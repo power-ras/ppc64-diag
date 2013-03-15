@@ -286,9 +286,10 @@ config_restart_policy(char *start, char *end, int *line_no, int update_param)
 	/* Validate the restart value */
 	if (! (d_cfg.restart_policy == 0 || d_cfg.restart_policy == 1)) {
 		d_cfg.log_msg("Invalid parameter (%d) specified for the "
-			      "AutoRestartPolicy (line %d), expecting a 0 "
-			      "or a 1.  The Auto Restart Policy has not been "
-			      "configured", d_cfg.restart_policy, line_no);
+			      "AutoRestartPolicy (line %d) in config file "
+			      "(%s), expecting a 0 or a 1.  The Auto Restart "
+			      "Policy has not been configured",
+			      d_cfg.restart_policy, *line_no, config_file);
 		d_cfg.restart_policy = -1;
 		return cur;
 	}

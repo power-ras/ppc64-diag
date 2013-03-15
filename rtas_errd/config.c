@@ -251,6 +251,35 @@ get_config_num(char *start, char *end, int *val, int *line_no)
 }
 
 /**
+ * get_restart_policy_value
+ * @brief Retrieve Auto Restart Policy value
+ *
+ * Same as get_config_num(), except we handle 0 and negative
+ * values here.
+ */
+static char *
+get_restart_policy_value(char *start, char *end, int *val, int *line_no)
+{
+	char	tok[1024];
+	char	*next_char;
+
+	/* The first token should be '=' */
+	start = get_token(start, end, tok, line_no);
+	if ((start == NULL) || (tok[0] != '='))
+		return NULL;
+
+	/* Next token should be the value */
+	start = get_token(start, end, tok, line_no);
+	if (start != NULL) {
+		*val = (int)strtol(tok, &next_char, 10);
+		if (*next_char != '\0')
+		    *val = -1;
+	}
+
+	return start;
+}
+
+/**
  * config_restart_policy
  * @brief Configure the Auto Restart Policy for this machine, if present.
  *
@@ -275,7 +304,8 @@ config_restart_policy(char *start, char *end, int *line_no, int update_param)
 	char		param[3];
 	int		rc;
 
-	cur = get_config_num(start, end, &d_cfg.restart_policy, line_no);
+	cur = get_restart_policy_value(start, end,
+				       &d_cfg.restart_policy, line_no);
 	if (cur == NULL) {
 		d_cfg.log_msg("Parsing error for configuration file "
 			      "entry \"AutoRestartPolicy\", " "line %d", 

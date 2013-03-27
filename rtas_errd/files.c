@@ -398,6 +398,10 @@ read_proc_error_log(char *buf, int buflen)
 			j += 2;
 			sscanf(str, "%02x", &ch);
 			buf[k++] = ch;
+			if (k >= buflen) { /* Buffer overflow */
+				log_msg(NULL, "Invalid test file");
+				return -1;
+			}
 		}
 
 		len = tf_sbuf.st_size;

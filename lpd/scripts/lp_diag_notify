@@ -1,0 +1,58 @@
+#!/usr/bin/perl -I /etc/ppc64-diag
+# @file		lp_diag_notify
+#
+# This script is to be registered with servicelog as a notification tool.
+# It calls Light Path Diagnostics (lp_diag) tool for error analysis and
+# enabling/disabling fault LED's.
+#
+# Copyright (C) 2012 IBM Corporation
+# See 'COPYRIGHT' for License of this code.
+#
+# @author	Vasant Hegde <hegdevasant@linux.vnet.ibm.com>
+
+use Getopt::Long;
+
+sub usage {
+	print "$0 {[--event|e <servicelog ID>] | [--repair|r <repair ID>]}\n";
+	print "   --event |e: Service event ID\n";
+	print "   --repair|r: Repair event ID\n";
+}
+
+my $id = 0;
+
+my $command = "/usr/sbin/lp_diag";
+
+Getopt::Long::Configure("bundling");
+GetOptions("event|e=i" =>\$event,
+	"repair|r=i" =>\$repair,
+	"help|h"=>\$flag_help) or usage(), exit(1);
+
+if ($flag_help) {
+	usage();
+	exit(0);
+}
+
+if ($event && $repair) {
+	print "The options -e and -r cannot be used together.\n";
+	usage();
+	exit(1);
+}
+
+if (!$event && !$repair) {
+	print "One of -e or -r must be specified.\n";
+	usage();
+	exit(1);
+}
+
+if ($event) {
+	$command .= " -e $event";
+} elsif ($repair) {
+	$command .= " -r $repair";
+} else {
+	usage();
+	exit(1);
+}
+
+#print("command =", $command);
+system("$command\n");
+exit (0);

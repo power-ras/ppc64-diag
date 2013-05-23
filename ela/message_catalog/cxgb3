@@ -1,0 +1,259 @@
+subsystem: net
+
+devspec(device) = "/sys/bus/pci/devices/$device/devspec"
+filter: driver = "cxgb3"
+
+/*
+ * This text is used repeatedly, so make it paste-able.
+ * We also need to explain what to do with the info we get from #1 and #2.
+ */
+@copy version_diags_replace {{
+1. Run the "ethtool -i" command to determine the driver software level.
+2. Execute diagnostics on the adapter, using "ethtool -t".
+3. Replace the adapter board.
+}}
+
+/* cxgb3 kernel driver files have moved from drivers/net/cxgb3 to
+ * drivers/net/ethernet/chelsio/cxgb3.
+ */
+
+file: " drivers/net/ethernet/chelsio/cxgb3/ael1002.c"
+message[defensive]: CH_WARN "PHY %u i2c read of dev.addr %#x.%#x timed out\n"
+
+file: "drivers/net/ethernet/chelsio/cxgb3/aq100x.c"
+message[defensive]: CH_WARN "PHY%d: reset failed (0x%x).\n"
+message[defensive]: CH_WARN "PHY%d: reset failed (0x%x, 0x%x).\n"
+message[defensive]: CH_WARN "PHY%d: reset timed out (0x%x).\n"
+message[defensive]: CH_WARN "PHY%d: reset took %ums\n"
+message[defensive]: CH_WARN "PHY%d: unsupported firmware %d\n"
+message[defensive]: CH_WARN "PHY%d does not start in low power mode.\n"
+message[defensive]: CH_WARN "PHY%d: incorrect XAUI settings (0x%x, 0x%x).\n"
+
+file: "drivers/net/ethernet/chelsio/cxgb3/cxgb3_main.c"
+message[chatter]: printk KERN_INFO "%s: link down\n"
+message[chatter]: printk KERN_INFO "%s: link up, %s, %s-duplex\n"
+message[chatter]: printk KERN_INFO "%s: PHY module unplugged\n"
+message[chatter]: printk KERN_INFO "%s: %s PHY module inserted\n"
+
+message[defensive]: CH_ERR "firmware image too large %u, expected %d\n"
+message[defensive]: CH_ERR "corrupted firmware image, checksum %u\n"
+
+message: dev_err "could not upgrade firmware: unable to load %s\n"
+description {{
+The firmware on the adapter doesn't match what the driver requires.
+}}
+action {{
+Verify that /lib/firmware/cxgb3 contains the correct firmware.
+[Where do they get the correct firmware?]
+[Re: your recommended action: Under what circumstances should you
+verify the driver software level, execute diagnostics, and/or replace
+the adapter?]
+}}
+class: software  type: temp  refcode: "cxgb3007"
+
+message[chatter]: dev_info "successful upgrade to firmware %d.%d.%d\n"
+
+message: dev_err "failed to upgrade to firmware %d.%d.%d\n"
+description {{
+The adapter contains the wrong firmware version, so the driver tried
+to update the firmware to the version stored in /lib/firmware/cxgb3.
+This update failed.
+}}
+action {{
+Verify that /lib/firmware/cxgb3 contains the correct firmware.
+[Under what circumstances should you verify the driver software level,
+execute diagnostics, and/or replace the adapter?]
+}}
+class: software  type: temp  refcode: "cxgb3008"
+
+message: dev_err "could not load TP SRAM: unable to load %s\n"
+description {{
+The adapter contains the wrong microcode version, so the driver tried
+to update the TP SRAM to the version stored in /lib/firmware.  This
+update failed.
+}}
+action {{
+@paste version_diags_replace
+[Why don't we advise verifying that the correct microcode is in /lib/firmware?]
+}}
+class: software  type: temp  refcode: "cxgb3009"
+
+message[chatter]: dev_info "successful update of protocol engine to %d.%d.%d\n"
+
+/* This is reported right before the next message. */
+message[redundant]: dev_err "failed to update of protocol engine %d.%d.%d\n"
+
+message: dev_err "loading protocol SRAM failed\n"
+description {{
+The required version of microcode could not be written to the adapter.
+}}
+action {{ @paste version_diags_replace }}
+/* Shouldn't this be hardware/perm? */
+class: software  type: temp  refcode: "cxgb3010"
+
+message: CH_WARN "FW upgrade to %d.%d.%d %s\n"
+description {{
+The adapter's firmware is out of sync with the driver.  The driver
+will attempt to load the correct version of firmware into the adapter.
+}}
+action {{
+Refer to subsequent messages to determine whether the firmware
+upgrade was successful.
+}}
+class: software  type: info
+
+message: CH_WARN "TP upgrade to %d.%d.%d %s\n"
+description {{
+The adapter's microcode is out of sync with the driver.  The driver
+will attempt to load the correct version of microcode into the adapter.
+}}
+action {{
+Refer to subsequent messages to determine whether the microcode
+upgrade was successful.
+}}
+class: software  type: info
+
+/* This next one can result from ENOMEM. */
+message: CH_ERR "failed to bind qsets, err %d\n"
+description {{
+The adapter failed to start up correctly, possibly due to a low-memory
+condition.
+}}
+action {{
+Free up memory and retry the failed operation, or add memory to
+your system.  If the problem persists, try the following:
+@paste version_diags_replace
+}}
+class: software  type: perm  refcode: "cxgb3011"
+
+message[defensive]: CH_ERR "request_irq failed, err %d\n"
+message[defensive]: dev_dbg "cannot create sysfs group\n"
+message[defensive]: printk KERN_WARNING "Could not initialize offload capabilities\n"
+message[defensive]: dev_err "Cannot re-enable PCI device after reset.\n"
+message[defensive]: dev_err "can't bring device back up after reset\n"
+message[defensive]: CH_ALERT "adapter reset %s\n"
+
+message: CH_ALERT "encountered fatal error, operation suspended\n"
+description {{
+Adapter goes to recovery.
+[What does that mean?]
+}}
+action {{ @paste version_diags_replace }}
+class: software  type: temp  refcode: "cxgb3005"
+
+
+message[defensive]: CH_ALERT "FW status: 0x%x, 0x%x, 0x%x, 0x%x\n"
+message[defensive]: CH_ALERT "adapter recovering, PEX ERR 0x%x\n"
+message[chatter]: dev_info "Port %d using %d queue sets.\n"
+message[chatter]: printk KERN_INFO "%s: %s %s %sNIC (rev %d) %s%s\n"
+message[chatter]: printk KERN_INFO "%s: %uMB CM, %uMB PMTX, %uMB PMRX, S/N: %s\n"
+message[chatter]: printk KERN_INFO "%s - version %s\n"
+
+/* Replaced DRV_NAME with "cxgb3" in this next one. */
+message: printk KERN_ERR "cxgb3: cannot initialize work queue\n"
+description {{
+The driver could not initialize a work queue while probing for devices,
+probably because of a low-memory condition.
+}}
+action {{
+Free up memory and retry the failed operation, or add memory to
+your system.
+}}
+class: hardware  type: perm  priority: H  refcode: "cxgb3001"
+
+message[chatter]: dev_info "cannot obtain PCI resources\n"
+
+message: dev_err "cannot enable PCI device\n"
+description {{ Can't enable PCI IO and memory resources for this adapter }}
+action {{ @paste version_diags_replace }}
+class: hardware  type: perm  priority: H  refcode: "cxgb3002"
+
+message: dev_err "unable to obtain 64-bit DMA for coherent allocations\n"
+description {{
+Cannot obtain 64-bit DMA allocations for this adapter now.
+}}
+action {{ @paste version_diags_replace }}
+class: hardware  type: perm  priority: H  refcode: "cxgb3003"
+
+message[defensive]: dev_err "no usable DMA configuration\n"
+message[defensive]: dev_err "cannot allocate nofail buffer\n"
+
+message: dev_err "cannot map device registers\n"
+description {{ Couldn't map device registers for MMIO registers access. }}
+action {{ @paste version_diags_replace }}
+class: hardware  type: perm  priority: H  refcode: "cxgb3004"
+
+message[defensive]: dev_warn "cannot register net device %s, skipping\n"
+message[defensive]: dev_err "could not register any net devices\n"
+
+file: "drivers/net/ethernet/chelsio/cxgb3/cxgb3_offload.c"
+message[chatter]: printk KERN_INFO "%s, iscsi set MaxRxData to 16224 (0x%x).\n"
+message[chatter]: printk KERN_INFO "%s, setting iscsi pgsz 0x%x, %u,%u,%u,%u.\n"
+message[defensive]: printk KERN_ERR "Unexpected SMT_WRITE_RPL status %u for entry %u\n"
+message[defensive]: printk KERN_ERR "Unexpected L2T_WRITE_RPL status %u for entry %u\n"
+message[defensive]: printk KERN_ERR "Unexpected RTE_WRITE_RPL status %u for entry %u\n"
+message[defensive]: printk KERN_ERR "%s: received clientless CPL command 0x%x\n"
+/* dup: printk KERN_ERR "%s: received clientless CPL command 0x%x\n" */
+/* dup: printk KERN_ERR "%s: received clientless CPL command 0x%x\n" */
+message[defensive]: printk default "%s: passive open TID %u too large\n"
+/* dup: printk KERN_ERR "%s: received clientless CPL command 0x%x\n" */
+message[enomem]: printk default "do_abort_req_rss: couldn't get skb!\n"
+message[defensive]: printk default "%s: active establish TID %u too large\n"
+/* dup: printk KERN_ERR "%s: received clientless CPL command 0x%x\n" */
+/* dup: printk KERN_ERR "%s: received clientless CPL command 0x%x\n" */
+message[defensive]: printk KERN_ERR "%s: received bad CPL command 0x%x\n"
+message[defensive]: printk KERN_ERR "T3C: handler registration for opcode %x failed\n"
+message[defensive]: printk KERN_ERR "%s: CPL message (opcode %u) had unknown TID %u\n"
+message[enomem]: printk KERN_ERR "%s: cannot allocate skb!\n"
+message[defensive]: printk KERN_WARNING "%s: Redirect to non-offload device ignored.\n"
+message[defensive]: printk KERN_WARNING "%s: Redirect to different offload device ignored.\n"
+message[defensive]: printk KERN_ERR "%s: couldn't allocate new l2t entry!\n"
+
+file: "drivers/net/ethernet/chelsio/cxgb3/mc5.c"
+message[defensive]: CH_ERR "MC5 timeout writing to TCAM address 0x%x\n"
+message[defensive]: CH_ERR "TCAM reset timed out\n"
+message[defensive]: CH_ERR "Unsupported TCAM type %d\n"
+message[defensive]: CH_ALERT "MC5 parity error\n"
+message[defensive]: CH_ALERT "MC5 request queue parity error\n"
+message[defensive]: CH_ALERT "MC5 dispatch queue parity error\n"
+
+file: "drivers/net/ethernet/chelsio/cxgb3/sge.c"
+message[defensive]: dev_err "%s: Tx ring %u full while queue awake!\n"
+message[defensive]: CH_ALERT "SGE parity error (0x%x)\n"
+message[defensive]: CH_ALERT "SGE framing error (0x%x)\n"
+message[defensive]: CH_ALERT "SGE response queue credit overflow\n"
+message[defensive]: CH_ALERT "packet delivered to disabled response queue (0x%x)\n"
+message[defensive]: CH_ALERT "SGE dropped %s priority doorbell\n"
+message[defensive]: CH_ALERT "free list queue 0 initialization failed\n"
+message[defensive]: CH_WARN "free list queue 0 enabled with %d credits\n"
+message[defensive]: CH_WARN "free list queue 1 enabled with %d credits\n"
+
+file: "drivers/net/ethernet/chelsio/cxgb3/t3_hw.c"
+message[defensive]: CH_ERR "reading EEPROM address 0x%x failed\n"
+message[defensive]: CH_ERR "write to EEPROM address 0x%x failed\n"
+message[defensive]: CH_ERR "found wrong TP version (%u.%u), driver compiled for version %d.%d\n"
+message[defensive]: CH_ERR "corrupted protocol SRAM image, checksum %u\n"
+message[defensive]: CH_WARN "found old FW minor version(%u.%u), driver compiled for version %u.%u\n"
+message[defensive]: CH_WARN "found newer FW version(%u.%u), driver compiled for version %u.%u\n"
+message[defensive]: CH_ERR "corrupted firmware image, checksum %u\n"
+message[defensive]: CH_ERR "firmware download failed, error %d\n"
+message[defensive]: CH_ALERT "%s (0x%x)\n"
+message[defensive]: CH_WARN "%s (0x%x)\n"
+message[defensive]: CH_ALERT "PEX error code 0x%x\n"
+message[defensive]: CH_WARN "%s MC7 correctable error at addr 0x%x, data 0x%x 0x%x 0x%x\n"
+message[defensive]: CH_ALERT "%s MC7 uncorrectable error at addr 0x%x, data 0x%x 0x%x 0x%x\n"
+message[defensive]: CH_ALERT "%s MC7 parity error 0x%x\n"
+message[defensive]: CH_ALERT "%s MC7 address error: 0x%x\n"
+message[defensive]: CH_ALERT "port%d: MAC TX FIFO parity error\n"
+message[defensive]: CH_ALERT "port%d: MAC RX FIFO parity error\n"
+message[defensive]: CH_ERR "TP initialization timed out\n"
+message[defensive]: CH_ERR "MAC calibration failed\n"
+message[defensive]: CH_ERR "write to MC7 register 0x%x timed out\n"
+message[defensive]: CH_ERR "%s MC7 calibration timed out\n"
+message[defensive]: CH_ERR "%s MC7 BIST timed out\n"
+message[defensive]: CH_ERR "uP initialization timed out\n"
+message[defensive]: CH_ALERT "Invalid port type index %d\n"
+
+file: "drivers/net/ethernet/chelsio/cxgb3/xgmac.c"
+message[defensive]: CH_ERR "MAC %d XAUI SERDES CMU lock failed\n"
+message[defensive]: CH_ERR "MAC %d Rx fifo drain failed\n"

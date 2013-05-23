@@ -1,0 +1,228 @@
+#! /usr/bin/perl -I /etc/ppc64-diag
+#
+# This script is to be registered with servicelog as a notification tool.  It
+# is responsible for creating a new IBM.ServiceEvent RMC resource when a
+# new serviceable event is logged in servicelog.  The ServiceRM resource
+# manager will cause the event to be reported to a managing Service Focal
+# Point (SFP, on a managing HMC or IVM partition).  If ServiceRM is not
+# installed, this script will do nothing.
+#
+# Ideally, ServiceRM should register itself with servicelog when it is
+# installed, so that we don't have to check if it is installed every time a
+# serviceable event is logged, but this will do for the time being.
+#
+# Copyright (C) 2005, 2007 IBM Corporation
+#
+
+require "/etc/ppc64-diag/servevent_parse.pl";
+
+# Check to make sure that devices.chrp.base.ServiceRM is installed
+$check = `/bin/rpm -q devices.chrp.base.ServiceRM 2>/dev/null`;
+if (index($check, "ServiceRM-") == -1) {
+	print "ServiceRM is not installed.\n";
+#	exit 1;
+}
+
+# Wait for rmcd to start
+$running = 0;
+$running = 1;
+$count = 0;
+do {
+	$check = `ps -e | grep rmcd 2>/dev/null`;
+	if (index($check, "rmcd") >= 0) {
+		$running = 1;
+	}
+	if ($running == 0) {
+		$count++;
+		sleep 5;
+	}
+} while ($running == 0 && $count < 36);		# wait about 3 minutes
+
+if ($running == 0) {
+	print "Timed out waiting for RMC daemon to start.\n";
+	exit 1;
+}
+
+# Parse the serviceable event data retrieved from stdin
+($se_vars, $frus) = parse_se();
+
+# Set call home candidate, error code, error text, and NLS support variables
+#   Call Home Candidate:
+#      always no for menugoals
+#      always yes for SRNs
+#      otherwise, check the action flag
+$error_text = $se_vars->{"Description"};
+$nls_support = "{\\\"\\\",\\\"\\\",\\\"\\\",\\\"\\\"}";
+if (substr($se_vars->{"RefCode"}, 0, 1) eq "#") {
+	# this is a menugoal
+	$call_home_candidate = "No";
+	$error_code = $se_vars->{"RefCode"};
+}
+else {
+	# this is an SRC or SRN
+	if ((length($se_vars->{"RefCode"}) == 8) &&
+			(index($se_vars->{"RefCode"}, '-') == -1)) {
+		# this is an SRC
+		$error_code = "";
+		$call_home_candidate = "Yes";
+	}
+	else {
+		# this is an SRN
+		$error_code = $se_vars->{"RefCode"};
+		$call_home_candidate = "Yes";
+	}
+}
+
+# Retrieve hostname from /etc/HOSTNAME; store both fully qualified and short
+$host_name = `hostname 2>/dev/null`;
+if (index($host_name, ".") == -1) {
+	$host_name = `hostname -f 2>/dev/null`;
+}
+chomp $host_name;
+$partition_name = (split(/\./, $host_name))[0];
+
+# Retrieve partition ID from /proc/device-tree/ibm,partition-no
+if (-e "/proc/device-tree/ibm,partition-no") {
+	$partition_no = `od -An -td /proc/device-tree/ibm,partition-no | sed "s/\\s//g" 2>/dev/null`;
+	chomp $partition_no;
+	if (length($partition_no) == 0) {
+		$partition_no = "000".$partition_no
+	}
+	elsif (length($partition_no) == 1) {
+		$partition_no = "00".$partition_no
+	}
+	elsif (length($partition_no) == 2) {
+		$partition_no = "0".$partition_no
+	}
+}
+else {
+	$partition_no = "000";
+}
+
+# Retrieve CEC MTMS from /proc/device-tree/model and /proc/device-tree/system-id
+$cec_machinetype = `cat /proc/device-tree/model | cut -c5- 2>/dev/null`;
+chomp $cec_machinetype;
+chop $cec_machinetype;
+$cec_machineserial = `cat /proc/device-tree/system-id | cut -c7- 2>/dev/null`;
+chomp $cec_machineserial;
+chop $cec_machineserial;
+
+# Retrieve OS description
+$os = "Linux";
+if (-e "/etc/SuSE-release") {
+	$os .= " (Novell/SuSE)";
+}
+elsif (-e "/etc/redhat-release") {
+	$os .= " (RedHat)";
+}
+
+# Determine if ibm,converged-loc-code property applies
+$level = "";
+if (-e "/proc/device-tree/ibm,converged-loc-codes") {
+	$level = "Level=\"ibm,converged-loc-codes\" ";
+}
+
+# Retrieve Extended Error Data (EED)
+mkdir "/tmp/diagSEsnap", 0775;
+$general_eed_file = "/tmp/diagSEsnap/snapH.tar.gz";
+system("/usr/sbin/snap -o $general_eed_file 2>/dev/null 1>&2");
+$cstop_eed_file = "";
+
+# Retrieve cluster MTMS if on a cluster
+$cluster_mt = "";
+$cluster_ms = "";
+if (-e "/usr/lib/lscmtms") {
+	$cluster_mtms = `/usr/lib/lscmtms 2>/dev/null`;
+	# output of lscmtms is in the following form: "MT:<mtm> MS:<ms>"
+	# anything, including spaces, can be between < and >; a space
+	# precedes the MS: tag
+	$start = index($cluster_mtms, "MT:<");
+	if ($start >= 0) {
+		$start += 4;
+		$end = index($cluster_mtms, ">", $start);
+		$cluster_mt = substr($cluster_mtms, $start, $end-$start);
+	}
+
+	$start = index($cluster_mtms, "MS:<");
+	if ($start >= 0) {
+		$start += 4;
+		$end = index($cluster_mtms, ">", $start);
+		$cluster_ms = substr($cluster_mtms, $start, $end-$start);
+	}
+}
+$cluster_buffer = "{\\\"$cluster_mt\\\",\\\"$cluster_ms\\\"}";
+
+# Create mkrsrc command line
+$nodes = "Nodes=\"{[\\\"OS\\\",{\\\"$cec_machinetype\\\"},".
+	"{\\\"$cec_machineserial\\\"},".
+	"\\\"".$se_vars->{"MachineType"}."\\\",".
+	"\\\"".$se_vars->{"MachineSerial"}."\\\",".
+	"\\\"$error_code\\\",\\\"".$error_text."\\\",".
+	"\\\"$reporting_loc_code\\\",\\\"$partition_no\\\",".
+	"\\\"$partition_name\\\",\\\"$host_name\\\",\\\"$os\\\",".
+	"\\\"".$se_vars->{"LogTime"}."\\\",\\\"$last_time\\\",".
+	"\\\"$err_log_resource\\\",".
+	"".$se_vars->{"ServicelogID"}.",0,".
+	"\\\"$general_eed_file\\\",\\\"$cstop_eed_file\\\",0,".
+	"{\\\"\\\"},{\\\"\\\"},{\\\"\\\"},{\\\"\\\"},{\\\"\\\"},".
+	"{\\\"\\\"},{\\\"\\\"},{\\\"\\\"},{\\\"\\\"},{\\\"\\\"},".
+	"$nls_support,$cluster_buffer]}\"";
+
+$sysrefcode = "SystemRefCode=\"".substr($se_vars->{"RefCode"}, 0, 8).
+	$se_vars->{"AddlWord0"}.$se_vars->{"AddlWord1"}.
+	$se_vars->{"AddlWord2"}.$se_vars->{"AddlWord3"}.
+	$se_vars->{"AddlWord4"}.$se_vars->{"AddlWord5"}.
+	$se_vars->{"AddlWord6"}.$se_vars->{"AddlWord7"}."\"";
+$fru_list = "FRUList=\"{";
+$first_fru = 1;
+foreach $fru (@$frus) {
+	if ($first_fru == 0) {
+		$fru_list .= ",";
+	}
+	$first_fru = 0;
+
+	# FRUList data:
+	#  index  1: PartNum
+	#  index  5: RefCode
+	#  index 12: LocCode (array of size 1)
+	#  index 13: CCIN
+	#  index 14: FRUSerialNum
+	#  index 15: FRUClass (integer value)
+	#  index 16: ReplacementGroup (aka Priority)
+	$fru_list .= "[";
+	@data = split / /, $fru;
+
+	# data[0]=priority, data[1]=type, data[2]=procedure,
+	# data[3]=location, data[4]=p/n, data[5]=s/n, data[6]=ccin
+	$fru_list .= "\\\"\\\",\\\"".$data[4]."\\\",\\\"\\\",\\\"\\\",".
+		"\\\"\\\",\\\"\\\",{},{},\\\"\\\",\\\"\\\",\\\"\\\",".
+		"\\\"\\\",{\\\"".$data[3]."\\\"},\\\"".$data[6]."\\\",".
+		"\\\"".$data[5]."\\\",".$data[1].",\\\"".$data[0].
+		"\\\"";
+
+	$fru_list .= "]";
+}
+$fru_list .= "}\"";
+
+$command = "/usr/bin/mkrsrc IBM.ServiceEvent $level".
+	"CallHomeCandidate=\"$call_home_candidate\" $nodes $sysrefcode";
+
+if ($first_fru == 0) {
+	$command .= " $fru_list";
+}
+if (defined $se_vars->{"PlatformID"}) {
+	$command .= " PlatformLogID=".hex(lc($se_vars->{"PlatformID"}));
+}
+if (defined $se_vars->{"CreatorID"}) {
+	$command .= " CreatorID=\"".$se_vars->{"CreatorID"}."\"";
+}
+if (defined $se_vars->{"SubsystemID"}) {
+	$command .= " SubsystemID=".hex(lc($se_vars->{"SubsystemID"}));
+}
+if (defined $se_vars->{"EventSeverity"}) {
+	$command .= " EventSeverity=".hex(lc($se_vars->{"EventSeverity"}));
+}
+
+system("$command\n");
+
+exit 0;

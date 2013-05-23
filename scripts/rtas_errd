@@ -1,0 +1,136 @@
+#! /bin/sh
+# 
+# System startup script for rtas_errd daemon
+#
+# Copyright (C) 2005 IBM Corporation
+#
+
+# Return values:
+# 0	  success
+# 1       unspecified error
+# 2       invalid argument(s)
+# 3       unimplemented feature
+# 4       insufficient privileges
+# 5       daemon not installed
+# 6       daemon not configured
+# 7       daemon not running
+# 8 - 199 reserved
+# 
+
+### BEGIN INIT INFO
+# Provides:		rtas_errd
+# Required-Start:	$local_fs $syslog $time
+# Required-Stop:
+# Default-Start:	2 3 5
+# Default-Stop:		0 1 4 6
+# Short-Description:	Daemon to retrieve platform errors
+# Description:		Starts rtas_errd daemon to retrieve platform errors
+#			and perform error log analysis.
+### END INIT INFO
+
+RE_BIN=/usr/sbin/rtas_errd
+test -x $RE_BIN || exit 5
+
+if [[ -f /etc/rc.status ]]; then
+    . /etc/rc.status
+    rc_reset
+    INSSERV=1
+else
+    . /etc/rc.d/init.d/functions
+    INSSERV=0
+fi
+
+case "$1" in
+    start)
+	if test ! -d /var/cache/ppc64-diag.registered ; then
+		echo "registering ppc64-diag with system"
+		rm -f /var/cache/ppc64-diag.registered
+		mkdir -v /var/cache/ppc64-diag.registered
+		/etc/ppc64-diag/ppc64_diag_setup --register
+	fi
+	echo -n "Starting rtas_errd (platform error handling) daemon: "
+	if [[ $INSSERV -eq 1 ]]; then
+	    startproc $RE_BIN
+	    rc_status -v
+	else
+	    daemon $RE_BIN
+	    pid=`pidof rtas_errd`
+	    if [[ -n "$pid" ]]; then
+	        echo $pid > /var/run/rtas_errd.pid
+	        touch /var/lock/subsys/rtas_errd
+	    fi
+	    echo
+	fi
+	;;
+    
+    stop)
+	echo -n "Stopping rtas_errd (platform error handling) daemon: "
+	if [[ $INSSERV -eq 1 ]]; then
+	    killproc -TERM $RE_BIN
+	    rc_status -v
+	else
+	    killproc rtas_errd -TERM
+	    rm -f /var/lock/subsys/rtas_errd
+	    rm -f /var/run/rtas_errd.pid
+	    echo
+	fi
+	;;
+    
+    try-restart)
+	# Restart only if the service was active before.
+	$0 status >/dev/null &&  $0 restart
+	if [[ $INSSERV -eq 1 ]]; then
+	    rc_status
+	fi
+	;;
+    
+    restart)
+	# Stop and restart the service
+	$0 stop
+	$0 start
+	if [[ $INSSERV -eq 1 ]]; then
+	    rc_status
+	fi
+	;;
+    
+    force-reload)
+	# Reload the config
+	pid=`pidof rtas_errd`
+	if [[ -n "$pid" ]]; then
+	    kill -HUP $pid
+	fi
+	;;
+    
+    reload)
+	# Reload the config
+	pid=`pidof rtas_errd`
+	if [[ -n "$pid" ]]; then
+	    kill -HUP $pid
+	fi
+	;;
+    
+    status)
+	if [[ $INSSERV -eq 1 ]]; then
+	    checkproc $RE_BIN
+	    rc_status -v
+	else
+	    status rtas_errd
+	fi
+	;;
+    
+    probe)
+	exit 3
+	;;
+    
+    *)
+	echo "Usage: $0 {start|stop|status|try-restart|restart|force-reload|reload|probe}"
+	exit 1
+	;;
+esac
+
+if [[ $INSSERV -eq 1 ]]; then
+    rc_exit
+else
+    exit 0
+fi
+

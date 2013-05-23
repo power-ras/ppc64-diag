@@ -1,0 +1,54 @@
+subsystem: gpfs 
+
+message: mmfs_failed "\n"
+regex mmfs_failed "^mmfs: Error=MMFS_PDISK_FAILED, ID=([[:print:]]*), Tag=([[:print:]]*):([[:print:]]*): Location=([[:print:]]*), FRU=([[:print:]]*), WWID=([[:print:]]*), RecoveryGroup=([[:print:]]*), DeclusteredArray=([[:print:]]*), Pdisk=([[:print:]]*), PdiskState=([[:print:]]*)$"
+description {{
+A disk has failed or is not responding. The filesystem is still operational. 
+}}
+action {{
+Ignore
+}}
+class: software sl_severity: warning refcode: "" 
+
+message: mmfs_pathfail "\n"
+regex mmfs_pathfail "^mmfs: Error=([[:print:]]*), ID=([[:print:]]*), Tag=([[:print:]]*):([[:print:]]*): Location=([[:print:]]*), FRU=([[:print:]]*), WWID=([[:print:]]*), RecoveryGroup=([[:print:]]*), ([[:print:]]*)=([[:print:]]*), Pdisk=([[:print:]]*), Device=([[:print:]]*)$"
+description {{
+A path to a disk is no longer usable. Probable cause: SAS adapter, cable,
+port expander or disk carrier.
+}}
+action {{
+Ignore
+}}
+class: software sl_severity: warning  refcode: ""
+
+message: mmfs_recovered "\n"
+regex mmfs_recovered "^mmfs: Error=MMFS_PDISK_RECOVERED, ID=([[:print:]]*), Tag=([[:print:]]*):([[:print:]]*): Location=([[:print:]]*), FRU=([[:print:]]*), WWID=([[:print:]]*), RecoveryGroup=([[:print:]]*), DeclusteredArray=([[:print:]]*), Pdisk=([[:print:]]*)$"
+description {{
+A disk previously reported as not responding has been found and is working.
+}}
+action {{
+Ignore
+}}
+class: software sl_severity: warning refcode: ""
+
+message: mmfs_replace "\n"
+regex mmfs_replace "^mmfs: Error=MMFS_REPLACE_PDISK, ID=([[:print:]]*), Tag=([[:print:]]*):([[:print:]]*): Location=([[:print:]]*), FRU=([[:print:]]*), WWID=([[:print:]]*), RecoveryGroup=([[:print:]]*), DeclusteredArray=([[:print:]]*), Pdisk=([[:print:]]*), Priority=([[:print:]]*), PdiskState=([[:print:]]*)$"
+description {{
+The disk replacement threshold has been met for the given failed disk. 
+The disk must be replaced.
+}}
+action {{
+Notify administrator.
+}}
+class: software sl_severity: error  refcode: "EF000001"
+
+message: mmfs_rebuild "\n"
+regex mmfs_rebuild "^mmfs: Error=MMFS_REBUILD_FAILED, ID=([[:print:]]*), Tag=([[:print:]]*):([[:print:]]*): RecoveryGroup=([[:print:]]*), DeclusteredArray=([[:print:]]*), RemainingRedundancy=([[:print:]]*)$"
+description {{
+There is not enough available spare space to reestablish full redundancy
+in a declustered array. Customer may be in danger of data loss.
+}}
+action {{
+Notify administrator.
+}}
+class: software sl_severity: error  refcode: "EF000002"

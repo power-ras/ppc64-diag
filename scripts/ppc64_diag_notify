@@ -1,0 +1,201 @@
+#! /usr/bin/perl -I /etc/ppc64-diag
+#
+# This script is to be registered with servicelog as a notification tool.  It
+# is responsible for sending out e-mail notifications of new ppc64 platform
+# events, and for writing event details to /var/log/platform.
+#
+# Copyright (C) 2005, 2007 IBM Corporation
+#
+ 
+use Getopt::Long;
+
+require "/etc/ppc64-diag/servevent_parse.pl";
+
+sub usage {
+	print "$0 [OPTIONS]\n";
+	print "    --email:   send notification to the specified addresses\n";
+	print "               (comma-separated)\n";
+	print "    --quiet:   do not print notification to stdout\n";
+	print "    --syslog:  print notification to /var/log/messages\n";
+	print "    --log:     print notification to specified log file\n";
+	exit(0);
+}
+
+@lines = (
+"-----------------------------------------------------------------------",
+""
+);
+
+Getopt::Long::Configure("bundling");
+GetOptions("email|e=s"=>\$flag_email,
+	"quiet|q"=>\$flag_quiet,
+	"help|h"=>\$flag_help,
+	"log|l=s"=>\$flag_logfile,
+	"syslog|s"=>\$flag_syslog,
+	"<>"=>\&bad_arg) or usage();
+
+usage() if $flag_help;
+
+($se_vars, $frus) = parse_se();
+if ($se_vars->{"Serviceable"} eq "1") {
+	push(@lines, "Automatic Error Log Analysis has detected a problem.");
+} else {
+	push(@lines, "Informational Event");
+}
+
+push(@lines, "");
+
+# Generate the message text
+@lines[1] = $se_vars->{"LogTime"};
+if (defined $se_vars->{"RefCode"}) {
+	push(@lines, "The Service Request Number(s)/Probable Cause(s)");
+	push(@lines, "(causes are listed in descending order of probability):");
+	push(@lines, "");
+	@description_lines = split(/\|/, $se_vars->{"Description"});
+	if (substr($se_vars->{"RefCode"}, 0, 1) eq '#') {
+		push(@lines, substr($se_vars->{"RefCode"}, 0, 8));
+	}
+	else {
+		$description_lines[0] = substr($se_vars->{"RefCode"}, 0, 8) .
+					": " . $description_lines[0];
+	}
+	push(@lines, @description_lines);
+	push(@lines, "");
+}
+if (($se_vars->{"Serviceable"} eq "1") && defined $se_vars->{"AddlWord0"} &&
+		defined $se_vars->{"AddlWord1"} &&
+		defined $se_vars->{"AddlWord2"} &&
+		defined $se_vars->{"AddlWord3"} &&
+		defined $se_vars->{"AddlWord4"} &&
+		defined $se_vars->{"AddlWord5"} &&
+		defined $se_vars->{"AddlWord6"} &&
+		defined $se_vars->{"AddlWord7"}) {
+	push(@lines, "Additional words 2-".$se_vars->{"AddlWord0"}.
+		" 3-".$se_vars->{"AddlWord1"}." 4-".$se_vars->{"AddlWord2"}.
+		" 5-".$se_vars->{"AddlWord3"});
+	push(@lines, "                 6-".$se_vars->{"AddlWord4"}.
+		" 7-".$se_vars->{"AddlWord5"}." 8-".$se_vars->{"AddlWord6"}.
+		" 9-".$se_vars->{"AddlWord7"});
+	push(@lines, "");
+}
+foreach $fru (@$frus) {
+	@data = split / /, $fru;
+	# ela event reports procedure ID as "see explain_syslog"
+	if ($data[2] eq "see") {
+		push(@lines, "Priority: ".shift(@data)." Type: ".shift(@data).
+			" Procedure Id: ".shift(@data)." ".shift(@data));
+	} else {
+		push(@lines, "Priority: ".shift(@data)." Type: ".shift(@data).
+			" Procedure Id: ".shift(@data));
+	}
+	push(@lines, "Location: ".shift(@data)." FRU: ".shift(@data).
+		" Serial: ".shift(@data)." CCIN: ".shift(@data));
+	push(@lines, "");
+}
+
+push(@lines, "Reference: servicelog event number ".
+	$se_vars->{"ServicelogID"}.", platform log event number ".
+	$se_vars->{"KernelID"});
+push(@lines, "Run \"/usr/bin/servicelog --query=\"id=".
+		$se_vars->{"ServicelogID"}."\" \" for full details.");
+
+# Print to stdout, if appropriate
+if (!$flag_quiet) {
+	foreach $line (@lines) {
+		print("$line\n");
+	}
+}
+
+# Write to a log file, if appropriate
+if ($flag_logfile) {
+	if (! open(LOGFILE, ">> $flag_logfile")) {
+		print("Could not open $flag_logfile");
+	} else {
+		foreach $line (@lines) {
+			print(LOGFILE "ppc64-diag: $line\n");
+		}
+		close(LOGFILE);
+	}
+}
+
+# Write to syslog, if appropriate
+if ($flag_syslog) {
+	if (!open(LOGPROG, "| logger -p local4.warning -t ppc64-diag")) {
+		print("Could not run logger to notify syslog\n");
+	}
+	else {
+		foreach $line (@lines) {
+			print(LOGPROG "$line\n");
+		}
+		close(LOGPROG);
+	}
+}
+
+if ($se_vars->{"Serviceable"} eq "0") {
+	exit 0;
+}
+
+push(@lines, "This message is logged to ".$flag_logfile.".");
+
+# Send out e-mail notifications, if appropriate
+if ($flag_email) {
+	$hostname = `hostname`;
+	chomp $hostname;
+	$subject = "$hostname: serviceable platform event logged";
+
+	if (open(MAILLIST, "< /etc/ppc64-diag/mail_list")) {
+		while (<MAILLIST>) {
+			chomp;
+			$pos = index($_, "#");
+			if ($pos == 0) {
+				# the line starts with a hash
+				next;
+			}
+			elsif ($pos > 0) {
+				# trim off everything past the hash
+				$mailid = substr($_, 0, $pos);
+			}
+			elsif ($pos == -1) {
+				$mailid = $_;
+			}
+			# trim leadng and tailing whitespace
+			$mailid =~ s/^\s+//;
+			$mailid =~ s/\s+$//;
+
+			if ($mailid ne "") {
+				push(@maillist, $mailid);
+			}
+		}
+	}
+
+	if (scalar(@maillist) == 0) {
+		# mail to the root group unless results were sent to an HMC
+		if (!$hmc) {
+			$rootgroup = `grep ^root: /etc/group | cut -f4 -d:`;
+
+			chomp($rootgroup);
+
+			# $rootgroup is a comma-separated list
+			if ($rootgroup ne "") {
+				@maillist = split /,/, $rootgroup;
+			}
+		}
+	}
+
+	push(@maillist, "root");
+	while ($maillist[0] eq "") { shift @maillist; }
+
+	if (scalar(@maillist) > 0) {
+		if (!open(MAILPROG, "| mail -n -s \"$subject\" ".
+				join(",", @maillist))) {
+			print("Could not run mail to deliver notifications\n");
+		}
+		else {
+			foreach $line (@lines) {
+				print(MAILPROG "$line\n");
+			}
+			close(MAILPROG);
+		}
+	}
+}
+

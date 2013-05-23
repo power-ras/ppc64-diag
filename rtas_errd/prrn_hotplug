@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Script to hotplug remove and add cpus and memory that was updated
+# due to a PRRN event.
+
+PRRN_LOG=/var/log/prrn_log
+DRMGR=/usr/sbin/drmgr
+TMPFILE=`mktemp -p /tmp`
+DATE=`date`
+
+while read line; do
+	# skip comments
+	case $line in
+	    \#*) echo $line >> $TMPFILE
+		 continue ;;
+	esac
+
+	type=`echo $line | cut -f 1 -d ' '`
+	drc=`echo $line | cut -f 2 -d ' '`
+
+	$DRMGR -c $type -r -q 1 -s 0x$drc >/dev/null 2>&1
+	if [[ "$?" != "0" ]]; then
+		echo "PRRN Update: Could not update $type at drc index $drc" >> /var/log/messages
+		echo "$type $drc" >> $TMPFILE
+		continue
+	fi
+
+	sleep 1
+
+	$DRMGR -c $type -a -q 1 -s 0x$drc >/dev/null 2>&1
+	if [[ "$?" != "0" ]]; then
+		echo "PRRN Update: Could not add $type at drc index $drc after PRRN Event" >> /var/log/messages
+		echo "$type $drc" >> $TMPFILE
+	fi
+
+	echo "# $type $drc -- Updated $DATE" >> $TMPFILE
+	sleep 1
+done < $PRRN_LOG
+
+cp $TMPFILE $PRRN_LOG
+rm $TMPFILE

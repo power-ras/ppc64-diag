@@ -1,0 +1,940 @@
+subsystem: scsi
+
+file: "drivers/scsi/ipr.c"
+
+message[defensive]: dev_err "Failed to save PCI-X command register\n"
+message[defensive]: dev_err "Failed to setup PCI-X command register\n"
+message[defensive]: dev_err "Host RCB failed with IOASC: 0x%08X\n"
+
+/*****
+ * Skipping all of the following because they report additional info
+ * subsequent to "real" error messages.
+979:	ipr_hcam_err(hostrcb, "%s VPID/SN: %s\n"
+998:	ipr_err("Vendor/Product ID: %s\n"
+1002:	ipr_err("    Serial Number: %s\n"
+1018:	ipr_hcam_err(hostrcb, "%s WWN: %08X%08X\n"
+1032:	ipr_err("    WWN: %08X%08X\n"
+1050:	ipr_err("-----Current Configuration-----\n"
+1051:	ipr_err("Cache Directory Card Information:\n"
+1053:	ipr_err("Adapter Card Information:\n"
+1056:	ipr_err("-----Expected Configuration-----\n"
+1057:	ipr_err("Cache Directory Card Information:\n"
+1059:	ipr_err("Adapter Card Information:\n"
+1062:	ipr_err("Additional IOA Data: %08X %08X %08X\n"
+1082:	ipr_err("-----Current Configuration-----\n"
+1083:	ipr_err("Cache Directory Card Information:\n"
+1085:	ipr_err("Adapter Card Information:\n"
+1088:	ipr_err("-----Expected Configuration-----\n"
+1089:	ipr_err("Cache Directory Card Information:\n"
+1091:	ipr_err("Adapter Card Information:\n"
+1094:	ipr_err("Additional IOA Data: %08X %08X %08X\n"
+1118:	ipr_err("Device Errors Detected/Logged: %d/%d\n"
+1126:		ipr_phys_res_err(ioa_cfg, dev_entry->dev_res_addr, "Device %d", i + 1);
+1129:		ipr_err("-----New Device Information-----\n"
+1132:		ipr_err("Cache Directory Card Information:\n"
+1135:		ipr_err("Adapter Card Information:\n"
+1158:	ipr_err("Device Errors Detected/Logged: %d/%d\n"
+1166:		ipr_phys_res_err(ioa_cfg, dev_entry->dev_res_addr, "Device %d", i + 1);
+1169:		ipr_err("-----New Device Information-----\n"
+1172:		ipr_err("Cache Directory Card Information:\n"
+1175:		ipr_err("Adapter Card Information:\n"
+1178:		ipr_err("Additional IOA Data: %08X %08X %08X %08X %08X\n"
+1207:	ipr_err("RAID %s Array Configuration: %d:%d:%d:%d\n"
+1225:			ipr_err("Exposed Array Member %d:\n"
+1227:			ipr_err("Array Member %d:\n"
+1230:		ipr_phys_res_err(ioa_cfg, array_entry->dev_res_addr, "Current Location");
+1231:		ipr_phys_res_err(ioa_cfg, array_entry->expected_dev_res_addr, "Expected Location");
+1258:	ipr_err("RAID %s Array Configuration: %d:%d:%d:%d\n"
+1274:			ipr_err("Exposed Array Member %d:\n"
+1276:			ipr_err("Array Member %d:\n"
+1280:		ipr_phys_res_err(ioa_cfg, array_entry->dev_res_addr, "Current Location");
+1281:		ipr_phys_res_err(ioa_cfg, array_entry->expected_dev_res_addr, "Expected Location");
+1313:		ipr_err("%08X: %08X %08X %08X %08X\n"
+ *****/
+
+/*****
+ * Omitting these because they could report any of a number of errors.
+1338:	ipr_hcam_err(hostrcb, "%s [PRC: %08X]\n"
+1364:	ipr_hcam_err(hostrcb, "%s [PRC: %08X]\n"
+ *****/
+
+/*****
+ * Skipping all of the following because they report additional info
+ * subsequent to "real" error messages.
+1417:				ipr_hcam_err(hostrcb, "%s %s: IOA Port=%d\n"
+1421:				ipr_hcam_err(hostrcb, "%s %s: IOA Port=%d, Phy=%d\n"
+1425:				ipr_hcam_err(hostrcb, "%s %s: IOA Port=%d, Cascade=%d\n"
+1429:				ipr_hcam_err(hostrcb, "%s %s: IOA Port=%d, Cascade=%d, Phy=%d\n"
+1437:	ipr_err("Path state=%02X IOA Port=%d Cascade=%d Phy=%d\n"
+1509:				ipr_hcam_err(hostrcb, "%s %s: Phy=%d, Link rate=%s, WWN=%08X%08X\n"
+1515:					ipr_hcam_err(hostrcb, "%s %s: Link rate=%s, WWN=%08X%08X\n"
+1520:					ipr_hcam_err(hostrcb, "%s %s: Phy=%d, Link rate=%s, "
+1526:					ipr_hcam_err(hostrcb, "%s %s: Cascade=%d, Link rate=%s, "
+1532:					ipr_hcam_err(hostrcb, "%s %s: Cascade=%d, Phy=%d, Link rate=%s "
+1543:	ipr_hcam_err(hostrcb, "Path element=%02X: Cascade=%d Phy=%d Link rate=%s "
+ *****/
+
+/*****
+ * Omitting this because it could report any of a number of errors.
+1567:	ipr_hcam_err(hostrcb, "%s\n"
+ *****/
+
+message[defensive]: dev_err "Error notifications lost\n"
+message[defensive]: dev_err "Host RCB failed with IOASC: 0x%08X\n"
+message[defensive]: dev_err "Adapter being reset due to command timeout.\n"
+message[defensive]: dev_err "Adapter timed out transitioning to operational.\n"
+message[defensive]: dev_err "IOA dump long data transfer timeout\n"
+message[defensive]: dev_err "IOA dump short data transfer timeout\n"
+message[defensive]: dev_err "Invalid dump table format: %lx\n"
+message[defensive]: dev_err "Dump of IOA initiated\n"
+message[defensive]: dev_err "Dump of IOA failed. Dump table not valid: %d, %X.\n"
+message[defensive]: dev_err "Dump of IOA completed.\n"
+message[chatter]: dev_info "%s adapter write cache.\n"
+message[defensive]: dev_err "Microcode download already in progress\n"
+message[defensive]: dev_err "Failed to map microcode download buffer!\n"
+message[defensive]: dev_err "Firmware file %s not found\n"
+message[defensive]: dev_err "Invalid microcode buffer\n"
+message[defensive]: dev_err "Microcode buffer allocation failed\n"
+message[defensive]: dev_err "Microcode buffer copy to DMA buffer failed\n"
+message[defensive]: ipr_err "Dump memory allocation failed\n"
+message[defensive]: dev_err "Adapter being reset as a result of error recovery.\n"
+message[defensive]: scmd_printk KERN_ERR "Resetting device\n"
+message[defensive]: sdev_printk KERN_ERR "Abort timed out. Resetting bus.\n"
+message[defensive]: scmd_printk KERN_ERR "Aborting command: %02X\n"
+message[defensive]: dev_err "Permanent IOA failure. 0x%08X\n"
+message[defensive]: dev_err "Invalid response handle from IOA\n"
+message[defensive]: dev_err "pci_map_sg failed!\n"
+message[defensive]: scmd_printk KERN_ERR "Request Sense failed with IOASC: 0x%08X\n"
+
+/*****
+ * Skipping the following because they report additional info
+ * subsequent to "real" error messages.
+4568:	ipr_err("IOASA Dump:\n"
+4571:		ipr_err("%08X: %08X %08X %08X %08X\n"
+ *****/
+
+message[chatter]: dev_info "IOA initialized.\n"
+message[defensive]: dev_err "Term power is absent on scsi bus %d\n"
+message[defensive]: dev_err "Invalid resource address reported: 0x%08X\n"
+message[defensive]: dev_err "0x%02X failed with IOASC: 0x%08X\n"
+message[defensive]: dev_err "Microcode download required\n"
+message[defensive]: dev_err "Too many devices attached\n"
+message[chatter]: dev_info "Adapter firmware version: %02X%02X%02X%02X\n"
+message[chatter]: dev_info "Starting IOA initialization sequence.\n"
+message[chatter]: dev_info "Initializing IOA.\n"
+message[defensive]: dev_err "IOA unit check with no data\n"
+message[defensive]: dev_err "IOA taken offline - error recovery failed\n"
+message[defensive]: dev_dbg "ioa_cfg adx: 0x%p\n"
+message[defensive]: dev_err "Adapter not supported in this hardware configuration.\n"
+message[defensive]: dev_err "Can not assign irq %d\n"
+message[chatter]: dev_info "IRQ assigned: %d\n"
+message[chatter]: dev_info "MSI test failed.  Falling back to LSI.\n"
+message[chatter]: dev_info "MSI test succeeded.\n"
+message[defensive]: dev_err "Cannot enable adapter\n"
+message[chatter]: dev_info "Found IOA with IRQ: %d\n"
+message[defensive]: dev_err "call to scsi_host_alloc failed!\n"
+message[defensive]: dev_err "Unknown adapter chipset 0x%04X 0x%04X\n"
+message[defensive]: dev_err "Couldn't register memory range of registers\n"
+message[defensive]: dev_err "Couldn't map memory range of registers\n"
+message[defensive]: dev_err "Failed to set PCI DMA mask\n"
+message[defensive]: dev_err "Write of cache line size failed\n"
+message[chatter]: dev_info "MSI enabled with IRQ: %d\n"
+message[chatter]: dev_info "Cannot enable MSI.\n"
+message[defensive]: dev_err "Failed to save PCI config space\n"
+message[defensive]: dev_err "Couldn't allocate enough memory for device driver!\n"
+message[defensive]: dev_err "Couldn't register IRQ %d! rc=%d\n"
+message[chatter]: ipr_info "IBM Power RAID SCSI Device Driver version: %s %s\n"
+
+/*****
+ ***** The rest of this catlog was generated automatically from
+ ***** ipr_error_table[].
+ *****/
+
+message: ipr_hcam_err "FFF9: Device sector reassign successful\n"
+description {{
+Device sector reassign successful.
+}}
+action {{
+None required
+}}
+class: software  type: info  refcode: ""
+
+message: ipr_hcam_err "FFF7: Media error recovered by device rewrite procedures\n"
+description {{
+Media error recovered by device rewrite procedures.
+}}
+action {{
+None required
+}}
+class: unknown  type: info  refcode: ""
+
+message: ipr_hcam_err "7001: IOA sector reassignment successful\n"
+description {{
+IOA sector reassignment successful
+}}
+action {{
+If three 7001 messages have occurred for the same disk drive location,
+then exchange the failing items in the Failing Items list one
+at a time. If the problem is not resolved, perform “MAP 3351” on page 104 of
+the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "FFF9: Soft media error. Sector reassignment recommended\n"
+description {{
+Soft media error. Sector reassignment recommended.
+}}
+action {{
+None required
+}}
+class: software  type: info  refcode: ""
+
+message: ipr_hcam_err "FFF7: Media error recovered by IOA rewrite procedures\n"
+description {{
+Media error recovered by IOA rewrite procedures.
+}}
+action {{
+None required
+}}
+class: unknown  type: info  refcode: ""
+
+message: ipr_hcam_err "FF3D: Soft PCI bus error recovered by the IOA\n"
+description {{
+Soft PCI bus error recovered by the IOA.
+}}
+action {{
+If 10 FF3D messages have occurred for the same I/O Adapter physical
+location within a week, then exchange the failing items in the Failing
+Items list one at a time.
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_res_err "FFF6: Device hardware error recovered by the IOA\n"
+description {{
+Device hardware error recovered by the IOA.
+}}
+action {{
+None required
+}}
+class: hardware  type: info  refcode: ""
+
+message: ipr_hcam_err "FFF6: Device hardware error recovered by the IOA\n"
+description {{
+Device hardware error recovered by the IOA.
+}}
+action {{
+None required
+}}
+class: hardware  type: info  refcode: ""
+
+message: ipr_hcam_err "FFF6: Device hardware error recovered by the device\n"
+description {{
+Device hardware error recovered by the device.
+}}
+action {{
+None required
+}}
+class: hardware  type: info  refcode: ""
+
+message: ipr_res_err "FF3D: Soft IOA error recovered by the IOA\n"
+description {{
+Soft IOA error recovered by the IOA.
+}}
+action {{
+If 10 FF3D messages have occurred for the same I/O Adapter physical
+location within a week, then exchange the failing items in the Failing
+Items list one at a time.  
+}} 
+class: unknown  sl_severity: error refcode:""
+
+message: ipr_hcam_err "FF3D: Soft IOA error recovered by the IOA\n"
+description {{
+Soft IOA error recovered by the IOA.
+}}
+action {{
+If 10 FF3D messages have occurred for the same I/O Adapter physical
+location within a week, then exchange the failing items in the Failing
+Items list one at a time.  
+}} 
+class: unknown  type: info  refcode: ""
+
+message: ipr_hcam_err "FFFA: Undefined device response recovered by the IOA\n"
+description {{
+Undefined device response recovered by the IOA.
+}}
+action {{
+If 10 FFFA messages have occurred for the same disk drive location
+in a one-week time period, then exchange the failing items in the
+Failing Items list one at a time. If the problem is not resolved,
+perform “MAP 3351” on page 104 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}} 
+class: unknown  sl_severity: error  refcode: ""
+
+
+message: ipr_hcam_err "FFF6: Failure prediction threshold exceeded\n"
+description {{
+Failure prediction threshold exceeded.
+}}
+action {{
+Exchange the failing items in the Failing Items list one at a time. 
+If the problem is not resolved, perform “MAP 3351” on page 104 of
+the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  type: info  refcode: ""
+
+message: ipr_hcam_err "8009: Impending cache battery pack failure\n"
+description {{
+Impending cache battery pack failure.
+}}
+action {{
+Perform “MAP 3300” on page 90 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+
+message: ipr_hcam_err "3020: Storage subsystem configuration error\n"
+description {{
+Storage subsystem configuration error.
+}}
+action {{
+Perform “MAP 3350” on page 101 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: software  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "FFF3: Disk media format bad\n"
+description {{
+Disk media format bad.
+}}
+action {{
+Perform “MAP 3335” on page 97 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "3002: Addressed device failed to respond to selection\n"
+description {{
+Addressed device failed to respond to selection.
+}}
+action {{
+Exchange the failing items in the Failing Items list one at a time. 
+If the problem is not resolved, perform “MAP 3351” on page 104 of
+the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_res_err "3100: Device bus error\n"
+description {{
+Device bus error.
+}}
+action {{
+A SAS fabric error occurred. Perform “MAP 3350” on page 101 of
+the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "3100: Device bus error\n"
+description {{
+Device bus error.
+}}
+action {{
+A SAS fabric error occurred. Perform “MAP 3350” on page 101 of
+the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "3109: IOA timed out a device command\n"
+description {{
+IOA timed out a device command.
+}}
+action {{
+Perform “MAP 3350” on page 101 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "4100: Hard device bus fabric error\n"
+description {{
+Hard device bus fabric error.
+}}
+action {{
+Perform “MAP 3352” on page 105 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9000: IOA reserved area data check\n"
+description {{
+IOA reserved area data check.
+}}
+action {{
+Perform “MAP 3390” on page 106 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: software  type: info  refcode: ""
+
+message: ipr_hcam_err "9001: IOA reserved area invalid data pattern\n"
+description {{
+IOA reserved area invalid data pattern.
+}}
+action {{
+Perform “MAP 3337” on page 98 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9002: IOA reserved area LRC error\n"
+description {{
+IOA reserved area LRC error.
+}}
+action {{
+Perform “MAP 3390” on page 106 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "102E: Out of alternate sectors for disk storage\n"
+description {{
+Out of alternate sectors for disk storage.
+}}
+action {{
+Exchange the failing items in the Failing Items list one at a time. 
+If the problem is not resolved, perform MAP 3351 on page 104 of
+the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_res_err "FFF4: Data transfer underlength error\n"
+description {{
+Data transfer underlength error.
+}}
+action{{
+Exchange the failing items in the Failing Items list
+one at a time. If the problem is not resolved, perform
+“MAP 3351” on page 104 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}} 
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "FFF4: Data transfer underlength error\n"
+description {{
+Data transfer underlength error.
+}}
+action {{
+Exchange the failing items in the Failing Items list
+one at a time. If the problem is not resolved, perform
+“MAP 3351” on page 104 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}} 
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_res_err "FFF4: Data transfer overlength error\n"
+description {{
+Data transfer overlength error.
+}}
+action {{
+Exchange the failing items in the Failing Items list
+one at a time. If the problem is not resolved, perform
+“MAP 3351” on page 104 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}} 
+class: software  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "FFF4: Data transfer overlength error\n"
+description {{
+Data transfer overlength error.
+}}
+action {{
+Exchange the failing items in the Failing Items list
+one at a time. If the problem is not resolved, perform
+“MAP 3351” on page 104 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}} 
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "3400: Logical unit failure\n"
+description {{
+Device, I/O Adapter, Any device on I/O bus, Signal cables.
+}}
+action {{
+Exchange the failing items in the Failing Items list one at a time.
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "FFF4: Device microcode is corrupt\n"
+description {{
+Device microcode is corrupt.
+}}
+action {{
+Exchange the failing items in the Failing Items list
+one at a time. If the problem is not resolved, perform
+“MAP 3351” on page 104 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}} 
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_res_err "8150: PCI bus error\n"
+description {{
+PCI bus error.
+}}
+action {{
+If two errors have occurred for the same I/O adapter in 24 hours,
+exchange the failing items in the Failing Items list one at a time.
+}} 
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "8150: PCI bus error\n"
+description {{
+PCI bus error.
+}}
+action {{
+If two errors have occurred for the same I/O adapter in 24 hours,
+exchange the failing items in the Failing Items list one at a time.
+}} 
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_res_err "FFF4: Disk device problem\n"
+description {{
+Disk device problem.
+}}
+action {{
+Exchange the failing items in the Failing Items list
+one at a time. If the problem is not resolved, perform
+“MAP 3351” on page 104 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}} 
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "FFF4: Disk device problem\n"
+description {{
+Disk device problem.
+}}
+action {{
+Exchange the failing items in the Failing Items list
+one at a time. If the problem is not resolved, perform
+“MAP 3351” on page 104 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}} 
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_res_err "8150: Permanent IOA failure\n"
+description {{
+Permanent IOA failure.
+}}
+action {{
+Exchange the failing items in the Failing Items list one at a time.
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "8150: Permanent IOA failure\n"
+description {{
+Permanent IOA failure.
+}}
+action {{
+Exchange the failing items in the Failing Items list one at a time.
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "3010: Disk device returned wrong response to IOA\n"
+description {{
+Disk device returned wrong response to IOA.
+}}
+action {{
+Exchange the failing items in the Failing Items list
+one at a time. If the problem is not resolved, perform
+“MAP 3351” on page 104 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}} 
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "8151: IOA microcode error\n"
+description {{
+IOA microcode error.
+}}
+action {{
+Update adapter microcode. See “Updating the controller
+microcode” on page 63 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+If the problem is not resolved, exchange the failing items in the Failing
+Items list one at a time.  
+}} 
+class: unknown  sl_severity: error  refcode:""
+
+message: ipr_hcam_err "8157: IOA error requiring IOA reset to recover\n"
+description {{
+IOA error requiring IOA reset to recover.
+}}
+action {{
+If two 8157 messages have occurred for the same I/O adapter location,
+exchange the failing items in the Failing Items list one at a time.
+}} 
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "8008: A permanent cache battery pack failure occurred\n"
+description {{
+A permanent cache battery pack failure occurred.
+}}
+action {{
+Perform “MAP 3300” on page 90 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9090: Disk unit has been modified after the last known status\n"
+description {{
+Disk unit has been modified after the last known status.
+}}
+action {{
+Perform “MAP 3333” on page 95 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: warning  refcode: ""
+
+message: ipr_hcam_err "9081: IOA detected device error\n"
+description {{
+IOA detected device error.
+}}
+action {{
+Exchange the failing items in the Failing Items list one at a time.
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9082: IOA detected device error\n"
+description {{
+IOA detected device error.
+}}
+action {{
+Exchange the failing items in the Failing Items list one at a time.
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9091: Incorrect hardware configuration change has been detected\n"
+description {{
+Incorrect hardware configuration change has been detected.
+}}
+action {{
+Perform “MAP 3333” on page 95 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "4010: Incorrect connection between cascaded expanders\n"
+description {{
+Incorrect connection between cascaded expanders.
+}}
+action {{
+Perform “MAP 3342” on page 99 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "4020: Connections exceed IOA design limits\n"
+description {{
+Connections exceed IOA design limits.
+}}
+action {{
+Perform “MAP 3343” on page 99 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "4030: Incorrect multipath connection\n"
+description {{
+Incorrect multipath connection.
+}}
+action {{
+Perform “MAP 3344” on page 100 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "4110: Unsupported enclosure function\n"
+description {{
+Unsupported enclosure function.
+}}
+action {{
+Perform “MAP 3345” on page 100 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "FFF4: Command to logical unit failed\n"
+description {{
+Command to logical unit failed.
+}}
+action {{
+Exchange the failing items in the Failing Items list
+one at a time. If the problem is not resolved, perform
+“MAP 3351” on page 104 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}} 
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9031: Array protection temporarily suspended, protection resuming\n"
+description {{
+Array protection temporarily suspended, protection resuming.
+}}
+action {{
+Perform “MAP 3310” on page 91 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  type: info  refcode: ""
+
+message: ipr_hcam_err "9040: Array protection temporarily suspended, protection resuming\n"
+description {{
+Array protection temporarily suspended, protection resuming.
+}}
+action {{
+No action required. The array is synching. Wait until the synch is
+complete.  
+}} 
+class: unknown  type: info  refcode: ""
+
+message: ipr_hcam_err "3020: IOA detected a SCSI bus configuration error\n"
+description {{
+IOA detected a SCSI bus configuration error.
+}}
+action {{
+Perform “MAP 3350” on page 101 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "4040: Incomplete multipath connection between IOA and enclosure\n"
+description {{
+Incomplete multipath connection between IOA and enclosure.
+}}
+action {{
+Perform “MAP 3344” on page 100 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "4041: Incomplete multipath connection between enclosure and device\n"
+description {{
+Incomplete multipath connection between enclosure and device.
+}}
+action {{
+Perform “MAP 3346” on page 100 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9075: Incomplete multipath connection between IOA and remote IOA\n"
+description {{
+Incomplete multipath connection between IOA and remote IOA.
+}}
+action {{
+Perform “MAP 3349” on page 101 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "4050: Enclosure does not support a required multipath function\n"
+description {{
+Enclosure does not support a required multipath function.
+}}
+action {{
+Perform “MAP 3348” on page 101 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9041: Array protection temporarily suspended\n"
+description {{
+Array protection temporarily suspended.
+}}
+action {{
+Background array parity checking detected and errors corrected. Perform
+“MAP 3390” on page 106 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: warning  refcode: ""
+
+message: ipr_hcam_err "9042: Corrupt array parity detected on specified device\n"
+description {{
+Corrupt array parity detected on specified device.
+}}
+action {{
+Perform “MAP 3390” on page 106 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9030: Array no longer protected due to missing or failed disk unit\n"
+description {{
+Array no longer protected due to missing or failed disk unit.
+}}
+action {{
+Perform “MAP 3310” on page 91 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9032: Array exposed but still protected\n"
+description {{
+Array exposed but still protected.
+}}
+action {{
+Perform “MAP 3310” on page 91 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "4061: Multipath redundancy level got better\n"
+description {{
+Multipath redundancy level got better.
+}}
+action {{
+None required
+}}
+class: unknown  type: info  refcode: ""
+
+message: ipr_hcam_err "4060: Multipath redundancy level got worse\n"
+description {{
+Multipath redundancy level got worse.
+}}
+action {{
+Perform “MAP 3353” on page 106 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9008: IOA does not support functions expected by devices\n"
+description {{
+IOA does not support functions expected by devices.
+}}
+action {{
+Perform “MAP 3330” on page 94 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: warning  refcode: ""
+
+message: ipr_hcam_err "9020: Array missing 2 or more devices with only 1 device present\n"
+description {{
+Array missing 2 or more devices with only 1 device present.
+}}
+action {{
+Perform “MAP 3311” on page 92 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9021: Array missing 2 or more devices with 2 or more devices present\n"
+description {{
+Array missing 2 or more devices with 2 or more devices present.
+}}
+action {{
+Perform “MAP 3311” on page 92 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9022: Exposed array is missing a required device\n"
+description {{
+Exposed array is missing a required device.
+}}
+action {{
+Perform “MAP 3311” on page 92 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9023: Array member(s) not at required physical locations\n"
+description {{
+Array member(s) not at required physical locations.
+}}
+action {{
+Perform “MAP 3312” on page 93 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9024: Array not functional due to present hardware configuration\n"
+description {{
+Array not functional due to present hardware configuration.
+}}
+action {{
+Perform “MAP 3390” on page 106 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9054: IOA resources not available due to previous problems\n"
+description {{
+IOA resources not available due to previous problems.
+}}
+action {{
+Perform “MAP 3321” on page 94 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9092: Disk unit requires initialization before use\n"
+description {{
+Disk unit requires initialization before use.
+}}
+action {{
+Perform “MAP 3334” on page 96 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: unknown  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9029: Incorrect hardware configuration change has been detected\n"
+description {{
+Incorrect hardware configuration change has been detected.
+}}
+action {{
+Perform “MAP 3390” on page 106 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9060: One or more disk pairs are missing from an array\n"
+description {{
+One or more disk pairs are missing from an array.
+}}
+action {{
+Perform “MAP 3311” on page 92 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9061: One or more disks are missing from an array\n"
+description {{
+One or more disks are missing from an array.
+}}
+action {{
+Perform “MAP 3311” on page 92 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9062: One or more disks are missing from an array\n"
+description {{
+One or more disks are missing from an array.
+}}
+action {{
+Perform “MAP 3311” on page 92 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+
+message: ipr_hcam_err "9063: Maximum number of functional arrays has been exceeded\n"
+description {{
+Maximum number of functional arrays has been exceeded.
+}}
+action {{
+Perform “MAP 3390” on page 106 of the SAS Reference Guide -
+http://publib.boulder.ibm.com/infocenter/powersys/v3r1m5/topic/p7ebk/p7ebk.pdf
+}}
+class: hardware  sl_severity: error  refcode: ""
+

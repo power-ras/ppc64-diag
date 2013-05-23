@@ -1,0 +1,49 @@
+subsystem: gpfs 
+
+message: mmfs_failed "\n"
+description {{
+A disk has failed or is not responding. The filesystem is still operational. 
+}}
+action {{
+Ignore
+}}
+class: software sl_severity: warning refcode: "" 
+
+message: mmfs_pathfail "\n"
+description {{
+A path to a disk is no longer usable. Probable cause: SAS adapter, cable,
+port expander or disk carrier.
+}}
+action {{
+Ignore
+}}
+class: software sl_severity: warning  refcode: ""
+
+message: mmfs_recovered "\n"
+description {{
+A disk previously reported as not responding has been found and is working.
+}}
+action {{
+Ignore
+}}
+class: software sl_severity: warning refcode: ""
+
+message: mmfs_replace "\n"
+description {{
+The disk replacement threshold has been met for the given failed disk. 
+The disk must be replaced.
+}}
+action {{
+Notify administrator.
+}}
+class: software sl_severity: error  refcode: "EF000001"
+
+message: mmfs_rebuild "\n"
+description {{
+There is not enough available spare space to reestablish full redundancy
+in a declustered array. Customer may be in danger of data loss.
+}}
+action {{
+Notify administrator.
+}}
+class: software sl_severity: error  refcode: "EF000002"

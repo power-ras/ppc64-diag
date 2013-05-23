@@ -1,0 +1,136 @@
+#! /usr/bin/perl
+#
+# Copyright (C) 2007 IBM Corporation
+#
+ 
+use Getopt::Long;
+
+sub usage {
+	print "$0 {--register | --unregister} [--verbose]\n";
+	print "    --register:   register notification tools with servicelog\n";
+	print "    --unregister: unregister servicelog notification tools\n";
+	print "    --verbose:    display verbose output\n";
+	exit(0);
+}
+
+sub run_cmd {
+	my $cmd = @_[0];
+	$redirect = " >/dev/null 2>&1";
+
+	if ($flag_verbose) {
+		$redirect = "";
+		print " *** Running: $cmd\n";
+	}
+
+	system("$cmd$redirect");
+	my $exit_status = $? >> 8;
+
+	if ($flag_verbose) {
+		print " *** Exit Status: $exit_status\n";
+	}
+	return $exit_status;
+}
+
+sub servicelog_id {
+	my $cmd = @_[0];
+
+	# read the servicelog_notify output for the Servicelog ID
+	@sl_out = `/usr/bin/servicelog_notify --list --command=\"$cmd\"`;
+	foreach $line (@sl_out) {
+		chomp($line);
+		$pos = index($line, "Servicelog ID:");
+		if ($pos >= 0) {
+			$sl_id = substr($line, 14);
+
+			# trim leading whitespace
+			$sl_id =~ s/^\s+//;
+			return $sl_id;
+		}
+	}
+
+	return "?";
+}
+
+sub register {
+	my $cmd = @_[0]->[0];
+	my $sl_args = @_[0]->[1];
+	my $rc;
+
+	$rc = run_cmd("/usr/bin/servicelog_notify --list --command=\"$cmd\"");
+	if ($rc == 1) {
+		# command not currently registered; register it now
+		
+		$rc = run_cmd("/usr/bin/servicelog_notify --add ".
+			      "--command=\"$cmd\" $sl_args");
+	}
+}
+
+sub unregister {
+	my $cmd = @_[0]->[0];
+	my $sl_args = @_[0]->[1];
+	my $rc;
+
+	$rc = run_cmd("/usr/bin/servicelog_notify --remove ".
+		      "--command=\"$cmd\"");
+}
+
+@notification_tools = (
+
+    ["/etc/ppc64-diag/ppc64_diag_notify -q -e root -l /var/log/platform",
+     "--match='serviceable=1' ".
+     "--type=EVENT --method=pairs_stdin"],
+
+    ["/etc/ppc64-diag/ppc64_diag_mkrsrc",
+     "--match='serviceable=1' ".
+     "--type=EVENT --method=pairs_stdin"],
+
+    ["/etc/ppc64-diag/ppc64_diag_migrate",
+     "--match=\'refcode=\"#MIGRATE\" and serviceable=0\' ".
+     "--type=EVENT --method=pairs_stdin"],
+);
+
+Getopt::Long::Configure("bundling");
+GetOptions("register|r"=>\$flag_register,
+	"unregister|u"=>\$flag_unregister,
+	"help|h"=>\$flag_help,
+	"verbose|v"=>\$flag_verbose,
+	"<>"=>\&bad_arg) or usage();
+
+usage() if $flag_help;
+
+if ($flag_register and $flag_unregister) {
+	print "Only one of --register and --unregister should be specified.\n";
+	usage();
+	exit 1;
+}
+
+if (!$flag_register and !$flag_unregister) {
+	print "One of --register or --unregister must be specified.\n";
+	usage();
+	exit 1;
+}
+
+my $count = 0;
+
+if ($flag_register) {
+	foreach $tool (@notification_tools) {
+		register($tool);
+		$count++;
+	}
+	print "Registered $count tools with servicelog:\n\n";
+	foreach $tool (@notification_tools) {
+		system("/usr/bin/servicelog_notify --list ".
+		       "--command=\"".$tool->[0]."\"");
+		print "\n";
+	}
+}
+
+if ($flag_unregister) {
+	foreach $tool (@notification_tools) {
+		unregister($tool);
+		$count++;
+	}
+	print "Unregistered $count notification tools from servicelog.\n";
+}
+
+exit 0;

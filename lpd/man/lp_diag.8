@@ -1,0 +1,37 @@
+.\"
+.\" Copyright (C) 2012 International Business Machines
+.\" Author : Vasant Hegde <hegdevasant@linux.vnet.ibm.com>
+.\"
+.TH LP_DIAG 8 "Dec 2012" Linux "PowerLinux Service Tools"
+.SH NAME
+lp_diag - Light Path Diagnostics
+
+.SH SYNOPSIS
+.nf
+lp_diag [\fB-V\fR] [\fB-h\fR]
+.fi
+.SH DESCRIPTION
+.P
+The \fBlp_diag\fR utility is used to view and manipulate the service indicators
+(LEDs). It provides curses based interface. Using \fBlp_diag\fR one can perform
+below tasks :
+
+     Set System Attention Indicator to NORMAL
+     Set ALL Identify Indicator to NORMAL
+     List all identify indicators along with their current status (on or off)
+     Modify identify indicator(s) state (on or off)
+
+.B lp_diag
+currently supports a limited number of device drivers and SES enclosures.
+
+.SH OPTIONS
+.TP
+.B \-V
+Display the version of the command and exit.
+.TP
+.B \-h
+Print the usage message and exit.
+
+.SH "SEE ALSO"
+.BR usysident (8),
+.BR usysattn (8)

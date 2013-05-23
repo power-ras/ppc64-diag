@@ -1,0 +1,4529 @@
+subsystem:net
+
+message: lpfc_printf_log KERN_WARNING "Abort outstanding I/O on NPort x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Abort outstanding I/O on NPort x([0-9a-f]{1,})$"
+description {{
+All outstanding I/Os are cleaned up on the specified remote NPort.
+DATA: (1) nlp_flag (2) nlp_state (3) nlp_rpi
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_WARNING "Active Mailbox cleared - mailbox timeout exiting\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Active Mailbox cleared - mailbox timeout exiting$"
+description {{
+The mailbox timeout handler has determined that the driver is in the
+process of completing this mailbox command.  
+}} 
+action {{ 
+No action needed, informational.  
+}} 
+class: software type: info refcode: ""
+
+message: lpfc_printf_log KERN_ERR "Adapter failed init, mbxCmd x%x READ_SPARM mbxStatus x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Adapter failed init, mbxCmd x([0-9a-f]{1,}) READ_SPARM mbxStatus x([0-9a-f]{1,})$"
+description {{
+Adapter initialization failed when issuing a READ_SPARM mailbox command.
+}}
+action {{
+This error could indicate a hardware or firmware problem. If the 
+problem persists, report the error to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Adapter failed to get Option ROM version status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Adapter failed to get Option ROM version status x([0-9a-f]{1,})$"
+description {{
+The driver could not read the HBA’s option ROM.
+}}
+action {{
+Reset the HBA. Ensure the adapter’s firmware is current.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Adapter failed to init, chipset, status reg x%x, FW Data: A8 x%x AC x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Adapter failed to init, chipset, status reg x([0-9a-f]{1,}), FW Data: A8 x([0-9a-f]{1,}) AC x([0-9a-f]{1,})$"
+description {{
+The adapter failed during powerup diagnostics after it was reset.
+}}
+action {{
+This error could indicate a hardware or firmware problem.If the problem
+persists, report the error to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+
+message: lpfc_printf_log KERN_ERR "Adapter failed to init. Data: x%x x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Adapter failed to init\\. Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+An error occurred when processing queue related tags for an HBA 
+in a particular slot.
+DATA: (1) mbxCommand (2) mbxStatus (3) hbaqno
+}}
+action {{
+Software driver error. If this problem persists, report these errors 
+to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Adapter failed to init, mbxCmd x%x CONFIG_PORT, mbxStatus x%x Data: x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Adapter failed to init, mbxCmd x([0-9a-f]{1,}) CONFIG_PORT, mbxStatus x([0-9a-f]{1,}) Data: x([0-9a-f]{1,})$"
+description {{
+Adapter initialization failed when issuing a CONFIG_PORT mailbox 
+command.
+DATA: (1) hbainit
+}}
+action {{
+This error could indicate a hardware or firmware problem. Update the 
+firmware. If the problem persists, report the error to 
+Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Adapter failed to init, mbxCmd x%x INIT_LINK, mbxStatus x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Adapter failed to init, mbxCmd x([0-9a-f]{1,}) INIT_LINK, mbxStatus x([0-9a-f]{1,})$"
+description {{
+Adapter initialization failed when issuing an INIT_LINK mailbox command.
+}}
+action {{
+This error could indicate a hardware or firmware problem. Update the 
+firmware.If the problem persists,report the error to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Adapter failed to init, mbxCmd x%x READ_CONFIG, mbxStatus x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Adapter failed to init, mbxCmd x([0-9a-f]{1,}) READ_CONFIG, mbxStatus x([0-9a-f]{1,})$"
+description {{
+Adapter initialization failed when issuing a READ_CONFIG mailbox command.
+}}
+action {{
+This error could indicate a hardware or firmware problem. Update the 
+firmware.If the problem persists,report the error to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Adapter failed to init, mbxCmd x%x READ_REV, mbxStatus x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Adapter failed to init, mbxCmd x([0-9a-f]{1,}) READ_REV, mbxStatus x([0-9a-f]{1,})$"
+description {{
+Adapter initialization failed when issuing a READ_REV mailbox command.
+}}
+action {{
+This error could indicate a hardware or firmware problem. Update the
+firmware.If the problem persists,report the error to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Adapter failed to init, READ_REV has missing revision information.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Adapter failed to init, READ_REV has missing revision information\\.$"
+description {{
+A firmware revision initialization error was detected.
+}}
+action {{
+This error could indicate a hardware or firmware problem. Update the
+firmware.If the problem persists,report the error to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Adapter failed to init, timeout, status reg x%x, FW Data: A8 x%x AC x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Adapter failed to init, timeout, status reg x([0-9a-f]{1,}), FW Data: A8 x([0-9a-f]{1,}) AC x([0-9a-f]{1,})$"
+description {{
+The adapter failed during powerup diagnostics after it was reset.
+}}
+action {{
+This error could indicate a hardware or firmware problem.If the problem
+persists, report the error to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Adapter failed to issue ASYNCEVT_ENABLE mbox status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Adapter failed to issue ASYNCEVT_ENABLE mbox status x([0-9a-f]{1,})$"
+description {{
+The mailbox command to enable an asynchronous event notification failed.
+}}
+action {{
+Ensure the adapter firmware is current. Reload the driver.
+}}
+class: firmware sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Adapter failed to issue DOWN_LINK mbox command rc 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Adapter failed to issue DOWN_LINK mbox command rc 0x([0-9a-f]{1,})$"
+description {{
+The driver was unable to issue the Down Link Mailbox command.
+}}
+action {{
+None required
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Adapter Hardware Error Data: x%x x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Adapter Hardware Error Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The driver received an interrupt indicating a possible hardware problem.
+Data: (1) status (2) status1 (3) status2
+}}
+action {{
+This error could indicate a hardware or firmware problem. If the problem 
+persists, report the error to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Adapter heartbeat failure, taking this port offline.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Adapter heartbeat failure, taking this port offline\\.$"
+description {{
+The Heartbeat mailbox command failed.
+}}
+action {{
+Ensure the adapter firmware is current. Reload the driver.
+}}
+class: firmware sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Adapter is very hot, please take corrective action. temperature : %d Celsius\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Adapter is very hot, please take corrective action\\. temperature : ([-]\?[0-9]{1,}) Celsius$"
+description {{
+Adapter temperature is above normal range.
+DATA: Temperature in Celsius
+}}
+action {{
+Shutdown and remove the HBA. Contact Technical Support.
+}}
+class: hardware sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Adapter Link is disabled.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Adapter Link is disabled\\.$"
+description {{
+The adapterl link has been disabled.
+}}
+action {{
+None required
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "Adapter temperature is OK now. temperature : %d Celsius\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Adapter temperature is OK now\\. temperature : ([-]\?[0-9]{1,}) Celsius$"
+description {{
+Adapter temperature has reverted to normal range.
+DATA: Temperature in Celsius
+}}
+action {{
+No action needed, informational.
+}}
+class: hardware type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "ADD_FCF_RECORD mailbox failed with status 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) ADD_FCF_RECORD mailbox failed with status 0x([0-9a-f]{1,})$"
+description {{
+The mailbox command to add the FCF record has failed.
+}}
+action {{
+None required
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "ADD_FCF_RECORD mailbox failed with status x%x add_status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) ADD_FCF_RECORD mailbox failed with status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,})$"
+description {{
+The mailbox command to add the FCF record has failed.
+}}
+action {{
+None required
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Bad hbq tag. Data: x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Bad hbq tag\\. Data: x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+An error occurred when processing queue related tags for an HBA in a 
+particular slot.
+DATA: (1) tag (2) buffer_count
+}}
+action {{
+Software driver error. If this problem persists, report these errors 
+to Technical Support.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_WARNING "Block sgl registration required DMA size (%d) great than a page\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Block sgl registration required DMA size \\(([-]\?[0-9]{1,})\\) great than a page$"
+description {{
+The request to post SGL pages does not fit on a page.
+}}
+action {{
+No action needed, informational.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "Bring Adapter offline\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Bring Adapter offline$"
+description {{
+The FC driver has received a request to bring the adapter offline. 
+This may occur when running lputil.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "Bring Adapter online\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Bring Adapter online$"
+description {{
+The FC driver has received a request to bring the adapter online. 
+This may occur when running lputil.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Cannot find virtual addr for buffer tag on ring %d Data x%lx x%p x%p x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Cannot find virtual addr for buffer tag on ring ([-]\?[0-9]{1,}) Data x([0-9a-f]{1,}) x(\\(null\\)|([0]{0,7}[0-9a-f]{1,})) x(\\(null\\)|([0]{0,7}[0-9a-f]{1,})) x([0-9a-f]{1,})$"
+description {{
+DMA buffer is not available for this unsolicited command.
+DATA: (1) tag (2) next (3) prev (4) postbufq_cnt
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Cannot find virtual addr for mapped buf on ring %d Data x%llx x%p x%p x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Cannot find virtual addr for mapped buf on ring ([-]\?[0-9]{1,}) Data x([0-9a-f]{1,}) x(\\(null\\)|([0]{0,7}[0-9a-f]{1,})) x(\\(null\\)|([0]{0,7}[0-9a-f]{1,})) x([0-9a-f]{1,})$"
+description {{
+The driver cannot find the specified buffer in its mapping table. Thus 
+it cannot find the virtual address needed to access the data.
+DATA: (1) phys (2) next (3) prev (4) postbufq_cnt
+}}
+action {{
+This error could indicate a software driver or firmware problem. If the
+problem persists report these errors to Technical Support.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Cannot re-enable interrupt after slot reset.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Cannot re-enable interrupt after slot reset\\.$"
+description {{
+The driver was not able to enable the interrupt after an HBA reset.
+}}
+action {{
+Unload and reload the driver.
+}}
+class: software sl_severity: error refcode: ""
+
+
+
+message: lpfc_printf_log KERN_ERR "Clear Virtual Link Received for VPI 0x%x tag 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Clear Virtual Link Received for VPI 0x([0-9a-f]{1,}) tag 0x([0-9a-f]{1,})$"
+description {{
+A Clear virtual link was received from the Fabric for this VPI.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_WARNING "Config MSI mailbox command failed, mbxCmd x%x, mbxStatus x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Config MSI mailbox command failed, mbxCmd x([0-9a-f]{1,}), mbxStatus x([0-9a-f]{1,})$"
+description {{
+The mailbox command sent to the firmware to configure the HBA to use 
+MSI-X has failed.
+}}
+action {{
+Ensure the hardware platform supports MSI-X.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Config Port initialization error, mbxCmd x%x READ_NVPARM, mbxStatus x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Config Port initialization error, mbxCmd x([0-9a-f]{1,}) READ_NVPARM, mbxStatus x([0-9a-f]{1,})$"
+description {{
+A read nvparams mailbox command failed during port configuration.
+}}
+action {{
+This error could indicate a software driver, firmware or hardware 
+problem. Report these errors to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Config region 23 has bad signature\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Config region 23 has bad signature$"
+description {{
+Configuration region 23 has an invalid signature.
+}}
+action {{
+None required.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Config region 23 has bad version\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Config region 23 has bad version$"
+description {{
+The driver was unable to read Config Region 23 because it is an 
+invalid version.
+}}
+action {{
+None required.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Could not manually add FCF record 0, status %d\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Could not manually add FCF record 0, status ([-]\?[0-9]{1,})$"
+description {{
+Could not add FCF record to the FCF list.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "CQ_CREATE mailbox failed with status x%x add_status x%x, mbx status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) CQ_CREATE mailbox failed with status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,}), mbx status x([0-9a-f]{1,})$"
+description {{
+The mailbox command sent to create the completion queue has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "CQ_DESTROY mailbox failed with status x%x add_status x%x, mbx status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) CQ_DESTROY mailbox failed with status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,}), mbx status x([0-9a-f]{1,})$"
+description {{
+The mailbox command sent to delete the completion queue has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Create VPORT failed: Cannot get instance number\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Create VPORT failed: Cannot get instance number$"
+description {{
+The driver failed to allocate resources for an adapter and could not
+assign an instance number.
+}}
+action {{
+Software driver error. If this problem persists, report these errors
+to Technical Support.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Create VPORT failed: Max VPORTs (%d) exceeded\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Create VPORT failed: Max VPORTs \\(([-]\?[0-9]{1,})\\) exceeded$"
+description {{
+The driver failed to create a port because the maximum number of port
+supported by the driver will be exceeded.
+DATA: (1) max_vpi
+}}
+action {{
+No Action. The driver can not create any more VPorts.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Create VPORT failed: NPIV is not enabled: SLImode:%d\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Create VPORT failed: NPIV is not enabled: SLImode:([-]\?[0-9]{1,})$"
+description {{
+The driver failed to create a port because the HBA was in wrong mode 
+or was not capable of NPIV.
+DATA: (1) sli_rev
+}}
+action {{
+Load the driver with npiv enabled on an HBA that supports SLI-3.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Create VPORT failed: vpi x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Create VPORT failed: vpi x([0-9a-f]{1,})$"
+description {{
+The driver failed to create a port and had to eliminate all its 
+resources.
+DATA: (1) vpi
+}}
+action {{
+Software driver error. If this problem persists, report these 
+errors to Technical Support.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "CT command failed to delete objects on fabric\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) CT command failed to delete objects on fabric$"
+description {{
+A command issued to the fabric to delete an associated resource for an
+object such as for a port, failed.
+}}
+action {{
+Software driver error. If this problem persists, report these 
+errors to Technical Support.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Deferred Adapter Hardware Error Data: x%x x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Deferred Adapter Hardware Error Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+An adapter hardware error was sent to the driver.
+DATA: (1) work_hs, (2) work_status[0], (3) work_status[1]
+}}
+action {{
+Perform a dump using hbacmd.
+}}
+class: hardware sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "DEL FCF of default FCF Index failed mbx status x%x, status x%x add_status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) DEL FCF of default FCF Index failed mbx status x([0-9a-f]{1,}), status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,})$"
+description {{
+The mailbox command to delete the FCF record has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+message: lpfc_printf_log KERN_ERR "Dropped frame rctl:%s type:%s\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Dropped frame rctl:([[:print:]]*) type:([[:print:]]*)$"
+description {{
+An unsupported frame was received by the port and dropped.
+DATA: (1) rctl_names[fc_hdr->fh_r_ctl], (2) type_names[fc_hdr->fh_type]
+}}
+action {{
+None required.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "ELS complete with no corresponding cmdiocb: iotag (%d)\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) ELS complete with no corresponding cmdiocb: iotag \\(([-]\?[0-9]{1,})\\)$"
+description {{
+The completion that the ISR is handling cannot find a tag associated 
+with the IOTAG
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "EQ_CREATE mailbox failed with status x%x add_status x%x, mbx status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) EQ_CREATE mailbox failed with status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,}), mbx status x([0-9a-f]{1,})$"
+description {{
+The mailbox command sent to create the event queue has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "EQ_DESTROY mailbox failed with status x%x add_status x%x, mbx status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) EQ_DESTROY mailbox failed with status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,}), mbx status x([0-9a-f]{1,})$"
+description {{
+The mailbox command sent to delete the event queue has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Error Could not grow rpi count\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Error Could not grow rpi count$"
+description {{
+An error occurred because the RPI count could not be increased.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Error %d during queue setup.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Error ([-]\?[0-9]{1,}) during queue setup\\.$"
+description {{
+Could not set up all the queues that driver requires to exchange IOs 
+with the HBA.
+}}
+action {{
+Reload the driver.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Error %d during rpi post operation\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Error ([-]\?[0-9]{1,}) during rpi post operation$"
+description {{
+The driver was trying to post pages to the firmware to keep target 
+login information and encountered a failure.
+}}
+action {{
+Unload and reload the driver.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_WARNING "Error %d during scsi sgl post operation\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Error ([-]\?[0-9]{1,}) during scsi sgl post operation$"
+description {{
+The SGL entries could not be registered with the HBA.
+}}
+action {{
+Reset the HBA using hbacmd.
+}}
+class: hardware sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Error %d during sgl post operation\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Error ([-]\?[0-9]{1,}) during sgl post operation$"
+description {{
+The SGL post operation failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Error %d parsing vpd. Using defaults.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Error ([-]\?[0-9]{1,}) parsing vpd\\. Using defaults\\.$"
+description {{
+Could not parse the VPD data, so the driver is using the default 
+values.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Error %d posting all rpi headers\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Error ([-]\?[0-9]{1,}) posting all rpi headers$"
+description {{
+The RPI headers could not be posted to the firmware.
+}}
+action {{
+None required.
+}}
+class: firmware sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Error during rpi post operation\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Error during rpi post operation$"
+description {{
+The driver was trying to post pages to the firmware to be used to keep
+target login information and encountered a failure.
+}}
+action {{
+Unload and reload the driver.
+}}
+class: firmware sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed allocate fast-path FCP CQ (%d)\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed allocate fast-path FCP CQ \\(([-]\?[0-9]{1,})\\)$"
+description {{
+The completion queue event for the fast path could not be allocated.
+}}
+action {{
+Unload and reload the driver.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed allocate memory for fast-path CQ record array\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed allocate memory for fast-path CQ record array$"
+description {{
+Failed to allocate memory for the fast-path EQ record array.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed allocate memory for fast-path EQ record array\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed allocate memory for fast-path EQ record array$"
+description {{
+Failed to allocate memory for the fast-path EQ record array.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed allocate memory for fast-path per-EQ handle array\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed allocate memory for fast-path per-EQ handle array$"
+description {{
+Failed to allocate memory for the fast-path per-EQ handle array.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed allocate memory for fast-path WQ record array\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed allocate memory for fast-path WQ record array$"
+description {{
+Failed to allocate memory for the fast-path EQ record array.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed allocate memory for msi-x interrupt vector entries\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed allocate memory for msi-x interrupt vector entries$"
+description {{
+The driver was unable to allocate memory during initialization of the 
+MSI-X interrupt array.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed allocate slow-path ELS CQ\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed allocate slow-path ELS CQ$"
+description {{
+Failed allocate slow-path ELS CQ.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed allocate slow-path ELS WQ\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed allocate slow-path ELS WQ$"
+description {{
+Failed to allocate slow-path ELS WQ.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed allocate slow-path EQ\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed allocate slow-path EQ$"
+description {{
+The event queue for the slow path was not allocated.
+}}
+action {{
+Unload and reload the driver.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_WARNING "Failed allocate slow-path mailbox CQ\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed allocate slow-path mailbox CQ$"
+description {{
+Failed to allocate slow-path mailbox CQ.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+message: lpfc_printf_log KERN_ERR "Failed to allocate CQ_EVENT entry\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to allocate CQ_EVENT entry$"
+description {{
+The asynchronous event handler was not able to allocate an event queue
+entry to which to transfer the asynchronous event.
+}}
+action {{
+This could be a V-LINK clear from the switch or a fatal error from the
+firmware. Perform a dump from the OneCommand Manager application.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to allocate IOTAG.last IOTAG is %d\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to allocate IOTAG\\.last IOTAG is ([-]\?[0-9]{1,})$"
+description {{
+The driver cannot allocate an IoTag. Display the last value used.
+}}
+action {{
+This message indicates the adapter HBA I/O queue is full. Typically 
+this happens when heavy I/O is running on a low-end (3 digit) adapter. 
+We suggest you upgrade to a higher-end adapter.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to allocate mbox cmd memory\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to allocate mbox cmd memory$"
+description {{
+Mailbox allocation error.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to allocate mbox for ADD_FCF cmd\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to allocate mbox for ADD_FCF cmd$"
+description {{
+Failed to allocate mailbox for ADD_FCF command.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to allocate mbox for query firmware config cmd\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to allocate mbox for query firmware config cmd$"
+description {{
+Failed to allocate mailbox memory.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to allocate mbox for READ_FCF cmd\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to allocate mbox for READ_FCF cmd$"
+description {{
+Failed to allocate mbox for READ_FCF command.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to allocate memory for ELS XRI management array of size %d.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to allocate memory for ELS XRI management array of size ([-]\?[0-9]{1,})\\.$"
+description {{
+Initialization failed to allocate memory for the ELS XRI management 
+array.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to allocate memory for SCSI XRI management array of size %d.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to allocate memory for SCSI XRI management array of size ([-]\?[0-9]{1,})\\.$"
+description {{
+Initialization could not allocate memory to hold the XRIs.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to allocate non-embedded SGE array.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to allocate non-embedded SGE array\\.$"
+description {{
+Failed to allocate the non-embedded SGE array.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to allocate sysfs attr\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to allocate sysfs attr$"
+description {{
+Initialization failed to sysfs attribute.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "Failed to allocate XRI.last XRITAG is %d Max XRI is %d, Used XRI is %d\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to allocate XRI\\.last XRITAG is ([-]\?[0-9]{1,}) Max XRI is ([-]\?[0-9]{1,}), Used XRI is ([-]\?[0-9]{1,})$"
+description {{
+All XRIs are in use.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to create scsi host.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to create scsi host\\.$"
+description {{
+Initialization failed to create SCSI host.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to enable interrupt.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to enable interrupt\\.$"
+description {{
+The driver failed to start the interrupt.
+}}
+action {{
+Unload and reload the driver.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to enable pci device.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to enable pci device\\.$"
+description {{
+Failed to enable PCI device during initialization.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to get the non-embedded SGE virtual address\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to get the non-embedded SGE virtual address$"
+description {{
+The READ_FCF_RECORD mailbox command could not retrieve the Scatter 
+Gather Entry that was requested.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to initialize iocb list.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to initialize iocb list\\.$"
+description {{
+Driver resource initialization failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to initialize rpi headers.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to initialize rpi headers\\.$"
+description {{
+Failed to initialize RPI headers.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to initialize sgl list.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to initialize sgl list\\.$"
+description {{
+Failed to initialize SGL list during initialization.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to read FCoE parameters\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to read FCoE parameters$"
+description {{
+The driver failed to read FCoE parameters.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to set up driver resource.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to set up driver resource\\.$"
+description {{
+Driver resource initialization failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to set up hba\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to set up hba$"
+description {{
+Initialization failed to set up the HBA.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Failed to set up pci memory space.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failed to set up pci memory space\\.$"
+description {{
+PCI initialization failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_WARNING "Failure HBA POST Status: sta_reg=0x%x, perr=x%x, sfi=x%x, nip=x%x, ipc=x%x, xrom=x%x, dl=x%x, pstatus=x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Failure HBA POST Status: sta_reg=0x([0-9a-f]{1,}), perr=x([0-9a-f]{1,}), sfi=x([0-9a-f]{1,}), nip=x([0-9a-f]{1,}), ipc=x([0-9a-f]{1,}), xrom=x([0-9a-f]{1,}), dl=x([0-9a-f]{1,}), pstatus=x([0-9a-f]{1,})$"
+description {{
+The HBA’s power on self test has failed.
+}}
+action {{
+None required.
+}}
+class: software type: info refcode: ""
+
+
+
+message: lpfc_printf_log KERN_INFO "Fast-path wqe consume event carries miss-matched qid: wcqe-qid=x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Fast-path wqe consume event carries miss-matched qid: wcqe-qid=x([0-9a-f]{1,})$"
+description {{
+The consumed entry does not have the fast path’s queueID.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "FCF disconnected from network index 0x%x tag 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) FCF disconnected from network index 0x([0-9a-f]{1,}) tag 0x([0-9a-f]{1,})$"
+description {{
+The FCF has disconnected from the network.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "FCF Table full count 0x%x tag 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) FCF Table full count 0x([0-9a-f]{1,}) tag 0x([0-9a-f]{1,})$"
+description {{
+The FCF table is full.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "FCoE Function not supported by firmware. Function mode = %08x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) FCoE Function not supported by firmware\\. Function mode = ([0]{0,7}[0-9a-f]{1,})$"
+description {{
+FCoE is not supported by this firmware.
+}}
+action {{
+Use the OneCommand Manager application to update to the latest firmware.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "FCP cmdiocb not callback function iotag: (%d)\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) FCP cmdiocb not callback function iotag: \\(([-]\?[0-9]{1,})\\)$"
+description {{
+The IOCB found for this iotag does not have a completion handler set 
+in it.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "FCP complete error: status=x%x, hw_status=x%x, total_data_specified=%d, parameter=x%x, word3=x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) FCP complete error: status=x([0-9a-f]{1,}), hw_status=x([0-9a-f]{1,}), total_data_specified=([-]\?[0-9]{1,}), parameter=x([0-9a-f]{1,}), word3=x([0-9a-f]{1,})$"
+description {{
+Logs the FCP failure. Status and parameter are equivalent to ulpStatus
+and ulpWord[4].
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "FCP complete with no corresponding cmdiocb: iotag (%d)\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) FCP complete with no corresponding cmdiocb: iotag \\(([-]\?[0-9]{1,})\\)$"
+description {{
+There was no IOCB on the in-progress list that matched this iotag.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "Feature Mismatch Data: x%08x %08x x%x x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Feature Mismatch Data: x([0]{0,7}[0-9a-f]{1,}) ([0]{0,7}[0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The features passed in to the driver as module parameters do not match
+what the firmware can do. Setting to default values.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "Find ndlp returned NULL for oxid:x%x SID:x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Find ndlp returned NULL for oxid:x([0-9a-f]{1,}) SID:x([0-9a-f]{1,})$"
+description {{
+Could not find the node for this DID.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "HBA not supporting SLI-3 or later SLI Revision: 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) HBA not supporting SLI-3 or later SLI Revision: 0x([0-9a-f]{1,})$"
+description {{
+The HBA does not support SLI-3 or SLI-4.
+}}
+action {{
+This HBA does not support msi. Set lpfc_use_msi=0.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "HBA Unrecoverable error: uerr_lo_reg=0x%x, uerr_hi_reg=0x%x, ue_mask_lo_reg=0x%x, ue_mask_hi_reg=0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) HBA Unrecoverable error: uerr_lo_reg=0x([0-9a-f]{1,}), uerr_hi_reg=0x([0-9a-f]{1,}), ue_mask_lo_reg=0x([0-9a-f]{1,}), ue_mask_hi_reg=0x([0-9a-f]{1,})$"
+description {{
+The HBA has notified the driver that it has encountered an 
+unrecoverable error.
+}}
+action {{
+A dump from the OneCommand Manager application should be taken. 
+Then, the driver should be unloaded and reloaded.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "HBQ %d: local_hbqGetIdx %u is > than hbqp->entry_count %u\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) HBQ ([-]\?[0-9]{1,}): local_hbqGetIdx ([0-9]{1,}) is > than hbqp->entry_count ([0-9]{1,})$"
+description {{
+An error occurred when processing queue related to an HBA in a 
+particular slot.
+DATA: (1) hbqno (2) local_hbqGetIdx (3) entry_count
+}}
+action {{
+Software driver error. If this problem persists, report these errors 
+to Technical Support.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Ignoring ELS cmd tag x%x completion Data: x%x x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Ignoring ELS cmd tag x([0-9a-f]{1,}) completion Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+This ELS command was aborted.
+DATA: (1) ulpStatus (2) ulpWord[4] (3) ulpTimeout
+}}
+action {{
+None required.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "Ignoring unsolicited CT No HBQ status = x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Ignoring unsolicited CT No HBQ status = x([0-9a-f]{1,})$"
+description {{
+Received an unsolicited ct command without a BDE.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "Ignoring unsolicted CT HBQ Size:%d status = x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Ignoring unsolicted CT HBQ Size:([-]\?[0-9]{1,}) status = x([0-9a-f]{1,})$"
+description {{
+Received an unsolicited ct command with an invalid size.
+DATA: ulpStatus
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "INIT VPI Mailbox failed status %d, mbxStatus x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) INIT VPI Mailbox failed status ([-]\?[0-9]{1,}), mbxStatus x([0-9a-f]{1,})$"
+description {{
+The INIT VPI mailbox command has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Invalid asynchrous event code: x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Invalid asynchrous event code: x([0-9a-f]{1,})$"
+description {{
+The asynchronous event code that the firmware passed to the driver is 
+invalid.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Invalid command 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Invalid command 0x([0-9a-f]{1,})$"
+description {{
+The IOCB command is invalid.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Invalid completion queue type (%d)\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Invalid completion queue type \\(([-]\?[0-9]{1,})\\)$"
+description {{
+The event queue entry is not for a mailbox or a work queue entry.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Invalid CT %x command 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Invalid CT ([0-9a-f]{1,}) command 0x([0-9a-f]{1,})$"
+description {{
+Invalid Command-Type in the IOCB is not supported.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Invalid device group (x%x)\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Invalid device group \\(x([0-9a-f]{1,})\\)$"
+description {{
+While unloading the driver, the driver detect a PCI device that it 
+should not have claimed.
+}}
+action {{
+None required.
+}}
+class: hardware sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Invalid HBA PCI-device group: 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Invalid HBA PCI-device group: 0x([0-9a-f]{1,})$"
+description {{
+Invalid HBA PCI-device group detected.
+}}
+action {{
+None required.
+}}
+class: hardware sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Invalid link-attention link speed: x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Invalid link-attention link speed: x([0-9a-f]{1,})$"
+description {{
+The link speed reported in the link attention interrupt is invalid.
+}}
+action {{
+Check the switch configuration.
+}}
+class: hardware sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Invalid link attention type: x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Invalid link attention type: x([0-9a-f]{1,})$"
+description {{
+The READ_LA mailbox command has returned an invalid link type.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Invalid link fault code: x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Invalid link fault code: x([0-9a-f]{1,})$"
+description {{
+The attempt to read the link attention register has returned an 
+unknown value.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Invalid param:\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Invalid param:$"
+description {{
+SLI-4: The post SGL function was passed an invalid XRI
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Invalid SLI revision (%d)\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Invalid SLI revision \\(([-]\?[0-9]{1,})\\)$"
+description {{
+While processing a host attention or unrecoverable error, the driver 
+detected an invalid SLI revision.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "Invalid speed for this board: Reset link speed to auto: x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Invalid speed for this board: Reset link speed to auto: x([0-9a-f]{1,})$"
+description {{
+The driver is reinitializing the link speed to auto-detect.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Invalid work queue CQE subtype (x%x)\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Invalid work queue CQE subtype \\(x([0-9a-f]{1,})\\)$"
+description {{
+Invalid work queue CQE.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+message: lpfc_printf_log KERN_INFO "IOCB wait issue failed, Data x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) IOCB wait issue failed, Data x([0-9a-f]{1,})$"
+description {{
+The LPFC driver failed to issue an IOCB.
+DATA:(1) retval
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "IOCB wake NOT set, Data x%x x%lx\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) IOCB wake NOT set, Data x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The completion handler associated with the IOCB was never called.
+DATA:(1) timeout (2) timeleft/jiffies
+}}
+action {{
+This error could indicate a software driver, firmware or hardware 
+problem.If the problem persists,report the error to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_WARNING "IOCB wake signaled\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) IOCB wake signaled$"
+description {{
+The IOCB completed successfully.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "IOCB x%x failed. No vport\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) IOCB x([0-9a-f]{1,}) failed\\. No vport$"
+description {{
+An IOCB command could not be communicated because there was no VPort 
+associated with the mailbox command.
+DATA: (1) ulpCommand
+}}
+action {{
+Software driver error. If this problem persists, report these errors 
+to Technical Support.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "iotag x%x is out off range: max iotag (x%x)\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) iotag x([0-9a-f]{1,}) is out off range: max iotag \\(x([0-9a-f]{1,})\\)$"
+description {{
+The IOCB lookup cannot be performed because the iocb_tag is out of 
+range.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "iotag x%x is out off range: max iotag x%x wd0 x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) iotag x([0-9a-f]{1,}) is out off range: max iotag x([0-9a-f]{1,}) wd0 x([0-9a-f]{1,})$"
+description {{
+The IoTag in the completed IOCB is out of range.
+}}
+action {{
+This error could indicate a software driver, firmware or hardware 
+problem. Report these errors to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+message: lpfc_printf_log KERN_ERR "LATT: Cannot issue READ_LA: Data:%d\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) LATT: Cannot issue READ_LA: Data:([-]\?[0-9]{1,})$"
+description {{
+The link attention handler could not issue a READ_LA mailbox command.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Link Down Event x%x received Data: x%x x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Link Down Event x([0-9a-f]{1,}) received Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+A link down event was received.
+DATA: (1) fc_eventTag (2) hba_state (3) fc_flag
+}}
+action {{
+If numerous link events are occurring, check the physical connections 
+to the Fibre Channel network.
+}}
+class: hardware sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Link Up Event in loop back mode x%x received Data: x%x x%x x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Link Up Event in loop back mode x([0-9a-f]{1,}) received Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+Link up notification; configured for loopback.
+DATA: (1) fc_eventTag (2) granted_AL_PA (3) UlnkSpeed (4) alpa_map[0]
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Link Up Event npiv not supported in loop topology\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Link Up Event npiv not supported in loop topology$"
+description {{
+NPIV is not supported in loop topology.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+message: lpfc_printf_log KERN_ERR "Loopback test did not receive expected data length. actual length 0x%x expected length 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Loopback test did not receive expected data length\\. actual length 0x([0-9a-f]{1,}) expected length 0x([0-9a-f]{1,})$"
+description {{
+The loopback test did not receive the same amount of data that it 
+transmitted.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "lpfc_create_static_vport bad information header 0x%x 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) lpfc_create_static_vport bad information header 0x([0-9a-f]{1,}) 0x([0-9a-f]{1,})$"
+description {{
+Invalid information header; the signature or revision is invalid.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "lpfc_create_static_vport failed to allocate mailbox memory\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) lpfc_create_static_vport failed to allocate mailbox memory$"
+description {{
+Failed to allocate mailbox memory for VPort creation.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "lpfc_create_static_vport failed to allocate vport_info\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) lpfc_create_static_vport failed to allocate vport_info$"
+description {{
+Failed to allocate vport_info.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "lpfc_create_static_vport failed to create vport\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) lpfc_create_static_vport failed to create vport$"
+description {{
+Failed to create vport
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "lpfc_create_static_vport failed to issue dump mailbox command ret 0x%x status 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) lpfc_create_static_vport failed to issue dump mailbox command ret 0x([0-9a-f]{1,}) status 0x([0-9a-f]{1,})$"
+description {{
+Failed to issue a dump mailbox command for statis VPort creation.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "lpfc_dump_fcoe_param: memory allocation failed\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) lpfc_dump_fcoe_param: memory allocation failed$"
+description {{
+Memory allocation has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "lpfc_dump_static_vport: memory allocation failed\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) lpfc_dump_static_vport: memory allocation failed$"
+description {{
+Failed to allocate mailbox memory.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "lpfc_sli_read_serdes_param failed to allocate mailbox memory\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) lpfc_sli_read_serdes_param failed to allocate mailbox memory$"
+description {{
+Failed to allocate mailbox memory.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_WARNING "lpfc_soft_wwpn attribute set failed to reinit adapter - %d\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) lpfc_soft_wwpn attribute set failed to reinit adapter - ([-]\?[0-9]{1,})$"
+description {{
+The adapter failed to restart after setting a new WWPN.
+}}
+action {{
+Perform a dump using the hbacmd.
+}}
+class: hardware sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Mailbox failed , mbxCmd x%x READ_CONFIG, mbxStatus x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Mailbox failed , mbxCmd x([0-9a-f]{1,}) READ_CONFIG, mbxStatus x([0-9a-f]{1,})$"
+description {{
+The READ_CONFIG mailbox command failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "mbox: Issued mailbox cmd 0x%x while in stopped state.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) mbox: Issued mailbox cmd 0x([0-9a-f]{1,}) while in stopped state\\.$"
+description {{
+Only the dump mailbox command and reset HBA mailbox command are 
+allowed when in the stopped state.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Mbox x%x failed, no vport\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Mbox x([0-9a-f]{1,}) failed, no vport$"
+description {{
+The vport field of this mailbox command was not completed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+message: lpfc_printf_log KERN_ERR "Menlo Maint Mode Link up Event x%x rcvd Data: x%x x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Menlo Maint Mode Link up Event x([0-9a-f]{1,}) rcvd Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The link is up in maintenance mode; only management commands are 
+allowed.
+DATA: (1) fc_eventTag (2) port_state (3) vport fc_flag
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Miss-matched fast-path completion queue identifier: eqcqid=%d, fcpcqid=%d\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Miss-matched fast-path completion queue identifier: eqcqid=([-]\?[0-9]{1,}), fcpcqid=([-]\?[0-9]{1,})$"
+description {{
+The CQID in the event queue entry does not match the fcp_cqid that was
+passed into the routine.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "MQ_CREATE mailbox failed with status x%x add_status x%x, mbx status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) MQ_CREATE mailbox failed with status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,}), mbx status x([0-9a-f]{1,})$"
+description {{
+The mailbox command sent to create the mailbox queue has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "MQ_DESTROY mailbox failed with status x%x add_status x%x, mbx status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) MQ_DESTROY mailbox failed with status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,}), mbx status x([0-9a-f]{1,})$"
+description {{
+The mailbox command sent to delete the mailbox queue has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_WARNING "MSI request_irq failed (%d)\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) MSI request_irq failed \\(([-]\?[0-9]{1,})\\)$"
+description {{
+The request_irq kernel API has failed.
+}}
+action {{
+Set lpfc_use_msi = 0.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_WARNING "MSI-X fast-path request_irq failed (%d)\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) MSI-X fast-path request_irq failed \\(([-]\?[0-9]{1,})\\)$"
+description {{
+The driver received an error for the request_irq_call.
+}}
+action {{
+Unload and reload the driver.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "MSI-X interrupt with no EQE\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) MSI-X interrupt with no EQE$"
+description {{
+SLI-4 HBA interrupt on the slow path but there is no associated EQE.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_WARNING "MSI-X slow-path request_irq failed (%d)\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) MSI-X slow-path request_irq failed \\(([-]\?[0-9]{1,})\\)$"
+description {{
+The kernel API to request an IRQ has failed.
+}}
+action {{
+Use module parameter lpfc_use_msi = 0 (IntX).
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "ndlp null for oxid %x SID %x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) ndlp null for oxid ([0-9a-f]{1,}) SID ([0-9a-f]{1,})$"
+description {{
+The Node value for this SID is not in the node list.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "New FCF found index 0x%x tag 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) New FCF found index 0x([0-9a-f]{1,}) tag 0x([0-9a-f]{1,})$"
+description {{
+The driver has detected a new FCF in the SAN.
+DATA: (1) macqe_fcoe->fcf_index (2) acqe_fcoe->event_tag
+}}
+action {{
+No action needed, informational.
+}}
+class: hardware type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "No entry from fast-path completion queue fcpcqid=%d\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) No entry from fast-path completion queue fcpcqid=([-]\?[0-9]{1,})$"
+description {{
+There were no completions in the completion queue referenced by fcpcqid.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "No entry from the CQ: identifier (x%x), type (%d)\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) No entry from the CQ: identifier \\(x([0-9a-f]{1,})\\), type \\(([-]\?[0-9]{1,})\\)$"
+description {{
+There was no completion queue event for this event queue entry.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_WARNING "NOP mailbox command failed status x%x add_status x%x mbx status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) NOP mailbox command failed status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,}) mbx status x([0-9a-f]{1,})$"
+description {{
+The NOP mailbox command failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "No room left for SCSI XRI allocation: max_xri=%d, els_xri=%d\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) No room left for SCSI XRI allocation: max_xri=([-]\?[0-9]{1,}), els_xri=([-]\?[0-9]{1,})$"
+description {{
+The number of allocated XRIs has reached the max_xri value.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "No support for fcpi mode.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) No support for fcpi mode\\.$"
+description {{
+Could not configure the port to run in FCP initiator mode.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Not a valid fast-path completion event: majorcode=x%x, minorcode=x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Not a valid fast-path completion event: majorcode=x([0-9a-f]{1,}), minorcode=x([0-9a-f]{1,})$"
+description {{
+The major or minor code in the Event Queue field is not valid.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Not a valid slow-path completion event: majorcode=x%x, minorcode=x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Not a valid slow-path completion event: majorcode=x([0-9a-f]{1,}), minorcode=x([0-9a-f]{1,})$"
+description {{
+SLI-4: The EQE is not valid.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Not a valid WCQE code: x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Not a valid WCQE code: x([0-9a-f]{1,})$"
+description {{
+The completion queue handler detected an invalid type.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Not configured for supporting MSI-X cfg_use_msi: 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Not configured for supporting MSI-X cfg_use_msi: 0x([0-9a-f]{1,})$"
+description {{
+The lpfc_use_msi module parameter should have been set to 2.
+}}
+action {{
+Set module parameter lpfc_use_msi = 2.
+}}
+class: software sl_severity: error refcode: ""
+
+message: lpfc_printf_log KERN_ERR "NPIV enabled: Override lpfc_sli_mode parameter (%d) to auto (0).\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) NPIV enabled: Override lpfc_sli_mode parameter \\(([-]\?[0-9]{1,})\\) to auto \\(0\\)\\.$"
+description {{
+The lpfc_enable_npiv and lpfc_sli_mode driver parameter settings 
+conflict. The HBA must be configured for SLI-3 mode to support NPIV.
+DATA: (1) lpfc_sli_mode
+}}
+action {{
+This is an informational message that indicates that the 
+lpfc_enable_npiv and lpfc_sli_mod parameter settings are not compatible. 
+Resolve the parameter conflict by setting the SLI mode to 0 or 3 or, if
+SLI-2 mode is required then disable NPIV.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Only Limited Edition cmd Format supported 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Only Limited Edition cmd Format supported 0x([0-9a-f]{1,})$"
+description {{
+The SGL pages could not be unregistered from the firmware.
+}}
+action {{
+None required.
+}}
+class: firmware sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "Outstanding IO when bringing Adapter offline\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Outstanding IO when bringing Adapter offline$"
+description {{
+IO is still pending while attempting to stop the driver.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "PCI enable MSI mode success.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) PCI enable MSI mode success\\.$"
+description {{
+MSI has been enabled for the port.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "PM resume Failed to enable interrupt\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) PM resume Failed to enable interrupt$"
+description {{
+The PCI resume (hotplug) could not get an interrupt vector.
+}}
+action {{
+Unload and reload the driver.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "PM resume failed to start worker thread: error=x%x.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) PM resume failed to start worker thread: error=x([0-9a-f]{1,})\\.$"
+description {{
+The PCI resume (hotplug) could not start the worker thread for the 
+driver.
+}}
+action {{
+Unload and reload the driver.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "POST_RPI_HDR mailbox failed with status x%x add_status x%x, mbx status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) POST_RPI_HDR mailbox failed with status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,}), mbx status x([0-9a-f]{1,})$"
+description {{
+The mailbox command sent to post the RPUI header pages to the firmware
+has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "POST_SGL_BLOCK mailbox command failed status x%x add_status x%x mbx status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) POST_SGL_BLOCK mailbox command failed status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,}) mbx status x([0-9a-f]{1,})$"
+description {{
+The mailbox command sent to post the SGL pages to the firmware has 
+failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "POST_SGL mailbox failed with status x%x add_status x%x, mbx status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) POST_SGL mailbox failed with status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,}), mbx status x([0-9a-f]{1,})$"
+description {{
+The mailbox command sent to post the SGL pages to the firmware has 
+failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Query Firmware Config failed mbx status x%x, status x%x add_status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Query Firmware Config failed mbx status x([0-9a-f]{1,}), status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,})$"
+description {{
+Could not read the firmware configuration.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "rc should be MBX_SUCCESS\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) rc should be MBX_SUCCESS$"
+description {{
+The next mailbox command on the mailbox queue has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "rc should have been MBX_BUSY\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) rc should have been MBX_BUSY$"
+description {{
+Attempting to unregister a default RPI from an interrupt context and 
+the mailbox state is not busy.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Read FCF record failed 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Read FCF record failed 0x([0-9a-f]{1,})$"
+description {{
+Could not read the FCF record from the firmware.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "READ_FCF_RECORD Indicates empty FCF table.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) READ_FCF_RECORD Indicates empty FCF table\\.$"
+description {{
+The driver requested the firmware provide a list of FCF entries to 
+connect to and the firmware responded that the FCF table is empty.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "READ_FCF_RECORD mailbox failed with status x%x add_status x%x, mbx\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) READ_FCF_RECORD mailbox failed with status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,}), mbx$"
+description {{
+The READ_FCF_RECORD mailbox command failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_WARNING "READ_LA mbox error x%x state x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) READ_LA mbox error x([0-9a-f]{1,}) state x([0-9a-f]{1,})$"
+description {{
+The driver cannot determine what type of link event occurred.
+}}
+action {{
+If numerous link events are occurring, check the physical connections
+to the Fibre Channel network. May indicate a possible hardware or 
+firmware problem.
+}}
+class: hardware sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "READ_REV Error. SLI Level %d FCoE enabled %d\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) READ_REV Error\\. SLI Level ([-]\?[0-9]{1,}) FCoE enabled ([-]\?[0-9]{1,})$"
+description {{
+This SLI-4 only HBA setup function was called for a non-SLI-4 device.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "READ_SPARAM command failed status %d, mbxStatus x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) READ_SPARAM command failed status ([-]\?[0-9]{1,}), mbxStatus x([0-9a-f]{1,})$"
+description {{
+The READ_SPARAM mailbox command has failed during initialization. The 
+HBA has been set to error state.
+}}
+action {{
+Take a dump with hbacmd and then try reloading the driver.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_WARNING "READ_SPARAM: no buffers\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) READ_SPARAM: no buffers$"
+description {{
+The driver attempted to issue a READ_SPARAM mailbox
+command to the HBA, but there were no buffers available.
+}}
+action {{
+This message indicates: (1) Kernel virtual memory is depleted. Check 
+that the system meets minimum RAM requirements for the Emulex Fibre 
+Channel adapter. Try closing other applications to freesome memory. 
+(2) A possible driver buffer management problem. If the problem 
+persists, report the error to Technical Support.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Receive Frame Truncated!!\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Receive Frame Truncated!!$"
+description {{
+The receive unsolicited handler detected a truncated frame.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+message: lpfc_printf_log KERN_WARNING "Re-establishing Link Data: x%x x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Re-establishing Link Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The driver detected a condition in which it had to re-initialize 
+the link.
+DATA: (1) status (2) status1 (3) status2
+}}
+action {{
+If numerous link events are occurring, check the physical connections 
+to the Fibre Channel network.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_WARNING "REG_LOGIN: no buffers, VPI:%d DID:x%x, flag x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) REG_LOGIN: no buffers, VPI:([-]\?[0-9]{1,}) DID:x([0-9a-f]{1,}), flag x([0-9a-f]{1,})$"
+description {{
+The driver attempted to issue a REG_LOGIN mailbox command to the HBA, 
+but there were no buffers available.
+DATA: (1) Did (2) flag
+}}
+action {{
+This message indicates: (1) Kernel virtual memory is depleted. Check 
+that the system meets minimum RAM requirements for the Emulex Fibre 
+Channel adapter. Try closing other applications to free some memory. 
+(2) A possible driver buffer management problem. If the problem 
+persists, report the error to Technical Support.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "REMOVE_ALL_SGL_PAGES mailbox failed with status x%x add_status x%x, mbx status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) REMOVE_ALL_SGL_PAGES mailbox failed with status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,}), mbx status x([0-9a-f]{1,})$"
+description {{
+The mailbox command sent to delete the SGL pages from the firmware has 
+failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "Reset HBA Data: x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Reset HBA Data: x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+An HBA has been reset.
+DATA: (1) hba_state (2) sli_flag
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Resetting board due to mailbox timeout\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Resetting board due to mailbox timeout$"
+description {{
+A mailbox command failed to complete. The driver is resetting the port.
+}}
+action {{
+If the mailbox command fails again, set the lpfc_log_verbose to 
+LOG_MBOX and retry.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "Restart HBA Data: x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Restart HBA Data: x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The driver has been told to restart the HBA
+}}
+action {{
+No action required, informational message.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Ring %d Cannot find buffer for an unsolicited iocb. tag 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Ring ([-]\?[0-9]{1,}) Cannot find buffer for an unsolicited iocb\\. tag 0x([0-9a-f]{1,})$"
+description {{
+There are no more pre-allocated buffers available to handle 
+unsolicited buffers.
+}}
+action {{
+Ensure this port is not being managed by multiple ports.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Ring %d handler: Failed to allocate iocb Rctl x%x Type x%x received\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Ring ([-]\?[0-9]{1,}) handler: Failed to allocate iocb Rctl x([0-9a-f]{1,}) Type x([0-9a-f]{1,}) received$"
+description {{
+The driver was unable to allocate memory to send a query config 
+mailbox command
+}}
+action {{
+None required.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Ring %d handler: portRspPut %d is bigger than rsp ring %d\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Ring ([-]\?[0-9]{1,}) handler: portRspPut ([-]\?[0-9]{1,}) is bigger than rsp ring ([-]\?[0-9]{1,})$"
+description {{
+The port rsp ring put index is larger than the size of the rsp ring.
+}}
+action {{
+This error could indicate a software driver, firmware or hardware 
+problem. Report these errors to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Ring %d handler: unexpected ASYNC_STATUS evt_code 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Ring ([-]\?[0-9]{1,}) handler: unexpected ASYNC_STATUS evt_code 0x([0-9a-f]{1,})$"
+description {{
+The HBA received an asynchronous event that was not a temperature event.
+}}
+action {{
+None required.
+}}
+class: hardware sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Ring %d handler: unexpected completion IoTag x%x Data: x%x x%x x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Ring ([-]\?[0-9]{1,}) handler: unexpected completion IoTag x([0-9a-f]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The driver could not find a matching command for the completion 
+received on the specified ring.
+DATA: (1) ulpStatus (2) ulpWord[4] (3) ulpCommand (4) ulpContext
+}}
+action {{
+This error could indicate a firmware or hardware problem. Report these 
+errors to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Ring %d handler: unexpected Rctl x%x Type x%x received\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Ring ([-]\?[0-9]{1,}) handler: unexpected Rctl x([0-9a-f]{1,}) Type x([0-9a-f]{1,}) received$"
+description {{
+The Rctl/Type of a received frame did not match any for the configured 
+masks for the specified ring.
+}}
+action {{
+This error could indicate a software driver, firmware or hardware 
+problem. Report these errors to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Ring %d issue: portCmdGet %d is bigger than cmd ring %d\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Ring ([-]\?[0-9]{1,}) issue: portCmdGet ([-]\?[0-9]{1,}) is bigger than cmd ring ([-]\?[0-9]{1,})$"
+description {{
+The port cmd ring get index is greater than the size of cmd ring.
+}}
+action {{
+This error could indicate a software driver, firmware or hardware 
+problem. Report these errors to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+message: lpfc_printf_log KERN_ERR "RQ_CREATE mailbox failed with status x%x add_status x%x, mbx status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) RQ_CREATE mailbox failed with status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,}), mbx status x([0-9a-f]{1,})$"
+description {{
+The mailbox command sent to create the receive queue has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "RQ_DESTROY mailbox failed with status x%x add_status x%x, mbx status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) RQ_DESTROY mailbox failed with status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,}), mbx status x([0-9a-f]{1,})$"
+description {{
+The mailbox command sent to delete the work queue has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_WARNING "Rsp Ring %d error: IOCB Data: x%x x%x x%x x%x x%x x%x x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Rsp Ring ([-]\?[0-9]{1,}) error: IOCB Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+An IOCB error has occurred on the specified ring.
+DATA: (1) ulpWord[0] (2) ulpWord[1] (3) ulpWord[2] (4) ulpWord[3] 
+(5) ulpWord[4] (6) ulpWord[5] (7) irsp+6 (8) irsp+7
+}}
+action {{
+If the problem persists, check the targets. If the targets are okay, 
+report the error to Technical Support.
+}}
+class: software sl_severity: warning refcode: ""
+
+message: lpfc_printf_log KERN_INFO "Rsp Ring %d error: IOCB Data: x%x x%x x%x x%x x%x x%x x%x x%x x%x x%x x%x x%x x%x x%x x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Rsp Ring ([-]\?[0-9]{1,}) error: IOCB Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The firmware has returned an error for this IOCB.
+DATA: (1) <iocb word[0]…iocb word[7]> (2) <rsp word[0]…rsp[word[7]>
+}}
+action {{
+No action needed, informational.
+}}
+class: firmware type: info refcode: ""
+
+message: lpfc_printf_log KERN_ERR "SLI4 Adapter Hardware Error Data: x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) SLI4 Adapter Hardware Error Data: x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The HBA has encountered an unrecoverable error.
+}}
+action {{
+Use hbacmd to retrieve a dump file.
+}}
+class: hardware sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "SLI_CONFIG_SPECIAL mailbox failed with status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) SLI_CONFIG_SPECIAL mailbox failed with status x([0-9a-f]{1,})$"
+description {{
+Mailbox command failed.
+}}
+action {{
+Ensure the adapter’s firmware is current. Unload and reload the driver.
+}}
+class: firmware sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "SLI_FUNCTION_RESET mailbox failed with status x%x add_status x%x, mbx status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) SLI_FUNCTION_RESET mailbox failed with status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,}), mbx status x([0-9a-f]{1,})$"
+description {{
+Mailbox command failed.
+}}
+action {{
+Reset the HBA.
+}}
+class: hardware sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Slow-path CQ identifier (%d) does not exist:\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Slow-path CQ identifier \\(([-]\?[0-9]{1,})\\) does not exist:$"
+description {{
+The Completion Queue ID passed in the Event Queue entry does not 
+reference a valid completion queue.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "Slow-path wqe consume event carries miss-matched qid: wcqe-qid=x%x, sp-qid=x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Slow-path wqe consume event carries miss-matched qid: wcqe-qid=x([0-9a-f]{1,}), sp-qid=x([0-9a-f]{1,})$"
+description {{
+The consumed entry does not have the slow path’s queueID.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "The lpfc_dmabuf allocation failed\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) The lpfc_dmabuf allocation failed$"
+description {{
+The asynchronous link event handler could not allocate a mailbox 
+command to issue the READ_LA (read link attention) mailbox command.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "The mboxq allocation failed\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) The mboxq allocation failed$"
+description {{
+The asynchronous link event handler could not allocate a mailbox 
+command to issue the READ_LA (read link attention) mailbox command.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "The mbuf allocation failed\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) The mbuf allocation failed$"
+description {{
+The asynchronous link event handler could not allocate DMA-able memory 
+for the READ_LA mailbox command.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "There is pending active mailbox cmd\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) There is pending active mailbox cmd$"
+description {{
+The mailbox commands have overlapped. This command should have been 
+added to the mailbox queue.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "The SLI4 DCBX asynchronous event is not handled yet\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) The SLI4 DCBX asynchronous event is not handled yet$"
+description {{
+The SLI-4 DCBX asynchronous event is not handled yet.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Unable to allocate memory for issuing MBOX_CONFIG_MSI command\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Unable to allocate memory for issuing MBOX_CONFIG_MSI command$"
+description {{
+Mailbox memory pool allocation error.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Unable to allocate memory for issuing NOP mailbox command\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Unable to allocate memory for issuing NOP mailbox command$"
+description {{
+Memory allocation for this mailbox command has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Unable to allocate memory for issuing SLI_CONFIG_SPECIAL mailbox command\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Unable to allocate memory for issuing SLI_CONFIG_SPECIAL mailbox command$"
+description {{
+Mailbox memory pool allocation error.
+}}
+action {{
+None required.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Unable to allocate memory for issuing SLI_FUNCTION_RESET mailbox command\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Unable to allocate memory for issuing SLI_FUNCTION_RESET mailbox command$"
+description {{
+Mailbox memory pool allocation error.
+}}
+action {{
+None required.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Unable to deregister pages from HBA: %x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Unable to deregister pages from HBA: ([0-9a-f]{1,})$"
+description {{
+The SGL pages could not be unregistered from the firmware.
+}}
+action {{
+None required.
+}}
+class: firmware sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Unable to select SLI-3.  Not supported by adapter.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Unable to select SLI-3\\.  Not supported by adapter\\.$"
+description {{
+The HBA is not capable of operating in a given mode.
+}}
+action {{
+SLI-3 mode is only available on some HBAs. Do not attempt to force the 
+SLI mode to 3 on HBAs that do not support SLI-3 mode. This is an 
+informational message. HBAs that do not support SLI-3 will be 
+configured to run in SLI-2 mode, but it is recommended to use the auto 
+setting (0).
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Unknown FCoE event type 0x%x event tag 0x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Unknown FCoE event type 0x([0-9a-f]{1,}) event tag 0x([0-9a-f]{1,})$"
+description {{
+The firmware has detected an unknown FCoE event.
+}}
+action {{
+Check the FCoE switch configuration and the HBA DCBX mode.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Unknown IOCB command Data: x%x x%x x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Unknown IOCB command Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+Received an unknown IOCB command completion.
+DATA: (1) ulpCommand (2) ulpStatus (3) ulpIoTag (4) ulpContext
+}}
+action {{
+This error could indicate a software driver or firmware problem. If 
+these problems persist, report these errors to Technical Support.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Unknown IOCB command Data: x%x, x%x x%x x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Unknown IOCB command Data: x([0-9a-f]{1,}), x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+eceived an unknown IOCB command completion.
+DATA: (1) type (2) ulpCommand (3) ulpStatus (4) ulpIoTag (5) ulpContext
+}}
+action {{
+This error could indicate a software driver or firmware problem. If 
+these problems persist, report these errors to Technical Support.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Unrecognized lpfc_sli_mode parameter: %d.\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Unrecognized lpfc_sli_mode parameter: ([-]\?[0-9]{1,})\\.$"
+description {{
+The user has attempted to set the SLI mode to an invalid value. The 
+only valid values for the SLI mode are 0, 2, and 3.
+DATA: (1) lpfc_sli_mode
+}}
+action {{
+The lpfc_sli_mode driver parameter setting must be corrected. Valid 
+values are 0, 2, and 3.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "UNREG_FCFI issue mbox failed\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) UNREG_FCFI issue mbox failed$"
+description {{
+Could not issue the UNREG_FCFI mailbox command.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "UNREG_FCFI mbox allocation failed HBA state x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) UNREG_FCFI mbox allocation failed HBA state x([0-9a-f]{1,})$"
+description {{
+allocation for the UNREG_FCFI mailbox command has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "UNREG_FCFI mbox allocation failed\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) UNREG_FCFI mbox allocation failed$"
+description {{
+Failed to allocate mailbox memory.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "UNREG_FCFI mbxStatus error x%x HBA state x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) UNREG_FCFI mbxStatus error x([0-9a-f]{1,}) HBA state x([0-9a-f]{1,})$"
+description {{
+The Unregister FCFI mailbox failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Unregister FCFI command failed status %d, mbxStatus x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Unregister FCFI command failed status ([-]\?[0-9]{1,}), mbxStatus x([0-9a-f]{1,})$"
+description {{
+The driver was unable to unregister the FCFI from the firmware.
+}}
+action {{
+None required.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "UNREG_VFI issue mbox failed rc x%x HBA state x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) UNREG_VFI issue mbox failed rc x([0-9a-f]{1,}) HBA state x([0-9a-f]{1,})$"
+description {{
+Could not issue the UNREG_VFI mailbox command.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "UNREG_VFI mbox allocation failed HBA state x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) UNREG_VFI mbox allocation failed HBA state x([0-9a-f]{1,})$"
+description {{
+Could not allocate memory for UNREG_VFI mailbox command.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "UNREG_VFI mbxStatus error x%x HBA state x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) UNREG_VFI mbxStatus error x([0-9a-f]{1,}) HBA state x([0-9a-f]{1,})$"
+description {{
+The Unregister VFI mailbox command failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Unsupported CQ count. (%d)\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Unsupported CQ count\\. \\(([-]\?[0-9]{1,})\\)$"
+description {{
+Cannot create an completion queue of this size.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Unsupported EQ count. (%d)\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Unsupported EQ count\\. \\(([-]\?[0-9]{1,})\\)$"
+description {{
+Cannot create an event queue of this size.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Unsupported MQ count. (%d)\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Unsupported MQ count\\. \\(([-]\?[0-9]{1,})\\)$"
+description {{
+Cannot create MQ of this size.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Unsupported RQ count. (%d)\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Unsupported RQ count\\. \\(([-]\?[0-9]{1,})\\)$"
+description {{
+The receive queue ring can only be 512, 1024, 2048, or 4096.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_INFO "Vital Product Data: x%x x%x x%x x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Vital Product Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+Vital product data (VPD) contained in the HBA flash.
+DATA: (1) vpd[0] (2) vpd[1] (3) vpd[2] (4) vpd[3]
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_log KERN_WARNING "VPD not present on adapter, mbxCmd x%x DUMP VPD, mbxStatus x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) VPD not present on adapter, mbxCmd x([0-9a-f]{1,}) DUMP VPD, mbxStatus x([0-9a-f]{1,})$"
+description {{
+The DUMP_VPD mailbox command failed.
+}}
+action {{
+This error could indicate a hardware or firmware problem. If the 
+problem persists, report the error to Technical Support.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "Wakeup on signal: rc=x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) Wakeup on signal: rc=x([0-9a-f]{1,})$"
+description {{
+A signal other than the LPFC_DATA_READY was received on the worker 
+thread.
+}}
+action {{
+Unload and reload the driver.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "WQ_CREATE mailbox failed with status x%x add_status x%x, mbx status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) WQ_CREATE mailbox failed with status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,}), mbx status x([0-9a-f]{1,})$"
+description {{
+The mailbox command sent to create the work queue has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_log KERN_ERR "WQ_DESTROY mailbox failed with status x%x add_status x%x, mbx status x%x\n"
+regex lpfc_printf_log "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):([-]\?[0-9]{1,}) WQ_DESTROY mailbox failed with status x([0-9a-f]{1,}) add_status x([0-9a-f]{1,}), mbx status x([0-9a-f]{1,})$"
+description {{
+The mailbox command sent to delete the work queue has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Abort outstanding I/O on NPort x%x Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Abort outstanding I/O on NPort x([0-9a-f]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+All outstanding I/Os are cleaned up on the specified remote NPort.
+DATA: (1) nlp_flag (2) nlp_state (3) nlp_rpi
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "ACC to LOGO completes to NPort x%x Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) ACC to LOGO completes to NPort x([0-9a-f]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The driver received a LOGO from a remote NPort and successfully 
+issued an ACC response.
+DATA: (1) nlp_flag (2) nlp_state (3) nlp_rpi
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "ADISC completes to NPort x%x Data: x%x x%x x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) ADISC completes to NPort x([0-9a-f]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The HBA performed a ADISC into a remote NPort.
+DATA: (1) ulpStatus (2) ulpWord[4] (3) ulpTimeout (4) disc 
+(5) num_disc_nodes
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Allocation request of %d command buffers did not succeed.  Allocated %d buffers.\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Allocation request of ([-]\?[0-9]{1,}) command buffers did not succeed\\.  Allocated ([-]\?[0-9]{1,}) buffers\\.$"
+description {{
+The allocation request for the specified command buffers did not 
+succeed. However,the specified number of buffers has been allocated.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Allocation request of %d command buffers will exceed max of %d. Reducing allocation request to %d.\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Allocation request of ([-]\?[0-9]{1,}) command buffers will exceed max of ([-]\?[0-9]{1,})\\. Reducing allocation request to ([-]\?[0-9]{1,})\\.$"
+description {{
+The number of command buffers requested will exceed the maximum so a 
+smaller quantity will be allocated.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "An FLOGI ELS command x%x was received from DID x%x in Loop Mode\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) An FLOGI ELS command x([0-9a-f]{1,}) was received from DID x([0-9a-f]{1,}) in Loop Mode$"
+description {{
+While in Loop Mode an unknown or unsupported ELS command was received.
+}}
+action {{
+Check device DID.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "At limitation of %d preallocated command buffers\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) At limitation of ([-]\?[0-9]{1,}) preallocated command buffers$"
+description {{
+The maximum number of command buffers have already been allocated.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Bus Reset on target %d failed\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Bus Reset on target ([-]\?[0-9]{1,}) failed$"
+description {{
+The bus reset for the specified target failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Cancel Discovery Timer state x%x Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Cancel Discovery Timer state x([0-9a-f]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+Cancel the device discovery / RSCN rescue timer.
+DATA: (1) fc_flag (2) fc_plogi_cnt (3) fc_adisc_cnt
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Cannot issue NameServer login\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Cannot issue NameServer login$"
+description {{
+Could not issue an ELS PLOGI to the nameserver DID.
+}}
+action {{
+Check the port connection and the switch configuration.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Cannot issue Register Fabric login: Err %d\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Cannot issue Register Fabric login: Err ([-]\?[0-9]{1,})$"
+description {{
+Could not issue the fabric reg login, the err value is unique for each 
+possible failure.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Cannot Register NameServer login\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Cannot Register NameServer login$"
+description {{
+Either a memory allocation issue or an invalid parameter was sent to 
+the REG_LOGIN.
+}}
+action {{
+At least one message (0142 0121 0133 0134 0135) should precede this 
+message.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Cleanup node for NPort x%x Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Cleanup node for NPort x([0-9a-f]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The driver node table entry for a remote NPort was removed.
+DATA: (1) nlp_flag (2) nlp_state (3) nlp_rpi
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "CLEAR_LA mbxStatus error x%x hba state x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) CLEAR_LA mbxStatus error x([0-9a-f]{1,}) hba state x([0-9a-f]{1,})$"
+description {{
+The driver issued a CLEAR_LA mbox command to the HBA that failed.
+}}
+action {{
+This error could indicate a firmware or hardware problem. Report these 
+errors to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "CLEAR LA timeout\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) CLEAR LA timeout$"
+description {{
+The driver issued a CLEAR_LA that never completed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "CONFIG_LINK bad hba state x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) CONFIG_LINK bad hba state x([0-9a-f]{1,})$"
+description {{
+A CONFIG_LINK mbox command completed and the driver was not in the 
+right state.
+}}
+action {{
+Software driver error. If this problem persists, report these errors 
+to Technical Support.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "CONFIG_LINK mbxStatus error x%x HBA state x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) CONFIG_LINK mbxStatus error x([0-9a-f]{1,}) HBA state x([0-9a-f]{1,})$"
+description {{
+The driver issued a CONFIG_LINK mbox command to the HBA that failed.
+}}
+action {{
+This error could indicate a firmware or hardware problem. Report these 
+errors to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Continue discovery with %d ADISCs to go Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Continue discovery with ([-]\?[0-9]{1,}) ADISCs to go Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+A device discovery is in progress.
+DATA: (1) fc_adisc_cnt (2) fc_flag (3) phba->hba_state
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Continue discovery with %d PLOGIs to go Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Continue discovery with ([-]\?[0-9]{1,}) PLOGIs to go Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+Device discovery is in progress.
+DATA: (1) fc_plogi_cnt (2) fc_flag (3) phba->hba_state
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Could not issue unreg_did (default rpis) status %d\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Could not issue unreg_did \\(default rpis\\) status ([-]\?[0-9]{1,})$"
+description {{
+Attempt to unregister rpi failed.
+}}
+action {{
+Software driver error. If this problem persists, report these errors 
+to Technical Support.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Could not issue unreg_login(all_rpis) status %d\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Could not issue unreg_login\\(all_rpis\\) status ([-]\?[0-9]{1,})$"
+description {{
+The unreg_login cannot be issued.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Could not issue unreg_vpi\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Could not issue unreg_vpi$"
+description {{
+Driver attempt to unregister vpi failed.
+}}
+action {{
+Software driver error. If this problem persists, report these errors 
+to Technical Support.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Create VPORT failed. Cannot get sparam\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Create VPORT failed\\. Cannot get sparam$"
+description {{
+The port could not be created because it could not be initialized 
+possibly due to unavailable resources.
+}}
+action {{
+Software driver error. If this problem persists, report these errors 
+to Technical Support.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Create VPORT failed. Duplicate WWN on HBA\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Create VPORT failed\\. Duplicate WWN on HBA$"
+description {{
+The port could not be created because it would duplicate an existing 
+WWNN HBA address. The resources for the port had to be discarded.
+}}
+action {{
+Provide a WWN that is unique.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Create VPORT failed. Invalid WWN format\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Create VPORT failed\\. Invalid WWN format$"
+description {{
+The port could not be created due to an invalid WWNN or WWPN format.
+}}
+action {{
+Provide a valid WWN when creating Vports.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Create VPORT Interrupted.\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Create VPORT Interrupted\\.$"
+description {{
+The port creation process was unexpectedly interrupted at a critical 
+time and the operation was unsuccessful.
+}}
+action {{
+The process was interrupted while creating a VPort. Retry the command.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_WARNING "Create vport work array FAILED: cannot do scsi_host_get\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Create vport work array FAILED: cannot do scsi_host_get$"
+description {{
+The driver was unable to get a reference to a SCSI host.
+}}
+action {{
+Software driver error. If this problem persists, report these errors 
+to Technical Support.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "CT Request completes, latt %d, ulpStatus x%x CmdRsp x%x, Context x%x, Tag x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) CT Request completes, latt ([-]\?[0-9]{1,}), ulpStatus x([0-9a-f]{1,}) CmdRsp x([0-9a-f]{1,}), Context x([0-9a-f]{1,}), Tag x([0-9a-f]{1,})$"
+description {{
+A RFT request that was sent to the fabric completed.
+DATA: (1) latt (2) ulpStatus (3) CmdRsp (4) Context (5) Tag
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Deferred RSCN Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Deferred RSCN Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The driver has received multiple RSCNs and has deferred the processing 
+of the most recent RSCN.
+DATA: (1) fc_rscn_id_cnt (2) fc_flag (3) hba_state
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Device Discovery completes\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Device Discovery completes$"
+description {{
+This indicates successful completion of device (re)discovery after a 
+link up.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Device Discovery completion error\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Device Discovery completion error$"
+description {{
+This indicates that an uncorrectable error was encountered during 
+device (re)discovery after a link up. Fibre Channel devices will not 
+be accessible if this message is displayed.
+}}
+action {{
+Reboot the system. If the problem persists, report the error to 
+Technical Support. Run with verbose mode on for more details.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Device Reset rport failure: rdata x%p\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Device Reset rport failure: rdata x(\\(null\\)|([0]{0,7}[0-9a-f]{1,}))$"
+description {{
+The reset of the Rport failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Discovery Mailbox error: state: 0x%x : %p %p\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Discovery Mailbox error: state: 0x([0-9a-f]{1,}) : (\\(null\\)|([0]{0,7}[0-9a-f]{1,})) (\\(null\\)|([0]{0,7}[0-9a-f]{1,}))$"
+description {{
+Either the driver could not allocate resources or it could not send 
+sparam_mbox or cfglink_mbox.
+DATA: (1) address of sparam_mbox command (2) address of cfglink_mbox 
+command
+}}
+action {{
+Attempt to unload and reload the driver when it is convenient.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+
+message: lpfc_printf_vlog KERN_ERR "Dropping received ELS cmd Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Dropping received ELS cmd Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The driver decided to drop an ELS Response ring entry.
+DATA: (1) ulpStatus (2) ulpWord[4] (3) ulpTimeout
+}}
+action {{
+This error could indicate a software driver or firmware problem. If 
+problems persist report these errors to Technical Support.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "DSM in event x%x on NPort x%x in state %d Data: x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) DSM in event x([0-9a-f]{1,}) on NPort x([0-9a-f]{1,}) in state ([-]\?[0-9]{1,}) Data: x([0-9a-f]{1,})$"
+description {{
+The driver Discovery State Machine is processing an event.
+DATA: (1) nlp_flag
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "DSM out state %d on NPort free\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) DSM out state ([-]\?[0-9]{1,}) on NPort free$"
+description {{
+The driver Discovery State Machine completed processing an event.
+DATA: (1) nlp_flag
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "DSM out state %d on NPort x%x Data: x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) DSM out state ([-]\?[0-9]{1,}) on NPort x([0-9a-f]{1,}) Data: x([0-9a-f]{1,})$"
+description {{
+The driver Discovery State Machine completed processing an event.
+DATA: (1) nlp_flag
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "ELS cmd tag x%x completes Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) ELS cmd tag x([0-9a-f]{1,}) completes Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The specific ELS command was completed by the firmware.
+DATA: (1) ulpStatus (2) ulpWord[4] (3) ulpTimeout
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "ELS command x%x received from NPORT x%x Data: x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) ELS command x([0-9a-f]{1,}) received from NPORT x([0-9a-f]{1,}) Data: x([0-9a-f]{1,})$"
+description {{
+Received the specific ELS command from a remote NPort.
+DATA: (1) hba_state
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "ELS response tag x%x completes Data: x%x x%x x%x x%x x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) ELS response tag x([0-9a-f]{1,}) completes Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The specific ELS response was completed by the firmware.
+DATA: (1) ulpStatus (2) ulpWord[4] (3) ulptimeout (4) nlp_DID 
+(5) nlp_flag (6) nlp_state (7) nlp_rpi
+}}
+action {{
+No action needed, informational.
+}}
+class: firmware type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "ELS rsp: Cannot issue reg_login for x%x Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) ELS rsp: Cannot issue reg_login for x([0-9a-f]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+REG_LOGIN mailbox command failed.
+DATA: (1) nlp_DID (2) nlp_state (3) nlp_flag (4) nlp_rpi
+}}
+action {{
+None required.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "ELS timeout Data: x%x x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) ELS timeout Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+An ELS IOCB command was posted to a ring and did not complete within 
+ULP timeout seconds.
+DATA: (1) elscmd (2) remote_id (3) ulpcommand (4) ulpIoTag
+}}
+action {{
+If no ELS command is going through the adapter, reboot the system; 
+If problem persists, contact Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Fabric does not support NPIV - configuring single port mode.\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Fabric does not support NPIV - configuring single port mode\\.$"
+description {{
+The fabric reports no support for NPIV upon FLOGI.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Failed to allocate init_vpi mailbox\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Failed to allocate init_vpi mailbox$"
+description {{
+Failed to allocate init_vpi mailbox\n.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Failed to allocate memory for ELS event\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Failed to allocate memory for ELS event$"
+description {{
+Memory could not be allocated to send the ELS event to the FC 
+transport.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Failed to allocate memory for LOGO event\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Failed to allocate memory for LOGO event$"
+description {{
+Memory could not be allocated to send the LOGO event to the FC 
+transport.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Failed to allocate memory for RSCN event\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Failed to allocate memory for RSCN event$"
+description {{
+Memory could not be allocated to send the RSCN event to the management 
+application.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Failed to issue INIT_VPI  mailbox command\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Failed to issue INIT_VPI  mailbox command$"
+description {{
+Failed to INIT_VPI.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Failed to issue init_vpi mailbox\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Failed to issue init_vpi mailbox$"
+description {{
+The driver was unable to send an initialize VPI mailbox command.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_WARNING "FAN timeout\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) FAN timeout$"
+description {{
+A link up event was received without the login bit set, so the driver 
+waits E_D_TOV for the Fabric to send a FAN. If no FAN if received, a 
+FLOGI will be sent after the timeout.
+}}
+action {{
+None required. The driver recovers from this condition by issuing a 
+FLOGI to the fabric.
+}}
+class: hardware sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "FARP-REQ received from DID x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) FARP-REQ received from DID x([0-9a-f]{1,})$"
+description {{
+An unsolicited FARP request was received.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_WARNING "FCP cmd x%x failed <%d/%d> status: x%x result: x%x Data: x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) FCP cmd x([0-9a-f]{1,}) failed <([-]\?[0-9]{1,})/([-]\?[0-9]{1,})> status: x([0-9a-f]{1,}) result: x([0-9a-f]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The specified device failed an FCP command.
+DATA: (1) ulpContext (2) iotag
+}}
+action {{
+Check the state of the target in question.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_WARNING "FCP command x%x failed: x%x SNS x%x x%x Data: x%x x%x x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) FCP command x([0-9a-f]{1,}) failed: x([0-9a-f]{1,}) SNS x([0-9a-f]{1,}) x([0-9a-f]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The FCP command failed with a response error.
+DATA: (1) resp_info (2) scsi_status (3) ResId (4) SnsLen (5) RspLen 
+(6)rspInfo3
+}}
+action {{
+Check the state of the target in question.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "FCP command x%x residual overrun error. Data: x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) FCP command x([0-9a-f]{1,}) residual overrun error\\. Data: x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+A residual overrun error has occurred while processing the specified 
+FCP command.
+DATA: (1) request_bufflen (2) resid
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "FCP command x%x residual underrun converted to error Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) FCP command x([0-9a-f]{1,}) residual underrun converted to error Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The driver converted this underrun condition to an error based on the 
+underflow field in the SCSI command.
+DATA: (1) len (2) resid (3) underflow
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "FCP Read Check Error and Underrun Data: x%x x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) FCP Read Check Error and Underrun Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+HBA reported under run from storage array.
+DATA: (1) vpi (2) fcpDI (3) res_id (4) fcpi_parm
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_WARNING "FCP Read Check Error Data: x%x x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) FCP Read Check Error Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The issued FCP command returned a read check error.
+DATA: (1) fcpDl (2) rspResId (3) fcpi_parm (4) cmd[0]
+}}
+action {{
+Check the state of the target in question.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "FCP Read Underrun, expected %d, residual %d Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) FCP Read Underrun, expected ([-]\?[0-9]{1,}), residual ([-]\?[0-9]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+An FCP device provided less data than was requested.
+DATA: (1) fcpi_parm (2) cmnd[0] (3) underflow
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "FDISC failed. (%d/%d)\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) FDISC failed\\. \\(([-]\?[0-9]{1,})/([-]\?[0-9]{1,})\\)$"
+description {{
+DATA: lsRjtError
+}}
+action {{
+Reconfigure the switch to support more NPIV logins. If problem 
+persists, contact Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "FDISC Failed (x%x).\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) FDISC Failed \\(x([0-9a-f]{1,})\\)\\.$"
+description {{
+DATA: lsRjtError
+}}
+action {{
+Reconfigure the switch to support more NPIV logins. If problem 
+persists, contact Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "FDMI Request Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) FDMI Request Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The driver is sending an FDMI request to the fabric.
+DATA: (1) fc_flag (2) hba_state (3) cmdcode
+}}
+action {{
+No action needed, informational.
+}}
+class: unknown type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_WARNING "FDMI rsp failed Data: x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) FDMI rsp failed Data: x([0-9a-f]{1,})$"
+description {{
+An error response was received to FDMI request.
+DATA:(1) SWAP_DATA16(fdmi_cmd)
+}}
+action {{
+The fabric does not support FDMI, check fabric configuration.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+message: lpfc_printf_vlog KERN_INFO "FIND node did x%x NOT FOUND.\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) FIND node did x([0-9a-f]{1,}) NOT FOUND\\.$"
+description {{
+The driver was searching for a node table entry based on the DID and 
+the entry was not found.
+DATA: (1) order
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "FLOGI completes successfully Data: x%x x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) FLOGI completes successfully Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+An ELS FLOGI command that was sent to the fabric succeeded.
+DATA: (1) ulpWord[4] (2) e_d_tov (3) r_a_tov (4) edtovResolution
+}}
+action {{
+No action needed, informational.
+}}
+class: unknown type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "FLOGI failure Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) FLOGI failure Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+An ELS FLOGI command that was sent to the fabric failed.
+DATA: (1) ulpStatus (2) ulpWord[4] (3) ulpTimeout
+}}
+action {{
+No action needed, informational.
+}}
+class: unknown type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "FLOGI NPIV supported, response data 0x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) FLOGI NPIV supported, response data 0x([0-9a-f]{1,})$"
+description {{
+The fabric reports support for NPIV upon FLOGI.
+DATA: (1) response_multiple_NPort
+}}
+action {{
+No action needed, informational.
+}}
+class: unknown type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "GID_FT Query error: 0x%x 0x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) GID_FT Query error: 0x([0-9a-f]{1,}) 0x([0-9a-f]{1,})$"
+description {{
+The GID_FT CT request for the nameserver has failed.
+}}
+action {{
+Check the switch configuration.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Ignoring change to nodev_tmo because devloss_tmo is set.\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Ignoring change to nodev_tmo because devloss_tmo is set\\.$"
+description {{
+Attempting to change the nodev timeout when the devloss has already 
+been set.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Ignoring nodev_tmo module parameter because devloss_tmo is set.\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Ignoring nodev_tmo module parameter because devloss_tmo is set\\.$"
+description {{
+Both module parameters (nodev and devloss) were set so the driver is 
+ignoring the nodev parameter.
+}}
+action {{
+Only one of these parameters must be set.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Illegal State Transition: node x%x event x%x, state x%x Data: x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Illegal State Transition: node x([0-9a-f]{1,}) event x([0-9a-f]{1,}), state x([0-9a-f]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The current node state does not have a handler for this event.
+DATA: (1) nlp_rpi (2) nlp_flag
+}}
+action {{
+Verify that all targets are still visible to the SCSI mid-layer.
+}}
+class: unknown sl_severity: error refcode: ""
+
+message: lpfc_printf_vlog KERN_ERR "Init VPI mailbox failed 0x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Init VPI mailbox failed 0x([0-9a-f]{1,})$"
+description {{
+The Initialize VPI mailbox command failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Invalid response length: tgt x%x lun x%x cmnd x%x rsplen x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Invalid response length: tgt x([0-9a-f]{1,}) lun x([0-9a-f]{1,}) cmnd x([0-9a-f]{1,}) rsplen x([0-9a-f]{1,})$"
+description {{
+The response length for this FCP command is not supported.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Iodone <%d/%d> cmd %p, error x%x SNS x%x x%x Data: x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Iodone <([-]\?[0-9]{1,})/([-]\?[0-9]{1,})> cmd (\\(null\\)|([0]{0,7}[0-9a-f]{1,})), error x([0-9a-f]{1,}) SNS x([0-9a-f]{1,}) x([0-9a-f]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+This error indicates that the Fibre Channel driver is returning a SCSI 
+command to the SCSI layer in error or with sense data.
+DATA: (1) retry (2) resid
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "I/O flush failure for context %s : cnt x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) I/O flush failure for context ([[:print:]]*) : cnt x([0-9a-f]{1,})$"
+description {{
+The I/O flush to the {LUN TARGET or HOST] has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Issue FDISC: Cannot send IOCB\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Issue FDISC: Cannot send IOCB$"
+description {{
+Unable to send the fabric IOCB.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Issue FDISC: no IOCB\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Issue FDISC: no IOCB$"
+description {{
+All of the pre-allocated IOCBs are in use.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_WARNING "Issue FDMI request failed Data: x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Issue FDMI request failed Data: x([0-9a-f]{1,})$"
+description {{
+Cannot issue an FDMI request to the HBA.
+DATA: (1) cmdcode
+}}
+action {{
+No action needed, informational.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Issue GEN REQ IOCB to NPORT x%x Data: x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Issue GEN REQ IOCB to NPORT x([0-9a-f]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+Issue a GEN REQ IOCB for remote NPORT. These are typically used for CT 
+request.
+DATA: (1) ulpIoTag (2) hba_state
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Issue NameServer Req x%x err %d Data: x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Issue NameServer Req x([0-9a-f]{1,}) err ([-]\?[0-9]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The driver was not able to send the nameserver CT command.
+DATA: (1) vports fc_flag (2) vports fc_rscn_id_cn
+}}
+action {{
+Check the port and switch configurations.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Issue Register VFI failed: Err %d\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Issue Register VFI failed: Err ([-]\?[0-9]{1,})$"
+description {{
+The driver could not register the Virtual Fabric Index for the FCFI.
+}}
+action {{
+Check the switch and port configurations.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "LOGO completes to NPort x%x Data: x%x x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) LOGO completes to NPort x([0-9a-f]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The HBA performed a LOGO to a remote NPort.
+DATA: (1) ulpStatus (2) ulpWord[4] (3) ulpTimeout (4) num_disc_nodes
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "lpfc_alloc_bucket failed to allocate statistical data buffer DID 0x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) lpfc_alloc_bucket failed to allocate statistical data buffer DID 0x([0-9a-f]{1,})$"
+description {{
+Memory allocation failed for node’s statistical data.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "lpfc_cleanup_node: ndlp:x%p usgmap:x%x refcnt:%d\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) lpfc_cleanup_node: ndlp:x(\\(null\\)|([0]{0,7}[0-9a-f]{1,})) usgmap:x([0-9a-f]{1,}) refcnt:([-]\?[0-9]{1,})$"
+description {{
+Node clean-up wascalled to prepare the node for release.
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "lpfc_devloss_tmo attribute cannot be set to  %d, allowed range is [%d, %d]\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) lpfc_devloss_tmo attribute cannot be set to  ([-]\?[0-9]{1,}), allowed range is \\[([-]\?[0-9]{1,}), ([-]\?[0-9]{1,})]$"
+description {{
+Attempt to set the devloss timeout value is outside the allowed range.
+}}
+action {{
+Set the devloss timeout between the minimum and maximum devloss range.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_WARNING "lpfc_enable_node: ndlp:x%p usgmap:x%x refcnt:%d\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) lpfc_enable_node: ndlp:x(\\(null\\)|([0]{0,7}[0-9a-f]{1,})) usgmap:x([0-9a-f]{1,}) refcnt:([-]\?[0-9]{1,})$"
+description {{
+Enable node was attempted on an inactive node.
+}}
+action {{
+No action needed, informational.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_WARNING "lpfc_nlp_get: ndlp:x%p usgmap:x%x refcnt:%d\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) lpfc_nlp_get: ndlp:x(\\(null\\)|([0]{0,7}[0-9a-f]{1,})) usgmap:x([0-9a-f]{1,}) refcnt:([-]\?[0-9]{1,})$"
+description {{
+A kref_get was attempted on a node that was being released.
+}}
+action {{
+No action needed, informational.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_WARNING "lpfc_nlp_put: ndlp:x%p usgmap:x%x refcnt:%d\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) lpfc_nlp_put: ndlp:x(\\(null\\)|([0]{0,7}[0-9a-f]{1,})) usgmap:x([0-9a-f]{1,}) refcnt:([-]\?[0-9]{1,})$"
+description {{
+A kref_put was called again after the node was already inactive.
+}}
+action {{
+No action needed, informational.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "lpfc_nlp_state_cleanup failed to allocate statistical data buffer DID 0x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) lpfc_nlp_state_cleanup failed to allocate statistical data buffer DID 0x([0-9a-f]{1,})$"
+description {{
+Memory allocation failed for node’s statistical data.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "lpfc_nodev_tmo attribute cannot be set to  %d, allowed range is [%d, %d]\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) lpfc_nodev_tmo attribute cannot be set to  ([-]\?[0-9]{1,}), allowed range is \\[([-]\?[0-9]{1,}), ([-]\?[0-9]{1,})]$"
+description {{
+The attempt to set the devloss timeout value failed because the value 
+is out of the allowable range.
+}}
+action {{
+Use a value between the minimum and maximum values.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "lpfc_restrict_login attribute cannot be set to %d, allowed range is [0, 1]\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) lpfc_restrict_login attribute cannot be set to ([-]\?[0-9]{1,}), allowed range is \\[0, 1]$"
+description {{
+The module parameter lpfc_restrict_login can only be set to 0 (off) 
+or 1 (on).
+}}
+action {{
+Set lpfc_restrict_login=[0,1].
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "lpfc_restrict_login must be 0 for Physical ports.\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) lpfc_restrict_login must be 0 for Physical ports\\.$"
+description {{
+Attempt to set the restrict login parameter to something other than on 
+or off.
+}}
+action {{
+Use 0 (Off) or 1 (On).
+}}
+class: software sl_severity: error refcode: ""
+
+
+
+message: lpfc_printf_vlog KERN_ERR "NameServer GFF Rsp x%x Error (%d %d) Data: x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) NameServer GFF Rsp x([0-9a-f]{1,}) Error \\(([-]\?[0-9]{1,}) ([-]\?[0-9]{1,})\\) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The nameServer GFF CT request failed.
+DATA: (1) vports fc_flag (2) vports fc_rscn_id_cnt
+}}
+action {{
+Check the port and switch configurations.
+}}
+class: hardware sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "NameServer login: node freed\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) NameServer login: node freed$"
+description {{
+The enable mode failed to free up the nameserver login.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "NameServer login: no memory\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) NameServer login: no memory$"
+description {{
+Could not allocate memory for the NDLP structure.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "NameServer Query timeout Data: x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) NameServer Query timeout Data: x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+Node authentication timeout, node Discovery timeout. A NameServer 
+Query to the Fabric or discovery of reported remote NPorts is not 
+acknowledged within R_A_TOV.
+DATA: (1) fc_ns_retry (2) fc_max_ns_retry
+}}
+action {{
+Check Fabric configuration. The driver recovers from this and continues 
+with device discovery.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "NameServer Rsp Data: x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) NameServer Rsp Data: x([0-9a-f]{1,})$"
+description {{
+The driver received a NameServer response containing a status error.
+DATA: (1) CommandResponse.bits.CmdRsp (2) ReasonCode (3) Explanation 
+(4) fc_flag
+}}
+action {{
+Check the fabric configuration. The driver recovers from this and 
+continues with device discovery.
+}}
+class: unknown sl_severity: error refcode: ""
+
+message: lpfc_printf_vlog KERN_ERR "Node Authentication timeout\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Node Authentication timeout$"
+description {{
+The driver has lost track of what NPORTs are being authenticated.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Nodelist not empty\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Nodelist not empty$"
+description {{
+Driver unloaded or hotplug detected a node still in use.
+}}
+action {{
+None required.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "No NPIV Fabric support\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) No NPIV Fabric support$"
+description {{
+The driver was unable to create an NPIV Vport because it is not 
+supported by the attached fabric.
+DATA: (1) rctl_names[fc_hdr->fh_r_ctl], 
+(2) type_names[fc_hdr->fh_type])
+}}
+action {{
+Reconfigure the switch to support NPIV.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "No retry ELS command x%x to remote NPORT x%x Retried:%d Error:x%x/%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) No retry ELS command x([0-9a-f]{1,}) to remote NPORT x([0-9a-f]{1,}) Retried:([-]\?[0-9]{1,}) Error:x([0-9a-f]{1,})/([0-9a-f]{1,})$"
+description {{
+(1) ulpStatus (2) ulpWord[4]
+}}
+action {{
+None required.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "NS cmd %x Error (%d %d)\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) NS cmd ([0-9a-f]{1,}) Error \\(([-]\?[0-9]{1,}) ([-]\?[0-9]{1,})\\)$"
+description {{
+The nameServer CT request failed.
+}}
+action {{
+Check the port and switch configurations.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Pending Link Event during Discovery: State x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Pending Link Event during Discovery: State x([0-9a-f]{1,})$"
+description {{
+Received link event during discovery. Causes discovery restart.
+}}
+action {{
+None required unless problem persists. If persistent check cabling.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "PLOGI: cannot format reg_login Data: x%x x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) PLOGI: cannot format reg_login Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+Could not allocate an RPI or DMA buffer for the mailbox command.
+DATA: (1) nlp_DID (2) nlp_state (3) nlp_flag (4) nlp_rpi
+}}
+action {{
+None required.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "PLOGI: cannot issue reg_login Data: x%x x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) PLOGI: cannot issue reg_login Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The ELS PLOGI mailbox command has failed.
+DATA: (1) nlp_DID 92) nlp_state (3) nlp_flag (4) nlp_rpi
+}}
+action {{
+Check the port and switch configuration.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "PLOGI chkparm OK Data: x%x x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) PLOGI chkparm OK Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+Received a PLOGI from a remote NPORT and its Fibre Channel service 
+parameters match this HBA. Request can be accepted.
+DATA: (1) nlp_DID (2) nlp_state (3) nlp_flag (4) nlp_Rpi
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "PLOGI completes to NPort x%x Data: x%x x%x x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) PLOGI completes to NPort x([0-9a-f]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The HBA performed a PLOGI into a remote NPort.
+DATA: (1) ulpStatus (2) ulpWord[4] (3) ulpTimeout (4)disc 
+(5) num_disc_nodes
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "PLOGI completes to NPort x%x with no ndlp. Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) PLOGI completes to NPort x([0-9a-f]{1,}) with no ndlp\\. Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+A PLOGI has completed for which there is no NDLP.
+DATA: (1) ulpStatus (2) ulpWord[4]
+}}
+action {{
+None required.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "PLOGI: no memory for reg_login Data: x%x x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) PLOGI: no memory for reg_login Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+Memory allocation error.
+DATA: (1) nlp_DID (2) nlp_state (3) nlp_flag (4) nlp_rpi
+}}
+action {{
+Memory allocation error. Check system resources. Unload unused modules.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "PLOGI Reject: invalid nname\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) PLOGI Reject: invalid nname$"
+description {{
+Invalid node WWN provided.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "PLOGI RSP: Invalid WWN.\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) PLOGI RSP: Invalid WWN\\.$"
+description {{
+The PLOGI sent to the port by a remote port had an invalid WWN.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "PRLI completes to NPort x%x Data: x%x x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) PRLI completes to NPort x([0-9a-f]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The HBA performed a PRLI into a remote NPort.
+DATA: (1) ulpStatus (2) ulpWord[4] (3) ulpTimeout (4) num_disc_nodes
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Process x%x NameServer Rsp Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Process x([0-9a-f]{1,}) NameServer Rsp Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The driver received a NameServer response.
+DATA: (1) nlp_flag (2) fc_flag (3) fc_rscn_id_cnt
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "READ_SPARAM mbxStatus error x%x hba state x%x>\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) READ_SPARAM mbxStatus error x([0-9a-f]{1,}) hba state x([0-9a-f]{1,})>$"
+description {{
+The driver issued a READ_SPARAM mbox command to the HBA that failed.
+}}
+action {{
+This error could indicate a firmware or hardware problem. Report these 
+errors to Technical Support.
+}}
+class: unknown sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "ReDiscovery RSCN Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) ReDiscovery RSCN Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The number / type of RSCNs has forced the driver to go to the nameserver 
+and rediscover all NPORTs.
+DATA: (1) fc_rscn_id_cnt (2) fc_flag (3) hba_state
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "REG_FCFI mbxStatus error x%x HBA state x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) REG_FCFI mbxStatus error x([0-9a-f]{1,}) HBA state x([0-9a-f]{1,})$"
+description {{
+The REG_FCFI mailbox command has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Register Fabric login error: 0x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Register Fabric login error: 0x([0-9a-f]{1,})$"
+description {{
+The REG_LOGIN for the fabric has failed.
+}}
+action {{
+Check the port connection and the switch configuration.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Register NameServer error: 0x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Register NameServer error: 0x([0-9a-f]{1,})$"
+description {{
+The REG_LOGIN mailbox command has failed for the nameserver.
+}}
+action {{
+Check the switch configuration
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Register VPI: Can't send mbox\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Register VPI: Can't send mbox$"
+description {{
+Could not issue the REG_LOGIN command for this VPort.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Register VPI: no memory\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Register VPI: no memory$"
+description {{
+Could not allocate memory for the REG_LOGIN mailbox command.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "RegLogin failed Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) RegLogin failed Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The firmware returned a failure for the specified RegLogin.
+DATA: (1) Did (2) mbxStatus (3) hbaState
+}}
+action {{
+This message indicates that the firmware could not do RegLogin for the 
+specified Did. There may be a limitation on how many nodes an HBA 
+can see.
+}}
+class: firmware sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "REG_VFI mbxStatus error x%x HBA state x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) REG_VFI mbxStatus error x([0-9a-f]{1,}) HBA state x([0-9a-f]{1,})$"
+description {{
+The REG_VFI mailbox command has failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Retry ELS command x%x to remote NPORT x%x Data: x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Retry ELS command x([0-9a-f]{1,}) to remote NPORT x([0-9a-f]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The driver is retrying the specific ELS command.
+DATA: (1) retry (2) delay
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+message: lpfc_printf_vlog KERN_INFO "RSCN processed Data: x%x x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) RSCN processed Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+An RSCN ELS command was received from a fabric and processed.
+DATA: (1) fc_flag (2) cnt (3) fc_rscn_id_cnt (4) hba_state
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "RSCN received Data: x%x x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) RSCN received Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+An RSCN ELS command was received from a fabric.
+DATA: (1) fc_flag (2) payload_len (3) *lp (4)fc_rscn_id_cnt
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "RSCN timeout Data: x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) RSCN timeout Data: x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The driver has lost track of what NPORTs have RSCNs pending.
+DATA: (1) fc_ns_retry (2) lpfc_max_ns_retry
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+message: lpfc_printf_vlog KERN_ERR "SCSI layer issued Bus Reset Data: x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) SCSI layer issued Bus Reset Data: x([0-9a-f]{1,})$"
+description {{
+The SCSI layer is requesting the driver to abort all I/Os to all 
+targets on this HBA.
+DATA: (1) ret
+}}
+action {{
+Check the state of the targets in question.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Signal aborted mbxCmd x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Signal aborted mbxCmd x([0-9a-f]{1,})$"
+description {{
+A pending mailbox command was aborted because the thread received a 
+signal.
+}}
+action {{
+You should retry the attempted command.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Skip x%x NameServer Rsp Data: x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Skip x([0-9a-f]{1,}) NameServer Rsp Data: x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+The driver received a NameServer response.
+DATA: (1) size (2) fc_flag (3) fc_rscn_id_cnt (4)no_rscn_id_cnt
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Start Discovery hba state x%x Data: x%x x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Start Discovery hba state x([0-9a-f]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+Device discovery / rediscovery after FLOGI, FAN or RSCN has started.
+DATA: (1) fc_flag (2) fc_plogi_cnt (3) fc_adisc_cnt
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Start Discovery Timer state x%x Data: x%x x%lx x%x x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Start Discovery Timer state x([0-9a-f]{1,}) Data: x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,}) x([0-9a-f]{1,})$"
+description {{
+Start the device discovery / RSCN rescue timer.
+DATA: (1) tmo (2) fc_disctmo (3) fc_plogi_cnt (4) fc_adisc_cnt
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Target Reset rport failure: rdata x%p\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Target Reset rport failure: rdata x(\\(null\\)|([0]{0,7}[0-9a-f]{1,}))$"
+description {{
+The reset of the target failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+message: lpfc_printf_vlog KERN_ERR "Timeout while waiting for NameServer login\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Timeout while waiting for NameServer login$"
+description {{
+Our login request to the NameServer was not acknowledged within RATOV.
+}}
+action {{
+Check the fabric configuration. The driver recovers from this and 
+continues with device discovery.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "TMF %s to TGT %d LUN %d failed (%d, %d)\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) TMF ([[:print:]]*) to TGT ([-]\?[0-9]{1,}) LUN ([-]\?[0-9]{1,}) failed \\(([-]\?[0-9]{1,}), ([-]\?[0-9]{1,})\\)$"
+description {{
+The task management command failed.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Unexpected discovery timeout, vport State x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Unexpected discovery timeout, vport State x([0-9a-f]{1,})$"
+description {{
+The discovery process has timed out.
+}}
+action {{
+Verify that all targets are still visible.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Unexpected timeout, hba link state x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Unexpected timeout, hba link state x([0-9a-f]{1,})$"
+description {{
+Discovery has timed out and the HBA state is not ready.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Unknown ELS command x%x received from NPORT x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Unknown ELS command x([0-9a-f]{1,}) received from NPORT x([0-9a-f]{1,})$"
+description {{
+Received an unsupported ELS command from a remote NPORT.
+}}
+action {{
+Check remote NPORT for potential problem.
+}}
+class: software sl_severity: error refcode: ""
+
+message: lpfc_printf_vlog KERN_INFO "Vport Created.\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Vport Created\\.$"
+description {{
+This message is displayed to indicate that a port was created in the 
+system. It is displayed at this level to ensure it is always appears 
+at all log levels.
+}}
+action {{
+None required.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Vport Disabled.\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Vport Disabled\\.$"
+description {{
+The port had to be disabled in the system.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "vport_delete failed: Cannot delete physical host\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) vport_delete failed: Cannot delete physical host$"
+description {{
+An attempt to delete a port failed because it was to delete a physical 
+port and not a virtual port. Only VPorts on physical ports can be 
+deleted on an NPIV system.
+}}
+action {{
+Software driver error. If this problem persists, report these errors to 
+Technical Support.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "vport_delete failed: Cannot delete static vport.\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) vport_delete failed: Cannot delete static vport\\.$"
+description {{
+Static VPorts cannot be deleted.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Vport Deleted.\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Vport Deleted\\.$"
+description {{
+A Vport was deleted.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Vport discovery quiesce Wait: state x%x fc_flags x%x num_nodes x%x, waiting 1000 msecs total wait msecs x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Vport discovery quiesce Wait: state x([0-9a-f]{1,}) fc_flags x([0-9a-f]{1,}) num_nodes x([0-9a-f]{1,}), waiting 1000 msecs total wait msecs x([0-9a-f]{1,})$"
+description {{
+Could not pause discovery on this VPort.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "Vport Enabled.\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Vport Enabled\\.$"
+description {{
+The port had to be enabled after possible recovery from some errors.
+}}
+action {{
+None required.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: lpfc_printf_vlog KERN_ERR "VPort failed init, mbxCmd x%x READ_SPARM mbxStatus x%x, rc = x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) VPort failed init, mbxCmd x([0-9a-f]{1,}) READ_SPARM mbxStatus x([0-9a-f]{1,}), rc = x([0-9a-f]{1,})$"
+description {{
+A pending mailbox command issued to initialize port, failed.
+DATA: (1) mbxCommand (2) mbxStatus (3) rc
+}}
+action {{
+Software driver error. If this problem persists, report these errors to 
+Technical Support.
+}}
+class: software sl_severity: error refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Xmit ADISC ACC response iotag x%x xri: x%x, did x%x, nlp_flag x%x, nlp_state x%x rpi x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Xmit ADISC ACC response iotag x([0-9a-f]{1,}) xri: x([0-9a-f]{1,}), did x([0-9a-f]{1,}), nlp_flag x([0-9a-f]{1,}), nlp_state x([0-9a-f]{1,}) rpi x([0-9a-f]{1,})$"
+description {{
+An ADISC ACC response for the specified IO tag has been sent.
+DATA: (1) xri (for SLI-4) (2) ulpContext (3) nlp_DID (4) nlp_flag 
+(5) nlp_state (6) nlp_rpi
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Xmit ELS ACC response tag x%x, XRI: x%x, DID: x%x, nlp_flag: x%x nlp_state: x%x RPI: x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Xmit ELS ACC response tag x([0-9a-f]{1,}), XRI: x([0-9a-f]{1,}), DID: x([0-9a-f]{1,}), nlp_flag: x([0-9a-f]{1,}) nlp_state: x([0-9a-f]{1,}) RPI: x([0-9a-f]{1,})$"
+description {{
+An ELS accept response for the specified IO tag has been sent.
+DATA: (1) ulpContext (2) nlp_DID (3) nlp_flag (4) nlp_state (5) nlp_rpi
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Xmit ELS command x%x to remote NPORT x%x I/O tag: x%x, port state: x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Xmit ELS command x([0-9a-f]{1,}) to remote NPORT x([0-9a-f]{1,}) I/O tag: x([0-9a-f]{1,}), port state: x([0-9a-f]{1,})$"
+description {{
+Xmit ELS command to remote NPORT.
+DATA: (1) icmd->ulpIoTag (2) hba_state
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Xmit ELS response x%x to remote NPORT x%x I/O tag: x%x, size: x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Xmit ELS response x([0-9a-f]{1,}) to remote NPORT x([0-9a-f]{1,}) I/O tag: x([0-9a-f]{1,}), size: x([0-9a-f]{1,})$"
+description {{
+Xmit ELS response to remote NPORT.
+DATA: (1) icmd->ulpIoTag (2) size
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Xmit ELS RJT x%x response tag x%x xri x%x, did x%x, nlp_flag x%x, nlp_state x%x, rpi x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Xmit ELS RJT x([0-9a-f]{1,}) response tag x([0-9a-f]{1,}) xri x([0-9a-f]{1,}), did x([0-9a-f]{1,}), nlp_flag x([0-9a-f]{1,}), nlp_state x([0-9a-f]{1,}), rpi x([0-9a-f]{1,})$"
+description {{
+An ELS reject response with the specified error for the specified IO 
+tag has been sent.
+DATA: (1) xri (for SLI-4) (2) ulpContext (3) nlp_DID (4) nlp_flag 
+(5) nlp_state (6) nlp_rpi
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Xmit ELS RPL ACC response tag x%x xri x%x, did x%x, nlp_flag x%x, nlp_state x%x, rpi x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Xmit ELS RPL ACC response tag x([0-9a-f]{1,}) xri x([0-9a-f]{1,}), did x([0-9a-f]{1,}), nlp_flag x([0-9a-f]{1,}), nlp_state x([0-9a-f]{1,}), rpi x([0-9a-f]{1,})$"
+description {{
+An RPL ACC response for the specified IO tag has been sent.
+DATA: (1) xri (for SLI-4) (2) ulpContext (3) nlp_DID (4) nlp_flag 
+(5) nlp_state (6) nlp_rpi
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Xmit ELS RPS ACC response tag x%x xri x%x, did x%x, nlp_flag x%x, nlp_state x%x, rpi x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Xmit ELS RPS ACC response tag x([0-9a-f]{1,}) xri x([0-9a-f]{1,}), did x([0-9a-f]{1,}), nlp_flag x([0-9a-f]{1,}), nlp_state x([0-9a-f]{1,}), rpi x([0-9a-f]{1,})$"
+description {{
+An RPS ACC response for the specified IO tag has been sent.
+DATA: (1) xri (for SLI-4) (2) ulpContext (3) nlp_DID (4) nlp_flag 
+(5) nlp_state (6) nlp_rpi
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Xmit PRLI ACC response tag x%x xri x%x, did x%x, nlp_flag x%x, nlp_state x%x, rpi x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Xmit PRLI ACC response tag x([0-9a-f]{1,}) xri x([0-9a-f]{1,}), did x([0-9a-f]{1,}), nlp_flag x([0-9a-f]{1,}), nlp_state x([0-9a-f]{1,}), rpi x([0-9a-f]{1,})$"
+description {{
+A PRLI ACC response for the specified IO tag has been sent.
+DATA: (1) xri (for SLI-4) (2) ulpContext (3) nlp_DID (4) nlp_flag 
+(5) nlp_state (6) nlp_rpi
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""
+
+
+message: lpfc_printf_vlog KERN_INFO "Xmit RNID ACC response tag x%x xri x%x\n"
+regex lpfc_printf_vlog "^lpfc ([[:print:]]*): ([-]\?[0-9]{1,}):\\(([-]\?[0-9]{1,})\\):([-]\?[0-9]{1,}) Xmit RNID ACC response tag x([0-9a-f]{1,}) xri x([0-9a-f]{1,})$"
+description {{
+A RNID ACC response for the specified IO tag has been sent.
+DATA: (1) ulpContext
+}}
+action {{
+No action needed, informational.
+}}
+class: software type: info refcode: ""

@@ -1,0 +1,58 @@
+Here's code to match lines from syslog output to selected messages from
+device drivers, and take appropriate action.  For the explain_syslog
+program, the "appropriate action" is to report the matching line and
+format string, plus advice in the form of "description" and "action"
+text blocks.
+
+catalogs.cpp
+catalogs.h
+date.c
+event_gram.y
+event_lex.l
+reporter_gram.y
+reporter_lex.l
+These files implement the lexer, parser, and C++ classes for the reporter
+and message/event catalogs.
+
+message_catalog/
+This directory contains a sample reporter catalog and some sample
+message-catalog files.
+
+message_catalog/with_regex/
+This directory contains copies of the message-catalog files from
+message_catalog/, augmented by add_regex to include the regular
+expression(s) associated with each message statement.  These are
+the message-catalog files that explain_syslog and syslog_to_svclog
+actually read.
+
+msgs
+This file contains a smattering of syslog messages, some of which match
+the patterns in the message catalog.
+
+explain_syslog.cpp
+This C++ program uses the aforementioned C++ classes to read the
+message catalog, then reads lines from syslog and prints description
+and action advice for each line matching a pattern in the message
+catalog.  Typical usage, when testing:
+	$ (cd ../lib; make)
+	$ make
+	$ ./explain_syslog [-d] -C message_catalog < msgs
+-d specifies debug output, including a dump of the message-catalog
+data structures.
+
+syslog_to_svclog.cpp
+This C++ program uses the aforementioned C++ classes to read the
+message catalog, then reads lines from syslog, and for each error or
+warning message matching one in the message catalog, logs an event
+to servicelog.  This works only on powerpc, and only if you have the
+needed dependencies installed (libservicelog, libvpd, libvpd_cxx,
+and libsqlite).  See the man page.
+
+doc/
+man pages for explain_syslog and syslog_to_svclog
+
+add_regex.cpp
+This C++ program creates message_catalog/with_regex/* (which see) from
+message_catalog/*.
+
+

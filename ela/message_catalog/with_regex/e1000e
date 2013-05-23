@@ -1,0 +1,974 @@
+subsystem: net
+
+devspec(device) = "/sys/bus/pci/devices/$device/devspec"
+devspec(netdev) = "/sys/class/net/$netdev/device/devspec"
+
+@copy diags_eeprom_replace {{
+1. Execute diagnostics on the adapter, using "ethtool -t".
+2. Check the EEPROM level on the failing adapter.
+3. Replace the adapter.
+}}
+/* Where do they see the errno they should check against errno.h? */
+
+/* Note: e1000e kernel driver files have been moved from drivers/net/e1000e to
+ * drivers/net/ethernet/intel/e1000e folder.
+ */
+
+file: "drivers/net/ethernet/intel/e1000e/82571.c"
+
+/*
+ * Note: hw_dbg is now e_dbg since
+ * kernel commit 3bb99fe226ead584a4db674dab546689f705201f
+ *
+ * Skip debug code.
+ * e_dbg "Error getting PHY ID\n"
+ * e_dbg "PHY ID unknown: type = 0x%08x\n"
+ * e_dbg "Please update your 82571 Bootagent\n"
+ * e_dbg "Driver can't access device - SMBI bit is set.\n"
+ * e_dbg "Driver can't access the NVM\n"
+ * e_dbg "Driver can't access the PHY\n"
+ * e_dbg "nvm parameter(s) out of bounds\n"
+ * e_dbg "MNG configuration cycle has not completed.\n"
+ * e_dbg "PCI-E Master disable polling has failed.\n"
+ * e_dbg "Masking off all interrupts\n"
+ * e_dbg "Cannot acquire MDIO ownership\n"
+ * e_dbg "Issuing a global reset to MAC\n"
+ * e_dbg "Error initializing identification LED\n"
+ * e_dbg "Initializing the IEEE VLAN\n"
+ * e_dbg "Zeroing the MTA\n"
+ * e_dbg "AN_UP     -> AN_PROG\n"
+ * e_dbg "FORCED_UP -> AN_PROG\n"
+ * e_dbg "AN_PROG   -> AN_UP\n"
+ * e_dbg "AN_PROG   -> DOWN\n"
+ * e_dbg "Error config flow control\n"
+ * e_dbg "AN_PROG   -> FORCED_UP\n"
+ * e_dbg "DOWN      -> AN_PROG\n"
+ * e_dbg "ANYSTATE  -> DOWN\n"
+ * e_dbg "ANYSTATE  -> DOWN\n"
+ * e_dbg "ANYSTATE  -> AN_PROG\n"
+ * e_dbg "NVM Read Error\n"
+ */
+
+file: "drivers/net/ethernet/intel/e1000e/80003es2lan.c"
+/*
+ * e_dbg "Driver can't access resource, SW_FW_SYNC timeout.\n"
+ * e_dbg "MNG configuration cycle has not completed.\n"
+ * e_dbg "GG82563 PSCR: %X\n"
+ * e_dbg "Waiting for forced speed/duplex link on GG82563 phy.\n"
+ * e_dbg "PCI-E Master disable polling has failed.\n"
+ * e_dbg "Masking off all interrupts\n"
+ * e_dbg "Issuing a global reset to MAC\n"
+ * e_dbg "Error initializing identification LED\n"
+ * e_dbg "Initializing the IEEE VLAN\n"
+ * e_dbg "Zeroing the MTA\n"
+ * e_dbg "Error Resetting the PHY\n"
+ */
+
+file: "drivers/net/ethernet/intel/e1000e/ethtool.c"
+message: e_err "Unsupported Speed/Duplex configuration\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Unsupported Speed/Duplex configuration$"
+description {{
+Using the "ethtool -s" command, an attempt has been made to
+configure an incompatible combination of speed and duplex parameters.
+In particular, the only combination available for fiber is 1000 Mbps,
+full duplex.
+}}
+action {{
+Specify a speed/duplex combination that is supported by your
+adapter and driver.
+}}
+class: software  type: config  refcode: "UnsupportSpeed/Duplex"
+
+/* dup: e_err "Unsupported Speed/Duplex configuration\n" */
+
+message: e_err "Cannot change link characteristics when SoL/IDER is active.\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Cannot change link characteristics when SoL/IDER is active\\.$"
+description {{
+Using the "ethtool -s" command, an attempt has been made to change
+link settings while a PHY (physical layer device) reset is blocked
+by firmware.
+}}
+action {{
+1. Try again later.
+2. Execute diagnostics on the adapter, using "ethtool -t".
+}}
+class: hardware  type: temp  refcode: "BLKRstPHY"
+
+message: e_err "forcing MDI/MDI-X state is not supported when link speed and/or duplex are forced\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): forcing MDI/MDI-X state is not supported when link speed and/or duplex are forced$"
+description {{
+MDI setting is only allowed when autoneg enabled because
+some hardware doesn't allow MDI setting when speed or duplex is
+forced.
+}}
+action {{
+1. Enable autoneg to allow MDI setting.
+2. Dont force speed and/or duplex.
+}}
+class: hardware  type: temp  refcode: "MDIreqAutoneg"
+
+message[chatter]: e_info "TSO is %s\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): TSO is ([[:print:]]*)$"
+message[defensive]: e_err "pattern test reg %04X failed: got 0x%08X expected 0x%08X\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): pattern test reg ([0]{0,3}[0-9A-F]{1,}) failed: got 0x([0]{0,7}[0-9A-F]{1,}) expected 0x([0]{0,7}[0-9A-F]{1,})$"
+message[defensive]: e_err "set/check reg %04X test failed: got 0x%08X expected 0x%08X\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): set/check reg ([0]{0,3}[0-9A-F]{1,}) test failed: got 0x([0]{0,7}[0-9A-F]{1,}) expected 0x([0]{0,7}[0-9A-F]{1,})$"
+
+message: e_err "failed STATUS register test got: 0x%08X expected: 0x%08X\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): failed STATUS register test got: 0x([0]{0,7}[0-9A-F]{1,}) expected: 0x([0]{0,7}[0-9A-F]{1,})$"
+description {{
+An adapter self-test, run with "ethtool -t ... offline", has failed reading
+the STATUS register.
+}}
+action {{
+Run "ethtool -d" to obtain a register dump, and contact your service
+provider.
+}}
+class: hardware  type: temp  refcode: "RegTestFail"
+
+message[chatter]: e_info "testing %s interrupt\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): testing ([[:print:]]*) interrupt$"
+
+message: e_err "Cannot setup 1Gbps loopback.\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Cannot setup 1Gbps loopback\\.$"
+description {{
+Workaround: K1 must be disabled for stable 1Gbps operation
+82577/8 must acquire h/w semaphore before workaround.
+}}
+action {{
+1. Re-try after some time. (?)
+2. TBD
+}}
+class: hardware  type: temp  refcode: "AcqHwSemaphore"
+
+message: e_err "Cannot do PHY loopback test when SoL/IDER is active.\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Cannot do PHY loopback test when SoL/IDER is active\\.$"
+description {{
+In an adapter self-test, run with the "ethtool -t ... offline"
+command, a loopback test has been cancelled because a PHY (physical
+layer device) reset is blocked by firmware.
+}}
+action {{
+1. Try again later.
+2. In the absence of any other problem reports, it's probably OK to
+ignore this failure.
+}}
+class: hardware  type: temp  refcode: "BLKRstPHY"
+
+message[chatter]: e_info "offline testing starting\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): offline testing starting$"
+message[chatter]: e_info "online testing starting\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): online testing starting$"
+message[defensive]: e_err "Interface does not support directed (unicast) frame wake-up packets\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Interface does not support directed \\(unicast\\) frame wake-up packets$"
+
+file: "drivers/net/ethernet/intel/e1000e/ich8lan.c"
+/*
+ * e_dbg "Failed to initialize PHY flow\n"
+ * e_dbg "Required LANPHYPC toggle blocked by ME\n"
+ * e_dbg "Toggling LANPHYPC\n"
+ * e_dbg "Cannot determine PHY addr. Erroring out\n"
+ * e_dbg "ERROR: Flash registers not mapped\n"
+ * e_dbg "Error configuring flow control\n"
+ * e_dbg "contention for Phy access\n"
+ * e_dbg "SW has already locked the resource.\n"
+ * e_dbg "Failed to acquire the semaphore, FW or HW has it: FWSM=0x%8.8x EXTCNF_CTRL=0x%8.8x)\n"
+ * e_dbg "Semaphore unexpectedly released by sw/fw/hw\n"
+ * e_dbg "SHRA[%d] might be locked by ME - FWSM=0x%8.8x\n"
+ * e_dbg "Failed to write receive address at index %d\n"
+ * e_dbg "Unsupported SMB frequency in PHY\n"
+ * e_dbg "SW/FW/HW has locked the resource for too long.\n"
+ * e_dbg "Failed to acquire the semaphore.\n"
+ * e_dbg "IFE PMC: %X\n"
+ * e_dbg "Waiting for forced speed/duplex link on IFE phy.\n"
+ * e_dbg "Link taking longer than expected.\n"
+ * e_dbg "LAN_INIT_DONE not set, increase timeout\n"
+ * e_dbg "Phy info is only valid if link is up\n"
+ * e_dbg "Unable to determine valid NVM bank via EEC - reading flash signature\n"
+ * e_dbg "ERROR: No valid NVM bank present\n"
+ * e_dbg "nvm parameter(s) out of bounds\n"
+ * e_dbg "Could not detect valid bank, assuming bank 0\n"
+ * e_dbg "NVM read error: %d\n"
+ * e_dbg "Flash descriptor invalid.  SW Sequencing must be used."  sic
+ * e_dbg "Flash controller busy, cannot get access"	sic
+ * e_dbg "Timeout error - flash cycle did not complete."	sic
+ * e_dbg "nvm parameter(s) out of bounds\n"
+ * e_dbg "Could not detect valid bank, assuming bank 0\n"
+ * e_dbg "Flash commit failed.\n"
+ * e_dbg "NVM update error: %d\n"
+ * e_dbg "Timeout error - flash cycle did not complete."	sic
+ * e_dbg "Retrying Byte %2.2X at offset %u\n"
+ * e_dbg "NVM Read Error\n"
+ * e_dbg "PCI-E Master disable polling has failed.\n"
+ * e_dbg "Masking off all interrupts\n"
+ * e_dbg "Issuing a global reset to ich8lan\n"
+ * e_dbg "Auto Read Done did not complete\n"
+ * e_dbg "Error initializing identification LED\n"
+ * e_dbg "Zeroing the MTA\n"
+ * e_dbg "After fix-ups FlowControl is now = %x\n"
+ * e_dbg "Workaround applies to ICH8 only.\n"
+ * e_dbg "Failed to init PHY flow ret_val=%d\n"
+ * e_dbg "Failed to setup iRST\n"
+ * e_dbg "Error %d in resume workarounds\n"
+ * e_dbg "Auto Read Done did not complete\n"
+ * e_dbg "PHY Reset Asserted not set - needs delay\n"
+ * e_dbg "EEPROM not present\n"
+ */
+
+file: "drivers/net/ethernet/intel/e1000e/mac.c"
+/*
+ * e_dbg "Programming MAC Address into RAR[0]\n"
+ * e_dbg "Clearing RAR[1-%u]\n"
+ */
+message[defensive]: printk KERN_ERR "multicast array memory allocation failed\n"
+regex printk "^multicast array memory allocation failed$"
+/*
+ * e_dbg "Hash value = 0x%03X\n"
+ */
+
+message: e_dbg "Error configuring flow control\n"
+regex e_dbg "^([[:print:]]*): ([[:print:]]*): Error configuring flow control$"
+description {{
+After detecting a link change, the driver failed to reconfigure and
+restore the flow-control parameters.  The failure was probably either
+in autonegotiation or in forcing the desired speed and duplex
+parameters.
+}}
+action {{
+Run the ethtool command (e.g., "ethtool eth0") to check the adapter's
+speed/duplex and flow-control settings.
+}}
+class: hardware  sl_severity: warning  refcode: "ErrCfgFC"
+
+message: e_dbg "NOT RXing /C/, disable AutoNeg and force link.\n"
+regex e_dbg "^([[:print:]]*): ([[:print:]]*): NOT RXing /C/, disable AutoNeg and force link\\.$"
+/* Wen has: "NOT RXing, disable AutoNeg and force link" */
+description {{
+Autonegotiation with the adapter's link partner has failed, or the
+link partner is not trying to autonegotiate.  The adapter will treat
+the link as up.
+}}
+action {{
+1. Verify that the adapter's cable to the network is plugged in.
+2. Run the ethtool command (e.g., "ethtool eth0") to verify that
+autonegotiation is enabled.
+}}
+class: software  sl_severity: warning  refcode: "ErrCfgFC"
+
+/*
+ * e_dbg "Ignoring Alternate Mac Address with MC bit set\n"
+ * e_dbg "Error configuring flow control\n"
+ * e_dbg "RXing /C/, enable AutoNeg and stop forcing link.\n"
+ * dup: e_dbg "NOT RXing /C/, disable AutoNeg and force link.\n"
+ * dup: e_dbg "Error configuring flow control\n"
+ * dup: e_dbg "RXing /C/, enable AutoNeg and stop forcing link.\n"
+ * e_dbg "SERDES: Link up - forced.\n"
+ * e_dbg "SERDES: Link down - force failed.\n"
+ * e_dbg "SERDES: Link up - autoneg completed sucessfully.\n"
+ * e_dbg "SERDES: Link down - invalidcodewords detected in autoneg.\n"
+ * e_dbg "SERDES: Link down - no sync.\n"
+ * e_dbg "SERDES: Link down - autoneg failed\n"
+ */
+
+message: e_dbg "NVM Read Error\n"
+regex e_dbg "^([[:print:]]*): ([[:print:]]*): NVM Read Error$"
+description {{
+In an attempt to set the adapters's default flow control setting, a
+read from the adapter's EEPROM failed.
+}}
+action {{ @paste diags_eeprom_replace }}
+class: hardware  sl_severity: warning  refcode: "BF778E00"
+
+/*
+ * e_dbg "After fix-ups FlowControl is now = %x\n"
+ * e_dbg "Initializing the Flow Control address, type and timer regs\n"
+ */
+
+message: e_dbg "Flow control param set incorrectly\n"
+regex e_dbg "^([[:print:]]*): ([[:print:]]*): Flow control param set incorrectly$"
+description {{
+For a copper or forced fiber connection, the driver tried to adjust
+the flow-control setting, but the current setting is in error.
+}}
+action {{
+1. Run diagnostics using the "ethtool -t" command.
+2. Check the flow-control settings in drivers/net/e1000e/param.c in
+the kernel source.
+[I don't see any mention of flow control in param.c]
+3. Check the EEPROM level on the failing adapter.
+}}
+class: software  sl_severity: warning  refcode: "FCParaWrong"
+
+/*
+ * e_dbg "Never got a valid link from auto-neg!!!\n"
+ */
+
+message: e_dbg "Error while checking for link\n"
+regex e_dbg "^([[:print:]]*): ([[:print:]]*): Error while checking for link$"
+description {{
+After autonegotiation failed, the adapter attempted to force the
+link up, but that also failed; no signal was detected.
+}}
+action {{
+1. Run diagnostics using the "ethtool -t" command.
+[And then what?]
+}}
+class: software  sl_severity: warning  refcode: "FCParaWrong"
+
+/*
+ * e_dbg "Valid Link Found\n"
+ * e_dbg "Auto-negotiation enabled\n"
+ * e_dbg "No signal detected\n"
+ * e_dbg "hw->fc.current_mode = %u\n"
+ * dup: e_dbg "Flow control param set incorrectly\n"
+ */
+
+message: e_dbg "Error forcing flow control settings\n"
+regex e_dbg "^([[:print:]]*): ([[:print:]]*): Error forcing flow control settings$"
+description {{
+For a copper or forced fiber connection, the driver's attempt to adjust
+the flow-control setting failed.
+}}
+action {{
+1. Run diagnostics using the "ethtool -t" command.
+2. Check the flow-control settings in drivers/net/e1000e/param.c in
+the kernel source.
+[I don't see any mention of flow control in param.c]
+3. Check the EEPROM level on the failing adapter.
+}}
+class: software  sl_severity: warning  refcode: "ErrForceFC"
+
+/*
+ * e_dbg "Copper PHY and Auto Neg has not completed.\n"
+ * e_dbg "Flow Control = FULL.\r\n"
+ * e_dbg "Flow Control = RX PAUSE frames only.\r\n"
+ * e_dbg "Flow Control = Tx PAUSE frames only.\r\n"
+ * e_dbg "Flow Control = Rx PAUSE frames only.\r\n"
+ * e_dbg "Flow Control = NONE.\r\n"
+ */
+
+message: e_dbg "Error getting link speed and duplex\n"
+regex e_dbg "^([[:print:]]*): ([[:print:]]*): Error getting link speed and duplex$"
+description {{
+After establishing a link, the adapter failed to obtain the link
+speed and duplex.
+}}
+action {{
+Run the ethtool command (e.g., "ethtool eth0") to check the adapter's
+speed/duplex and flow-control settings.
+}}
+class: software  sl_severity: warning  refcode: "ErrSpeedDlx"
+
+/*
+ * dup: e_dbg "Error forcing flow control settings\n"
+ * e_dbg "1000 Mbs, "); sic
+ * e_dbg "100 Mbs, "); sic
+ * e_dbg "10 Mbs, "); sic
+ * e_dbg "Full Duplex\n"
+ * e_dbg "Half Duplex\n"
+ */
+
+message: e_dbg "Driver can't access device - SMBI bit is set.\n"
+regex e_dbg "^([[:print:]]*): ([[:print:]]*): Driver can't access device - SMBI bit is set\\.$"
+description {{
+The driver could not obtain exclusive access to the PHY (physical
+layer device) and/or NVM (non-volatile memory) as needed.
+}}
+action {{ @paste diags_eeprom_replace }}
+class: software  sl_severity: warning  refcode: "SMBIset"
+
+message: e_dbg "Driver can't access the NVM\n"
+regex e_dbg "^([[:print:]]*): ([[:print:]]*): Driver can't access the NVM$"
+description {{
+The driver could not obtain exclusive access to the PHY (physical
+layer device) and/or NVM (non-volatile memory) as needed.
+}}
+action {{ @paste diags_eeprom_replace }}
+class: hardware  type: perm  refcode: "ErrAcessNVM"
+
+message: e_dbg "Auto read by HW from NVM has not completed.\n"
+regex e_dbg "^([[:print:]]*): ([[:print:]]*): Auto read by HW from NVM has not completed\\.$"
+description {{
+The driver timed out while preparing to access the adapter's non-volatile
+memory.
+}}
+action {{ @paste diags_eeprom_replace }}
+class: hardware  type: perm  refcode: "AutoReadFail"
+
+/*
+ * e_dbg "NVM Read Error\n"
+ * e_dbg "Master requests are pending.\n"
+ * e_dbg "Not in Adaptive IFS mode!\n"
+ */
+
+message: e_dbg "Could not acquire NVM grant\n"
+regex e_dbg "^([[:print:]]*): ([[:print:]]*): Could not acquire NVM grant$"
+description {{
+While preparing to write to the adapter's non-volatile memory, the driver
+timed out trying to obtain exclusive access.
+}}
+action {{ 
+1. Run the "ethtool -i" command to check the adapter's firmware version.
+2. Check the level of the adapter's EEPROM or NVRAM.
+[How do you do that?  What do you do with this info once you have it?]
+3. Replace the adapter.
+}}
+class: hardware  type: perm  refcode: "GrantNVMFail"
+
+message: e_dbg "SPI NVM Status error\n"
+regex e_dbg "^([[:print:]]*): ([[:print:]]*): SPI NVM Status error$"
+description {{
+While preparing to read or write the adapter's EEPROM, the driver
+timed out trying to read a status register.
+}}
+action {{ @paste diags_eeprom_replace }}
+class: hardware  type: perm  refcode: "SPINVMErr"
+
+message: e_dbg "nvm parameter(s) out of bounds\n"
+regex e_dbg "^([[:print:]]*): ([[:print:]]*): nvm parameter\\(s\\) out of bounds$"
+description {{
+An attempt to read or write the adapter's EEPROM failed, apparently
+due to an internal error or hardware error.
+}}
+action {{ @paste diags_eeprom_replace }}
+class: hardware  type: perm  refcode: "ErrCfgNVM"
+
+/*
+ * dup: e_dbg "nvm parameter(s) out of bounds\n"
+ * dup: e_dbg "NVM Read Error\n"
+ * dup: e_dbg "NVM Read Error\n"
+ * dup: e_dbg "NVM Read Error\n"
+ * dup: e_dbg "NVM Read Error\n"
+ * e_dbg "NVM Checksum Invalid\n"
+ */
+
+message: e_dbg "NVM Read Error while updating checksum.\n"
+regex e_dbg "^([[:print:]]*): ([[:print:]]*): NVM Read Error while updating checksum\\.$"
+description {{
+At attempt to read the adapter's EEPROM (in order to compute a new
+checksum) failed.
+}}
+action {{
+1. Run the "ethtool -i" command to check the adapter's firmware version.
+2. Check the level of the adapter's EEPROM or NVRAM.
+[How do you do that?  What do you do with this info once you have it?]
+}}
+class: hardware  type: perm  refcode: "ReadNVMFail"
+
+message: e_dbg "NVM Write Error while updating checksum.\n"
+regex e_dbg "^([[:print:]]*): ([[:print:]]*): NVM Write Error while updating checksum\\.$"
+description {{ An attempt to write a new EEPROM checksum failed. }}
+action {{
+1. Run the "ethtool -i" command to check the adapter's firmware version.
+2. Check the level of the adapter's EEPROM or NVRAM.
+[How do you do that?  What do you do with this info once you have it?]
+}}
+class: hardware  type: perm  refcode: "WriteNVMFail"
+
+/*
+ * e_dbg "E1000_HOST_EN bit disabled.\n"
+ * e_dbg "Previous command timeout failed .\n"
+ * e_dbg "NVM Read Error\n"
+ * e_dbg "NVM Read Error\n"
+ */
+
+file: "drivers/net/ethernet/intel/e1000e/netdev.c"
+message: dev_err "RX DMA map failed\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): RX DMA map failed$"
+description {{
+The driver failed to create a DMA mapping for the adapter's receive
+buffer.
+}}
+action {{
+1. Reduce your current use of DMA mappings.  [How?]
+2. Delay bringing up the network interface; try again later.
+3. Reboot the system.
+}}
+class: software  sl_severity: error  refcode: "RxDMAFail"
+
+message[defensive]: dev_err "RX DMA page map failed\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): RX DMA page map failed$"
+/* duplicate: dev_err "RX DMA map failed\n" */
+/* e_dbg "%s: Receive packet consumed multiple buffers\n" */
+message[defensive]: e_err "Detected Tx Unit Hang:\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Detected Tx Unit Hang:$"
+/* e_dbg "%s: Packet Split buffers didn't pick up the full packet\n" */
+/* e_dbg "%s: Last part of the packet spanning multiple descriptors\n" */
+/* e_dbg "failed to enable jumbo frame workaround mode\n" */
+
+message[defensive]: e_err "ME firmware caused invalid RDT - resetting\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): ME firmware caused invalid RDT - resetting$"
+message[defensive]: e_err "ME firmware caused invalid TDT - resetting\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): ME firmware caused invalid TDT - resetting$"
+/* See desc in kernel commit c6e7f51e73c1bc6044bce989ec503ef2e4758d55 */
+
+message[defensive]: e_err "Detected Hardware Unit Hang:\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Detected Hardware Unit Hang:$"
+/* Kernel commit: 41cec6f1160c110bd69597c2a5611b46e8287801 */
+
+message: e_err "Try turning off Tx pause (flow control) via ethtool\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Try turning off Tx pause \\(flow control\\) via ethtool$"
+description {{
+There is a known issue in the 82577 and 82578 device that can cause a hang
+in the device hardware during traffic stress; the current workaround in the
+driver is to disable transmit flow control by default.
+}}
+action {{
+1. Try turning off Tx pause (flow control) via ethtool
+2. Re-try after disabling transmit flow control
+}}
+class: software  type: config  refcode: "DisableFlowCtrl"
+
+message[defensive]: e_err "pskb_may_pull failed.\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): pskb_may_pull failed\\.$"
+
+message: e_err "Failed to initialize MSI-X interrupts.  Falling back to MSI interrupts.\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Failed to initialize MSI-X interrupts\\.  Falling back to MSI interrupts\\.$"
+description {{
+MSI-X interrupts could not be enabled for this adapter, because either
+the kernel or the hardware doesn't support MSI-X mode.  The driver will
+try to use MSI mode.
+}}
+action {{
+1. Execute diagnostics on the adapter, using "ethtool -t".
+2. Verify that the adapter hardware and firmware support MSI-X mode.
+3. Verify that the kernel supports MSI-X mode.
+}}
+class: software  type: config  refcode: "EnableMSIXFailed"
+
+message: e_err "Failed to initialize MSI interrupts.  Falling back to legacy interrupts.\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Failed to initialize MSI interrupts\\.  Falling back to legacy interrupts\\.$"
+description {{
+MSI interrupts could not be enabled for this adapter, because either
+the kernel or the hardware doesn't support MSI mode.  The driver will
+try to use LSI mode.
+}}
+action {{
+1. Execute diagnostics on the adapter, using "ethtool -t".
+2. Verify that the adapter hardware and firmware support MSI mode.
+3. Verify that the kernel supports MSI mode.
+}}
+class: software  type: config  refcode: "EnableMSIFailed"
+
+message: e_err "Unable to allocate interrupt, Error: %d\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Unable to allocate interrupt, Error: ([-]\?[0-9]{1,})$"
+description {{
+While bringing up a network interface, the driver failed to configure
+interrupts for this adapter.
+}}
+action {{
+1. Find the error code in errno.h to determine the reason for the error.
+2. Execute diagnostics on the adapter, using "ethtool -t".
+}}
+class: software  sl_severity: error  refcode: "ReqItrFail"
+
+message: e_err "Unable to allocate memory for the transmit descriptor ring\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Unable to allocate memory for the transmit descriptor ring$"
+description {{
+While bringing up a network interface, the driver failed to allocate
+memory for the transmit descriptor ring, probably because the system
+is low on memory.
+}}
+action {{
+1. With the ethtool command (-g and -G options), reduce the size of
+the adapter's transmit descriptor ring.
+2. Free up memory and retry the failed operation.
+3. Add memory to your system.
+}}
+class: software  sl_severity: error  refcode: "TxDMemFail"
+
+message: e_err "Unable to allocate memory for the receive descriptor ring\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Unable to allocate memory for the receive descriptor ring$"
+description {{
+While bringing up a network interface, the driver failed to allocate
+memory for the receive descriptor ring, probably because the system
+is low on memory.
+}}
+action {{
+1. With the ethtool command (-g and -G options), reduce the size of
+the adapter's receive descriptor ring.
+2. Free up memory and retry the failed operation.
+3. Add memory to your system.
+}}
+class: software  sl_severity: error  refcode: "RxDMemFail"
+
+message: e_err "Unable to allocate memory for queues\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Unable to allocate memory for queues$"
+description {{
+While bringing up a network interface, the driver failed to allocate
+memory for the transmit and receive queues, probably because the system
+is low on memory.
+}}
+action {{
+1. With the ethtool command (-g and -G options), reduce the size of
+the adapter's transmit and/or descriptor rings.
+2. Free up memory and retry the failed operation.
+3. Add memory to your system.
+}}
+class: software  sl_severity: error  refcode: "QueueMemFail"
+
+message: e_err "Hardware Error\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Hardware Error$"
+description {{
+While bringing up a network interface, the driver failed to initialize
+the identification LED or failed to set up link and flow control.
+This is a non-fatal error.
+}}
+action {{
+1. Execute diagnostics on the adapter, using "ethtool -t".
+2. Check the cable connections.
+}}
+class: hardware  sl_severity: warning  refcode: "HrdErr"
+
+/* e_dbg "%s: icr is %08X\n" */
+message[chatter]: e_info "MSI interrupt test failed!\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): MSI interrupt test failed!$"
+/* e_dbg "%s: MSI interrupt test succeeded!\n" */
+
+message: e_warn "MSI interrupt test failed, using legacy interrupt.\n"
+regex e_warn "^([[:print:]]*): ([[:print:]]*): MSI interrupt test failed, using legacy interrupt\\.$"
+description {{
+One of the tests run via the "ethtool -t" command failed.  MSI interrupt
+mode is not available, so the driver will try to use LSI mode.
+}}
+action {{
+1. Find the error code in errno.h to determine the reason for the error.
+2. Verify that the adapter hardware and firmware support MSI mode.
+3. Verify that the kernel supports MSI mode.
+}}
+class: software  sl_severity: warning  refcode: "MSIFailed"
+
+/* dup: e_info "MSI interrupt test failed, using legacy interrupt.\n" */
+
+/* TODO: Is the explanation provided by Wen (#18) correct? */
+message[defensive]: e_err "Interrupt allocation failed\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Interrupt allocation failed$"
+
+message[defensive]: e_warn "Unable to create IPMI pass-through filter\n"
+regex e_warn "^([[:print:]]*): ([[:print:]]*): Unable to create IPMI pass-through filter$"
+
+message: e_warn "Error reading PHY register\n"
+regex e_warn "^([[:print:]]*): ([[:print:]]*): Error reading PHY register$"
+description {{ This is only a warning message. }}
+action {{ No action necessary. }}
+class: software  sl_severity: warning  refcode: "ErrPHY"
+
+message[chatter]: printk KERN_INFO "e1000e: %s NIC Link is Up %d Mbps %s, Flow Control: %s\n"
+regex printk "^e1000e: [[:print:]]* NIC Link is Up [-]\?[0-9]{1,} Mbps [[:print:]]*, Flow Control: [[:print:]]*$"
+message[chatter]: e_info "Gigabit has been disabled, downgrading speed\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): Gigabit has been disabled, downgrading speed$"
+message[chatter]: e_info "Autonegotiated half duplex but link partner cannot autoneg.  Try forcing full duplex if link gets many collisions.\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): Autonegotiated half duplex but link partner cannot autoneg\\.  Try forcing full duplex if link gets many collisions\\.$"
+message[chatter]: e_info "10/100 speed: disabling TSO\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): 10/100 speed: disabling TSO$"
+message[chatter]: printk KERN_INFO "e1000e: %s NIC Link is Down\n"
+regex printk "^e1000e: [[:print:]]* NIC Link is Down$"
+message[defensive]: e_warn "checksum_partial proto=%x!\n"
+regex e_warn "^([[:print:]]*): ([[:print:]]*): checksum_partial proto=([0-9a-f]{1,})!$"
+
+message: dev_err "TX DMA map failed\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): TX DMA map failed$"
+description {{
+The driver failed to create a DMA mapping for the adapter's transmit
+buffer.
+}}
+action {{
+1. Reduce your current use of DMA mappings.  [How?]
+2. Delay bringing up the network interface; try again later.
+3. Reboot the system.
+}}
+class: software  sl_severity: error  refcode: "TxDMAFail"
+
+message[defensive]: e_err "__pskb_pull_tail failed.\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): __pskb_pull_tail failed\\.$"
+
+message: e_err "Reset adapter\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Reset adapter$"
+description {{
+An unexpected reset has been called because of some unexpected behaviour.
+}}
+action {{
+Reset (restart?) the network interface.
+}}
+class: software  type: config  refcode: "ResetAdapter"
+
+message: e_err "Jumbo Frames not supported.\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Jumbo Frames not supported\\.$"
+description {{
+The configured MTU size is appropriate for Jumbo Frames; however,
+the adapter doesn't support Jumbo Frames.  The default size for Jumbo
+Frames is 9234 bytes.
+}}
+action {{
+Use the ifconfig command to set the MTU value to within the proper range.
+}}
+class: software  type: config  refcode: "JmbFrames"
+
+message: e_err "Unsupported MTU setting\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Unsupported MTU setting$"
+description {{
+Different adapters support different ranges for the MTU (maximum
+transmit unit) parameter.  A system administrator has apparently
+configured an MTU value that is too small or too big.
+}}
+action {{
+Use the ifconfig command to set the MTU value to within the proper range.
+}}
+class: software  type: config  refcode: "badMtu"
+
+message: e_err "Jumbo Frames not supported on this device when CRC stripping is disabled.\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Jumbo Frames not supported on this device when CRC stripping is disabled\\.$"
+description {{
+Jumbo frames on 82579 and newer devcies requires CRC be stripped.
+}}
+action {{
+Enable CRC stripping on this device.
+}}
+class: software  type: config  refcode: "JmbFramesCRCStrip"
+
+message[chatter]: e_info "changing MTU from %d to %d\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): changing MTU from ([-]\?[0-9]{1,}) to ([-]\?[0-9]{1,})$"
+message[defensive]: e_err "Could not acquire PHY\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Could not acquire PHY$"
+message[defensive]: e_err "Could not read PHY page 769\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Could not read PHY page 769$"
+message[defensive]: e_err "Could not set PHY Host Wakeup bit\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Could not set PHY Host Wakeup bit$"
+message[defensive]: dev_warn "Disabling L1 ASPM\n"
+regex dev_warn "^([[:print:]]*) ([[:print:]]*): Disabling L1 ASPM$"
+message[defensive]: dev_err "Cannot enable PCI device from suspend\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): Cannot enable PCI device from suspend$"
+message[chatter]: e_info "PHY Wakeup cause - %s\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): PHY Wakeup cause - ([[:print:]]*)$"
+message[chatter]: e_info "MAC Wakeup cause - %s\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): MAC Wakeup cause - ([[:print:]]*)$"
+message[defensive]: dev_err "Cannot re-enable PCI device after reset.\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): Cannot re-enable PCI device after reset\\.$"
+
+message: dev_err "can't bring device back up after reset\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): can't bring device back up after reset$"
+description {{
+This error happens during Enhanced Error Handling (EEH) on the
+PowerPC platform.  During error recovery, the attempt to resume normal
+operation after a PCI bus reset failed.
+}}
+action {{
+1. Obtain a dump of the kernel stack and registers, and report the
+problem to your service provider.
+[How do you obtain a strack trace that's relevant to this problem?]
+2. On a PowerPC platform, you can use the hotplug command to attempt
+to recover the adapter, rather than rebooting the Linux partition.
+[Where is the hotplug command documented?  Under what circumstances
+SHOULD you reboot the partition?]
+}}
+class: software  sl_severity: error  refcode: "AEREnfail"
+
+message[chatter]: e_info "(PCI Express:2.5GB/s:%s) %pM\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): \\(PCI Express:2\\.5GB/s:([[:print:]]*)\\) (\\(null\\)|([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})$"
+message[chatter]: e_info "Intel(R) PRO/%s Network Connection\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): Intel\\(R\\) PRO/([[:print:]]*) Network Connection$"
+message[chatter]: e_info "MAC: %d, PHY: %d, PBA No: %06x-%03x\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): MAC: ([-]\?[0-9]{1,}), PHY: ([-]\?[0-9]{1,}), PBA No: ([0]{0,5}[0-9a-f]{1,})-([0]{0,2}[0-9a-f]{1,})$"
+message[defensive]: dev_warn "Warning: detected DSPD enabled in EEPROM\n"
+regex dev_warn "^([[:print:]]*) ([[:print:]]*): Warning: detected DSPD enabled in EEPROM$"
+message[defensive]: dev_warn "Warning: detected ASPM enabled in EEPROM\n"
+regex dev_warn "^([[:print:]]*) ([[:print:]]*): Warning: detected ASPM enabled in EEPROM$"
+
+message: dev_err "No usable DMA configuration, aborting\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): No usable DMA configuration, aborting$"
+description {{
+Unable to enable DMA for either 32 or 64 bits with device_mask. The
+device driver couldn't continue to initialize the adapter because
+the adapter couldn't perform DMA properly on the system.
+[Explain device_mask, or omit the ref to it.]
+}}
+action {{
+1. Reboot Linux.
+2. Verify that your kernel supports DMA mode for data transfer.
+[How?  Is DMA support configurable?]
+}}
+class: software  sl_severity: error  refcode: "noDmaCfg"
+
+message: dev_err "pci_enable_pcie_error_reporting failed 0x%x\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): pci_enable_pcie_error_reporting failed 0x([0-9a-f]{1,})$"
+/* Note: Wen has this as "pci_enable_error_reporting failed\n" */
+description {{
+This is a non-fatal error.  The driver unsuccessfully attempted to
+enable AER on the adapter.  This error means either the system doesn't
+support AER or the adapter doesn't support AER.  The driver will
+continue to initialize the adapter.
+}}
+action {{
+1. Verify that your Linux kernel supports AER.
+2. Verify that your adapter supports AER.
+}}
+class: software  sl_severity: warning  refcode: "AEREnfail"
+
+message: e_info "PHY reset is blocked due to SOL/IDER session.\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): PHY reset is blocked due to SOL/IDER session\\.$"
+description {{
+The reset of the PHY (physical layer device) is blocked, but the
+driver continues to initialize the adapter.
+}}
+action {{ No action required. }}
+class: software  type: info  refcode: "PhyRstBlk"
+
+message: e_err "The NVM Checksum Is Not Valid\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): The NVM Checksum Is Not Valid$"
+description {{
+The driver has given up trying to initialize the adapter because the
+adapter's EEPROM checksum is incorrect.
+}}
+action {{ @paste diags_eeprom_replace }}
+class: hardware  type: perm  refcode: "BF778E00" priority: H
+
+/* dup: dev_err "The NVM Checksum Is Not Valid\n" */
+
+message: e_err "NVM Read Error while reading MAC address\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): NVM Read Error while reading MAC address$"
+description {{
+The driver was unable to read the MAC address from the adapter's EEPROM.
+}}
+action {{ @paste diags_eeprom_replace }}
+class: software  sl_severity: warning  refcode: "RdMAC"
+
+/* dup: dev_err "NVM Read Error while reading MAC address\n" */
+
+message: e_err "Invalid MAC Address: %pM\n"
+regex e_err "^([[:print:]]*): ([[:print:]]*): Invalid MAC Address: (\\(null\\)|([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})$"
+description {{
+The MAC address read from the adapter's EEPROM is not a valid Ethernet
+address.
+}}
+action {{ @paste diags_eeprom_replace }}
+class: hardware  type: perm  refcode: "BF778E00" priority: H
+
+/* dup: dev_err "Invalid MAC Address: %pM\n" */
+
+message: dev_err "pci_disable_pcie_error_reporting failed 0x%x\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): pci_disable_pcie_error_reporting failed 0x([0-9a-f]{1,})$"
+/* Note: Wen has this as "pci_disable_error_reporting failed\n" */
+description {{
+This is a non-fatal error.  The driver unsuccessfully attempted to
+disable AER on the adapter.  This error means either the system
+doesn't support AER or the adapter doesn't support AER.
+}}
+action {{
+Verify that the adapter supports AER.  If it doesn't, don't try to
+enable or disable AER for it.
+[How can the customer affect this?]
+}}
+class: software  sl_severity: warning  refcode: "AERDisfail"
+
+message[chatter]: printk KERN_INFO "%s: Intel(R) PRO/1000 Network Driver - %s\n"
+regex printk "^[[:print:]]*: Intel\\(R\\) PRO/1000 Network Driver - [[:print:]]*$"
+message[chatter]: printk KERN_INFO "%s: Copyright (c) 1999-2008 Intel Corporation.\n"
+regex printk "^[[:print:]]*: Copyright \\(c\\) 1999-2008 Intel Corporation\\.$"
+
+file: "drivers/net/ethernet/intel/e1000e/param.c"
+message[chatter]: e_info "%s Enabled\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): ([[:print:]]*) Enabled$"
+message[chatter]: e_info "%s Disabled\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): ([[:print:]]*) Disabled$"
+message[chatter]: e_info "%s set to %i\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): ([[:print:]]*) set to ([-]\?[0-9]{1,})$"
+/* Omit this: it would match everything.  e_info "%s\n" */
+message[chatter]: e_info "Invalid %s value specified (%i) %s\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): Invalid ([[:print:]]*) value specified \\(([-]\?[0-9]{1,})\\) ([[:print:]]*)$"
+
+message: e_notice "Warning: no configuration for board #%i\n"
+regex e_notice "^([[:print:]]*): ([[:print:]]*): Warning: no configuration for board #([-]\?[0-9]{1,})$"
+description {{
+The number of network adapters in the system that are associated with
+the e1000e driver exceeds E1000_MAX_NIC, as defined in e1000_param.c
+of the driver source.
+}}
+action {{
+Change E1000_MAX_NIC in e1000_param.c and rebuild the driver.
+["(ii) Change the startup module parameter."  How would this work?
+It appears that E1000_MAX_NIC is a compile-time constant.]
+}}
+class: software  type: config  refcode: "noBoard"
+
+message[defensive]: e_notice "Using defaults for all values\n"
+regex e_notice "^([[:print:]]*): ([[:print:]]*): Using defaults for all values$"
+message[chatter]: dev_info "%s set to default %d\n"
+regex dev_info "^([[:print:]]*) ([[:print:]]*): ([[:print:]]*) set to default ([-]\?[0-9]{1,})$"
+message[chatter]: e_info "%s turned off\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): ([[:print:]]*) turned off$"
+message[chatter]: e_info "%s set to dynamic mode\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): ([[:print:]]*) set to dynamic mode$"
+message[chatter]: e_info "%s set to dynamic conservative mode\n"
+regex e_info "^([[:print:]]*): ([[:print:]]*): ([[:print:]]*) set to dynamic conservative mode$"
+message[chatter]: dev_info "%s set to simplified (2000-8000 ints) mode\n"
+regex dev_info "^([[:print:]]*) ([[:print:]]*): ([[:print:]]*) set to simplified \\(2000-8000 ints\\) mode$"
+
+file: "drivers/net/ethernet/intel/e1000e/phy.c"
+/*
+ * e_dbg "PHY Address %d is out of range\n"
+ * e_dbg "MDI Read did not complete\n"
+ * e_dbg "MDI Error\n"
+ * e_dbg "PHY Address %d is out of range\n"
+ * e_dbg "MDI Write did not complete\n"
+ * e_dbg "MDI Error\n"
+ * e_dbg "Setting page 0x%x\n"
+ * e_dbg "Error committing the PHY changes\n"
+ * e_dbg "Error resetting the PHY.\n"
+ * e_dbg "Error Disabling LPLU D0\n"
+ * e_dbg "autoneg_advertised %x\n"
+ * e_dbg "Advertise 10mb Half duplex\n"
+ * e_dbg "Advertise 10mb Full duplex\n"
+ * e_dbg "Advertise 100mb Half duplex\n"
+ * e_dbg "Advertise 100mb Full duplex\n"
+ * e_dbg "Advertise 1000mb Half duplex request denied!\n"
+ * e_dbg "Advertise 1000mb Full duplex\n"
+ * e_dbg "Flow control param set incorrectly\n"
+ * e_dbg "Auto-Neg Advertising %x\n"
+ * e_dbg "Reconfiguring auto-neg advertisement params\n"
+ * e_dbg "Error Setting up Auto-Negotiation\n"
+ * e_dbg "Restarting Auto-Neg\n"
+ * e_dbg "Error while waiting for autoneg to complete\n"
+ * e_dbg "Forcing Speed and Duplex\n"
+ * e_dbg "Error Forcing Speed and Duplex\n"
+ * e_dbg "Valid link established!!!\n"
+ * e_dbg "Unable to establish link!!!\n"
+ * e_dbg "IGP PSCR: %X\n"
+ * e_dbg "Waiting for forced speed/duplex link on IGP phy.\n"
+ * e_dbg "Link taking longer than expected.\n"
+ * e_dbg "M88E1000 PSCR: %X\n"
+ * e_dbg "Waiting for forced speed/duplex link on M88 phy.\n"
+ * e_dbg "Link taking longer than expected.\n"
+ * e_dbg "IFE PMC: %X\n"
+ * e_dbg "Waiting for forced speed/duplex link on IFE phy.\n"
+ * e_dbg "Link taking longer than expected.\n"
+ * e_dbg "Half Duplex\n"
+ * e_dbg "Full Duplex\n"
+ * e_dbg "Forcing 100mb\n"
+ * e_dbg "Forcing 10mb\n"
+ * e_dbg "Phy info is only valid for copper media\n"
+ * e_dbg "Phy info is only valid if link is up\n"
+ * e_dbg "Phy info is only valid if link is up\n"
+ * e_dbg "Running IGP 3 PHY init script\n"
+ * e_dbg "Could not set Port Control page\n"
+ * e_dbg "Could not read PHY register %d.%d\n"
+ * e_dbg "Could not write PHY register %d.%d\n"
+ * e_dbg "Could not set Port Control page\n"
+ * e_dbg "Could not restore PHY register %d.%d\n"
+ * e_dbg "Attempting to access page %d while gig enabled.\n"
+ * e_dbg "Could not enable PHY wakeup reg access\n"
+ * e_dbg "Accessing PHY page %d reg 0x%x\n"
+ * e_dbg "Could not write address opcode to page %d\n"
+ * e_dbg "Could not access PHY reg %d.%d\n"
+ * e_dbg "reading PHY page %d (or 0x%x shifted) reg 0x%x\n"
+ * e_dbg "writing PHY page %d (or 0x%x shifted) reg 0x%x\n"
+ * e_dbg "Could not write the Address Offset port register\n"
+ * e_dbg "Could not access the Data port register\n"
+ * e_dbg "Attempting to access page 800 while gig enabled\n"
+ * e_dbg "Could not acquire PHY\n"
+ * e_dbg "Could not write PHY the HV address register\n"
+ * e_dbg "Could not read data value from HV data register\n"
+ * e_dbg "I82577_PHY_CTRL_2: %X\n"
+ * e_dbg "Waiting for forced speed/duplex link on 82577 phy\n"
+ * e_dbg "Link taking longer than expected.\n"
+ * e_dbg "Phy info is only valid if link is up\n"
+ */

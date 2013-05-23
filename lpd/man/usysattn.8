@@ -1,0 +1,58 @@
+.\"
+.\" Copyright (C) 2004, 2012 International Business Machines
+.\"
+.\" Note:
+.\"     This man page is moved from powerpc-util package to here.
+.\"	Author : Michael Strosaker <strosake@us.ibm.com>
+.\"	Updates: Vasant Hegde <hegdevasant@linux.vnet.ibm.com>
+.\"
+.TH USYSATTN 8 "Dec 2012" Linux "PowerLinux Service Tools"
+.SH NAME
+usysattn, usysfault \- operate system attention and fault indicators
+.SH SYNOPSIS
+.nf
+\fB/usr/sbin/usysattn \fR[\fB-l \fI<location_code>\fR [\fB-s normal\fR] [\fB-t\fR]] [\fB-V\fR] [\fB-h\fR]
+\fB/usr/sbin/usysfault \fR[\fB-l \fI<location_code>\fR [\fB-s normal\fR] [\fB-t\fR]] [\fB-V\fR] [\fB-h\fR]
+.fi
+.SH DESCRIPTION
+.P
+The \fIusysattn\fR utility is used to view and manipulate the system attention
+and fault indicators (LEDs) on IBM Power Systems servers. The first location code
+displayed by \fIusysattn\fR is system attention indicator and rest of the location
+codes are fault indicators. These indicators are turned on automatically when a
+serviceable event is received. These identifiers are specified by location code.
+
+.P
+When run without arguments, \fIusysattn\fR will print a list of all the
+fault indicators on the system along with their current status (on or off).
+The \fB\-l\fR option can be used to specify a particular indicator. If
+\fB\-l\fR is the only argument, the status of that indicator will be
+printed.  If \fB\-s\fR \fInormal\fR is specified along with the \fB\-l\fR
+argument, the indicator will be turned off.
+
+.P
+.B NOTE:
+Ensure that there are no outstanding service actions to be taken on this
+system before turning off the system attention indicator.
+.SH OPTIONS
+.TP
+.B \-l \fIlocation_code
+Specify the location code of the indicator.
+.TP
+.B \-s normal
+Must be used with the \fB\-l\fR option; turns the specified indicator off.
+.TP
+.B \-t
+Truncate the location code if necessary. If an indicator is not available at
+the specified location, this option will continuously trim the last clause off
+of the location code in an attempt to find an indicator near the device.
+.TP
+.B \-V
+Display the version of the command and exit.
+.TP
+.B \-h
+Print the usage message and exit.
+
+.SH "SEE ALSO"
+.BR lp_diag (8),
+.BR usysident (8)

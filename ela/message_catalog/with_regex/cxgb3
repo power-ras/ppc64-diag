@@ -1,0 +1,362 @@
+subsystem: net
+
+devspec(device) = "/sys/bus/pci/devices/$device/devspec"
+filter: driver = "cxgb3"
+
+/*
+ * This text is used repeatedly, so make it paste-able.
+ * We also need to explain what to do with the info we get from #1 and #2.
+ */
+@copy version_diags_replace {{
+1. Run the "ethtool -i" command to determine the driver software level.
+2. Execute diagnostics on the adapter, using "ethtool -t".
+3. Replace the adapter board.
+}}
+
+/* cxgb3 kernel driver files have moved from drivers/net/cxgb3 to
+ * drivers/net/ethernet/chelsio/cxgb3.
+ */
+
+file: " drivers/net/ethernet/chelsio/cxgb3/ael1002.c"
+message[defensive]: CH_WARN "PHY %u i2c read of dev.addr %#x.%#x timed out\n"
+regex CH_WARN "^cxgb3 ([[:print:]]*): PHY ([0-9]{1,}) i2c read of dev\\.addr (0x[0-9a-f]{1,})\\.(0x[0-9a-f]{1,}) timed out$"
+
+file: "drivers/net/ethernet/chelsio/cxgb3/aq100x.c"
+message[defensive]: CH_WARN "PHY%d: reset failed (0x%x).\n"
+regex CH_WARN "^cxgb3 ([[:print:]]*): PHY([-]\?[0-9]{1,}): reset failed \\(0x([0-9a-f]{1,})\\)\\.$"
+message[defensive]: CH_WARN "PHY%d: reset failed (0x%x, 0x%x).\n"
+regex CH_WARN "^cxgb3 ([[:print:]]*): PHY([-]\?[0-9]{1,}): reset failed \\(0x([0-9a-f]{1,}), 0x([0-9a-f]{1,})\\)\\.$"
+message[defensive]: CH_WARN "PHY%d: reset timed out (0x%x).\n"
+regex CH_WARN "^cxgb3 ([[:print:]]*): PHY([-]\?[0-9]{1,}): reset timed out \\(0x([0-9a-f]{1,})\\)\\.$"
+message[defensive]: CH_WARN "PHY%d: reset took %ums\n"
+regex CH_WARN "^cxgb3 ([[:print:]]*): PHY([-]\?[0-9]{1,}): reset took ([0-9]{1,})ms$"
+message[defensive]: CH_WARN "PHY%d: unsupported firmware %d\n"
+regex CH_WARN "^cxgb3 ([[:print:]]*): PHY([-]\?[0-9]{1,}): unsupported firmware ([-]\?[0-9]{1,})$"
+message[defensive]: CH_WARN "PHY%d does not start in low power mode.\n"
+regex CH_WARN "^cxgb3 ([[:print:]]*): PHY([-]\?[0-9]{1,}) does not start in low power mode\\.$"
+message[defensive]: CH_WARN "PHY%d: incorrect XAUI settings (0x%x, 0x%x).\n"
+regex CH_WARN "^cxgb3 ([[:print:]]*): PHY([-]\?[0-9]{1,}): incorrect XAUI settings \\(0x([0-9a-f]{1,}), 0x([0-9a-f]{1,})\\)\\.$"
+
+file: "drivers/net/ethernet/chelsio/cxgb3/cxgb3_main.c"
+message[chatter]: printk KERN_INFO "%s: link down\n"
+regex printk "^[[:print:]]*: link down$"
+message[chatter]: printk KERN_INFO "%s: link up, %s, %s-duplex\n"
+regex printk "^[[:print:]]*: link up, [[:print:]]*, [[:print:]]*-duplex$"
+message[chatter]: printk KERN_INFO "%s: PHY module unplugged\n"
+regex printk "^[[:print:]]*: PHY module unplugged$"
+message[chatter]: printk KERN_INFO "%s: %s PHY module inserted\n"
+regex printk "^[[:print:]]*: [[:print:]]* PHY module inserted$"
+
+message[defensive]: CH_ERR "firmware image too large %u, expected %d\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): firmware image too large ([0-9]{1,}), expected ([-]\?[0-9]{1,})$"
+message[defensive]: CH_ERR "corrupted firmware image, checksum %u\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): corrupted firmware image, checksum ([0-9]{1,})$"
+
+message: dev_err "could not upgrade firmware: unable to load %s\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): could not upgrade firmware: unable to load ([[:print:]]*)$"
+description {{
+The firmware on the adapter doesn't match what the driver requires.
+}}
+action {{
+Verify that /lib/firmware/cxgb3 contains the correct firmware.
+[Where do they get the correct firmware?]
+[Re: your recommended action: Under what circumstances should you
+verify the driver software level, execute diagnostics, and/or replace
+the adapter?]
+}}
+class: software  type: temp  refcode: "cxgb3007"
+
+message[chatter]: dev_info "successful upgrade to firmware %d.%d.%d\n"
+regex dev_info "^([[:print:]]*) ([[:print:]]*): successful upgrade to firmware ([-]\?[0-9]{1,})\\.([-]\?[0-9]{1,})\\.([-]\?[0-9]{1,})$"
+
+message: dev_err "failed to upgrade to firmware %d.%d.%d\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): failed to upgrade to firmware ([-]\?[0-9]{1,})\\.([-]\?[0-9]{1,})\\.([-]\?[0-9]{1,})$"
+description {{
+The adapter contains the wrong firmware version, so the driver tried
+to update the firmware to the version stored in /lib/firmware/cxgb3.
+This update failed.
+}}
+action {{
+Verify that /lib/firmware/cxgb3 contains the correct firmware.
+[Under what circumstances should you verify the driver software level,
+execute diagnostics, and/or replace the adapter?]
+}}
+class: software  type: temp  refcode: "cxgb3008"
+
+message: dev_err "could not load TP SRAM: unable to load %s\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): could not load TP SRAM: unable to load ([[:print:]]*)$"
+description {{
+The adapter contains the wrong microcode version, so the driver tried
+to update the TP SRAM to the version stored in /lib/firmware.  This
+update failed.
+}}
+action {{
+@paste version_diags_replace
+[Why don't we advise verifying that the correct microcode is in /lib/firmware?]
+}}
+class: software  type: temp  refcode: "cxgb3009"
+
+message[chatter]: dev_info "successful update of protocol engine to %d.%d.%d\n"
+regex dev_info "^([[:print:]]*) ([[:print:]]*): successful update of protocol engine to ([-]\?[0-9]{1,})\\.([-]\?[0-9]{1,})\\.([-]\?[0-9]{1,})$"
+
+/* This is reported right before the next message. */
+message[redundant]: dev_err "failed to update of protocol engine %d.%d.%d\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): failed to update of protocol engine ([-]\?[0-9]{1,})\\.([-]\?[0-9]{1,})\\.([-]\?[0-9]{1,})$"
+
+message: dev_err "loading protocol SRAM failed\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): loading protocol SRAM failed$"
+description {{
+The required version of microcode could not be written to the adapter.
+}}
+action {{ @paste version_diags_replace }}
+/* Shouldn't this be hardware/perm? */
+class: software  type: temp  refcode: "cxgb3010"
+
+message: CH_WARN "FW upgrade to %d.%d.%d %s\n"
+regex CH_WARN "^cxgb3 ([[:print:]]*): FW upgrade to ([-]\?[0-9]{1,})\\.([-]\?[0-9]{1,})\\.([-]\?[0-9]{1,}) ([[:print:]]*)$"
+description {{
+The adapter's firmware is out of sync with the driver.  The driver
+will attempt to load the correct version of firmware into the adapter.
+}}
+action {{
+Refer to subsequent messages to determine whether the firmware
+upgrade was successful.
+}}
+class: software  type: info
+
+message: CH_WARN "TP upgrade to %d.%d.%d %s\n"
+regex CH_WARN "^cxgb3 ([[:print:]]*): TP upgrade to ([-]\?[0-9]{1,})\\.([-]\?[0-9]{1,})\\.([-]\?[0-9]{1,}) ([[:print:]]*)$"
+description {{
+The adapter's microcode is out of sync with the driver.  The driver
+will attempt to load the correct version of microcode into the adapter.
+}}
+action {{
+Refer to subsequent messages to determine whether the microcode
+upgrade was successful.
+}}
+class: software  type: info
+
+/* This next one can result from ENOMEM. */
+message: CH_ERR "failed to bind qsets, err %d\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): failed to bind qsets, err ([-]\?[0-9]{1,})$"
+description {{
+The adapter failed to start up correctly, possibly due to a low-memory
+condition.
+}}
+action {{
+Free up memory and retry the failed operation, or add memory to
+your system.  If the problem persists, try the following:
+@paste version_diags_replace
+}}
+class: software  type: perm  refcode: "cxgb3011"
+
+message[defensive]: CH_ERR "request_irq failed, err %d\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): request_irq failed, err ([-]\?[0-9]{1,})$"
+message[defensive]: dev_dbg "cannot create sysfs group\n"
+regex dev_dbg "^([[:print:]]*) ([[:print:]]*): cannot create sysfs group$"
+message[defensive]: printk KERN_WARNING "Could not initialize offload capabilities\n"
+regex printk "^Could not initialize offload capabilities$"
+message[defensive]: dev_err "Cannot re-enable PCI device after reset.\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): Cannot re-enable PCI device after reset\\.$"
+message[defensive]: dev_err "can't bring device back up after reset\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): can't bring device back up after reset$"
+message[defensive]: CH_ALERT "adapter reset %s\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): adapter reset ([[:print:]]*)$"
+
+message: CH_ALERT "encountered fatal error, operation suspended\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): encountered fatal error, operation suspended$"
+description {{
+Adapter goes to recovery.
+[What does that mean?]
+}}
+action {{ @paste version_diags_replace }}
+class: software  type: temp  refcode: "cxgb3005"
+
+
+message[defensive]: CH_ALERT "FW status: 0x%x, 0x%x, 0x%x, 0x%x\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): FW status: 0x([0-9a-f]{1,}), 0x([0-9a-f]{1,}), 0x([0-9a-f]{1,}), 0x([0-9a-f]{1,})$"
+message[defensive]: CH_ALERT "adapter recovering, PEX ERR 0x%x\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): adapter recovering, PEX ERR 0x([0-9a-f]{1,})$"
+message[chatter]: dev_info "Port %d using %d queue sets.\n"
+regex dev_info "^([[:print:]]*) ([[:print:]]*): Port ([-]\?[0-9]{1,}) using ([-]\?[0-9]{1,}) queue sets\\.$"
+message[chatter]: printk KERN_INFO "%s: %s %s %sNIC (rev %d) %s%s\n"
+regex printk "^[[:print:]]*: [[:print:]]* [[:print:]]* [[:print:]]*NIC \\(rev [-]\?[0-9]{1,}\\) [[:print:]]*[[:print:]]*$"
+message[chatter]: printk KERN_INFO "%s: %uMB CM, %uMB PMTX, %uMB PMRX, S/N: %s\n"
+regex printk "^[[:print:]]*: [0-9]{1,}MB CM, [0-9]{1,}MB PMTX, [0-9]{1,}MB PMRX, S/N: [[:print:]]*$"
+message[chatter]: printk KERN_INFO "%s - version %s\n"
+regex printk "^[[:print:]]* - version [[:print:]]*$"
+
+/* Replaced DRV_NAME with "cxgb3" in this next one. */
+message: printk KERN_ERR "cxgb3: cannot initialize work queue\n"
+regex printk "^cxgb3: cannot initialize work queue$"
+description {{
+The driver could not initialize a work queue while probing for devices,
+probably because of a low-memory condition.
+}}
+action {{
+Free up memory and retry the failed operation, or add memory to
+your system.
+}}
+class: hardware  type: perm  priority: H  refcode: "cxgb3001"
+
+message[chatter]: dev_info "cannot obtain PCI resources\n"
+regex dev_info "^([[:print:]]*) ([[:print:]]*): cannot obtain PCI resources$"
+
+message: dev_err "cannot enable PCI device\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): cannot enable PCI device$"
+description {{ Can't enable PCI IO and memory resources for this adapter }}
+action {{ @paste version_diags_replace }}
+class: hardware  type: perm  priority: H  refcode: "cxgb3002"
+
+message: dev_err "unable to obtain 64-bit DMA for coherent allocations\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): unable to obtain 64-bit DMA for coherent allocations$"
+description {{
+Cannot obtain 64-bit DMA allocations for this adapter now.
+}}
+action {{ @paste version_diags_replace }}
+class: hardware  type: perm  priority: H  refcode: "cxgb3003"
+
+message[defensive]: dev_err "no usable DMA configuration\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): no usable DMA configuration$"
+message[defensive]: dev_err "cannot allocate nofail buffer\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): cannot allocate nofail buffer$"
+
+message: dev_err "cannot map device registers\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): cannot map device registers$"
+description {{ Couldn't map device registers for MMIO registers access. }}
+action {{ @paste version_diags_replace }}
+class: hardware  type: perm  priority: H  refcode: "cxgb3004"
+
+message[defensive]: dev_warn "cannot register net device %s, skipping\n"
+regex dev_warn "^([[:print:]]*) ([[:print:]]*): cannot register net device ([[:print:]]*), skipping$"
+message[defensive]: dev_err "could not register any net devices\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): could not register any net devices$"
+
+file: "drivers/net/ethernet/chelsio/cxgb3/cxgb3_offload.c"
+message[chatter]: printk KERN_INFO "%s, iscsi set MaxRxData to 16224 (0x%x).\n"
+regex printk "^[[:print:]]*, iscsi set MaxRxData to 16224 \\(0x[0-9a-f]{1,}\\)\\.$"
+message[chatter]: printk KERN_INFO "%s, setting iscsi pgsz 0x%x, %u,%u,%u,%u.\n"
+regex printk "^[[:print:]]*, setting iscsi pgsz 0x[0-9a-f]{1,}, [0-9]{1,},[0-9]{1,},[0-9]{1,},[0-9]{1,}\\.$"
+message[defensive]: printk KERN_ERR "Unexpected SMT_WRITE_RPL status %u for entry %u\n"
+regex printk "^Unexpected SMT_WRITE_RPL status [0-9]{1,} for entry [0-9]{1,}$"
+message[defensive]: printk KERN_ERR "Unexpected L2T_WRITE_RPL status %u for entry %u\n"
+regex printk "^Unexpected L2T_WRITE_RPL status [0-9]{1,} for entry [0-9]{1,}$"
+message[defensive]: printk KERN_ERR "Unexpected RTE_WRITE_RPL status %u for entry %u\n"
+regex printk "^Unexpected RTE_WRITE_RPL status [0-9]{1,} for entry [0-9]{1,}$"
+message[defensive]: printk KERN_ERR "%s: received clientless CPL command 0x%x\n"
+regex printk "^[[:print:]]*: received clientless CPL command 0x[0-9a-f]{1,}$"
+/* dup: printk KERN_ERR "%s: received clientless CPL command 0x%x\n" */
+/* dup: printk KERN_ERR "%s: received clientless CPL command 0x%x\n" */
+message[defensive]: printk default "%s: passive open TID %u too large\n"
+regex printk "^[[:print:]]*: passive open TID [0-9]{1,} too large$"
+/* dup: printk KERN_ERR "%s: received clientless CPL command 0x%x\n" */
+message[enomem]: printk default "do_abort_req_rss: couldn't get skb!\n"
+regex printk "^do_abort_req_rss: couldn't get skb!$"
+message[defensive]: printk default "%s: active establish TID %u too large\n"
+regex printk "^[[:print:]]*: active establish TID [0-9]{1,} too large$"
+/* dup: printk KERN_ERR "%s: received clientless CPL command 0x%x\n" */
+/* dup: printk KERN_ERR "%s: received clientless CPL command 0x%x\n" */
+message[defensive]: printk KERN_ERR "%s: received bad CPL command 0x%x\n"
+regex printk "^[[:print:]]*: received bad CPL command 0x[0-9a-f]{1,}$"
+message[defensive]: printk KERN_ERR "T3C: handler registration for opcode %x failed\n"
+regex printk "^T3C: handler registration for opcode [0-9a-f]{1,} failed$"
+message[defensive]: printk KERN_ERR "%s: CPL message (opcode %u) had unknown TID %u\n"
+regex printk "^[[:print:]]*: CPL message \\(opcode [0-9]{1,}\\) had unknown TID [0-9]{1,}$"
+message[enomem]: printk KERN_ERR "%s: cannot allocate skb!\n"
+regex printk "^[[:print:]]*: cannot allocate skb!$"
+message[defensive]: printk KERN_WARNING "%s: Redirect to non-offload device ignored.\n"
+regex printk "^[[:print:]]*: Redirect to non-offload device ignored\\.$"
+message[defensive]: printk KERN_WARNING "%s: Redirect to different offload device ignored.\n"
+regex printk "^[[:print:]]*: Redirect to different offload device ignored\\.$"
+message[defensive]: printk KERN_ERR "%s: couldn't allocate new l2t entry!\n"
+regex printk "^[[:print:]]*: couldn't allocate new l2t entry!$"
+
+file: "drivers/net/ethernet/chelsio/cxgb3/mc5.c"
+message[defensive]: CH_ERR "MC5 timeout writing to TCAM address 0x%x\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): MC5 timeout writing to TCAM address 0x([0-9a-f]{1,})$"
+message[defensive]: CH_ERR "TCAM reset timed out\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): TCAM reset timed out$"
+message[defensive]: CH_ERR "Unsupported TCAM type %d\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): Unsupported TCAM type ([-]\?[0-9]{1,})$"
+message[defensive]: CH_ALERT "MC5 parity error\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): MC5 parity error$"
+message[defensive]: CH_ALERT "MC5 request queue parity error\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): MC5 request queue parity error$"
+message[defensive]: CH_ALERT "MC5 dispatch queue parity error\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): MC5 dispatch queue parity error$"
+
+file: "drivers/net/ethernet/chelsio/cxgb3/sge.c"
+message[defensive]: dev_err "%s: Tx ring %u full while queue awake!\n"
+regex dev_err "^([[:print:]]*) ([[:print:]]*): ([[:print:]]*): Tx ring ([0-9]{1,}) full while queue awake!$"
+message[defensive]: CH_ALERT "SGE parity error (0x%x)\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): SGE parity error \\(0x([0-9a-f]{1,})\\)$"
+message[defensive]: CH_ALERT "SGE framing error (0x%x)\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): SGE framing error \\(0x([0-9a-f]{1,})\\)$"
+message[defensive]: CH_ALERT "SGE response queue credit overflow\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): SGE response queue credit overflow$"
+message[defensive]: CH_ALERT "packet delivered to disabled response queue (0x%x)\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): packet delivered to disabled response queue \\(0x([0-9a-f]{1,})\\)$"
+message[defensive]: CH_ALERT "SGE dropped %s priority doorbell\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): SGE dropped ([[:print:]]*) priority doorbell$"
+message[defensive]: CH_ALERT "free list queue 0 initialization failed\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): free list queue 0 initialization failed$"
+message[defensive]: CH_WARN "free list queue 0 enabled with %d credits\n"
+regex CH_WARN "^cxgb3 ([[:print:]]*): free list queue 0 enabled with ([-]\?[0-9]{1,}) credits$"
+message[defensive]: CH_WARN "free list queue 1 enabled with %d credits\n"
+regex CH_WARN "^cxgb3 ([[:print:]]*): free list queue 1 enabled with ([-]\?[0-9]{1,}) credits$"
+
+file: "drivers/net/ethernet/chelsio/cxgb3/t3_hw.c"
+message[defensive]: CH_ERR "reading EEPROM address 0x%x failed\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): reading EEPROM address 0x([0-9a-f]{1,}) failed$"
+message[defensive]: CH_ERR "write to EEPROM address 0x%x failed\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): write to EEPROM address 0x([0-9a-f]{1,}) failed$"
+message[defensive]: CH_ERR "found wrong TP version (%u.%u), driver compiled for version %d.%d\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): found wrong TP version \\(([0-9]{1,})\\.([0-9]{1,})\\), driver compiled for version ([-]\?[0-9]{1,})\\.([-]\?[0-9]{1,})$"
+message[defensive]: CH_ERR "corrupted protocol SRAM image, checksum %u\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): corrupted protocol SRAM image, checksum ([0-9]{1,})$"
+message[defensive]: CH_WARN "found old FW minor version(%u.%u), driver compiled for version %u.%u\n"
+regex CH_WARN "^cxgb3 ([[:print:]]*): found old FW minor version\\(([0-9]{1,})\\.([0-9]{1,})\\), driver compiled for version ([0-9]{1,})\\.([0-9]{1,})$"
+message[defensive]: CH_WARN "found newer FW version(%u.%u), driver compiled for version %u.%u\n"
+regex CH_WARN "^cxgb3 ([[:print:]]*): found newer FW version\\(([0-9]{1,})\\.([0-9]{1,})\\), driver compiled for version ([0-9]{1,})\\.([0-9]{1,})$"
+message[defensive]: CH_ERR "corrupted firmware image, checksum %u\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): corrupted firmware image, checksum ([0-9]{1,})$"
+message[defensive]: CH_ERR "firmware download failed, error %d\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): firmware download failed, error ([-]\?[0-9]{1,})$"
+message[defensive]: CH_ALERT "%s (0x%x)\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): ([[:print:]]*) \\(0x([0-9a-f]{1,})\\)$"
+message[defensive]: CH_WARN "%s (0x%x)\n"
+regex CH_WARN "^cxgb3 ([[:print:]]*): ([[:print:]]*) \\(0x([0-9a-f]{1,})\\)$"
+message[defensive]: CH_ALERT "PEX error code 0x%x\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): PEX error code 0x([0-9a-f]{1,})$"
+message[defensive]: CH_WARN "%s MC7 correctable error at addr 0x%x, data 0x%x 0x%x 0x%x\n"
+regex CH_WARN "^cxgb3 ([[:print:]]*): ([[:print:]]*) MC7 correctable error at addr 0x([0-9a-f]{1,}), data 0x([0-9a-f]{1,}) 0x([0-9a-f]{1,}) 0x([0-9a-f]{1,})$"
+message[defensive]: CH_ALERT "%s MC7 uncorrectable error at addr 0x%x, data 0x%x 0x%x 0x%x\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): ([[:print:]]*) MC7 uncorrectable error at addr 0x([0-9a-f]{1,}), data 0x([0-9a-f]{1,}) 0x([0-9a-f]{1,}) 0x([0-9a-f]{1,})$"
+message[defensive]: CH_ALERT "%s MC7 parity error 0x%x\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): ([[:print:]]*) MC7 parity error 0x([0-9a-f]{1,})$"
+message[defensive]: CH_ALERT "%s MC7 address error: 0x%x\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): ([[:print:]]*) MC7 address error: 0x([0-9a-f]{1,})$"
+message[defensive]: CH_ALERT "port%d: MAC TX FIFO parity error\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): port([-]\?[0-9]{1,}): MAC TX FIFO parity error$"
+message[defensive]: CH_ALERT "port%d: MAC RX FIFO parity error\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): port([-]\?[0-9]{1,}): MAC RX FIFO parity error$"
+message[defensive]: CH_ERR "TP initialization timed out\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): TP initialization timed out$"
+message[defensive]: CH_ERR "MAC calibration failed\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): MAC calibration failed$"
+message[defensive]: CH_ERR "write to MC7 register 0x%x timed out\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): write to MC7 register 0x([0-9a-f]{1,}) timed out$"
+message[defensive]: CH_ERR "%s MC7 calibration timed out\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): ([[:print:]]*) MC7 calibration timed out$"
+message[defensive]: CH_ERR "%s MC7 BIST timed out\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): ([[:print:]]*) MC7 BIST timed out$"
+message[defensive]: CH_ERR "uP initialization timed out\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): uP initialization timed out$"
+message[defensive]: CH_ALERT "Invalid port type index %d\n"
+regex CH_ALERT "^cxgb3 ([[:print:]]*): Invalid port type index ([-]\?[0-9]{1,})$"
+
+file: "drivers/net/ethernet/chelsio/cxgb3/xgmac.c"
+message[defensive]: CH_ERR "MAC %d XAUI SERDES CMU lock failed\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): MAC ([-]\?[0-9]{1,}) XAUI SERDES CMU lock failed$"
+message[defensive]: CH_ERR "MAC %d Rx fifo drain failed\n"
+regex CH_ERR "^cxgb3 ([[:print:]]*): MAC ([-]\?[0-9]{1,}) Rx fifo drain failed$"

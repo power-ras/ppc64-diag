@@ -1,0 +1,357 @@
+#!/bin/sh
+
+#
+# Copyright (C) 2005 IBM Corporation
+#
+# This is a customizable file for responding to EPOW (Environmental and Power
+# Warning) events.  These events are issued in response to various
+# environmental conditions such as power or temperature problems, or fan
+# failures.
+#
+# When this script is executed, the /var/log/epow_status file will contain a
+# number indicating the current status of the system.  The following is a list
+# of values that may appear in that file:
+#
+#    Status  Description                       Action
+#    ------  -----------                       ------
+#    0       Normal state                      no action
+#    1       Loss of Primary Power             4 ms to shutdown*
+#    2       Power Supply Failure              4 ms to shutdown*
+#    3       Manual Power-Off Switch Activated 4 ms to shutdown*
+#    4       Thermal High                      20 seconds to shutdown
+#    5       Primary Fan Failure               20 seconds to shutdown
+#    6       Secondary Fan Failure             10 minutes to shutdown
+#    7       Battery Backup                    10 minutes to shutdown
+#    8       Non-Critical Cooling Problem      no action
+#    9       Non-Critical Power Problem        no action
+#    10      (v6) Normal system shutdown       initiate an OS shutdown
+#    11      (v6) Loss of critical functions   initiate an OS shutdown
+#
+#  * this script is not likely to be invoked in this short timespan
+#
+# In the more severe cases, there will not be enough time to invoke this
+# script (or update the epow_status file, for that matter).  A 20-second
+# warning indicates that the machine should be shut down immediately; power
+# will be automatically removed in 20 seconds.  A 10-minute warning indicates
+# that a less severe problem exists; the epow_status file will be updated every
+# 5 seconds.  If the status improves to "no action", there is no need to shut
+# down;  otherwise, the system should be shut down within 10 minutes.
+#
+# The exit status of this script is as follows:
+#
+#    Status  Description
+#    ------  -----------
+#    0       system condition is normal, no shutdown is necessary
+#    1       system is shutting down or halting
+#    2       halt -fn failed
+#    3       shutdown -hF now failed
+#    4       reached the end of the script, which should never occur
+#    5       script entered an undefined state
+#
+# Current EPOW sensor information may also be obtained from reading
+# /proc/ppc64/rtas/sensors.
+#
+# The rtas_errd daemon must be running for this script to be invoked and for the
+# epow_status file to be updated.
+
+msg=""
+detail=""
+status=0
+
+#
+# notify()
+#
+# This function walls the following information to all attached terminals:
+#    <script name>: <first param>\n
+#    \t<second param>
+#    <4 bells>
+# Ensure that the $msg and $detail internal variables are set appropriately
+# before invoking this routine.
+#
+# This routine can be modified to send e-mail messages or pages as well.
+#
+notify()
+{
+	printf "$0: $1\n\t$2\a\a\a\a" | wall
+
+} # end of notify()
+
+#
+# get_status()
+#
+# This function will check the epow_status file and set the environment to
+# the appropriate state.
+#
+get_status()
+{
+	# check epow_status file
+	status=`cat /var/log/epow_status`
+
+} # end of get_status()
+
+#
+# check_poweroff_token()
+#
+# This function modifies the behavior of a system only during ups notified
+# shutdown sequence. It trips and changes the value of /sys/power/autopoweron
+# which in turn enables the ibm,power-off-ups token to be called instead of
+# power-off so that the system can automatically restart when power
+# is restored.
+check_poweroff_token()
+{
+	get_status
+
+	if [ $status -eq 7 ] ; then
+
+		if [ -f /sys/power/auto_poweron ]
+		then
+			echo "1" > /sys/power/auto_poweron
+		else
+			notify \
+			     "System could not ensure automatic restart as /sys/power/auto_poweron file is missing" \
+			     "You may need to manually restart the partition when power is restored."
+
+		fi
+	fi
+} # end of check_poweroff_token()
+
+#
+# system_shutdown()
+#
+# Called in order to shut the system down immediately.
+#
+system_shutdown()
+{
+	check_poweroff_token
+
+	if /sbin/shutdown -h now; then
+		: ok
+	else
+
+		# will only get this far if shutdown fails
+		notify \
+		    "System shutdown failed." \
+		    "You should manually shut down the system NOW with \"shutdown -h now\"."
+		exit 3
+	fi
+
+	exit 1
+
+} # end of system_shutdown()
+
+#
+# system_halt()
+#
+# Called in order to halt the system immediately.
+#
+system_halt()
+{
+	if /sbin/halt -fn; then
+		: ok
+	else
+
+		# will only get this far if halt fails
+		notify \
+		    "System halt failed." \
+		    "You should manually halt the system NOW with \"halt -fn\"."
+		exit 2
+	fi
+
+	exit 1
+
+} # end of system_halt()
+
+#
+# short_warning()
+#
+# This function is called in response to a 20-second warning.  The system
+# will shut down immediately.  This routine can be modified to send e-mail
+# messages or pages.
+#
+short_warning()
+{
+	system_shutdown
+
+} # end of short_warning()
+
+#
+# long_warning()
+#
+# This function is called in response to a 10-minute warning.  The default
+# response is to check for status updates every 5 seconds.  If the status
+# does not improve within 8 minutes, the system will be shut down.  If the
+# status worsens, the system will be shut down immediately.  This routine
+# can be modified to send e-mail messages or pages.
+#
+long_warning()
+{
+	time=480		# seconds until shutdown begins (8 minutes)
+	cause=$status
+
+	sleep 1			# sleep for 1 second, so that we don't check
+	time=`expr $time - 1`	# the epow_status file until after it is
+				# updated
+
+	while [ $time -gt 0 ]
+	do
+		sleep 5		# sleep for 5 seconds
+		time=`expr $time - 5`
+
+		get_status	# recheck the epow status
+		case $status in
+
+			# epow status 1 - 5 and 8 - 11 will result in this
+			# script being started again from rtas_errd, so they do
+			# not need to be handled here
+
+			0 | 8 | 9 | 10 | 11)	# status has improved
+						# conditions 8, 9, 10 and 11
+						# will be handled by a different
+						# invocation of this script
+				/bin/sync
+				/bin/sync
+				notify \
+				    "The problem that caused the delayed shutdown to begin has been remedied." \
+				    "The system shutdown has been canceled."
+				exit 0
+				continue ;;
+
+			1 | 2 | 3 | 4 | 5)	# status has worsened;  these are handled
+						# by a different invocation of this script
+				continue ;;
+
+			6 | 7)			# status is unchanged
+
+				continue ;;
+
+			*)			# error; epow status is invalid
+				notify \
+				    "Undefined state." \
+				    "An undefined EPOW status was encountered; this script cannot continue."
+				exit 5
+				continue ;;
+
+		esac
+	done
+
+	notify \
+	    "The time until system shutdown has expired." \
+	    "The system will begin shutting down NOW."
+
+	system_shutdown
+
+} # end of long_warning()
+
+
+
+#
+# Main
+#
+# Time is critical, so determine the problem as quickly as possible and take
+# down the system if necessary.
+#
+
+/bin/sync
+/bin/sync
+/bin/sync
+
+get_status
+
+case $status in
+
+	0)			# normal state
+		/bin/sync
+		/bin/sync
+		exit 0
+		break ;;
+
+	1)			# loss of primary power
+		notify \
+		    "The system has experienced a loss of primary power." \
+		    "The system will be halted IMMEDIATELY."
+		system_halt
+		break ;;
+
+	2)			# power supply failure
+		notify \
+		    "The system has experienced a power supply failure." \
+		    "The system will be halted IMMEDIATELY."
+		system_halt
+		break ;;
+
+	3)			# manual power-off switch activated
+		notify \
+		    "The manual power-off switch has been activated." \
+		    "The system will be halted IMMEDIATELY."
+		system_halt
+		break ;;
+
+	4)			# thermal high
+		notify \
+		    "The system is experiencing abnormally high temperature conditions." \
+		    "The system will begin shutting down IMMEDIATELY."
+		short_warning
+		break ;;
+
+	5)			# primary fan failure
+		notify \
+		    "The primary fan has experienced a failure." \
+		    "The system will begin shutting down IMMEDIATELY."
+		short_warning
+		break ;;
+
+	6)			# secondary fan failure
+		notify \
+		    "A secondary fan has experienced a failure." \
+		    "The system will begin shutting down in 8 minutes if the problem is not remedied."
+		long_warning
+		break ;;
+
+	7)			# battery backup
+		notify \
+		    "The system has switched to battery backup." \
+		    "The system will begin shutting down in 8 minutes if the problem is not remedied."
+		long_warning
+		break ;;
+
+	8)			# non-critical cooling problem
+		notify \
+		    "The system is experiencing a non-critical cooling problem." \
+		    "View the system sensors with 'cat /proc/ppc64/rtas/sensors'."
+		echo -n "0" > /var/log/epow_status
+		exit 0
+		break ;;
+
+	9)			# non-critical power problem
+		notify \
+		    "The system is experiencing a non-critical power problem." \
+		    "View the system sensors with 'cat /proc/ppc64/rtas/sensors'."
+		echo -n "0" > /var/log/epow_status
+		exit 0
+		break ;;
+
+	10)			# normal shutdown with no additional delay
+		notify \
+		    "A normal shutdown with no delay has been requested." \
+		    "A system shutdown is being initiated."
+		system_shutdown
+		break ;;
+
+	11)			# loss of system critical functions
+		notify \
+		    "The system has experienced a loss of system critical functions." \
+		    "A system shutdown is being initiated."
+		system_shutdown
+		break ;;
+
+	*)			# error; epow status is invalid
+		notify \
+			"Undefined state." \
+			"An undefined EPOW status was encountered; this script cannot continue."
+		exit 5
+		break ;;
+
+esac
+
+exit 4
+

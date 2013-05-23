@@ -1,0 +1,148 @@
+#! /usr/bin/perl -I /etc/ppc64-diag
+#
+# This script is to be registered with servicelog as a notification tool.  It
+# is responsible for invoking Electronic Service Agent in response to a
+# serviceable event, if eSA is installed on the system.  If eSA is not
+# installed, the script will do nothing.
+#
+# Ideally, eSA should register itself with servicelog when it is installed,
+# so that we don't have to check if it is installed every time a serviceable
+# event is logged, but this will do for the time being.
+#
+# Copyright (C) 2007 IBM Corporation
+#
+ 
+require "/etc/ppc64-diag/servevent_parse.pl";
+
+if (!-e "/usr/svcagent/bin/callsa2") {
+	# eSA is not installed; exit quietly
+	exit 0;
+}
+
+($se_vars, $frus) = parse_se();
+
+@lines = ();
+
+# Determine if the partition is HMC-attached
+$slot = 0;
+while ($slot < 16) {
+	@hmc = `/usr/sbin/serv_config -e hmc$slot`;
+	if (@hmc[0] ne "\n") {
+		push(@lines, "HMC_Attached:");
+		last;
+	}
+	$slot = $slot + 1;
+}
+
+$val = $se_vars->{"EventTime"};
+push(@lines, "Date/Time: $val");
+
+$error_code = $se_vars->{"RefCode"};
+# trim leadng and tailing whitespace
+$error_code =~ s/^\s+//;
+$error_code =~ s/\s+$//;
+
+$error_text = $se_vars->{"Description"};
+if (substr($se_vars->{"RefCode"}, 0, 1) eq "#") {
+	# this is a menugoal
+	$error_code = substr($se_vars->{"RefCode"}, 1);
+	push(@lines, "Menu Number: $error_code");
+	push(@lines, "Menu Text: $error_text");
+	push(@lines, "End Menu Text");
+}
+else {
+	# this is an SRC or SRN
+
+	if ((length($error_code) == 8) && (index($error_code, '-') == -1)) {
+		# this is an SRC
+		$src = substr($se_vars->{"RefCode"}, 0, 8).
+			$se_vars->{"AddlWord0"}.$se_vars->{"AddlWord1"}.
+			$se_vars->{"AddlWord2"}.$se_vars->{"AddlWord3"}.
+			$se_vars->{"AddlWord4"}.$se_vars->{"AddlWord5"}.
+			$se_vars->{"AddlWord6"}.$se_vars->{"AddlWord7"};
+		push(@lines, "SRN_SRC: $src");
+		$val = sprintf("0X%X", hex($se_vars->{"AddlWord0"}));
+		push(@lines, "Refc2: $val");
+		$val = sprintf("0X%X", hex($se_vars->{"AddlWord1"}));
+		push(@lines, "Refc3: $val");
+		$val = sprintf("0X%X", hex($se_vars->{"AddlWord2"}));
+		push(@lines, "Refc4: $val");
+		$val = sprintf("0X%X", hex($se_vars->{"AddlWord3"}));
+		push(@lines, "Refc5: $val");
+		$val = sprintf("0X%X", hex($se_vars->{"AddlWord4"}));
+		push(@lines, "Refc6: $val");
+		$val = sprintf("0X%X", hex($se_vars->{"AddlWord5"}));
+		push(@lines, "Refc7: $val");
+		$val = sprintf("0X%X", hex($se_vars->{"AddlWord6"}));
+		push(@lines, "Refc8: $val");
+		$val = sprintf("0X%X", hex($se_vars->{"AddlWord7"}));
+		push(@lines, "Refc9: $val");
+
+		push(@lines, "Text: $error_text");
+
+		$val = uc($se_vars->{"PlatformID"});
+		push(@lines, "PlatformId: $val");
+		$val = $se_vars->{"CreatorID"};
+		push(@lines, "CreatorId: $val");
+		$val = uc($se_vars->{"SubsystemID"});
+		push(@lines, "SubSystemId: $val");
+		$val = uc($se_vars->{"RTASSeverity"});
+		push(@lines, "EventSeverity: $val");
+		$val = uc($se_vars->{"ActionFlags"});
+		push(@lines, "ActionFlags: $val");
+
+		foreach $fru (@$frus) {
+			@data = split / /, $fru;
+			# data[0]=priority, data[1]=type, data[2]=procedure,
+			# data[3]=location, data[4]=p/n, data[5]=s/n,
+			# data[6]=ccin, data[7]=repair_key
+			$f = $data[0]." ".$data[1]." ".$data[2]." ".$data[3].
+			     " ".$data[4]." ".$data[5]." ".$data[6];
+			push(@lines, "FRU_SRC(priority,type,procedure,".
+				"location,p/n,s/n,ccin): $f");
+		}
+	}
+	else {
+		# this is an SRN
+		push(@lines, "SRN: $error_code");
+		push(@lines, "Text: $error_text");
+
+		foreach $fru (@$frus) {
+			@data = split / /, $fru;
+			# data[0]=priority, data[1]=type, data[2]=procedure,
+			# data[3]=location, data[4]=p/n, data[5]=s/n,
+			# data[6]=ccin, data[7]=repair_key
+			$f = $data[3]." ".$data[4]." ".$data[2];
+			push(@lines, "FRU(Location,FRU p/n,Ref-code): $f");
+		}
+	}
+}
+
+if (defined $se_vars->{"MachineType"}) {
+	$val = $se_vars->{"MachineType"};
+	push(@lines, "Failing Device Enclosure Type-Model: $val");
+}
+
+if (defined $se_vars->{"MachineSerial"}) {
+	$val = $se_vars->{"MachineSerial"};
+	push(@lines, "Failing Device Enclosure Serial: $val");
+}
+
+$val = $se_vars->{"ServicelogID"};
+push(@lines, "ServiceLogId: $val");
+$val = $se_vars->{"KernelID"};
+push(@lines, "Error Log Sequence Number: $val");
+
+if (!open(SA_PROG, "| /usr/svcagent/bin/callsa2")) {
+	print("Could not run /usr/svcagent/bin/callsa2 to notify ".
+	      "Service Agent\n");
+	exit 1;
+}
+else {
+	foreach $line (@lines) {
+		print(SA_PROG "$line\n");
+	}
+	close(SA_PROG);
+}
+
+exit 0;

@@ -1,0 +1,24 @@
+Light Path Diangostics :
+=======================
+Light Path Diagnostics allows system engineers and administrators to easily
+and quickly diagnose hardware problems on the IBM servers.
+
+Light Path Diagnostics on PowerLinux constantly monitors for serviceable
+events and enables/disable fault indicators as required.
+
+Further documentation for each of these utilities is available in their
+corresponding man pages.
+
+lp_diag: light path diagnostics
+--------
+UI to view and modify the indicator status.
+
+usysident:  identification indicator utility
+---------
+A utility to view the status of device identification indicators
+(LEDs), and to turn the indicators on and off.
+
+usysattn, usysfault:  attention indicator utility
+-------------------
+A utility to view the status of the system attention and fault indicators
+(LEDs), and to turn the indicators off after an event has been serviced.

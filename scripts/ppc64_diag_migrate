@@ -1,0 +1,28 @@
+#! /usr/bin/perl -I /etc/ppc64-diag
+#
+# This script is to be registered with servicelog as a notification tool.  It
+# is responsible for performing whatever actions may be necessary following
+# the migration of a  partition from one system to another.
+#
+# It is only invoked when an event with a refcode of #MIGRATE is logged.
+# The DLPAR/virtualization tools automatically log such an event just after
+# a partition is migrated to a new system.
+#
+# Copyright (C) 2008 IBM Corporation
+#
+ 
+# Update the VPD database with the dynamic VPD of the new system
+system("vpdupdate >/dev/null 2>&1");
+
+# Force RMC to detect new management servers (HMCs, etc.)
+system("/usr/sbin/rsct/bin/refrsrc IBM.ManagementServer >/dev/null 2>&1");
+
+# We should consider having this script go through and close
+# any open serviceable events that are only applicable to the
+# old hardware.  That opens up a few new questions, though:
+# Do we reopen those events if the partition is migrated back
+# to the old system?  What if there was a repair action on
+# that old system which would fix one of the serviceable events
+# that we are trying to reopen?  We'll skip it for now in favor
+# of manual cleanup, if necessary.
+

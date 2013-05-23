@@ -1,0 +1,135 @@
+#!/usr/bin/perl -I /etc/ppc64-diag
+# @file		lp_diag_setup
+# @brief	Register/unregister Light Path notification tools
+#		with servicelog
+#
+# Copyright (C) 2012 IBM Corporation
+# See 'COPYRIGHT' for License of this code.
+#
+# @author	Vasant Hegde <hegdevasant@linux.vnet.ibm.com>
+
+use Getopt::Long;
+
+sub usage {
+	print "$0 {--register | --unregister} [--verbose]\n";
+	print "    --register:   register notification tools with servicelog\n";
+	print "    --unregister: unregister servicelog notification tools\n";
+	print "    --verbose:    display verbose output\n";
+}
+
+sub run_cmd {
+	my $cmd = @_[0];
+	$redirect = " >/dev/null 2>&1";
+
+	if ($flag_verbose) {
+		$redirect = "";
+		print " *** Running: $cmd\n";
+	}
+
+	system("$cmd$redirect");
+	my $exit_status = $? >> 8;
+
+	if ($flag_verbose) {
+		print " *** Exit Status: $exit_status\n";
+	}
+	return $exit_status;
+}
+
+sub servicelog_id {
+	my $cmd = @_[0];
+
+	# read the servicelog_notify output for the Servicelog ID
+	@sl_out = `/usr/bin/servicelog_notify --list --command=\"$cmd\"`;
+	foreach $line (@sl_out) {
+		chomp($line);
+		$pos = index($line, "Servicelog ID:");
+		if ($pos >= 0) {
+			$sl_id = substr($line, 14);
+
+			# trim leading whitespace
+			$sl_id =~ s/^\s+//;
+			return $sl_id;
+		}
+	}
+
+	return "?";
+}
+
+sub register {
+	my $cmd = @_[0]->[0];
+	my $sl_args = @_[0]->[1];
+	my $rc;
+
+	$rc = run_cmd("/usr/bin/servicelog_notify --list --command=\"$cmd\"");
+	if ($rc == 1) {
+		# command not currently registered; register it now
+		$rc = run_cmd("/usr/bin/servicelog_notify --add ".
+			      "--command=\"$cmd\" $sl_args");
+	}
+}
+
+sub unregister {
+	my $cmd = @_[0]->[0];
+	my $sl_args = @_[0]->[1];
+	my $rc;
+
+	$rc = run_cmd("/usr/bin/servicelog_notify --remove ".
+		      "--command=\"$cmd\"");
+}
+
+@notification_tools = (
+    ["/etc/ppc64-diag/lp_diag_notify -e",
+     "--match='disposition>=1 and severity>=4 and serviceable=1' ".
+     "--type=EVENT --method=num_arg"],
+    ["/etc/ppc64-diag/lp_diag_notify -r",
+     "--type=REPAIR --method=num_arg"],
+);
+
+Getopt::Long::Configure("bundling");
+GetOptions("register|r"=>\$flag_register,
+	"unregister|u"=>\$flag_unregister,
+	"help|h"=>\$flag_help,
+	"verbose|v"=>\$flag_verbose,
+	"<>"=>\&bad_arg) or usage(), exit(1);
+
+if ($flag_help) {
+	usage();
+	exit (0);
+}
+
+if ($flag_register and $flag_unregister) {
+	print "Only one of --register and --unregister should be specified.\n";
+	usage();
+	exit (1);
+}
+
+if (!$flag_register and !$flag_unregister) {
+	print "One of --register or --unregister must be specified.\n";
+	usage();
+	exit (1);
+}
+
+my $count = 0;
+
+if ($flag_register) {
+	foreach $tool (@notification_tools) {
+		register($tool);
+		$count++;
+	}
+	print "Registered $count tools with servicelog:\n\n";
+	foreach $tool (@notification_tools) {
+		system("/usr/bin/servicelog_notify --list ".
+		       "--command=\"".$tool->[0]."\"");
+		print "\n";
+	}
+}
+
+if ($flag_unregister) {
+	foreach $tool (@notification_tools) {
+		unregister($tool);
+		$count++;
+	}
+	print "Unregistered $count notification tools from servicelog.\n";
+}
+
+exit (0);

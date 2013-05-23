@@ -1,0 +1,172 @@
+/*
+ * The reporters catalog.  A reporter is a function or macro that's
+ * used to log a message to syslog.  Such macros typically prepend
+ * a prefix (e.g., specifying the driver and/or device) and may specify
+ * a severity level.  This catalog captures that information.
+ */
+reporter: printk
+source: kernel
+
+reporter: dev_printk
+source: kernel
+aliases: dev_emerg(emerg) dev_alert(alert) dev_crit(crit) dev_err(err)
+	dev_warn(warning) dev_notice(notice) dev_info(info) dev_dbg(debug)
+prefix_format: "%s %s: "
+prefix_args: driver device
+
+reporter: pr_err(err)
+source: kernel
+aliases: pr_emerg(emerg) pr_alert(alert) pr_crit(crit) pr_warning(warning)
+	pr_notice(notice) pr_info(info) pr_debug(debug)
+prefix_format: "%s: "
+prefix_args: component
+device_arg: none
+
+/* used by cxgb3 driver */
+reporter: CH_MSG
+source: kernel
+aliases: CH_DBG(debug) CH_ERR(err) CH_WARN(warning) CH_ALERT(alert)
+prefix_format: "cxgb3 %s: "
+prefix_args: adapter
+device_arg: adapter
+
+/* used by GPFS */
+reporter: mmfs_pathfail(info)
+source: user 
+prefix_format: "mmfs: Error=MMFS_PDISK_PATHFAIL, ID=%s, Tag=%s:%s: Location=%s, FRU=%s, WWID=%s, RecoveryGroup=%s, %s=%s, Pdisk=%s, Device=%s"
+prefix_args: id tag message location fru wwid recoverygroup empty declusteredarray pdisk device
+
+/* used by GPFS */
+reporter: mmfs_failed(info)
+source: user
+prefix_format: "mmfs: Error=MMFS_PDISK_FAILED, ID=%s, Tag=%s:%s: Location=%s, FRU=%s, WWID=%s, RecoveryGroup=%s, DeclusteredArray=%s, Pdisk=%s, PdiskState=%s"
+prefix_args: id tag message location fru wwid recoverygroup declusteredarray pdisk pdiskstate
+device_arg: none
+
+/* used by GPFS */
+reporter: mmfs_recovered(info)
+source: user
+prefix_format: "mmfs: Error=MMFS_PDISK_RECOVERED, ID=%s, Tag=%s:%s: Location=%s, FRU=%s, WWID=%s, RecoveryGroup=%s, DeclusteredArray=%s, Pdisk=%s"
+prefix_args: id tag message location fru wwid recoverygroup declusteredarray pdisk
+device_arg: none
+
+/*used by GPFS */
+reporter: mmfs_replace(err)
+source: user
+prefix_format: "mmfs: Error=MMFS_REPLACE_PDISK, ID=%s, Tag=%s:%s: Location=%s, FRU=%s, WWID=%s, RecoveryGroup=%s, DeclusteredArray=%s, Pdisk=%s, Priority=%s, PdiskState=%s"
+prefix_args: id tag message location fru wwid recoverygroup declusteredarray pdisk priority pdiskstate
+device_arg: none
+
+/*used by GPFS */
+reporter: mmfs_rebuild(err)
+source: user
+prefix_format: "mmfs: Error=MMFS_REBUILD_FAILED, ID=%s, Tag=%s:%s: RecoveryGroup=%s, DeclusteredArray=%s, RemainingRedundancy=%s"
+prefix_args: id tag mesage recoverygroup declusteredarray remainingredundancy
+device_arg: none
+
+/* used by e1000e driver */ 
+reporter: e_printk
+source: kernel
+aliases: e_dbg(debug) e_info(info) e_notice(notice) e_warn(warning) e_err(err)
+prefix_format: "%s: %s: "
+prefix_args: device netdev
+
+/* used by e1000e driver */ 
+reporter: hw_dbg(debug)
+source: kernel
+prefix_format: "%s: "
+prefix_args: netdev
+device_arg: netdev
+
+/* used by ipr driver */
+reporter: ipr_ra_printk
+source: kernel
+/*
+ * The "device" parameter logged by ipr_ra_printk() (and thus by ipr_ra_err()
+ * and ipr_res_err()) is actually %d:%d:%d:%d -- host:bus:target:lun -- but
+ * this together is taken as the device ID.
+ *
+ * ipr_hcam_err() can call ipr_ra_err() or dev_err().  What's the format
+ * of the device ID when dev_err() is called, and which driver name is
+ * reported?
+ */
+aliases: ipr_ra_err(err) ipr_res_err(err) ipr_hcam_err(err)
+prefix_format: "ipr: %s: "
+prefix_args: device
+
+/* used by ipr driver */
+reporter: ipr_err(err)
+source: kernel
+aliases: ipr_info(info) ipr_dbg(debug)
+prefix_format: "ipr: "
+
+/* used by lpfc driver */
+reporter: lpfc_printf_vlog
+source: kernel
+prefix_format: "lpfc %s: %d:(%d):%d "
+prefix_args: device FCBoardno vpi messageno
+
+/* used by lpfc driver */
+reporter: lpfc_printf_log
+source: kernel
+prefix_format: "lpfc %s: %d:%d "
+prefix_args: device FCBoardno messageno
+
+/* used by qla2xxx driver -- calls dev_printk */
+reporter: qla_printk
+source:kernel
+prefix_format: "qla2xxx %s: "
+prefix_args: device
+
+/* for ixgb device driver */
+
+/* 3 prefix args */
+reporter: netdev_printk3
+source: kernel
+aliases: netdev_info3(info) netdev_err3(err)
+prefix_format: "%s %s: %s: "
+prefix_args: driver device netdev
+device_arg: netdev
+
+/* 1 prefix arg */
+reporter: netdev_printk1
+source: kernel
+aliases: netdev_info1(info) netdev_err1(err)
+prefix_format: "%s: "
+prefix_args: netdev
+device_arg: netdev
+
+/* 0 prefix args */
+reporter: netdev_printk0
+source: kernel
+aliases: netdev_info0(info) netdev_err0(err)
+prefix_format: "(NULL net_device): "
+
+meta_reporter: netif_info
+variants: netdev_info3 netdev_info1 netdev_info0
+
+meta_reporter: netif_err
+variants: netdev_err3 netdev_err1 netdev_err0
+
+
+/* from include/scsi/scsi_device.h -- just calls dev_printk */
+reporter: sdev_printk
+source: kernel
+prefix_format: "%s %s: "
+prefix_args: driver device
+
+/*
+ * from include/scsi/scsi_device.h
+ * scmd_printk() can produce either of two message formats.  If there's an
+ * rq_disk associated with the request, the name of the disk is appended to
+ * the message prefix.  Otherwise it's equivalent to sdev_printk.  So we
+ * list scmd_printk as a meta-reporter that maps to either sdev_printk or
+ * to the scmd_printk_disk pseudo-reporter.
+ */
+reporter: scmd_printk_disk
+source: kernel
+prefix_format: "%s %s: [%s] "
+prefix_args: driver device disk
+
+meta_reporter: scmd_printk
+variants: sdev_printk scmd_printk_disk

@@ -1,0 +1,1702 @@
+subsystem: scsi
+
+file: "drivers/scsi/qla2xxx/qla_attr.c"
+
+message: qla_printk KERN_INFO "Firmware dump cleared on (%ld).\n"
+description {{
+Previous firmware dump was cleared from memory.
+}}
+action {{
+None recommended.
+}}
+class: firmware type: info refcode: ""
+
+
+message: qla_printk KERN_WARNING "Raw firmware dump ready for read on (%ld).\n"
+description {{
+Firmware dump now ready to be read.
+}}
+action {{
+None recommended.
+}}
+class: firmware type: info refcode: ""
+
+
+message: qla_printk KERN_ERR "HBA not online, failing NVRAM update.\n"
+description {{
+Application tried to write to NVRAM of adapter that is offline.
+}}
+action {{
+None recommended.
+}}
+class: hardware sl_severity: warning refcode: ""
+
+message: qla_printk KERN_ERR "Unable to allocate memory for optrom retrieval (%x).\n"
+description {{
+System has low memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Invalid start region 0x%x/0x%x.\n"
+description {{
+Invalid starting address of option rom memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to allocate memory for optrom update (%x).\n"
+description {{
+System has low memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "HBA not online, failing flash update.\n"
+description {{
+Application tried to write to flash memory of adapter that is offline.
+}}
+action {{
+None recommended.
+}}
+class: hardware sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "HBA not online, failing VPD update.\n"
+description {{
+Application tried to write to vital product data of adapter that is 
+offline.
+}}
+action {{
+None recommended.
+}}
+class: hardware sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to allocate memory for VPD information update.\n"
+description {{
+System has low memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to allocate memory for SFP read-data.\n"
+description {{
+System has low memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to read SFP data (%x/%x/%x).\n"
+description {{
+Firmware did not return any information for requested SFP data.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_INFO "Issuing ISP reset on (%ld).\n"
+description {{
+Debug ASIC reset.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_INFO "Issuing MPI reset on (%ld).\n"
+description {{
+Debug reset of 81xx MP firmware.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_ERR "MPI reset failed on (%ld).\n"
+description {{
+MPI firmware reset failed during loopback test.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to allocate memory for XGMAC read-data.\n"
+description {{
+System has low memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to read XGMAC data (%x).\n"
+description {{
+Unable to ethernet transmission statistics.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to allocate memory for DCBX TLV read-data.\n"
+description {{
+System has low memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to read DCBX TLV data (%x).\n"
+description {{
+Unable to read data center bridging type-length-value data.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to create sysfs %s binary attribute (%d).\n"
+description {{
+Error creating sysfs attribute.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "Abort ISP active -- ignoring beacon request.\n"
+description {{
+Request to blink beacon ignored.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_INFO "VP entry id %d assigned.\n"
+description {{
+Virtual port index of new NPIV port.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_WARNING "Can't create request queue for vp_idx:%d\n"
+description {{
+Could not create a separate request queue for new virtual port.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "Queue delete failed.\n"
+description {{
+Could not delete request queue specific to a virtual port being deleted.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_INFO "vport %d deleted\n"
+description {{
+Virtual port successfully deleted.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+file: "drivers/scsi/qla2xxx/qla_bsg.c"
+
+message: qla_printk KERN_ERR "MPI reset failed on (%ld).\n"
+description {{
+MPI firmware reset failed during loopback test.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+file: "drivers/scsi/qla2xxx/qla_dbg.c"
+
+message: qla_printk KERN_ERR "Failed to dump firmware (%x)!!!\n"
+description {{
+Procedure to produce a firmware dump failed.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_INFO "Firmware dump saved to temp buffer (%ld/%p).\n"
+description {{
+Procedure to produce firmware dump succeeded and is ready for retrieval.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_ERR "No buffer available for dump!!!\n"
+description {{
+Memory buffer for firmware dump was never allocated.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+file: "drivers/scsi/qla2xxx/qla_dfs.c"
+
+message: qla_printk KERN_ERR "DebugFS: Unable to disable FCE (%d).\n"
+description {{
+Error flushing fibre channel event buffer.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "DebugFS: Unable to reinitialize FCE (%d).\n"
+description {{
+Error reinitializing trace when ending a trace session.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "DebugFS: Unable to create root directory.\n"
+description {{
+Unable to create the qla2xxx directory in the debugFS filesystem.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "DebugFS: Unable to create ha directory.\n"
+description {{
+Unable to create a directory for this adapter in DebugFS.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "DebugFS: Unable to fce node.\n"
+description {{
+Unable to create fibre channel event node in DebugFS.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+file: "drivers/scsi/qla2xxx/qla_init.c"
+
+message: qla_printk KERN_WARNING "Configuring PCI space...\n"
+description {{
+Driver is configuring PCI configuration registers.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_INFO "Configure NVRAM parameters...\n"
+description {{
+Driver is reading NVRAM parameters and configuring driver settings 
+with them.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_WARNING "Masking HBA WWPN %02x%02x%02x%02x%02x%02x%02x%02x (via NVRAM).\n"
+description {{
+Masking this HBA from operating system based on NVRAM parameters.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_INFO "Verifying loaded RISC code...\n"
+description {{
+Verifying that the firmware image is valid.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to configure ISP84XX.\n"
+description {{
+Error configuring 84xx CNA specific settings.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to initialize ISP84XX.\n"
+description {{
+Error initializing 84xx CNA specific firmware.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "RISC CODE NOT loaded\n"
+description {{
+Not loading firmware from flash memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Wrong product ID = 0x%x,0x%x,0x%x\n"
+description {{
+Bad product ID detected for 1Gb/s or 2Gb/s adapter.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Failed mailbox send register test\n"
+description {{
+Register communication test for adapter failed.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "Firmware dump previously allocated.\n"
+description {{
+Memory for a firmware dump has already been allocated.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to allocate (%d KB) for FCE.\n"
+description {{
+System has low memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to initialize FCE (%d).\n"
+description {{
+Mailbox command to initialize the fibre channel event buffer.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_INFO "Allocated (%d KB) for FCE...\n"
+description {{
+Information about how much memory was allocated for the fibre channel 
+event buffer.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to allocate (%d KB) for EFT.\n"
+description {{
+System has low memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to initialize EFT (%d).\n"
+description {{
+Mailbox command to initialize the event trace buffer failed.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_INFO "Allocated (%d KB) for EFT...\n"
+description {{
+Information about how much memory was allocated for the event trace 
+buffer.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to allocate (%d KB) for firmware dump!!!\n"
+description {{
+System has low memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_INFO "Allocated (%d KB) for firmware dump...\n"
+description {{
+Informational about how much memory was allocated for firmware dump.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_ERR "Unsupported FAC firmware (%d.%02d.%02d).\n"
+description {{
+Error getting information about flash access commands.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to update Serial Link options (%x).\n"
+description {{
+Error setting link parameters.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "MSIX Handshake Disable Mode turned on\n"
+description {{
+No MSI-X handshaking needed for this adapter.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_INFO "Waiting for LIP to complete...\n"
+description {{
+Waiting for link to stabilize.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_INFO "scsi(%ld): Waiting for LIP to complete...\n"
+description {{
+Waiting for link to stabilize.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_WARNING "Cable is unplugged...\n"
+description {{
+Adapter not connected to another physical port.
+}}
+action {{
+None recommended.
+}}
+class: hardware sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "ERROR -- Unable to get host loop ID.\n"
+description {{
+Could not get handle for local port.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Cannot get topology - retrying.\n"
+description {{
+Error getting connection type.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "Topology - %s, Host Loop address 0x%x\n"
+description {{
+Local port handle.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Inconsistent NVRAM detected: checksum=0x%x id=%c version=0x%x.\n"
+description {{
+NVRAM signature was invalid.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Falling back to functioning (yet invalid -- WWPN) defaults.\n"
+description {{
+Using driver default NVRAM settings.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "ZIO mode %d enabled; timer delay (%d us).\n"
+description {{
+Zero interrupt i/o enabled.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+message: qla_printk KERN_ERR "Unable to allocate fc remote port!\n"
+description {{
+FC transport could not create remote port object.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "SNS scan failed -- assuming zero-entry result...\n"
+description {{
+All name server queries failed.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "Performing ISP error recovery - ha= %p.\n"
+description {{
+About to perform an ASIC reset.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "ISP error recovery failed - board disabled\n"
+description {{
+ASIC reset failed so the adapter is being disabled.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "qla2x00_abort_isp: **** FAILED ****\n"
+description {{
+ASIC reset failed.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "FW: Loading from flash (%x)...\n"
+description {{
+Firmware is loading from onboard flash memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to verify integrity of flash firmware image! Firmware data: %08x %08x %08x %08x!\n"
+description {{
+Firmware image from onboard flash memory is invalid.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "[ERROR] Failed to load segment %d of firmware\n"
+description {{
+Error copying firmware image to onboard RAM.
+}}
+action {{
+None recommended.
+}}
+class: firmware sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Firmware image unavailable.\n"
+description {{
+Retrieving firmware image via request_firmware failed.
+}}
+action {{
+None recommended.
+}}
+class: firmware sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to verify integrity of firmware image (%Zd)!\n"
+description {{
+Firmware image retrieved via request_firmware is invalid.
+}}
+action {{
+None recommended.
+}}
+class: firmware sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to verify integrity of firmware image!\n"
+description {{
+Firmware image retrieved via request_firmware is invalid.
+}}
+action {{
+None recommended.
+}}
+class: firmware sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "FW: Loading via request-firmware...\n"
+description {{
+Firmware image was retrieved via request_firmware.
+}}
+action {{
+None recommended.
+}}
+class: firmware sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "FW: Attempting to fallback to golden firmware...\n"
+description {{
+Falling back to golden firmware for 81xx adapter.
+}}
+action {{
+None recommended.
+}}
+class: firmware sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "FW: Please update operational firmware...\n"
+description {{
+The operational firmware image of a 81xx adapter is corrupt and needs 
+to be reloaded.
+}}
+action {{
+None recommended.
+}}
+class: firmware sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Attempting retry of stop-firmware command...\n"
+description {{
+Trying orderly shutdown of firmware.
+}}
+action {{
+None recommended.
+}}
+class: firmware sl_severity: warning refcode: ""
+
+file: "drivers/scsi/qla2xxx/qla_isr.c"
+
+message: qla_printk KERN_ERR "Parity error -- HCCR=%x, Dumping firmware!\n"
+description {{
+A parity error was detected in a register or onboard RAM so perform a 
+ASIC reset.
+}}
+action {{
+None recommended.
+}}
+class: firmware sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "RISC paused -- HCCR=%x, Dumping firmware!\n"
+description {{
+The ASIC was frozen so perform a reset of the ASIC.
+}}
+action {{
+None recommended.
+}}
+class: firmware sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "IDC failed to post ACK.\n"
+description {{
+Driver failed to ACK 81xx inter-driver communication event.
+}}
+action {{
+None recommended.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "ISP System Error - mbx1=%xh mbx2=%xh mbx3=%xh mbx7=%xh.\n"
+description {{
+An internal system error occurred.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unrecoverable Hardware Error: adapter marked OFFLINE!\n"
+description {{
+An internal parity error occurred and the adapter may need to be 
+replaced.
+}}
+action {{
+None recommended.
+}}
+class: hardware sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "ISP Request Transfer Error (%x).\n"
+description {{
+Error transferring data from request queue.
+}}
+action {{
+None recommended.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "ISP Response Transfer Error.\n"
+description {{
+Error transferring data from firmware to host response queue.
+}}
+action {{
+None recommended.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "LIP occurred (%x).\n"
+description {{
+Fibre channel LIP occurred on the link.
+}}
+action {{
+None recommended.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "LOOP UP detected (%s Gbps).\n"
+description {{
+Local port link is up.
+}}
+action {{
+None recommended.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "LOOP DOWN detected (%x %x %x %x).\n"
+description {{
+Local port link is down.
+}}
+action {{
+None recommended.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "LIP reset occurred (%x).\n"
+description {{
+Fibre channel LIP reset occurred.
+}}
+action {{
+None recommended.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "Configuration change detected: value=%x.\n"
+description {{
+There was a change in the connection status of the local port.
+}}
+action {{
+None recommended.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Alert 84XX: panic recovery %04x %04x\n"
+description {{
+Internal panic recovered on a 84xx adapter.
+}}
+action {{
+None recommended.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Alert 84XX: firmware version %x\n"
+description {{
+Unknown asynchronous event from 84xx adapter.
+}}
+action {{
+None recommended.
+}}
+class: firmware sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Alert 84xx: Invalid Alert %04x %04x %04x\n"
+description {{
+Unknown asynchronous event from 84xx adapter.
+}}
+action {{
+None recommended.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Invalid SCSI completion handle %d.\n"
+description {{
+Command completion is for invalid command.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Invalid ISP SCSI completion handle\n"
+description {{
+Command completion is for invalid command.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "%s: Invalid completion handle (%x).\n"
+description {{
+Command completion is for invalid command.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "%s: Invalid completion handle (%x) -- timed-out.\n"
+description {{
+SCSI layer has already timed out command.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "%s: SRB handle (%x) mismatch %x.\n"
+description {{
+Command completion is for invalid command.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "Command is NULL: already returned to OS (sp=%p)\n"
+description {{
+Command already completed back to SCSI layer.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Error entry - invalid handle\n"
+description {{
+Error status entry is invalid.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Additional code -- 0x55AA.\n"
+description {{
+Extra debug information from checking the ASIC when it is frozen.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "MSI-X: Failed to enable support -- %d/%d Retry with %d vectors\n"
+description {{
+System could not give us the number of MSI-X vectors request so retry 
+with less.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "MSI-X: Failed to enable support, giving up -- %d/%d\n"
+description {{
+Could not enable MSI-X support for this adapter.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "MSI-X: Unable to register handler -- %x/%d.\n"
+description {{
+Unable to register a specific MSI-X handler callback.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "MSI-X: Falling back-to INTa mode -- %d.\n"
+description {{
+Could not enable MSI so falling back to INTx for interrupt handling.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Failed to reserve interrupt %d already in use.\n"
+description {{
+Could not reserve INTx IRQ.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+file: "drivers/scsi/qla2xxx/qla_mbx.c"
+
+message: qla_printk KERN_ERR "Mailbox command timeout occurred. Scheduling ISP abort. eeh_busy: 0x%x\n"
+description {{
+Mailbox command to firmware timed out, reset ASIC.
+}}
+action {{
+None recommended.
+}}
+class: firmware sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Mailbox command timeout occurred. Issuing ISP abort.\n"
+description {{
+Mailbox command to firmware timed out, reset ASIC.
+}}
+action {{
+None recommended.
+}}
+class: firmware sl_severity: warning refcode: ""
+
+file: "drivers/scsi/qla2xxx/qla_mid.c"
+
+message: qla_printk KERN_ERR "Couldn't delete req que %d\n"
+description {{
+Couldn't delete a request queue associated with a virtual port.
+}}
+action {{
+None recommended.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Couldn't delete rsp que %d\n"
+description {{
+Couldn't delete a response queue associated with a virtual port.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "could not allocate memory for request que\n"
+description {{
+System has low memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Memory Allocation failed - request_ring\n"
+description {{
+Coherant DMA memory allocation failed.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "No resources to create additional request queue\n"
+description {{
+Adapter has no more resources to create another request queue.
+}}
+action {{
+None recommended.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "qla25xx_create_req_que failed\n"
+description {{
+Failed to create a new request queue (beyond the base request queue).
+}}
+action {{
+None recommended.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "could not allocate memory for response que\n"
+description {{
+System has low memory.
+}}
+action {{
+None recommended.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Memory Allocation failed - response_ring\n"
+description {{
+Coherant DMA memory allocation failed.
+}}
+action {{
+None recommended.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "No resources to create additional response queue\n"
+description {{
+Adapter has no more resources to create another response queue.
+}}
+action {{
+None recommended.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "msix not enabled\n"
+description {{
+Adapter is not using MSI-X.
+}}
+action {{
+None recommended.
+}}
+class: unknown sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "qla25xx_create_rsp_que failed\n"
+description {{
+Failed to create a new response queue (beyond the base response queue).
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+file: "drivers/scsi/qla2xxx/qla_os.c"
+
+message: qla_printk KERN_ERR "Unable to allocate memory for request queue ptrs\n"
+description {{
+System low on memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to allocate memory for response queue ptrs\n"
+description {{
+System low on memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "Firmware is not multi-queue capable\n"
+description {{
+The firmware for this adapter is not capable of multiple request or 
+response queues.
+}}
+action {{
+None recommended.
+}}
+class: firmware sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Can't create request queue\n"
+description {{
+A request to create a new request queue could not be fulfilled.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Response Queue create failed\n"
+description {{
+A request to create a new response queue failed.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "scsi(%ld:%d:%d): Abort handler timed out -- %lx\n"
+description {{
+A request to abort a command timed out.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "scsi(%ld:%d:%d): Abort command issued -- %d %lx %x.\n"
+description {{
+A request to abort a command was issued from the SCSI layer.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_INFO "scsi(%ld:%d:%d): %s RESET ISSUED.\n"
+description {{
+A reset of a LUN was requested by the SCSI layer.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_INFO "scsi(%ld:%d:%d): %s RESET SUCCEEDED.\n"
+description {{
+LUN reset succeeded.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_ERR "scsi(%ld:%d:%d): %s RESET FAILED: %s.\n"
+description {{
+LUN reset failed.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_INFO "scsi(%ld:%d:%d): BUS RESET ISSUED.\n"
+description {{
+A bus reset was requested by the SCSI layer.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_INFO "qla2xxx_eh_bus_reset  reset succeeded.\n"
+description {{
+bus reset succeeded.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_INFO "scsi(%ld:%d:%d): ADAPTER RESET ISSUED.\n"
+description {{
+A reset of the adapter was requested by the SCSI layer.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_INFO "qla2xxx_eh_host_reset reset succeeded.\n"
+description {{
+Adapter reset succeeded.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_ERR "Failed to reserve PIO/MMIO regions (%s)\n"
+description {{
+PCI layer could not reserve device resources.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Invalid PCI I/O region size (%s)...\n"
+description {{
+PCI I/O memory region for this adapter is an invalid size.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "region #0 not a PIO resource (%s)...\n"
+description {{
+Memory region 0 on the adapter is not a port I/O resource.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "region #1 not an MMIO resource (%s), aborting\n"
+description {{
+Memory region 1 on the adapter isn't a memory-mapped I/O resource so 
+abort configuration.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Invalid PCI mem region size (%s), aborting\n"
+description {{
+The memory-mapped I/O region of the adapter is an invalid size so 
+abort configuration.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "cannot remap MMIO (%s), aborting\n"
+description {{
+ioremap() operation to map device memory into the kernel address space 
+failed so abort configuration.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_INFO "MSI-X vector count: %d\n"
+description {{
+Number of MSI-X vectors for this adapter.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_WARNING "BAR 3 not enabled\n"
+description {{
+This adapter is not capable of multiple request and response queues.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_INFO "Found an ISP%04X, irq %d, iobase 0x%p\n"
+description {{
+Information about adapter just found in probe routine.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_ERR "[ERROR] Failed to allocate memory for adapter\n"
+description {{
+System has low memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "[ERROR] Failed to allocate memory for scsi_host\n"
+description {{
+System has low memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "[ERROR] Failed to allocate memory for queue pointers\n"
+description {{
+System has low memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Failed to initialize adapter\n"
+description {{
+Error starting firmware.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "Can't create queues, falling back to single queue mode\n"
+description {{
+Setting up multiqueue mode failed so fall back to a single request and 
+response queue.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to start DPC thread!\n"
+description {{
+Could not start deferred procedure kernel thread.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_INFO " QLogic Fibre Channel HBA Driver: %s QLogic %s - %s ISP%04X: %s @ %s hdma%c, host#=%ld, fw=%s\n"
+description {{
+Info about adapter just configured.
+}}
+action {{
+None recommended.
+}}
+class: software type: info refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to allocate memory for rsp\n"
+description {{
+System low on memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to allocate memory for rsp_ring\n"
+description {{
+System low on memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to allocate memory for npiv info\n"
+description {{
+System low on memory.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "qla2x00_do_dpc: dpc_flags: %lx\n"
+description {{
+Allocating Scsi_host struct from SCSI layer failed.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Loop down - aborting ISP.\n"
+description {{
+Local port has been down for over 4 minutes, reset ASIC.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+message: qla_printk KERN_ERR "RISC paused -- mmio_enabled, Dumping firmware!\n"
+description {{
+ASIC is frozen after a AER recovery so perform a firware dump.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Can't re-enable PCI device after reset.\n"
+description {{
+Adapter failed to restart after a PCIe slot reset.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "the device failed to resume I/O from slot/link_reset\n"
+description {{
+Adapter failed to restart after AER recovery.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+file: "drivers/scsi/qla2xxx/qla_sup.c"
+
+message: qla_printk KERN_ERR "Inconsistent FLTL detected: checksum=0x%x.\n"
+description {{
+Firmware Layout Table signature not valid.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+message: qla_printk KERN_ERR "NPIV-Config: Failed to create vport [%02x]: wwpn=%llx wwnn=%llx.\n"
+description {{
+Predefined virtual port stored in flash could not be created.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to allocate memory for optrom burst write (%x KB).\n"
+description {{
+Coherant DMA memory allocation failed.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to unprotect flash for update.\n"
+description {{
+Turning off write-protection for onboard flash memory failed.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "Unable to burst-write optrom segment (%x/%x/%llx).\n"
+description {{
+Cannot use fast flash write method so use slower method.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to protect flash after update.\n"
+description {{
+Reenable of write protection for onboard flash memory failed.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to update fw options (beacon on).\n"
+description {{
+Unable to set beacon blinking functionality.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to update fw options (beacon off).\n"
+description {{
+Unable to turn off beacon blinking functionality.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+message: qla_printk KERN_ERR "Unable to get fw options (beacon off).\n"
+description {{
+Unable to read firmware options for this adapter.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_ERR "Unable to allocate memory for optrom burst read (%x KB).\n"
+description {{
+Coherant DMA memory allocation failed.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+
+
+message: qla_printk KERN_WARNING "Unable to burst-read optrom segment (%x/%x/%llx).Reverting to slow-read\n"
+description {{
+Cannot use fast flash read method so use slower method.
+}}
+action {{
+None recommended.
+}}
+class: software sl_severity: warning refcode: ""
+

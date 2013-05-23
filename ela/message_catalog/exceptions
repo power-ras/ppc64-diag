@@ -1,0 +1,89 @@
+/*
+ * The exceptions catalog.  Can also be thought of as the "fallbacks"
+ * catalog, since it provides a convenient shorthand for classifying
+ * messages that we don't have explicit advice for.
+ *
+ * Given these fallbacks, there's very little excuse for excluding
+ * any of your driver's messages from the catalog.
+ *
+ * Note that there's no exception type specifically for messages
+ * that you deem self-explanatory.  If it's a self-explanatory,
+ * low-severity message (e.g., notice, info, debug), label it
+ * "chatter".  Otherwise it probably warrants a servicelog record,
+ * so you need to provide the appropriate info.
+ */
+exception: chatter
+description {{ This message is logged as part of normal operations. }}
+action {{ No action required. }}
+
+exception: redundant
+description {{
+No explanation is provided for this message because it typically
+accompanies one or more other messages for which explanations are
+provided.
+}}
+action {{
+Refer to explanations for other messages logged at about the same time.
+If no such explanations can be found, please report this situation
+to your service provider.
+}}
+
+exception: fragment
+description {{
+This line is the second or subsequent line in a multi-line message.
+}}
+action {{
+Refer to explanations for messages logged previously at about the
+same time.
+}}
+
+/*
+ * Use this for those defensive printks used to log failures that you
+ * never expect to see.
+ */
+exception: defensive
+description {{
+This message is not expected to be logged during normal operation
+or any anticipated failure scenario.  No explanation is currently
+available.
+}}
+action {{
+Refer to explanations of related messages, if any.  Report this
+situation to your service provider.
+}}
+
+/*
+ * Typically used with printks associated with ENOMEM failures.
+ * A special case of "defensive" printks.
+ */
+exception: enomem
+description {{
+This message typically indicates that the system is low on memory.
+}}
+action {{
+Free up memory and retry the failed operation, or add memory to
+your system.
+}}
+
+exception: unknown
+description {{ We don't know why this message was logged. }}
+action {{
+Refer to explanations of related messages, if any.  Report this
+situation to your service provider.
+}}
+
+/*
+ * Used to match messages that appear to come from our driver, but
+ * are missing from our driver's message catalog.  Typical usage:
+ * message[catchall]: printk any "cxgb3 %s\n"
+ * message[catchall]: printk any "cxgb3: %s\n"
+ */
+exception: catchall
+description {{
+There is no match for this message in the message catalog.  The message
+catalog may be out of sync with the related system software.
+}}
+action {{
+Refer to explanations of related messages, if any.  Report this
+situation to your service provider.
+}}

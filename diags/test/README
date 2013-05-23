@@ -1,0 +1,30 @@
+To create a .pg2 file that represents an entirely healthy Bluehawk, run:
+$ make
+$ ./bh_mk_healthy xxx.pg2
+
+
+To create a .pg2 file that represents (sort of) a Bluehawk with an overheating
+power supply, run:
+$ make
+$ ./bh_mk_hot_power xxx.pg2
+
+You can simulate other problems by writing programs similar to mk_hot_power.c.
+
+When you feed such a file to diag_encl using the -f option, remember that
+you also need to provide a .vpd file.  Just copy sg8.vpd and rename it.
+
+
+To create .pg2 file from Bluehawk enclosure, run:
+$ make
+$ ./bh_dump_pg2 <sgN> <output_file>
+
+
+To dump the Bluehawk vpd data, run:
+$ make
+$ bh_vpd <sgN>
+
+
+To dump the Bluehawk structure size, run :
+$ make
+$ bh_structs
+

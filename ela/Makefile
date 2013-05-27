@@ -75,7 +75,7 @@ install: all
 	@$(call install_files,$(CATALOG),744,$(DESTDIR)/etc/ppc64-diag/message_catalog)
 	@$(call install_files,$(CATALOG_REGEX),744,$(DESTDIR)/etc/ppc64-diag/message_catalog/with_regex)
 	@$(call install_man,$(MANPAGES),$(DESTDIR))
-	$(INSTALL) -d -m 755 /var/log/ppc64-diag
+	$(INSTALL) -d -m 755 $(DESTDIR)/var/log/ppc64-diag
 
 clean:
 	@rm -rf $(CMDS) *.o lex.*.c *.tab.c *.tab.h

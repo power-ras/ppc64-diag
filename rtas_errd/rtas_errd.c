@@ -151,7 +151,7 @@ handle_rtas_event(struct event *event)
 		break;
 
 	    case RTAS_HDR_TYPE_PRRN:
-		dbg("Entring PRRN handler");
+		dbg("Entering PRRN handler");
 		handle_prrn_event(event);
 
 		/* Nothing left to do for PRRN Events, there is no exthdr

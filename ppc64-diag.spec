@@ -1,5 +1,5 @@
 Name:	ppc64-diag
-Version:	2.6.1
+Version:	2.6.2
 Release:	0
 Summary: 	PowerLinux Platform Diagnostics
 Group: 		System Environment/Base
@@ -78,6 +78,9 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Tue Aug 20 2013 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.6.2
+- Minor bug fix in diag_encl and encl_led
+
 * Fri Feb 08 2013 - Vasant Hegde <hegdevasant@in.ibm.com> - 2.6.1
 - Handler to handle PRRN RTAS notification
 

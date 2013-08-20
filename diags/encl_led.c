@@ -78,16 +78,16 @@ open_sg_device(const char *encl)
 static int
 loc_code_device(const char *loccode, char *sg, int sg_size)
 {
-	int found = 0;
-	char buf[128];
+	int rc, found = 0;
+	char buf[128], cmd[128];
 	char *dev;
 	FILE *fp;
-	struct dev_vpd vpd;
 
-	fp = popen("lsvpd | grep sg", "r");
+	snprintf(cmd, 128, "lsvpd -l %s", loccode);
+	fp = popen(cmd, "r");
 	if (fp == NULL) {
-		fprintf(stderr, "Could not obtain a list of sg devices."
-				 " Ensure that lsvpd is installed.\n");
+		fprintf(stderr, "Could not obtain the sg device details."
+			" Ensure that lsvpd is installed.\n");
 		return -1;
 	}
 
@@ -97,12 +97,14 @@ loc_code_device(const char *loccode, char *sg, int sg_size)
 		/* Handle both old and new formats. */
 		if (strstr(buf, "/dev/sg") || strstr(buf, "*AX sg")) {
 			dev = strstr(buf, "sg");
-			memset(&vpd, 0, sizeof(vpd));
-			if (read_vpd_from_lscfg(&vpd, dev) == 0)
-				if (!strcmp(vpd.location, loccode)) {
-					strncpy(sg, dev, sg_size);
-					found = 1;
-				}
+
+			/* validate sg device */
+			rc = valid_enclosure_device(dev);
+			if (rc)
+				continue;
+
+			strncpy(sg, dev, sg_size);
+			found = 1;
 		}
 	}
 
@@ -129,7 +131,7 @@ enclosure_dev_name(const char *encl, char *sg, int sg_size)
 {
 	if (!strncmp(encl, "sg", 2) && strlen(encl) < DEVSG_MAXLEN - 6) {
 		strncpy(sg, encl, sg_size);
-		return 0;
+		return valid_enclosure_device(sg);
 	}
 	return loc_code_device(encl, sg, sg_size);
 }
@@ -223,11 +225,8 @@ main(int argc, char **argv)
 
 	/* Get sg dev name for the given sg/location code */
 	memset(sg, 0, sizeof(sg));
-	if (enclosure_dev_name(enclosure, sg, sizeof(sg)) != 0) {
-		fprintf(stderr, "%s: %s is not a valid enclosure device\n",
-				progname, enclosure);
+	if (enclosure_dev_name(enclosure, sg, sizeof(sg)) != 0)
 		exit(1);
-	}
 
 	/* Get enclosure type as "Machine Type" from VPD. */
 	memset(&vpd, 0, sizeof(vpd));

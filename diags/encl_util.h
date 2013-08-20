@@ -6,6 +6,9 @@
 
 #include <stdint.h>
 
+/* SES sys path */
+#define SCSI_SES_PATH		"/sys/class/enclosure"
+
 /* device vpd */
 struct dev_vpd {
 	char mtm[128];
@@ -24,5 +27,6 @@ extern int get_diagnostic_page(int fd, uint8_t cmd, uint8_t page_nr, void *buf,
 extern char *fgets_nonl(char *buf, int size, FILE *s);
 extern int read_vpd_from_lscfg(struct dev_vpd *vpd, const char *sg);
 extern void trim_location_code(struct dev_vpd *vpd);
+extern int valid_enclosure_device(const char *sg);
 
 #endif /* _ENCL_UTIL_H */

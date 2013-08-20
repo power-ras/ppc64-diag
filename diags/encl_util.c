@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
+#include <dirent.h>
 #include <sys/types.h>
 #include <scsi/scsi.h>
 #include <scsi/scsi_ioctl.h>
@@ -203,5 +204,62 @@ read_vpd_from_lscfg(struct dev_vpd *vpd, const char *sg)
 	trim_location_code(vpd);
 	pclose(fp);
 
+	return 0;
+}
+
+/*
+ * Validate sg device.
+ *
+ * Note:
+ *  /sys/class/enclosure/<ID>/device/scsi_generic/ dir
+ *  will have the 'scsi' generic name of the device.
+ *
+ * Returns: 0 on valid enclosure device, -1 on invalid enclosure device.
+ */
+int
+valid_enclosure_device(const char *sg)
+{
+	struct dirent *edirent, *sdirent;
+	DIR *edir, *sdir;
+	char path[128];
+
+	edir = opendir(SCSI_SES_PATH);
+	if (!edir) {
+		fprintf(stderr, "System does not have SCSI enclsoure(s).\n");
+		return -1;
+	}
+
+	/* loop over all enclosures */
+	while ((edirent = readdir(edir)) != NULL) {
+		if (!strcmp(edirent->d_name, ".") ||
+		    !strcmp(edirent->d_name, ".."))
+			continue;
+
+		snprintf(path, 128, "%s/%s/device/scsi_generic",
+			 SCSI_SES_PATH, edirent->d_name);
+
+		sdir = opendir(path);
+		if (!sdir)
+			continue;
+
+		while ((sdirent = readdir(sdir)) != NULL) {
+			if (!strcmp(sdirent->d_name, ".") ||
+			    !strcmp(sdirent->d_name, ".."))
+				continue;
+
+			/* found sg device */
+			if (!strcmp(sdirent->d_name, sg))
+				goto out;
+		}
+		closedir(sdir);
+	}
+
+	closedir(edir);
+	fprintf(stderr, "%s is not a valid enclosure device\n", sg);
+	return -1;
+
+out:
+	closedir(sdir);
+	closedir(edir);
 	return 0;
 }

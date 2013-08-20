@@ -391,6 +391,11 @@ diagnose(const char *sg, struct dev_vpd **diagnosed)
 	struct dev_vpd *vpd = NULL;
 	struct dev_vpd *v;
 
+	/* Validate sg device */
+	rc = valid_enclosure_device(sg);
+	if (rc)
+		return -1;
+
 	printf("DIAGNOSING %s\n", sg);
 
 	vpd = (struct dev_vpd *)malloc(sizeof(struct dev_vpd));

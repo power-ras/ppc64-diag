@@ -10,6 +10,7 @@
 #include <time.h>
 #include <getopt.h>
 #include <errno.h>
+#include <dirent.h>
 #include <sys/wait.h>
 #include <scsi/scsi.h>
 #include <scsi/scsi_ioctl.h>
@@ -487,8 +488,9 @@ int
 main(int argc, char *argv[])
 {
 	int failure = 0, option_index, rc;
-	char buf[128], *sg;
-	FILE *fp;
+	char path[128];
+	DIR *edir, *sdir;
+	struct dirent *sdirent, *edirent;
 	struct dev_vpd *diagnosed = NULL;
 
 	memset(&cmd_opts, 0, sizeof(cmd_opts));
@@ -574,21 +576,38 @@ main(int argc, char *argv[])
 			failure += diagnose(argv[optind++], &diagnosed);
 
 	} else {
-		/* use lsvpd to find all sg devices */
-		fp = popen("lsvpd | grep sg", "r");
-		if (fp == NULL) {
-			fprintf(stderr, "Could not obtain a list of sg devices."
-					" Ensure that lsvpd is installed.\n");
+		edir = opendir(SCSI_SES_PATH);
+		if (!edir) {
+			fprintf(stderr,
+				"System does not have SCSI enclsoure(s).\n");
 			return -1;
 		}
-		while (fgets_nonl(buf, 128, fp) != NULL) {
-			/* Handle both old and new formats. */
-			if (strstr(buf, "/dev/sg") || strstr(buf, "*AX sg")) {
-				sg = strstr(buf, "sg");
-				failure += diagnose(sg, &diagnosed);
+
+		/* loop over all enclosures */
+		while ((edirent = readdir(edir)) != NULL) {
+			if (!strcmp(edirent->d_name, ".") ||
+			    !strcmp(edirent->d_name, ".."))
+				continue;
+
+			snprintf(path, 128, "%s/%s/device/scsi_generic",
+				 SCSI_SES_PATH, edirent->d_name);
+
+			sdir = opendir(path);
+			if (!sdir)
+				continue;
+
+			while ((sdirent = readdir(sdir)) != NULL) {
+				if (!strcmp(sdirent->d_name, ".") ||
+				    !strcmp(sdirent->d_name, ".."))
+					continue;
+
+				/* run diagnostics */
+				failure += diagnose(sdirent->d_name,
+						    &diagnosed);
 			}
-		}
-		pclose(fp);
+			closedir(sdir);
+		} /* outer while loop */
+		closedir(edir);
 	}
 
 	free(cmd_opts.prev_path);

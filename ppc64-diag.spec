@@ -9,11 +9,13 @@ Vendor: 	IBM Corp.
 ExclusiveArch:  ppc ppc64
 BuildRequires:  libservicelog-devel, libvpd-devel, flex, perl, /usr/bin/yacc
 BuildRequires:	ncurses-devel
-Requires: 	servicelog, /usr/sbin/lsvpd, /sbin/chkconfig
+Requires: 	servicelog, /sbin/chkconfig
 # PRRN RTAS event notification handler depends on below librtas
 # and powerpc-utils versions.
 Requires:	librtas >= 1.3.8
 Requires:	powerpc-utils >= 1.2.16
+# Light Path Diagnostics depends on below lsvpd version.
+Requires:	lsvpd >= 1.7.1
 BuildRoot:	%{_tmppath}/%{name}-%{version}-build
 Source0: 	ppc64-diag-%{version}.tar.gz
 

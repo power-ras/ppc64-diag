@@ -8,6 +8,7 @@
  * @author	Vasant Hegde <hegdevasant@linux.vnet.ibm.com>
  */
 
+#include <stdio.h>
 #include <string.h>
 
 #include "lp_diag.h"

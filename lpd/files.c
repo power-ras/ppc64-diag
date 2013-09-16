@@ -8,6 +8,7 @@
  * @author	Vasant Hegde <hegdevasant@linux.vnet.ibm.com>
  */
 
+#include <stdio.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <string.h>

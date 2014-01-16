@@ -1,0 +1,141 @@
+#! /bin/sh
+#
+# System startup script for opal_errd daemon
+#
+# Copyright (C) 2014 IBM Corporation
+#
+# Description:	Starts opal_errd daemon to retrieve platform errors
+#		and performs error log analysis.
+
+# Return values:
+# 0		Success
+# 1		Unspecified error
+# 2		Invalid argument(s)
+# 3		Unimplemented feature
+# 4		Insufficient privileges
+# 5		Daemon not installed
+# 6		Daemon not configured
+# 7		Daemon not running
+# 8		Unsupported platform
+# 9 - 199	Reserved
+
+### BEGIN INIT INFO
+# Provides:		opal_errd
+# Required-Start:	$local_fs $syslog $time
+# Required-Stop:
+# Default-Start:	2 3 5
+# Default-Stop:         0 1 4 6
+# Short-Description:	Daemon to retrieve platform errors/events
+# Description:		Starts opal_errd daemon to retrieve platform errors,
+#			parse the error and log to syslog.
+### END INIT INFO
+
+# Command path
+OE_BIN=/usr/sbin/opal_errd
+test -x $OE_BIN || exit 5
+
+# This daemon runs only on PowerNV platform
+machine=`uname -m`
+platform=`cat /proc/cpuinfo | grep platform | awk '{print $3}'`
+if [ "$machine" != "ppc64" ] || [ "$platform" != "PowerNV" ]; then
+	echo "opal_errd daemon is not supported on the $platform platform"
+	exit 8
+fi
+
+if [[ -f /etc/rc.status ]]; then
+	. /etc/rc.status
+	rc_reset
+	INSSERV=1
+else
+	. /etc/rc.d/init.d/functions
+	INSSERV=0
+fi
+
+opal_errd_start()
+{
+	if [[ $INSSERV -eq 1 ]]; then
+		startproc $OE_BIN
+		rc_status -v
+	else
+		daemon $OE_BIN
+		pid=`pidof opal_errd`
+		if [[ -n "$pid" ]]; then
+			echo $pid > /var/run/opal_errd.pid
+			touch /var/lock/subsys/opal_errd
+		fi
+	fi
+}
+
+opal_errd_stop()
+{
+	if [[ $INSSERV -eq 1 ]]; then
+		killproc -TERM $OE_BIN
+		rc_status -v
+	else
+		killproc opal_errd -TERM
+		rm -f /var/lock/subsys/opal_errd
+		rm -f /var/run/opal_errd.pid
+		echo
+	fi
+}
+
+opal_errd_status()
+{
+	if [[ $INSSERV -eq 1 ]]; then
+		checkproc $OE_BIN
+		rc_status -v
+	else
+		status opal_errd
+	fi
+}
+
+opal_errd_reload()
+{
+	pid=`pidof opal_errd`
+	if [[ -n "$pid" ]]; then
+		kill -HUP $pid
+	fi
+}
+
+case "$1" in
+	start)
+		echo -n "Starting opal_errd daemon: "
+		opal_errd_start
+		;;
+
+	stop)
+		echo -n "Stopping opal_errd daemon: "
+		opal_errd_stop
+		;;
+
+	restart)
+		# Stop and restart the service
+		echo -n "Restarting opal_errd daemon: "
+		opal_errd_stop
+		opal_errd_start
+		if [[ $INSSERV -eq 1 ]]; then
+			rc_status
+		fi
+		;;
+
+	reload)
+		# Reload the config
+		echo -n "Reload opal_errd daemon: "
+		opal_errd_reload
+		;;
+
+	status)
+		opal_errd_status
+		;;
+
+	*)
+		echo "Usage: $0 {start|stop|status|restart|reload}"
+		exit 1
+		;;
+esac
+
+if [[ $INSSERV -eq 1 ]]; then
+	rc_exit
+else
+	exit 0
+fi

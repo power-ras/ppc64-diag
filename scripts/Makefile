@@ -6,7 +6,7 @@ include ../rules.mk
 
 SCRIPTS = ppc64_diag_setup ppc64_diag_mkrsrc ppc64_diag_notify \
           ppc64_diag_migrate servevent_parse.pl
-INIT_FILES = rtas_errd
+INIT_FILES = rtas_errd opal_errd
 CFG_FILES = ppc64-diag.config
 
 all: $(SCRIPTS) $(INIT_FILES) $(CFG_FILES)

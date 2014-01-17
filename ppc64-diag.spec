@@ -53,32 +53,51 @@ ln -sfv /usr/sbin/usysattn $RPM_BUILD_ROOT/usr/sbin/usysfault
 %config /etc/ppc64-diag/*
 %config /etc/rc.powerfail
 %config %attr(755,root,root) /etc/init.d/rtas_errd
+%config %attr(755,root,root) /etc/init.d/opal_errd
 %config %attr(744,root,root) /etc/ppc64-diag/prrn_hotplug
 
 %post
 # Post-install script --------------------------------------------------
-/etc/ppc64-diag/ppc64_diag_setup --register >/dev/null
-/etc/ppc64-diag/lp_diag_setup --register >/dev/null
-if [ "$1" = "1" ]; then # first install
-    /sbin/chkconfig --add rtas_errd
-    /etc/init.d/rtas_errd start
-elif [ "$1" = "2" ]; then # upgrade
-    /etc/init.d/rtas_errd restart
+if [ "`grep platform /proc/cpuinfo | awk '{print $3}'`" == "PowerNV" ]; then
+    if [ "$1" = "1" ]; then # first install
+        /sbin/chkconfig --add opal_errd
+        /etc/init.d/opal_errd start
+    elif [ "$1" = "2" ]; then # upgrade
+        /etc/init.d/opal_errd restart
+    fi
+else
+    /etc/ppc64-diag/ppc64_diag_setup --register >/dev/null
+    /etc/ppc64-diag/lp_diag_setup --register >/dev/null
+    if [ "$1" = "1" ]; then # first install
+        /sbin/chkconfig --add rtas_errd
+        /etc/init.d/rtas_errd start
+    elif [ "$1" = "2" ]; then # upgrade
+        /etc/init.d/rtas_errd restart
+    fi
 fi
 
 %preun
 # Pre-uninstall script -------------------------------------------------
-if [ "$1" = "0" ]; then # last uninstall
-    /etc/init.d/rtas_errd stop
-    /sbin/chkconfig --del rtas_errd
-    /etc/ppc64-diag/ppc64_diag_setup --unregister >/dev/null
-    /etc/ppc64-diag/lp_diag_setup --unregister >/dev/null
+if [ "`grep platform /proc/cpuinfo | awk '{print $3}'`" == "PowerNV" ]; then
+    if [ "$1" = "0" ]; then # last uninstall
+        /etc/init.d/opal_errd stop
+        /sbin/chkconfig --del opal_errd
+    fi
+else
+    if [ "$1" = "0" ]; then # last uninstall
+        /etc/init.d/rtas_errd stop
+        /sbin/chkconfig --del rtas_errd
+        /etc/ppc64-diag/ppc64_diag_setup --unregister >/dev/null
+        /etc/ppc64-diag/lp_diag_setup --unregister >/dev/null
+    fi
 fi
 
 %triggerin -- librtas
 # trigger on librtas upgrades ------------------------------------------
-if [ "$2" = "2" ]; then
-    /etc/init.d/rtas_errd restart
+if [ "`grep platform /proc/cpuinfo | awk '{print $3}'`" != "PowerNV" ]; then
+    if [ "$2" = "2" ]; then
+        /etc/init.d/rtas_errd restart
+    fi
 fi
 
 %changelog

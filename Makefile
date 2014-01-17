@@ -6,7 +6,7 @@ include rules.mk
 
 .SILENT:
 
-SUBDIRS = rtas_errd diags scripts ela lpd
+SUBDIRS = rtas_errd diags scripts ela lpd opal_errd
 
 LICENSE = COPYRIGHT
 
@@ -22,6 +22,8 @@ all:
 	@$(MAKE) -C ela
 	@echo "Building lpd files..."
 	@$(MAKE) -C lpd
+	@echo "Building opal_errd files..."
+	@$(MAKE) -C opal_errd
 
 install: all
 	@$(call install_files,$(LICENSE),644,$(DESTDIR)/usr/share/doc/packages/ppc64-diag)

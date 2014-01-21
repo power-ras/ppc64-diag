@@ -14,7 +14,8 @@
 # 5       daemon not installed
 # 6       daemon not configured
 # 7       daemon not running
-# 8 - 199 reserved
+# 8       Unsupported platform
+# 9 - 199 reserved
 # 
 
 ### BEGIN INIT INFO
@@ -27,6 +28,14 @@
 # Description:		Starts rtas_errd daemon to retrieve platform errors
 #			and perform error log analysis.
 ### END INIT INFO
+
+# This daemon runs only on PowerVM platform
+machine=`uname -m`
+platform=`cat /proc/cpuinfo | grep platform | awk '{print $3}'`
+if [ "$machine" == "ppc64" ] && [ "$platform" == "PowerNV" ]; then
+	echo "rtas_errd daemon is not supported on the $platform platform"
+	exit 8
+fi
 
 RE_BIN=/usr/sbin/rtas_errd
 test -x $RE_BIN || exit 5

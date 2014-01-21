@@ -375,7 +375,7 @@ parse_epow(struct event *event)
  * 
  * @param event pointer to the RTAS event
  */
-void 
+int
 check_epow(struct event *event)
 {
 	pid_t	child;
@@ -411,5 +411,5 @@ check_epow(struct event *event)
 		}
 	}
 
-	return;
+	return current_status;
 }

@@ -152,7 +152,7 @@ int menugoal(struct event *, char *);
 
 /* epow.c */
 void epow_timer_handler(int, siginfo_t, void *);
-void check_epow(struct event *);
+int check_epow(struct event *);
 
 /* servicelog.c */
 time_t get_event_date(struct event *event);

@@ -137,7 +137,10 @@ handle_rtas_event(struct event *event)
 			    
 	    case RTAS_HDR_TYPE_EPOW:
 		dbg("Entering check_epow()");
-		check_epow(event);
+		if (check_epow(event) <= 0) {
+			dbg("Recevied EPOW 0 (all is normal) event");
+			return 0;
+		}
 		break;
 
 	    case RTAS_HDR_TYPE_PLATFORM_ERROR:

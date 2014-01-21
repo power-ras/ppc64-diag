@@ -272,9 +272,6 @@ report_src(struct event *event, struct rtas_priv_hdr_scn *privhdr,
 			    frupn, frusn, ccin);
 	}
 
-	if (event->flags & RE_SERVICEABLE)
-		event->sl_entry->serviceable = 1;
-
 	if ((usrhdr->action & 0x8000) && (usrhdr->action & 0x0800))
 		event->sl_entry->call_home_status = SL_CALLHOME_CANDIDATE;
 
@@ -472,7 +469,6 @@ report_menugoal(struct event *event, struct rtas_priv_hdr_scn *privhdr,
 				  MSGMENUGPEL_EVENT, msg); 
 	}
 
-	event->sl_entry->serviceable = 1;
 	event->sl_entry->call_home_status = SL_CALLHOME_NONE;
 
 	snprintf(menu_num_str, 20, "#%d", menu_num);
@@ -581,6 +577,10 @@ process_v6(struct event *event)
 		rtas_data->pel_severity = usrhdr->event_severity;
 		rtas_data->event_subtype = usrhdr->event_type;
 	}
+
+	/* Enable serviceable flag based on "Error Action Flags" */
+	if (usrhdr->action & RTAS_UH_ACTION_SERVICE)
+		event->sl_entry->serviceable = 1;
 
 	/*
 	 * if a "primary SRC" section exists, this is an SRC; otherwise, it

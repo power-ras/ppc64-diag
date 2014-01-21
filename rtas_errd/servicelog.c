@@ -126,8 +126,6 @@ add_callout(struct event *event, char pri, int type, char *proc, char *loc,
 {
 	struct sl_callout *callout = event->sl_entry->callouts;
 
-	event->flags |= RE_SERVICEABLE;
-
 	if (!callout) {
 		event->sl_entry->callouts = (struct sl_callout *)malloc(
 							sizeof(*callout));

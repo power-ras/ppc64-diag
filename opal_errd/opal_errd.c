@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <syslog.h>
 #include <signal.h>
+#include <sys/stat.h>
 
 #include "opal_errd.h"
 
@@ -142,6 +143,33 @@ static int parse_log(char *buffer)
 	return 0;
 }
 
+/**
+ * Check platform dump
+ *
+ * FIXME:
+ *   Presently we are calling dump extractor for every error/event.
+ *   We have to parse the error/event and call dump extractor only
+ *   for dump available event.
+ */
+static void check_platform_dump(void)
+{
+	int rc;
+	struct stat sbuf;
+
+	if (stat(EXTRACT_OPAL_DUMP_CMD, &sbuf) < 0) {
+		syslog(LOG_NOTICE, "The command \"%s\" does not exist.\n",
+		       EXTRACT_OPAL_DUMP_CMD);
+		return;
+	}
+
+	rc = system(EXTRACT_OPAL_DUMP_CMD);
+	if (rc) {
+		syslog(LOG_NOTICE, "Failed to execute platform dump "
+		       "extractor (%s).\n", EXTRACT_OPAL_DUMP_CMD);
+		return;
+	}
+}
+
 /* Read logs from opal sysfs interface */
 static int read_elog_events(void)
 {
@@ -180,6 +208,9 @@ static int read_elog_events(void)
 		syslog(LOG_NOTICE, "Failed to ACK log ID : %x\n", elog_id);
 		return -1;
 	}
+
+	/* Check platform dump */
+	check_platform_dump();
 
 	/* Parse and write required fields to syslog */
 	rc = parse_log(buffer);

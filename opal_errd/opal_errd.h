@@ -11,6 +11,8 @@
 #define SYSFS_ELOG_ACK	"/sys/firmware/opal/opal_elog_ack"
 #define PLATFORM_LOG	"/var/log/platform"
 
+#define EXTRACT_OPAL_DUMP_CMD	"/usr/sbin/extract_opal_dump"
+
 /*
  * As per PEL v6 (defined in PAPR spec) fixed offset for
  * error log information.

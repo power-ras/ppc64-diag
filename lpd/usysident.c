@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdint.h>
 
+#include "platform.c"
 #include "lp_diag.h"
 
 #define CMD_LINE_OPTIONS	"d:l:s:-:thV"
@@ -93,6 +94,7 @@ main(int argc, char **argv)
 	int	rc = 0;
 	int	trunc = 0;
 	int	truncated = 0;
+	int	platform = 0;
 	char	temp[LOCATION_LENGTH];
 	char	dloc[LOCATION_LENGTH];
 	char	*dvalue = NULL;
@@ -101,6 +103,13 @@ main(int argc, char **argv)
 	char	*othervalue = NULL;
 	struct	loc_code *current;
 	struct	loc_code *list = NULL;
+
+	platform = get_platform();
+	if (platform != PLATFORM_PSERIES_LPAR) {
+		fprintf(stderr, "%s is not supported on the %s platform\n",
+				argv[0], __power_platform_name(platform));
+		return 1;
+	}
 
 	opterr = 0;
 	while ((c = getopt(argc, argv, CMD_LINE_OPTIONS)) != -1) {

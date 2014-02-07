@@ -19,6 +19,7 @@
 #include <ncurses/menu.h>
 #include <signal.h>
 
+#include "platform.c"
 #include "lp_diag.h"
 #include "lp_util.h"
 
@@ -1146,7 +1147,15 @@ main(int argc, char *argv[])
 	int	repair_flag = 0;
 	int	event_id = 0;
 	int	repair_id = 0;
+	int	platform = 0;
 	char	*next_char;
+
+	platform = get_platform();
+	if (platform != PLATFORM_PSERIES_LPAR) {
+		fprintf(stderr, "%s is not supported on the %s platform\n",
+				argv[0], __power_platform_name(platform));
+		return 1;
+	}
 
 	opterr = 0;
 	while ((c = getopt_long(argc, argv, LP_DIAG_ARGS,

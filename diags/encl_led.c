@@ -14,6 +14,7 @@
 
 #include "encl_util.h"
 #include "encl_led.h"
+#include "platform.c"
 
 static struct {
 	char	*mtm;
@@ -160,6 +161,7 @@ int
 main(int argc, char **argv)
 {
 	int rc, option_index, i;
+	int platform = 0;
 	int list_opt = 0, verbose = 0, found = 0;
 	int fault_setting = LED_SAME, ident_setting = LED_SAME;
 	const char *enclosure = NULL, *component = NULL;
@@ -167,6 +169,14 @@ main(int argc, char **argv)
 	struct dev_vpd vpd;
 
 	progname = argv[0];
+
+	platform = get_platform();
+	if (platform != PLATFORM_PSERIES_LPAR) {
+		fprintf(stderr, "%s is not supported on the %s platform\n",
+				argv[0], __power_platform_name(platform));
+		exit(1);
+	}
+
 	for (;;) {
 		option_index = 0;
 		rc = getopt_long(argc, argv, "f:hi:lvV", long_options,

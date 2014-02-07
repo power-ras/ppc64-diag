@@ -19,6 +19,7 @@
 
 #include "encl_util.h"
 #include "diag_encl.h"
+#include "platform.c"
 
 static struct option long_options[] = {
 	{"cmp_prev",		no_argument,		NULL, 'c'},
@@ -488,10 +489,18 @@ int
 main(int argc, char *argv[])
 {
 	int failure = 0, option_index, rc;
+	int platform = 0;
 	char path[128];
 	DIR *edir, *sdir;
 	struct dirent *sdirent, *edirent;
 	struct dev_vpd *diagnosed = NULL;
+
+	platform = get_platform();
+	if (platform != PLATFORM_PSERIES_LPAR) {
+		fprintf(stderr, "%s is not supported on the %s platform\n",
+				argv[0], __power_platform_name(platform));
+		return -1;
+	}
 
 	memset(&cmd_opts, 0, sizeof(cmd_opts));
 

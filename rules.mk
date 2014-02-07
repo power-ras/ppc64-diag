@@ -70,12 +70,14 @@ SHIPDIR = /tmp/$(PROJECT)-buildroot
 TARBALL = $(PROJECT)-$(VERSION).tar.gz
 TARBALL_FILES = Makefile rules.mk COPYRIGHT $(SPECFILENAME)
 TB_DIR = $(PROJECT)-$(VERSION)
+COM_DIR = common
 
 # Build a tarball of the source code
 BUILD_TARBALL =						\
 	$(shell						\
 	echo CVS > ./ignore;				\
 	mkdir $(TB_DIR);				\
+	cp -R $(COM_DIR) $(TB_DIR);			\
 	cp -R $(SUBDIRS) $(TARBALL_FILES) $(TB_DIR);	\
 	tar -zcf $(TARBALL) -X ./ignore $(TB_DIR);)
 
@@ -88,6 +90,9 @@ CFLAGS += -Wall
 # Uncomment this for debug builds
 CFLAGS += -g -DDEBUG 
 
+# Build with common directory included
+CFLAGS += -I $(ROOT_DIR)/$(COM_DIR)
+
 # Build with version string
 AM_CFLAGS = -DVERSION='"$(VERSION)"'
 
@@ -96,6 +101,9 @@ CXXFLAGS += -Wall
 
 # Uncomment this for debug builds
 CXXFLAGS += -g -DDEBUG
+
+# Build with common directory included
+CXXFLAGS += -I $(ROOT_DIR)/$(COM_DIR)
 
 # Build with version string
 AM_CXXFLAGS = -DVERSION='"$(VERSION)"'

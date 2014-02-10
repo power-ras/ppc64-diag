@@ -33,6 +33,9 @@ using namespace lsvpd;
 
 #include "catalogs.h"
 #include <servicelog-1/servicelog.h>
+extern "C" {
+#include "platform.c"
+}
 
 #define SYSLOG_PATH "/var/log/messages"
 #define LAST_EVENT_PATH "/var/log/ppc64-diag/last_syslog_event"
@@ -668,8 +671,18 @@ int main(int argc, char **argv)
 {
 	int c, result;
 	int args_seen[0x100] = { 0 };
+	int platform = 0;
 
 	progname = argv[0];
+
+	platform = get_platform();
+	if (platform != PLATFORM_PSERIES_LPAR) {
+		cerr << progname << ": is not supported on the "
+		<< __power_platform_name(platform) << " platform" << endl;
+
+		exit(1);
+	}
+
 	opterr = 0;
 	while ((c = getopt(argc, argv, "b:C:de:Fhm:M")) != -1) {
 		if (isalpha(c))

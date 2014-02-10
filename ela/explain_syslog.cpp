@@ -11,6 +11,9 @@ using namespace std;
 #include <iostream>
 
 #include "catalogs.h"
+extern "C" {
+#include "platform.c"
+}
 
 static const char *progname;
 bool debug = 0;
@@ -106,6 +109,7 @@ print_help(void)
 int main(int argc, char **argv)
 {
 	int c;
+	int platform = 0;
 	time_t begin_date = 0, end_date = 0;
 	const char *catalog_dir = ELA_CATALOG_DIR;
 	const char *msg_path = NULL;
@@ -113,6 +117,15 @@ int main(int argc, char **argv)
 	vector<SyslogEvent*>::iterator ie;
 
 	progname = argv[0];
+
+	platform = get_platform();
+	if (platform != PLATFORM_PSERIES_LPAR) {
+		cerr << progname << ": is not supported on the "
+		<< __power_platform_name(platform) << " platform" << endl;
+
+		exit(1);
+	}
+
 	opterr = 0;
 	while ((c = getopt(argc, argv, "b:C:de:hm:M")) != -1) {
 		switch (c) {

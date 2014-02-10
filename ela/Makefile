@@ -4,7 +4,7 @@
 
 include ../rules.mk
 
-CMDS = explain_syslog add_regex
+CMDS = explain_syslog add_regex syslog_to_svclog
 CATALOG = message_catalog/cxgb3 message_catalog/e1000e \
 	  message_catalog/exceptions message_catalog/reporters \
 	  message_catalog/gpfs
@@ -12,13 +12,6 @@ CATALOG_REGEX = message_catalog/with_regex/cxgb3 \
 	        message_catalog/with_regex/e1000e \
 		message_catalog/with_regex/gpfs
 MANPAGES = doc/explain_syslog.8.gz doc/syslog_to_svclog.8.gz	
-ARCH := $(shell uname -p)
-ifeq ($(ARCH), ppc)
-        CMDS += syslog_to_svclog
-endif
-ifeq ($(ARCH), ppc64)
-        CMDS += syslog_to_svclog
-endif
  
 COMMON_OBJS = rr.tab.o lex.rr.o ev.tab.o lex.ev.o date.o
 ES_OBJS = explain_syslog.o catalogs.o $(COMMON_OBJS)

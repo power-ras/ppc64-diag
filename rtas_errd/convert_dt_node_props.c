@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <dirent.h>
 #include <fcntl.h>
+#include "platform.c"
 
 #define MAX_IRQ_SERVERS_PER_CPU	16
 
@@ -119,11 +120,21 @@ mem_drcindex_to_drcname(uint32_t drc_idx, char *drc_name, int buf_size)
 int
 main(int argc, char *argv[]) {
 	int option_index, rc, i;
+	int platform = 0;
 	char *context=NULL, *from=NULL, *to=NULL;
 	uint32_t interruptserver, drcindex;
 	unsigned long drc_tmp_idx;
 	uint32_t intservs_array[MAX_IRQ_SERVERS_PER_CPU];
 	char drcname[20];
+
+	platform = get_platform();
+	switch (platform) {
+	case PLATFORM_UNKNOWN:
+	case PLATFORM_POWERKVM:
+		fprintf(stderr, "%s: is not supported on the %s platform\n",
+				argv[0], __power_platform_name(platform));
+		return -1;
+	}
 
 	for (;;) {
 		option_index = 0;

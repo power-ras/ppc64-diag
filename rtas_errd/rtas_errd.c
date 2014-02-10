@@ -17,6 +17,7 @@
 #include <sys/wait.h>
 #include <librtas.h>
 #include "rtas_errd.h"
+#include "platform.c"
 
 /**
  * @var debug
@@ -377,6 +378,16 @@ main(int argc, char *argv[])
 #ifdef DEBUG
 	int f_flag = 0, s_flag = 0;
 #endif
+	int platform = 0;
+
+	platform = get_platform();
+	switch (platform) {
+	case PLATFORM_UNKNOWN:
+	case PLATFORM_POWERKVM:
+		fprintf(stderr, "%s: is not supported on the %s platform\n",
+				argv[0], __power_platform_name(platform));
+		return -1;
+	}
 
 	while ((c = getopt_long(argc, argv, RTAS_ERRD_ARGS, 
 				longopts, NULL)) != EOF) {

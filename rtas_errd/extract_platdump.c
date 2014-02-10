@@ -18,6 +18,7 @@
 #include <librtas.h>
 #include <sys/stat.h>
 #include "rtas_errd.h"
+#include "platform.c"
 
 #define DUMP_HDR_PREFIX_OFFSET	0x16	/* prefix size in dump header */
 #define DUMP_HDR_FNAME_OFFSET	0x18	/* suggested filename in dump header */
@@ -344,7 +345,17 @@ int
 main(int argc, char *argv[])
 {
 	int option_index, rc, fail=0;
+	int platform = 0;
 	uint64_t dump_tag;
+
+	platform = get_platform();
+	switch (platform) {
+	case PLATFORM_UNKNOWN:
+	case PLATFORM_POWERKVM:
+		fprintf(stderr, "%s: is not supported on the %s platform\n",
+				argv[0], __power_platform_name(platform));
+		return -1;
+	}
 
 	for (;;) {
 		option_index = 0;

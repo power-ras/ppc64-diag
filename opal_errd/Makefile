@@ -9,8 +9,10 @@ CMDS = opal_errd extract_opal_dump
 OPAL_ERRD_OBJS = opal_errd.o
 OPAL_DUMP_OBJS = extract_opal_dump.o
 
+SUBDIRS = opal-elog-parse
 
 all: $(CMDS)
+	@$(foreach d,$(SUBDIRS), $(MAKE) -C $d;)
 
 opal_errd: $(OPAL_ERRD_OBJS)
 	@echo "LD $(WORK_DIR)/$@"
@@ -22,10 +24,13 @@ extract_opal_dump: $(OPAL_DUMP_OBJS)
 
 install: all
 	@$(call install_sbin,$(CMDS),$(DESTDIR))
+	@$(foreach d,$(SUBDIRS), $(MAKE) -C $d install;)
 
 uninstall:
 	@$(call uninstall_sbin,$(CMDS),$(DESTDIR))
+	@$(foreach d,$(SUBDIRS), $(MAKE) -C $d uninstall;)
 
 clean:
 	@echo "Cleaning up $(WORK_DIR) files..."
 	@rm -rf $(CMDS) $(OPAL_ERRD_OBJS) $(OPAL_DUMP_OBJS)
+	@$(foreach d,$(SUBDIRS), $(MAKE) -C $d clean;)

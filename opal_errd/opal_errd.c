@@ -25,6 +25,7 @@
 #include <sys/stat.h>
 
 #include "opal_errd.h"
+#include "platform.c"
 
 static int sysfs_elog_fd = -1;
 static int sysfs_elog_id_fd = -1;
@@ -226,7 +227,15 @@ static void sigterm_handler(int sig)
 int main(int argc, char *argv[])
 {
 	int rc = 0;
+	int platform = 0;
 	struct sigaction sigact;
+
+	platform = get_platform();
+	if (platform != PLATFORM_POWERKVM) {
+		fprintf(stderr, "%s: is not supported on the %s platform\n",
+					argv[0], __power_platform_name(platform));
+		return -1;
+	}
 
 	/* syslog initialization */
 	setlogmask(LOG_UPTO(LOG_NOTICE));

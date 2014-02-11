@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include "libopalevents.h"
+#include "platform.c"
 
 #define PLATFORM_LOG		"/var/log/platform"
 #define ELOG_ID_OFFESET         0x2c
@@ -140,6 +141,15 @@ int main(int argc, char *argv[])
 {
 	uint32_t eid = 0;
 	int opt = 0, ret = 0;
+	int platform = 0;
+
+	platform = get_platform();
+	if (platform != PLATFORM_POWERKVM) {
+		fprintf(stderr, "%s: is not supported on the %s platform\n",
+					argv[0], __power_platform_name(platform));
+		return -1;
+	}
+
 	while ((opt = getopt(argc, argv, "d:lsh")) != -1) {
 		switch (opt) {
 		case 'l':

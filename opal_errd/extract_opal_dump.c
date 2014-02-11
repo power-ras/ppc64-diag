@@ -19,6 +19,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "platform.c"
 
 /* Return codes */
 #define E_SUCCESS	0
@@ -371,6 +372,15 @@ out:
 int main(int argc, char *argv[])
 {
 	int rc = E_SUCCESS;
+	int platform = 0;
+
+	platform = get_platform();
+
+	if (platform != PLATFORM_POWERKVM) {
+		fprintf(stderr, "%s: is not supported on the %s platform\n",
+				argv[0], __power_platform_name(platform));
+		return -1;
+	}
 
 	/* syslog initialization */
 	setlogmask(LOG_UPTO(LOG_NOTICE));

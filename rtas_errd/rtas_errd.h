@@ -169,4 +169,7 @@ void setup_sigchld_handler(void);
 /* prrn.c */
 void handle_prrn_event(struct event *);
 
+/* hotplug.c */
+void handle_hotplug_event(struct event *);
+
 #endif /* _RTAS_ERRD_H */

@@ -163,6 +163,11 @@ handle_rtas_event(struct event *event)
 		 */
 		return 0;
 
+	    case RTAS_HDR_TYPE_HOTPLUG:
+		dbg("Entering Hotplug handler");
+		handle_hotplug_event(event);
+		break;
+
 	    default:
 		/* Nothing to do for this event */
 		break;

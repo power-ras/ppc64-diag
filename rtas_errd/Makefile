@@ -10,7 +10,7 @@ PRRN_HOTPLUG = prrn_hotplug
 
 RTAS_ERRD_OBJS = rtas_errd.o epow.o dump.o guard.o eeh.o update.o \
 		 files.o config.o diag_support.o ela.o v6ela.o servicelog.o \
-		 signal.o prrn.o
+		 signal.o prrn.o hotplug.o
 
 RTAS_ERRD_LIBS = -lrtas -lrtasevent -lservicelog -lsqlite3
 

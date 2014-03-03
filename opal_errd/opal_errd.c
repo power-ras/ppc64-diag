@@ -31,7 +31,7 @@ char *opt_output = "/var/log/platform";
 #define SYSFS_ELOG	"/sys/firmware/opal/opal_elog"
 #define SYSFS_ELOG_ACK	"/sys/firmware/opal/opal_elog_ack"
 
-#define EXTRACT_OPAL_DUMP_CMD	"/usr/sbin/extract_opal_dump"
+char *opt_extract_opal_dump_cmd = "/usr/sbin/extract_opal_dump";
 
 /*
  * As per PEL v6 (defined in PAPR spec) fixed offset for
@@ -187,16 +187,16 @@ static void check_platform_dump(void)
 	int rc;
 	struct stat sbuf;
 
-	if (stat(EXTRACT_OPAL_DUMP_CMD, &sbuf) < 0) {
+	if (stat(opt_extract_opal_dump_cmd, &sbuf) < 0) {
 		syslog(LOG_NOTICE, "The command \"%s\" does not exist.\n",
-		       EXTRACT_OPAL_DUMP_CMD);
+		       opt_extract_opal_dump_cmd);
 		return;
 	}
 
-	rc = system(EXTRACT_OPAL_DUMP_CMD);
+	rc = system(opt_extract_opal_dump_cmd);
 	if (rc) {
 		syslog(LOG_NOTICE, "Failed to execute platform dump "
-		       "extractor (%s).\n", EXTRACT_OPAL_DUMP_CMD);
+		       "extractor (%s).\n", opt_extract_opal_dump_cmd);
 		return;
 	}
 }
@@ -257,6 +257,8 @@ static void sigterm_handler(int sig)
 static void help(const char* argv0)
 {
 	fprintf(stderr, "%s help:\n\n", argv0);
+	fprintf(stderr, "-e cmd    - path to extract_opal_dump (default %s)\n",
+		opt_extract_opal_dump_cmd);
 	fprintf(stderr, "-o file   - output log entries to file (default %s)\n",
 		opt_output);
 	fprintf(stderr, "-h        - help (this message)\n");
@@ -269,10 +271,13 @@ int main(int argc, char *argv[])
 	struct sigaction sigact;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "ho:")) != -1) {
+	while ((opt = getopt(argc, argv, "e:ho:")) != -1) {
 		switch (opt) {
 		case 'o':
 			opt_output = optarg;
+			break;
+		case 'e':
+			opt_extract_opal_dump_cmd = optarg;
 			break;
 		case 'h':
 			help(argv[0]);

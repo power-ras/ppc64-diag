@@ -1,0 +1,20 @@
+#!/bin/bash
+
+SYSFS=`mktemp -d --tmpdir extract_opal_dump_sysfs.XXXXXXXXXX`
+OUT=`mktemp -d --tmpdir extract_opal_dump.XXXXXXXXXX`
+LOG=`mktemp --tmpdir extract_opal_dump.out.XXXXXXXXXX`
+
+cp -pr sysfs-test/* $SYSFS/
+
+./extract_opal_dump -s $SYSFS -o $OUT
+
+ls -1 $OUT > $LOG
+(cd $OUT; md5sum *) >> $LOG
+
+diff -u test-extract_opal_dump.result $LOG
+if diff -u test-extract_opal_dump.result $LOG; then
+	rm -rf $SYSFS $OUT $LOG
+	echo PASS;
+else
+	echo FAIL;
+fi

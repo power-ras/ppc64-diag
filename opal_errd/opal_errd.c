@@ -27,6 +27,7 @@
 #include "platform.c"
 
 char *opt_output = "/var/log/platform";
+int opt_daemon = 1;
 
 #define SYSFS_ELOG	"/sys/firmware/opal/opal_elog"
 #define SYSFS_ELOG_ACK	"/sys/firmware/opal/opal_elog_ack"
@@ -261,6 +262,7 @@ static void help(const char* argv0)
 		opt_extract_opal_dump_cmd);
 	fprintf(stderr, "-o file   - output log entries to file (default %s)\n",
 		opt_output);
+	fprintf(stderr, "-D        - don't daemonize, just run once.\n");
 	fprintf(stderr, "-h        - help (this message)\n");
 }
 
@@ -271,8 +273,11 @@ int main(int argc, char *argv[])
 	struct sigaction sigact;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "e:ho:")) != -1) {
+	while ((opt = getopt(argc, argv, "De:ho:")) != -1) {
 		switch (opt) {
+		case 'D':
+			opt_daemon = 0;
+			break;
 		case 'o':
 			opt_output = optarg;
 			break;
@@ -300,12 +305,14 @@ int main(int argc, char *argv[])
 	openlog("ELOG", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
 
 	/* Convert the opal_errd process to a daemon. */
-	rc = daemon(0, 0);
-	if (rc) {
-		syslog(LOG_NOTICE, "Cannot daemonize opal_errd, "
-		       "opal_errd cannot continue.\n");
-		closelog();
-		return rc;
+	if (opt_daemon) {
+		rc = daemon(0, 0);
+		if (rc) {
+			syslog(LOG_NOTICE, "Cannot daemonize opal_errd, "
+			       "opal_errd cannot continue.\n");
+			closelog();
+			return rc;
+		}
 	}
 
 	/* open sysfs files to read and write log */
@@ -324,8 +331,11 @@ int main(int argc, char *argv[])
 	}
 
 	/* Read error/event log until we get termination signal */
-	while (!terminate)
+	while (!terminate) {
 		read_elog_events();
+		if (!opt_daemon)
+			terminate = 1;
+	}
 
 error_out:
 	syslog(LOG_NOTICE, "The opal_errd daemon is exiting.\n");

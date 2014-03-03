@@ -24,8 +24,6 @@
 #include <signal.h>
 #include <sys/stat.h>
 
-#include "platform.c"
-
 char *opt_output = "/var/log/platform";
 int opt_daemon = 1;
 
@@ -269,9 +267,9 @@ static void help(const char* argv0)
 int main(int argc, char *argv[])
 {
 	int rc = 0;
-	int platform = 0;
 	struct sigaction sigact;
 	int opt;
+	struct stat s;
 
 	while ((opt = getopt(argc, argv, "De:ho:")) != -1) {
 		switch (opt) {
@@ -293,11 +291,11 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	platform = get_platform();
-	if (platform != PLATFORM_POWERKVM) {
-		fprintf(stderr, "%s: is not supported on the %s platform\n",
-					argv[0], __power_platform_name(platform));
-		return -1;
+	rc = stat(SYSFS_ELOG, &s);
+	if (rc != 0) {
+		fprintf(stderr, "Error accessing sysfs: %s (%d: %s)\n",
+			SYSFS_ELOG, errno, strerror(errno));
+		exit(EXIT_FAILURE);
 	}
 
 	/* syslog initialization */

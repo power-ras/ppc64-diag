@@ -23,12 +23,16 @@
 #include <syslog.h>
 #include <signal.h>
 #include <sys/stat.h>
+#include <limits.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <libgen.h>
+#include <sys/inotify.h>
 
+char *opt_sysfs = "/sys";
 char *opt_output = "/var/log/platform";
 int opt_daemon = 1;
-
-#define SYSFS_ELOG	"/sys/firmware/opal/opal_elog"
-#define SYSFS_ELOG_ACK	"/sys/firmware/opal/opal_elog_ack"
+int opt_watch = 1;
 
 char *opt_extract_opal_dump_cmd = "/usr/sbin/extract_opal_dump";
 
@@ -56,55 +60,7 @@ char *opt_extract_opal_dump_cmd = "/usr/sbin/extract_opal_dump";
 
 #define ELOG_ACTION_FLAG	0xa8000000
 
-static int sysfs_elog_fd = -1;
-static int sysfs_elog_id_fd = -1;
-static int platform_log_fd = -1;
-
 volatile int terminate;
-
-static void close_files(void)
-{
-	close(sysfs_elog_fd);
-	close(platform_log_fd);
-	close(sysfs_elog_id_fd);
-}
-
-/* Open error log and platform log files */
-static int init_files(void)
-{
-	/* Open Error/event log file */
-	sysfs_elog_fd = open(SYSFS_ELOG, O_RDONLY);
-	if (sysfs_elog_fd <= 0) {
-		syslog(LOG_NOTICE, "Could not open error log file %s: %s\n"
-		       "The opal_errd daemon cannot continue and will exit.\n",
-		       SYSFS_ELOG, strerror(errno));
-		return -1;
-	}
-
-	/* Open log ACK file*/
-	sysfs_elog_id_fd = open(SYSFS_ELOG_ACK, O_WRONLY);
-	if (sysfs_elog_id_fd <= 0) {
-		syslog(LOG_NOTICE, "Could not open ACK file %s: %s\n"
-		       "The opal_errd daemon cannot continue and will exit.\n",
-		       SYSFS_ELOG_ACK, strerror(errno));
-		close(sysfs_elog_fd);
-		return -1;
-	}
-
-	/* Next, open /var/log/platform with 0640 mode */
-	platform_log_fd = open(opt_output, O_RDWR | O_SYNC | O_CREAT,
-			       S_IRUSR | S_IWUSR | S_IRGRP);
-	if (platform_log_fd <= 0) {
-		syslog(LOG_NOTICE, "Could not open platform log file %s: %s\n"
-		       "The opal_errd daemon cannot continue and will exit.\n",
-		       opt_output, strerror(errno));
-		close(sysfs_elog_fd);
-		close(platform_log_fd);
-		return -1;
-	}
-
-	return 0;
-}
 
 /* Parse required fields from error log */
 static int parse_log(char *buffer)
@@ -200,87 +156,217 @@ static void check_platform_dump(void)
 	}
 }
 
-/* Read logs from opal sysfs interface */
-static int read_elog_events(void)
+static int ack_elog(const char *elog_path)
 {
-	ssize_t len;
-	uint32_t elog_id;
-	int rc = 0;
-	char buffer[OPAL_ERROR_LOG_MAX];
+	char ack_file[PATH_MAX];
+	int fd;
+	int rc;
 
-	memset(buffer, 0, sizeof(buffer));
+	snprintf(ack_file, sizeof(ack_file), "%s/acknowledge", elog_path);
 
-	/* Read log from OPAL log file */
-	len = read(sysfs_elog_fd, (char *)buffer, OPAL_ERROR_LOG_MAX);
+	fd = open(ack_file, O_WRONLY);
 
-	/* Received SIGTERM? */
-	if (terminate && len <= 0)
-		return 0;
-
-	if (len <= 0) {
-		syslog(LOG_NOTICE, "Could not read error log file (%s).\n",
-		       SYSFS_ELOG);
+	if (fd == -1) {
+		syslog(LOG_ERR, "Failed to acknowledge elog: %s"
+		       " (%d:%s)\n",
+		       ack_file, errno, strerror(errno));
 		return -1;
 	}
 
-	/* Write log to /var/log/platform */
-	rc = write(platform_log_fd, buffer, len);
-	if (rc <= 0) {
-		syslog(LOG_NOTICE, "Could not write to platform log "
-		       "file (%s).\n", opt_output);
+	rc = write(fd, "ack\n", 4);
+	if (rc != 4) {
+		syslog(LOG_ERR, "Failed to acknowledge elog: %s"
+		       " (%d:%s)\n",
+		       ack_file, errno, strerror(errno));
 		return -1;
 	}
 
-	/* ACK log (write elog id to ACK file) */
-	elog_id = *(uint32_t *)(buffer + ELOG_ID_OFFESET);
-	rc = write(sysfs_elog_id_fd, &elog_id, sizeof(elog_id));
-	if (rc < 0) {
-		syslog(LOG_NOTICE, "Failed to ACK log ID : %x\n", elog_id);
-		return -1;
-	}
+	close(fd);
 
-	/* Check platform dump */
-	check_platform_dump();
-
-	/* Parse and write required fields to syslog */
-	rc = parse_log(buffer);
-
-	return rc;
+	return 0;
 }
 
-static void sigterm_handler(int sig)
+static int process_elog(const char *elog_path)
 {
-	terminate = 1;
+	int in_fd = -1;
+	int out_fd = -1;
+	int dir_fd = -1;
+	char elog_raw_path[PATH_MAX];
+	char *buf;
+	size_t bufsz;
+	struct stat sbuf;
+	int ret = -1;
+	ssize_t sz = 0;
+	ssize_t readsz = 0;
+	int rc;
+	char *opt_output_dir = strdup(opt_output);
+
+	snprintf(elog_raw_path, sizeof(elog_raw_path), "%s/raw", elog_path);
+
+	if (stat(elog_raw_path, &sbuf) == -1)
+		return -1;
+
+	bufsz = sbuf.st_size;
+	buf = (char*)malloc(bufsz);
+
+	in_fd = open(elog_raw_path, O_RDONLY);
+
+	if (in_fd == -1) {
+		syslog(LOG_ERR, "Failed to open elog: %s (%d:%s)\n",
+		       elog_raw_path, errno, strerror(errno));
+		goto err;
+	}
+
+	do {
+		readsz = read(in_fd, buf+sz, bufsz-sz);
+		if (readsz == -1) {
+			syslog(LOG_ERR, "Failed to read elog: %s (%d:%s)\n",
+			       elog_raw_path, errno, strerror(errno));
+			goto err;
+		}
+
+		sz += readsz;
+	} while(sz != bufsz);
+
+	out_fd = open(opt_output, O_WRONLY | O_APPEND | O_CREAT,
+		      S_IRUSR | S_IWUSR | S_IRGRP);
+
+	if (out_fd == -1) {
+		syslog(LOG_ERR, "Failed to write elog: %s (%d:%s)\n",
+		       opt_output, errno, strerror(errno));
+		goto err;
+	}
+
+	sz = write(out_fd, buf, bufsz);
+	if (sz != bufsz) {
+		syslog(LOG_ERR, "Failed to write platform dump: %s (%d:%s)\n",
+		       opt_output, errno, strerror(errno));
+		goto err;
+	}
+
+	dir_fd = open(dirname(opt_output_dir), O_RDONLY|O_DIRECTORY);
+
+	rc = fsync(out_fd);
+	if (rc == -1) {
+		syslog(LOG_ERR, "Failed to sync elog: %s (%d:%s)\n",
+		       opt_output, errno, strerror(errno));
+		goto err;
+	}
+
+	rc = fsync(dir_fd);
+	if (rc == -1) {
+		syslog(LOG_ERR, "Failed to sync platform elog directory: %s"
+		       " (%d:%s)\n", opt_output, errno, strerror(errno));
+	}
+
+	check_platform_dump();
+
+	parse_log(buf);
+
+	ret = 0;
+err:
+	if (in_fd != -1)
+		close(in_fd);
+	if (out_fd != -1)
+		close(out_fd);
+	if (dir_fd != -1)
+		close(dir_fd);
+	free(opt_output_dir);
+	free(buf);
+	return ret;
+
+}
+
+/* Read logs from opal sysfs interface */
+static int find_and_read_elog_events(const char *elog_dir)
+{
+	int rc = 0;
+	DIR *d;
+	struct dirent *dirent;
+	char elog_path[PATH_MAX];
+	int is_dir = 0;
+	struct stat sbuf;
+	int retval = 0;
+
+	d = opendir(elog_dir);
+	if (d == NULL)
+		return -1;
+
+	while ((dirent = readdir(d))) {
+		snprintf(elog_path, sizeof(elog_path), "%s/%s",
+			 elog_dir, dirent->d_name);
+
+		is_dir = 0;
+
+		if (dirent->d_name[0] == '.')
+			continue;
+
+		if (dirent->d_type == DT_DIR) {
+			is_dir = 1;
+		} else {
+			/* Fall back to stat() */
+			rc = stat(elog_path, &sbuf);
+			if (S_ISDIR(sbuf.st_mode)) {
+				is_dir = 1;
+			}
+		}
+
+		if (is_dir) {
+			rc = process_elog(elog_path);
+			if (rc != 0 && retval == 0)
+				retval = -1;
+			if (rc == 0 && retval >= 0)
+				retval++;
+			ack_elog(elog_path);
+		}
+
+	}
+
+	closedir(d);
+
+	return retval;
 }
 
 static void help(const char* argv0)
 {
 	fprintf(stderr, "%s help:\n\n", argv0);
-	fprintf(stderr, "-e cmd    - path to extract_opal_dump (default %s)\n",
+	fprintf(stderr, "-e cmd  - path to extract_opal_dump (default %s)\n",
 		opt_extract_opal_dump_cmd);
-	fprintf(stderr, "-o file   - output log entries to file (default %s)\n",
+	fprintf(stderr, "-o file - output log entries to file (default %s)\n",
 		opt_output);
-	fprintf(stderr, "-D        - don't daemonize, just run once.\n");
-	fprintf(stderr, "-h        - help (this message)\n");
+	fprintf(stderr, "-s dir  - path to sysfs (default %s)\n", opt_sysfs);
+	fprintf(stderr, "-D      - don't daemonize, just run once.\n");
+	fprintf(stderr, "-w      - watch for new events (default when daemon)\n");
+	fprintf(stderr, "-h      - help (this message)\n");
 }
 
 int main(int argc, char *argv[])
 {
 	int rc = 0;
-	struct sigaction sigact;
 	int opt;
+	char sysfs_path[PATH_MAX];
 	struct stat s;
+	int inotifyfd;
+	char inotifybuf[sizeof(struct inotify_event) + NAME_MAX + 1];
 
-	while ((opt = getopt(argc, argv, "De:ho:")) != -1) {
+	while ((opt = getopt(argc, argv, "De:ho:s:w")) != -1) {
 		switch (opt) {
 		case 'D':
 			opt_daemon = 0;
+			opt_watch = 0;
+			break;
+		case 'w':
+			opt_daemon = 0;
+			opt_watch = 1;
 			break;
 		case 'o':
 			opt_output = optarg;
 			break;
 		case 'e':
 			opt_extract_opal_dump_cmd = optarg;
+			break;
+		case 's':
+			opt_sysfs = optarg;
 			break;
 		case 'h':
 			help(argv[0]);
@@ -291,12 +377,30 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	rc = stat(SYSFS_ELOG, &s);
+	snprintf(sysfs_path, sizeof(sysfs_path), "%s/firmware/opal/elog",
+		 opt_sysfs);
+
+	rc = stat(sysfs_path, &s);
 	if (rc != 0) {
 		fprintf(stderr, "Error accessing sysfs: %s (%d: %s)\n",
-			SYSFS_ELOG, errno, strerror(errno));
+			sysfs_path, errno, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
+
+	inotifyfd = inotify_init();
+	if (inotifyfd == -1) {
+		fprintf(stderr, "Error setting up inotify (%d:%s)\n",
+			errno, strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	rc = inotify_add_watch(inotifyfd, sysfs_path, IN_CREATE);
+	if (rc == -1) {
+		fprintf(stderr, "Error adding inotify watch for %s (%d: %s)\n",
+			sysfs_path, errno, strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
 
 	/* syslog initialization */
 	setlogmask(LOG_UPTO(LOG_NOTICE));
@@ -313,33 +417,20 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	/* open sysfs files to read and write log */
-	rc = init_files();
-	if (rc)
-		goto error_out;
-
-	/* Setup a signal handler for SIGTERM */
-	sigact.sa_handler = (void *)sigterm_handler;
-	sigemptyset(&sigact.sa_mask);
-	sigact.sa_flags = 0;
-	if (sigaction(SIGTERM, &sigact, NULL)) {
-		syslog(LOG_NOTICE, "Could not initialize signal handler for "
-		       "termination signal (SIGTERM), %s\n", strerror(errno));
-		goto error_out;
-	}
-
 	/* Read error/event log until we get termination signal */
 	while (!terminate) {
-		read_elog_events();
-		if (!opt_daemon)
+		find_and_read_elog_events(sysfs_path);
+		if (!opt_watch) {
 			terminate = 1;
+		} else {
+			/* We don't care about the content of the inotify
+			 * event, we'll just scan the directory anyway
+			 */
+			read(inotifyfd, inotifybuf, sizeof(inotifybuf));
+		}
 	}
 
-error_out:
-	syslog(LOG_NOTICE, "The opal_errd daemon is exiting.\n");
-
-	/* Close all files once read is complete */
-	close_files();
+	close(inotifyfd);
 	closelog();
 
 	return rc;

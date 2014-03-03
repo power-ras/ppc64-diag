@@ -1,0 +1,20 @@
+#!/bin/bash
+
+SYSFS=`mktemp -d --tmpdir opal_errd.sysfs.XXXXXXXXXX`
+OUT=`mktemp -d --tmpdir opal-errd.log.XXXXXXXXXX`
+LOG=`mktemp --tmpdir extract_opal_dump.out.XXXXXXXXXX`
+
+cp -pr sysfs-test/* $SYSFS/
+
+./opal_errd -s $SYSFS -o $OUT/platform -D -e /bin/true
+
+ls -1 $OUT > $LOG
+(cd $OUT; md5sum *) >> $LOG
+
+diff -u test-opal_errd.result $LOG
+if diff -u test-opal_errd.result $LOG; then
+	rm -rf $SYSFS $OUT $LOG
+	echo PASS;
+else
+	echo FAIL;
+fi

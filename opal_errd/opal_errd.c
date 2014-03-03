@@ -26,9 +26,10 @@
 
 #include "platform.c"
 
+char *opt_output = "/var/log/platform";
+
 #define SYSFS_ELOG	"/sys/firmware/opal/opal_elog"
 #define SYSFS_ELOG_ACK	"/sys/firmware/opal/opal_elog_ack"
-#define PLATFORM_LOG	"/var/log/platform"
 
 #define EXTRACT_OPAL_DUMP_CMD	"/usr/sbin/extract_opal_dump"
 
@@ -92,12 +93,12 @@ static int init_files(void)
 	}
 
 	/* Next, open /var/log/platform with 0640 mode */
-	platform_log_fd = open(PLATFORM_LOG, O_RDWR | O_SYNC | O_CREAT,
+	platform_log_fd = open(opt_output, O_RDWR | O_SYNC | O_CREAT,
 			       S_IRUSR | S_IWUSR | S_IRGRP);
 	if (platform_log_fd <= 0) {
 		syslog(LOG_NOTICE, "Could not open platform log file %s: %s\n"
 		       "The opal_errd daemon cannot continue and will exit.\n",
-		       PLATFORM_LOG, strerror(errno));
+		       opt_output, strerror(errno));
 		close(sysfs_elog_fd);
 		close(platform_log_fd);
 		return -1;
@@ -227,7 +228,7 @@ static int read_elog_events(void)
 	rc = write(platform_log_fd, buffer, len);
 	if (rc <= 0) {
 		syslog(LOG_NOTICE, "Could not write to platform log "
-		       "file (%s).\n", PLATFORM_LOG);
+		       "file (%s).\n", opt_output);
 		return -1;
 	}
 
@@ -253,11 +254,34 @@ static void sigterm_handler(int sig)
 	terminate = 1;
 }
 
+static void help(const char* argv0)
+{
+	fprintf(stderr, "%s help:\n\n", argv0);
+	fprintf(stderr, "-o file   - output log entries to file (default %s)\n",
+		opt_output);
+	fprintf(stderr, "-h        - help (this message)\n");
+}
+
 int main(int argc, char *argv[])
 {
 	int rc = 0;
 	int platform = 0;
 	struct sigaction sigact;
+	int opt;
+
+	while ((opt = getopt(argc, argv, "ho:")) != -1) {
+		switch (opt) {
+		case 'o':
+			opt_output = optarg;
+			break;
+		case 'h':
+			help(argv[0]);
+			exit(EXIT_SUCCESS);
+		default:
+			help(argv[0]);
+			exit(EXIT_FAILURE);
+		}
+	}
 
 	platform = get_platform();
 	if (platform != PLATFORM_POWERKVM) {

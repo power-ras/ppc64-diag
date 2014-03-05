@@ -348,6 +348,9 @@ int main(int argc, char *argv[])
 	struct stat s;
 	int inotifyfd;
 	char inotifybuf[sizeof(struct inotify_event) + NAME_MAX + 1];
+	fd_set fds;
+	struct timeval tv;
+	int r;
 
 	while ((opt = getopt(argc, argv, "De:ho:s:w")) != -1) {
 		switch (opt) {
@@ -426,7 +429,13 @@ int main(int argc, char *argv[])
 			/* We don't care about the content of the inotify
 			 * event, we'll just scan the directory anyway
 			 */
-			read(inotifyfd, inotifybuf, sizeof(inotifybuf));
+			FD_ZERO(&fds);
+			FD_SET(inotifyfd, &fds);
+			tv.tv_sec = 1;
+			tv.tv_usec = 0;
+			r = select(inotifyfd+1, &fds, NULL, NULL, &tv);
+			if (r > 0 && FD_ISSET(inotifyfd, &fds))
+				read(inotifyfd, inotifybuf, sizeof(inotifybuf));
 		}
 	}
 

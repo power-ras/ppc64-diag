@@ -8,7 +8,8 @@ Packager: 	IBM Corp.
 Vendor: 	IBM Corp.
 ExclusiveArch:  ppc ppc64
 BuildRequires:  libservicelog-devel, flex, perl, /usr/bin/yacc
-BuildRequires:  libvpd-devel >= 1.3.9
+BuildRequires:  libvpd-devel
+BuildRequires:  librtas-devel >= 1.3.9
 BuildRequires:	ncurses-devel
 
 Requires: 	servicelog, /sbin/chkconfig

@@ -1,5 +1,5 @@
 Name:	ppc64-diag
-Version:	2.6.2
+Version:	2.6.3
 Release:	0
 Summary: 	PowerLinux Platform Diagnostics
 Group: 		System Environment/Base
@@ -7,13 +7,14 @@ License: 	Eclipse Public License (EPL) v1.0
 Packager: 	IBM Corp. 
 Vendor: 	IBM Corp.
 ExclusiveArch:  ppc ppc64
-BuildRequires:  libservicelog-devel, libvpd-devel, flex, perl, /usr/bin/yacc
+BuildRequires:  libservicelog-devel, flex, perl, /usr/bin/yacc
+BuildRequires:  libvpd-devel >= 1.3.9
 BuildRequires:	ncurses-devel
+
 Requires: 	servicelog, /sbin/chkconfig
-# PRRN RTAS event notification handler depends on below librtas
-# and powerpc-utils versions.
-Requires:	librtas >= 1.3.8
-Requires:	powerpc-utils >= 1.2.16
+# PCI hotplug support on PowerKVM guest depends on below
+# powerpc-utils version.
+Requires:	powerpc-utils >= 1.2.19
 # Light Path Diagnostics depends on below lsvpd version.
 Requires:	lsvpd >= 1.7.1
 BuildRoot:	%{_tmppath}/%{name}-%{version}-build
@@ -80,6 +81,11 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Fri Mar 07 2014 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.6.3
+- Added platform validation code
+- Add support for hotplugging qemu pci devices via RTAS event
+- Minor bug fixes in rtas_errd code
+
 * Tue Aug 20 2013 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.6.2
 - Minor bug fix in diag_encl and encl_led
 

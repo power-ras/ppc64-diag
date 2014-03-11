@@ -13,7 +13,8 @@
 
 #include "libopalevents.h"
 
-#define PLATFORM_LOG		"/var/log/platform"
+char *opt_platform_log = "/var/log/platform";
+
 #define ELOG_ID_OFFESET         0x2c
 #define ELOG_SRC_OFFSET         0x78
 #define ELOG_SEVERITY_OFFSET    0x3a
@@ -31,11 +32,12 @@ static int platform_log_fd = -1;
 
 void print_usage(char *command)
 {
-	printf("Usage: %s { -d  <entryid> | -l  | -s | -h }\n"
+	printf("Usage: %s { -d  <entryid> | -l  | -s | -h } [ -f file ]\n"
 		"\t-d: Display error log entry details\n"
 		"\t-l: list all error logs\n"
 		"\t-s: list all call home logs\n"
-		"\t-h: print the usage\n", command);
+	        "\t-f file: use file as platform log file (default %s)\n"
+	        "\t-h: print the usage\n", command, opt_platform_log);
 }
 
 /* parse error log entry passed by user */
@@ -46,12 +48,13 @@ int elogdisplayentry(uint32_t eid)
 	int ret = 0;
 	static int pos;
 	char buffer[OPAL_ERROR_LOG_MAX];
-	platform_log_fd = open(PLATFORM_LOG, O_RDONLY);
+	platform_log_fd = open(opt_platform_log, O_RDONLY);
 	if (platform_log_fd <= 0) {
 		fprintf(stderr, "Could not open error log file at either %s or "
-		       " %s\nThe errorlog daemon cannot continue and will "
-		       "exit", PLATFORM_LOG, strerror(errno));
+		       " %s\nThe error log parse tool cannot continue and will "
+		       "exit", opt_platform_log, strerror(errno));
 		close(platform_log_fd);
+		return -1;
 	}
 	while (lseek(platform_log_fd, pos, 0) >= 0) {
 		memset(buffer, 0, sizeof(buffer));
@@ -86,11 +89,11 @@ int eloglist(uint32_t service_flag)
 	char severity;
 	static int pos;
 	uint32_t action;
-	platform_log_fd = open(PLATFORM_LOG, O_RDONLY);
+	platform_log_fd = open(opt_platform_log, O_RDONLY);
 	if (platform_log_fd <= 0) {
 		fprintf(stderr, "Could not open error log file at either %s or "
-		       " %s\nThe errorlog daemon cannot continue and will "
-		       "exit", PLATFORM_LOG, strerror(errno));
+		       " %s\nThe error log parse tool cannot continue and will "
+		       "exit", opt_platform_log, strerror(errno));
 		close(platform_log_fd);
 	}
 	printf("|-------------------------------------------------------------|\n");
@@ -141,7 +144,7 @@ int main(int argc, char *argv[])
 	uint32_t eid = 0;
 	int opt = 0, ret = 0;
 
-	while ((opt = getopt(argc, argv, "d:lsh")) != -1) {
+	while ((opt = getopt(argc, argv, "d:lshf:")) != -1) {
 		switch (opt) {
 		case 'l':
 			ret = eloglist(0);
@@ -152,6 +155,9 @@ int main(int argc, char *argv[])
 			break;
 		case 's':
 			ret = eloglist(1);
+			break;
+		case 'f':
+			opt_platform_log = optarg;
 			break;
 		case 'h':
 			print_usage(argv[0]);

@@ -233,7 +233,8 @@ static int find_and_process_dumps(const char *opal_dump_dir,
 				retval = -1;
 			if (rc == 0 && retval >= 0)
 				retval++;
-			ack_dump(dump_path);
+			if (opt_ack_dump)
+				ack_dump(dump_path);
 		}
 	}
 

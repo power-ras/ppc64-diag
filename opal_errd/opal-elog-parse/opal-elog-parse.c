@@ -13,7 +13,8 @@
 
 #include "libopalevents.h"
 
-char *opt_platform_log = "/var/log/platform";
+#define DEFAULT_opt_platform_log "/var/log/platform"
+char *opt_platform_log = DEFAULT_opt_platform_log;
 
 #define ELOG_ID_OFFESET         0x2c
 #define ELOG_SRC_OFFSET         0x78
@@ -37,7 +38,7 @@ void print_usage(char *command)
 		"\t-l: list all error logs\n"
 		"\t-s: list all call home logs\n"
 	        "\t-f file: use file as platform log file (default %s)\n"
-	        "\t-h: print the usage\n", command, opt_platform_log);
+	        "\t-h: print the usage\n", command, DEFAULT_opt_platform_log);
 }
 
 /* parse error log entry passed by user */
@@ -150,7 +151,7 @@ int main(int argc, char *argv[])
 			ret = eloglist(0);
 			break;
 		case 'd':
-			eid = strtoul(argv[2], 0, 0);
+			eid = strtoul(optarg, 0, 0);
 			ret = elogdisplayentry(eid);
 			break;
 		case 's':

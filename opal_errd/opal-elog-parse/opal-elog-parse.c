@@ -144,18 +144,24 @@ int main(int argc, char *argv[])
 {
 	uint32_t eid = 0;
 	int opt = 0, ret = 0;
+	char do_operation = '\0';
+	const char *eid_opt;
 
 	while ((opt = getopt(argc, argv, "d:lshf:")) != -1) {
 		switch (opt) {
-		case 'l':
-			ret = eloglist(0);
-			break;
 		case 'd':
-			eid = strtoul(optarg, 0, 0);
-			ret = elogdisplayentry(eid);
-			break;
+			eid_opt = optarg;
+			/* fallthrough */
+		case 'l':
 		case 's':
-			ret = eloglist(1);
+			if (do_operation != '\0') {
+				fprintf(stderr, "Only one operation "
+					"(-d | -l | -s) can "
+					"be selected at any one time.\n");
+				print_usage(argv[0]);
+				return -1;
+			}
+			do_operation = opt;
 			break;
 		case 'f':
 			opt_platform_log = optarg;
@@ -173,5 +179,22 @@ int main(int argc, char *argv[])
 		print_usage(argv[0]);
 		ret = -1;
 	}
+
+	switch (do_operation) {
+	case 'l':
+		ret = eloglist(0);
+		break;
+	case 'd':
+		eid = strtoul(eid_opt, 0, 0);
+		ret = elogdisplayentry(eid);
+		break;
+	case 's':
+		ret = eloglist(1);
+		break;
+	default:
+		ret = -1;
+		break;
+	}
+
 	return ret;
 }

@@ -85,7 +85,7 @@ int elogdisplayentry(uint32_t eid)
 int eloglist(uint32_t service_flag)
 {
 	int len = 0, ret = 0;
-	char *parse = "NONE";
+	char *parse;
 	uint32_t logid;
 	char src[4];
 	char buffer[OPAL_ERROR_LOG_MAX];
@@ -130,6 +130,9 @@ int eloglist(uint32_t service_flag)
 			break;
 		case OPAL_UNRECOVERABLE_LOG:
 			parse = "Unrecoverable Error";
+			break;
+		default:
+			parse = "NONE";
 			break;
 		}
 		if (service_flag != 1)

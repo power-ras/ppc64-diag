@@ -1,0 +1,16 @@
+#!/bin/bash
+
+SYSFS=`mktemp -d --tmpdir opal-elog-parse.sysfs.XXXXXXXXXX`
+OUT=`mktemp -d --tmpdir opal-elog-parse.log.XXXXXXXXXX`
+LOG=`mktemp --tmpdir opal-elog-parse.out.XXXXXXXXXX`
+
+cp -pr sysfs-test/* $SYSFS/
+
+./opal-elog-parse/opal-elog-parse -l -f $SYSFS/firmware/opal/elog/0x01/raw > $LOG
+
+if diff -u test-opal-elog-parse.result $LOG; then
+	rm -rf $SYSFS $OUT $LOG
+	echo PASS;
+else
+	echo FAIL;
+fi

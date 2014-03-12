@@ -16,7 +16,7 @@
 #define DEFAULT_opt_platform_log "/var/log/platform"
 char *opt_platform_log = DEFAULT_opt_platform_log;
 
-#define ELOG_ID_OFFESET         0x2c
+#define ELOG_ID_OFFSET          0x2c
 #define ELOG_SRC_OFFSET         0x78
 #define ELOG_SEVERITY_OFFSET    0x3a
 #define OPAL_ERROR_LOG_MAX      16384
@@ -69,7 +69,7 @@ int elogdisplayentry(uint32_t eid)
 			break;
 		}
 		pos = pos + len;
-		memcpy(logid, (buffer+ELOG_ID_OFFESET), 4);
+		memcpy(logid, (buffer+ELOG_ID_OFFSET), 4);
 		if (*(int *)logid == eid) {
 			parse_opal_event(buffer, len);
 			break;
@@ -112,7 +112,7 @@ int eloglist(uint32_t service_flag)
 			break;
 		}
 		pos = pos + len;
-		memcpy(logid, (buffer+ELOG_ID_OFFESET), 4);
+		memcpy(logid, (buffer+ELOG_ID_OFFSET), 4);
 		memcpy(src, (buffer + ELOG_SRC_OFFSET), 8);
 		severity = buffer[ELOG_SEVERITY_OFFSET];
 		action = *(uint32_t *)(buffer + ELOG_ACTION_OFFSET);

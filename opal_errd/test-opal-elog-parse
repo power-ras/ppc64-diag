@@ -6,7 +6,12 @@ LOG=`mktemp --tmpdir opal-elog-parse.out.XXXXXXXXXX`
 
 cp -pr sysfs-test/* $SYSFS/
 
-./opal-elog-parse/opal-elog-parse -l -f $SYSFS/firmware/opal/elog/0x01/raw > $LOG
+echo 'test-opal-elog-parse' > $LOG
+
+./opal_errd -s $SYSFS -o $OUT/platform -D -e /bin/true 2>&1 \
+    | sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' >> $LOG
+
+./opal-elog-parse/opal-elog-parse -l -f $OUT/platform >> $LOG
 
 if diff -u test-opal-elog-parse.result $LOG; then
 	rm -rf $SYSFS $OUT $LOG

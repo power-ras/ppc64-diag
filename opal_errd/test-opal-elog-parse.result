@@ -1,5 +1,9 @@
+test-opal-elog-parse
+ELOG[XXXX]: LID[0]::SRC[]::Not Applicable::Informational Error::No service action required
+ELOG[XXXX]: LID[0]::SRC[]::Not Applicable::Informational Error::No service action required
 |-------------------------------------------------------------|
 | Entry Id      Event Severity                       SRC      |
 |-------------------------------------------------------------|
+| 0x00000000   Informational Error                           |
 | 0x00000000   Informational Error                           |
 Read Completed

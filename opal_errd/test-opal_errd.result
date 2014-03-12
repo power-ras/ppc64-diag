@@ -1,4 +1,4 @@
 ELOG[XXXX]: LID[1]::SRC[TESTSRC1]::Not Applicable::Informational Error::No service action required
-ELOG[XXXX]: LID[2]::SRC[TESTSRC2]::Not Applicable::Informational Error::No service action required
+ELOG[XXXX]: LID[2]::SRC[TESTSRC2]::Not Applicable::Informational Error::Service action and call home required
 platform
-fa85b6881858bbd9bb24d689cdd268e5  platform
+f64e81de916543cce9ff600435ef20c7  platform

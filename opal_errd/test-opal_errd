@@ -1,17 +1,19 @@
 #!/bin/bash
 
 SYSFS=`mktemp -d --tmpdir opal_errd.sysfs.XXXXXXXXXX`
-OUT=`mktemp -d --tmpdir opal-errd.log.XXXXXXXXXX`
-LOG=`mktemp --tmpdir extract_opal_dump.out.XXXXXXXXXX`
+OUT=`mktemp -d --tmpdir opal_errd.log.XXXXXXXXXX`
+LOG=`mktemp --tmpdir opal_errd.out.XXXXXXXXXX`
 
 cp -pr sysfs-test/* $SYSFS/
 
-./opal_errd -s $SYSFS -o $OUT/platform -D -e /bin/true
+echo "test-opal_errd" > $LOG
 
-ls -1 $OUT > $LOG
+./opal_errd -s $SYSFS -o $OUT/platform -D -e /bin/true 2>&1 \
+    | sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' > $LOG
+
+ls -1 $OUT >> $LOG
 (cd $OUT; md5sum *) >> $LOG
 
-diff -u test-opal_errd.result $LOG
 if diff -u test-opal_errd.result $LOG; then
 	rm -rf $SYSFS $OUT $LOG
 	echo PASS;

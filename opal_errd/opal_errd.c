@@ -359,6 +359,7 @@ int main(int argc, char *argv[])
 	fd_set fds;
 	struct timeval tv;
 	int r;
+	int log_options;
 
 	while ((opt = getopt(argc, argv, "De:ho:s:w")) != -1) {
 		switch (opt) {
@@ -415,7 +416,10 @@ int main(int argc, char *argv[])
 
 	/* syslog initialization */
 	setlogmask(LOG_UPTO(LOG_NOTICE));
-	openlog("ELOG", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+	log_options = LOG_CONS | LOG_PID | LOG_NDELAY;
+	if (!opt_daemon)
+		log_options |= LOG_PERROR;
+	openlog("ELOG", log_options, LOG_LOCAL1);
 
 	/* Convert the opal_errd process to a daemon. */
 	if (opt_daemon) {

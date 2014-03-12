@@ -10,6 +10,8 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
+#include <inttypes.h>
+#include <endian.h>
 
 #include "libopalevents.h"
 
@@ -44,7 +46,7 @@ void print_usage(char *command)
 /* parse error log entry passed by user */
 int elogdisplayentry(uint32_t eid)
 {
-	char logid[4];
+	uint32_t logid;
 	int len = 0;
 	int ret = 0;
 	static int pos;
@@ -69,8 +71,8 @@ int elogdisplayentry(uint32_t eid)
 			break;
 		}
 		pos = pos + len;
-		memcpy(logid, (buffer+ELOG_ID_OFFSET), 4);
-		if (*(int *)logid == eid) {
+		logid = be32toh(*(uint32_t*)(buffer+ELOG_ID_OFFSET));
+		if (logid == eid) {
 			parse_opal_event(buffer, len);
 			break;
 		}
@@ -84,7 +86,7 @@ int eloglist(uint32_t service_flag)
 {
 	int len = 0, ret = 0;
 	char *parse = "NONE";
-	char logid[4];
+	uint32_t logid;
 	char src[4];
 	char buffer[OPAL_ERROR_LOG_MAX];
 	char severity;
@@ -112,10 +114,10 @@ int eloglist(uint32_t service_flag)
 			break;
 		}
 		pos = pos + len;
-		memcpy(logid, (buffer+ELOG_ID_OFFSET), 4);
+		logid = be32toh(*(uint32_t*)(buffer+ELOG_ID_OFFSET));
 		memcpy(src, (buffer + ELOG_SRC_OFFSET), 8);
 		severity = buffer[ELOG_SEVERITY_OFFSET];
-		action = *(uint32_t *)(buffer + ELOG_ACTION_OFFSET);
+		action = be32toh(*(uint32_t *)(buffer + ELOG_ACTION_OFFSET));
 		switch (severity) {
 		case OPAL_INFORMATION_LOG:
 			parse = "Informational Error";
@@ -131,10 +133,10 @@ int eloglist(uint32_t service_flag)
 			break;
 		}
 		if (service_flag != 1)
-			printf("| 0x%08X   %-36.36s %8.8s |\n", *(int *)logid, parse, src);
+			printf("| 0x%08X   %-36.36s %8.8s |\n", logid, parse, src);
 		else if ((action == ELOG_ACTION_FLAG) && (service_flag == 1))
 			/* list only service action logs */
-			printf("| 0x%08X   %-36.36s %8.8s |\n", *(int *)logid, parse, src);
+			printf("| 0x%08X   %-36.36s %8.8s |\n", logid, parse, src);
 	}
 	close(platform_log_fd);
 	return ret;

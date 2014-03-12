@@ -29,6 +29,8 @@
 #include <libgen.h>
 #include <sys/inotify.h>
 #include <assert.h>
+#include <endian.h>
+#include <inttypes.h>
 
 char *opt_sysfs = "/sys";
 char *opt_output = "/var/log/platform";
@@ -66,7 +68,7 @@ volatile int terminate;
 /* Parse required fields from error log */
 static int parse_log(char *buffer)
 {
-	char logid[ELOG_ID_SIZE];
+	uint32_t logid;
 	char src[ELOG_SRC_SIZE];
 	uint8_t severity;
 	uint8_t subsysid;
@@ -75,7 +77,7 @@ static int parse_log(char *buffer)
 	char *parse_action = "NONE";
 	char *failingsubsys = "Not Applicable";
 
-	memcpy(logid, (buffer + ELOG_ID_OFFESET), ELOG_ID_SIZE);
+	logid = be32toh(*(uint32_t*)(buffer + ELOG_ID_OFFESET));
 	memcpy(src, (buffer + ELOG_SRC_OFFSET), ELOG_SRC_SIZE);
 	subsysid = buffer[ELOG_SUBSYSTEM_OFFSET];
 	severity = buffer[ELOG_SEVERITY_OFFSET];
@@ -125,7 +127,7 @@ static int parse_log(char *buffer)
 		failingsubsys = "External Environment";
 
 	syslog(LOG_NOTICE, "LID[%x]::SRC[%s]::%s::%s::%s\n",
-	       *(uint32_t *)logid, src, failingsubsys, parse, parse_action);
+	       logid, src, failingsubsys, parse, parse_action);
 
 	return 0;
 }

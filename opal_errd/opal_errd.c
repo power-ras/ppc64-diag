@@ -28,6 +28,7 @@
 #include <dirent.h>
 #include <libgen.h>
 #include <sys/inotify.h>
+#include <assert.h>
 
 char *opt_sysfs = "/sys";
 char *opt_output = "/var/log/platform";
@@ -200,6 +201,8 @@ static int process_elog(const char *elog_path)
 	ssize_t readsz = 0;
 	int rc;
 	char *opt_output_dir = strdup(opt_output);
+	char outbuf[OPAL_ERROR_LOG_MAX];
+	size_t outbufsz = OPAL_ERROR_LOG_MAX;
 
 	snprintf(elog_raw_path, sizeof(elog_raw_path), "%s/raw", elog_path);
 
@@ -237,8 +240,13 @@ static int process_elog(const char *elog_path)
 		goto err;
 	}
 
-	sz = write(out_fd, buf, bufsz);
-	if (sz != bufsz) {
+	assert(bufsz <= outbufsz);
+
+	memset(outbuf, 0, outbufsz);
+	memcpy(outbuf, buf, bufsz);
+
+	sz = write(out_fd, outbuf, outbufsz);
+	if (sz != outbufsz) {
 		syslog(LOG_ERR, "Failed to write platform dump: %s (%d:%s)\n",
 		       opt_output, errno, strerror(errno));
 		goto err;

@@ -97,7 +97,7 @@ static int parse_log(char *buffer)
 		break;
 	}
 
-	action = *(uint32_t *)(buffer + ELOG_ACTION_OFFSET);
+	action = be32toh(*(uint32_t *)(buffer + ELOG_ACTION_OFFSET));
 	if (action == ELOG_ACTION_FLAG)
 		parse_action = "Service action and call home required";
 	else

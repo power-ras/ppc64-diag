@@ -1,9 +1,15 @@
 test-opal-elog-parse
 ELOG[XXXX]: LID[1]::SRC[TESTSRC1]::Not Applicable::Informational Error::No service action required
-ELOG[XXXX]: LID[2]::SRC[TESTSRC2]::Not Applicable::Informational Error::Service action and call home required
+ELOG[XXXX]: LID[2]::SRC[TESTSRC2]::Not Applicable::Recoverable Error::Service action and call home required
+ELOG[XXXX]: LID[3]::SRC[TESTSRC3]::Not Applicable::Predictive Error::Service action and call home required
+ELOG[XXXX]: LID[4]::SRC[TESTSRC4]::Not Applicable::Unrecoverable Error::Service action and call home required
+ELOG[XXXX]: LID[5]::SRC[TESTSRC5]::Not Applicable::NONE::Service action and call home required
 |-------------------------------------------------------------|
 | Entry Id      Event Severity                       SRC      |
 |-------------------------------------------------------------|
 | 0x00000001   Informational Error                  TESTSRC1 |
-| 0x00000002   Informational Error                  TESTSRC2 |
+| 0x00000002   Recoverable Error                    TESTSRC2 |
+| 0x00000003   Predictive Error                     TESTSRC3 |
+| 0x00000004   Unrecoverable Error                  TESTSRC4 |
+| 0x00000005   NONE                                 TESTSRC5 |
 Read Completed

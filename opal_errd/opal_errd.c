@@ -289,25 +289,31 @@ err:
 static int find_and_read_elog_events(const char *elog_dir)
 {
 	int rc = 0;
-	DIR *d;
+	struct dirent **namelist;
 	struct dirent *dirent;
 	char elog_path[PATH_MAX];
 	int is_dir = 0;
 	struct stat sbuf;
 	int retval = 0;
+	int n;
+	int i;
 
-	d = opendir(elog_dir);
-	if (d == NULL)
+	n = scandir(elog_dir, &namelist, NULL, alphasort);
+	if (n < 0)
 		return -1;
 
-	while ((dirent = readdir(d))) {
+	for (i = 0; i < n; i++) {
+		dirent = namelist[i];
+
+		if (dirent->d_name[0] == '.') {
+			free(namelist[i]);
+			continue;
+		}
+
 		snprintf(elog_path, sizeof(elog_path), "%s/%s",
 			 elog_dir, dirent->d_name);
 
 		is_dir = 0;
-
-		if (dirent->d_name[0] == '.')
-			continue;
 
 		if (dirent->d_type == DT_DIR) {
 			is_dir = 1;
@@ -328,9 +334,10 @@ static int find_and_read_elog_events(const char *elog_dir)
 			ack_elog(elog_path);
 		}
 
+		free(namelist[i]);
 	}
 
-	closedir(d);
+	free(namelist);
 
 	return retval;
 }

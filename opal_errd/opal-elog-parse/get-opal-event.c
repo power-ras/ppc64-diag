@@ -192,17 +192,27 @@ int print_opal_priv_hdr_scn(struct opal_priv_hdr_scn *privhdr)
 	printf("|-------------------------------------------------------------|\n");
 	printf("Section ID		: %c%c\n",
 	       privhdr->v6hdr.id[0], privhdr->v6hdr.id[1]);
-	printf("Section Length		: 0x%x (%u)\n",
+	printf("Section Length		: 0x%04x (%u)\n",
 	       privhdr->v6hdr.length, privhdr->v6hdr.length);
-	printf("Version			: %x\n", privhdr->v6hdr.version);
-	printf("Sub_type		: %x\n", privhdr->v6hdr.subtype);
+	printf("Version			: %x", privhdr->v6hdr.version);
+	if (privhdr->v6hdr.version != 1)
+		printf(" UNKNOWN VERSION");
+	printf("\nSub_type		: %x\n", privhdr->v6hdr.subtype);
 	printf("Component ID		: %x\n", privhdr->v6hdr.component_id);
-	printf("Create Date & Time      : %x-%x-%x | %x:%x:%x\n", privhdr->create_date.year,
-		privhdr->create_date.month, privhdr->create_date.day, privhdr->create_time.hour,
-		privhdr->create_time.minutes, privhdr->create_time.seconds);
-	printf("Commit Date & Time	: %x-%x-%x | %x:%x:%x\n", privhdr->commit_date.year,
-		privhdr->commit_date.month, privhdr->commit_date.day, privhdr->commit_time.hour,
-		privhdr->commit_time.minutes, privhdr->commit_time.seconds);
+	printf("Create Date & Time      : %4u-%02u-%02u | %02u:%02u:%02u\n",
+	       privhdr->create_datetime.year,
+	       privhdr->create_datetime.month,
+	       privhdr->create_datetime.day,
+	       privhdr->create_datetime.hour,
+	       privhdr->create_datetime.minutes,
+	       privhdr->create_datetime.seconds);
+	printf("Commit Date & Time	: %4u-%02u-%02u | %02u:%02u:%02u\n",
+	       privhdr->commit_datetime.year,
+	       privhdr->commit_datetime.month,
+	       privhdr->commit_datetime.day,
+	       privhdr->commit_datetime.hour,
+	       privhdr->commit_datetime.minutes,
+	       privhdr->commit_datetime.seconds);
 	printf("Creator ID		:");
 	switch (privhdr->creator_id) {
 	case 'C':
@@ -273,19 +283,73 @@ int parse_src_scn(char *buf, int buflen)
 	return OE_SRC_SCN_SZ + OE_SRC_EH_SZ;
 }
 
-/* parse private header scn */
-int parse_priv_hdr_scn(char *buf, int buflen)
+static uint16_t from_bcd16(uint16_t bcd)
 {
-	struct opal_priv_hdr_scn *privhdr;
-	privhdr = malloc(sizeof(*privhdr));
-	if (privhdr == NULL) {
-		errno = ENOMEM;
-		return -1;
+	return  (bcd & 0x000f) +
+		((bcd & 0x00f0) >> 4) * 10 +
+		((bcd & 0x0f00) >> 8) * 100 +
+		((bcd & 0xf000) >> 12) * 1000;
+}
+
+static uint8_t from_bcd8(uint8_t bcd)
+{
+	return  (bcd & 0x0f) +
+		((bcd & 0xf0) >> 4) * 10;
+}
+
+static struct opal_datetime parse_opal_datetime(const struct opal_datetime in)
+{
+	struct opal_datetime out;
+
+	out.year =  from_bcd16(be16toh(in.year));
+	out.month = from_bcd8(in.month);
+	out.day =   from_bcd8(in.day);
+	out.hour =  from_bcd8(in.hour);
+	out.minutes =    from_bcd8(in.minutes);
+	out.seconds =    from_bcd8(in.seconds);
+	out.hundredths = from_bcd8(in.hundredths);
+
+	return out;
+}
+
+/* parse private header scn */
+int parse_priv_hdr_scn(const struct opal_v6_hdr *hdr,
+		       const char *buf, int buflen)
+{
+	struct opal_priv_hdr_scn privhdr;
+	struct opal_priv_hdr_scn *bufhdr = (struct opal_priv_hdr_scn*)buf;
+
+	if (buflen < sizeof(struct opal_priv_hdr_scn)) {
+		fprintf(stderr, "%s: corrupted, expected length %lu, got %u\n",
+			__func__,
+			sizeof(struct opal_priv_hdr_scn), buflen);
+		return -EINVAL;
 	}
-	memset(privhdr, 0, sizeof(*privhdr));
-	memcpy(privhdr, buf, OE_PRVT_HDR_SCN_SZ);
-	print_opal_priv_hdr_scn(privhdr);
-	return OE_PRVT_HDR_SCN_SZ;
+
+	if (hdr->length != sizeof(struct opal_priv_hdr_scn)) {
+		fprintf(stderr, "%s: section header length disagrees with spec"
+			". section header length %u, spec: %lu\n",
+			__func__,
+			hdr->length, sizeof(struct opal_priv_hdr_scn));
+		return -EINVAL;
+	}
+
+	privhdr.v6hdr = *hdr;
+	privhdr.create_datetime = parse_opal_datetime(bufhdr->create_datetime);
+	privhdr.commit_datetime = parse_opal_datetime(bufhdr->commit_datetime);
+	privhdr.creator_id = bufhdr->creator_id;
+	privhdr.scn_count = bufhdr->scn_count;
+
+	// FIXME: are these ASCII? Need spec clarification
+	privhdr.creator_subid_hi = bufhdr->creator_subid_hi;
+	privhdr.creator_subid_lo = bufhdr->creator_subid_lo;
+
+	privhdr.plid = be32toh(bufhdr->plid);
+
+	privhdr.log_entry_id = be32toh(bufhdr->log_entry_id);
+
+	print_opal_priv_hdr_scn(&privhdr);
+	return 0;
 }
 
 /* parse_usr_hdr_scn */
@@ -353,7 +417,7 @@ int parse_opal_event(char *buf, int buflen)
 
 		if (strncmp(hdr.id, "PH", 2) == 0) {
 			// FIXME required 
-			parse_priv_hdr_scn(buf, buflen);
+			parse_priv_hdr_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "UH", 2) == 0) {
 			// fixme required
 			parse_usr_hdr_scn(buf, buflen);

@@ -27,6 +27,13 @@ if [ $R -ne 234 ]; then
     exit $R
 fi
 
+./opal-elog-parse/opal-elog-parse -d 3 -f $SYSFS/firmware/opal/elog/0x03/raw &>> $LOG 1>&2
+R=$?
+if [ $R -ne 234 ]; then
+    echo 'FAIL:' $R;
+    exit $R
+fi
+
 
 if diff -u test-opal-elog-parse.result $LOG; then
 	rm -rf $SYSFS $OUT $LOG

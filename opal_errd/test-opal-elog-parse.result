@@ -20,12 +20,27 @@ ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must
 |-------------------------------------------------------------|
 Section ID		: PH
 Section Length		: 0x0030 (48)
-Version			: 0
+Version			: 0 UNKNOWN VERSION
 Sub_type		: 0
 Component ID		: 0
-Create Date & Time      : 0-0-0 | 0:0:0
-Commit Date & Time	: 0-0-0 | 0:0:0
+Create Date & Time      :    0-00-00 | 00:00:00
+Commit Date & Time	:    0-00-00 | 00:00:00
 Creator ID		: Unknown
 Creator Subsystem Name	: 0
 Platform Log ID		: 0
 Log Entry ID		: 2
+ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
+|-------------------------------------------------------------|
+|                    Private Header                           |
+|-------------------------------------------------------------|
+Section ID		: PH
+Section Length		: 0x0030 (48)
+Version			: 1
+Sub_type		: 0
+Component ID		: 0
+Create Date & Time      : 2014-03-12 | 14:24:12
+Commit Date & Time	: 2014-03-13 | 13:01:56
+Creator ID		: Unknown
+Creator Subsystem Name	: 0
+Platform Log ID		: 0
+Log Entry ID		: 3

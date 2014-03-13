@@ -23,24 +23,17 @@
 #define __packed __attribute__((packed))
 #endif
 
-/**
- * Definition of date format in opal events
- */
-struct opal_date {
-	uint32_t    year:16;
-	uint32_t    month:8;
-	uint32_t    day:8;
-};
+/* This comes in BCD for some reason, we convert it in parsing */
+struct opal_datetime {
+	uint16_t   year;
+	uint8_t    month;
+	uint8_t    day;
+	uint8_t    hour;
+	uint8_t    minutes;
+	uint8_t    seconds;
+	uint8_t    hundredths;
+} __packed;
 
-/**
- * Definition of timestamp in opal events
- */
-struct opal_time {
-	uint32_t    hour:8;
-	uint32_t    minutes:8;
-	uint32_t    seconds:8;
-	uint32_t    hundredths:8;
-};
 
 /* Error log section ID's */
 enum elogSectionId {
@@ -146,24 +139,23 @@ struct opal_src_scn {
 /* Private Header section */
 struct opal_priv_hdr_scn {
 	struct opal_v6_hdr v6hdr;
-	struct opal_date create_date;
-	struct opal_time create_time;
-	struct opal_date commit_date;
-	struct opal_time commit_time;
-	uint32_t creator_id:8;	/* subsystem component id */
+	struct opal_datetime create_datetime;
+	struct opal_datetime commit_datetime;
+	uint8_t creator_id;	/* subsystem component id */
 #define OPAL_PH_CREAT_SERVICE_PROC   'E'
 #define OPAL_PH_CREAT_HYPERVISOR     'H'
 #define OPAL_PH_CREAT_POWER_CONTROL  'W'
 #define OPAL_PH_CREAT_PARTITION_FW   'L'
 
-	uint32_t reserved_0:16;
-	uint32_t scn_count:8;	/* number of sections in log */
-	uint32_t reserved_1;
+	uint8_t reserved0;
+	uint8_t reserved1;
+	uint8_t scn_count;	/* number of sections in log */
+	uint32_t reserved2;
 	uint32_t creator_subid_hi;
 	uint32_t creator_subid_lo;
 	uint32_t plid;		/* platform log id */
 	uint32_t log_entry_id;	/* Unique log entry id */
-};
+} __packed;
 
 /* user header section */
 struct opal_usr_hdr_scn {

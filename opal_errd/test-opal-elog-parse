@@ -13,6 +13,9 @@ echo 'test-opal-elog-parse' > $LOG
 
 ./opal-elog-parse/opal-elog-parse -l -f $OUT/platform &>> $LOG 1>&2
 
+# First 3 elogs are completely synthesized and not *entirely* according
+# to spec, but useful in testing.
+
 ./opal-elog-parse/opal-elog-parse -d 1 -f $OUT/platform &>> $LOG 1>&2
 R=$?
 if [ $R -ne 234 ]; then
@@ -34,7 +37,8 @@ if [ $R -ne 234 ]; then
     exit $R
 fi
 
-./opal-elog-parse/opal-elog-parse -d 4 -f $SYSFS/firmware/opal/elog/0x04/raw &>> $LOG 1>&2
+# Next log entry is from FSP A, so has 0x50
+./opal-elog-parse/opal-elog-parse -d 0x50000004 -f $SYSFS/firmware/opal/elog/0x04/raw &>> $LOG 1>&2
 R=$?
 if [ $R -ne 234 ]; then
     echo 'FAIL:' $R;

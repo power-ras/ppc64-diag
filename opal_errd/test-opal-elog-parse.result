@@ -2,7 +2,7 @@ test-opal-elog-parse
 ELOG[XXXX]: LID[1]::SRC[TESTSRC1]::Not Applicable::Informational Error::No service action required
 ELOG[XXXX]: LID[2]::SRC[TESTSRC2]::Processor, including internal cache::Recoverable Error::Service action and call home required
 ELOG[XXXX]: LID[3]::SRC[TESTSRC3]::Platform Firmware::Predictive Error::Service action and call home required
-ELOG[XXXX]: LID[4]::SRC[TESTSRC4]::Software::Unrecoverable Error::Service action and call home required
+ELOG[XXXX]: LID[50000004]::SRC[TESTSRC4]::Software::Unrecoverable Error::Service action and call home required
 ELOG[XXXX]: LID[5]::SRC[TESTSRC5]::Not Applicable::NONE::Service action and call home required
 |-------------------------------------------------------------|
 | Entry Id      Event Severity                       SRC      |
@@ -10,7 +10,7 @@ ELOG[XXXX]: LID[5]::SRC[TESTSRC5]::Not Applicable::NONE::Service action and call
 | 0x00000001   Informational Error                  TESTSRC1 |
 | 0x00000002   Recoverable Error                    TESTSRC2 |
 | 0x00000003   Predictive Error                     TESTSRC3 |
-| 0x00000004   Unrecoverable Error                  TESTSRC4 |
+| 0x50000004   Unrecoverable Error                  TESTSRC4 |
 | 0x00000005   NONE                                 TESTSRC5 |
 Read Completed
 ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
@@ -58,4 +58,4 @@ Commit Date & Time	: 2000-12-31 | 10:14:44
 Creator ID		: OPAL
 Creator Subsystem Name	: 0
 Platform Log ID		: b0010203
-Log Entry ID		: 4
+Log Entry ID		: 50000004

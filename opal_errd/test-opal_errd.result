@@ -1,7 +1,7 @@
 ELOG[XXXX]: LID[1]::SRC[TESTSRC1]::Not Applicable::Informational Error::No service action required
 ELOG[XXXX]: LID[2]::SRC[TESTSRC2]::Processor, including internal cache::Recoverable Error::Service action and call home required
 ELOG[XXXX]: LID[3]::SRC[TESTSRC3]::Platform Firmware::Predictive Error::Service action and call home required
-ELOG[XXXX]: LID[4]::SRC[TESTSRC4]::Software::Unrecoverable Error::Service action and call home required
+ELOG[XXXX]: LID[50000004]::SRC[TESTSRC4]::Software::Unrecoverable Error::Service action and call home required
 ELOG[XXXX]: LID[5]::SRC[TESTSRC5]::Not Applicable::NONE::Service action and call home required
 platform
-e5b7b940a9ef615dcb4af7defcb0756f  platform
+030b2a7ed9970fafec82e9e016e8ee57  platform

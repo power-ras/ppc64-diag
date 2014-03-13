@@ -13,3 +13,19 @@ ELOG[XXXX]: LID[5]::SRC[TESTSRC5]::Not Applicable::NONE::Service action and call
 | 0x00000004   Unrecoverable Error                  TESTSRC4 |
 | 0x00000005   NONE                                 TESTSRC5 |
 Read Completed
+ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
+ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
+|-------------------------------------------------------------|
+|                    Private Header                           |
+|-------------------------------------------------------------|
+Section ID		: PH
+Section Length		: 0x0030 (48)
+Version			: 0
+Sub_type		: 0
+Component ID		: 0
+Create Date & Time      : 0-0-0 | 0:0:0
+Commit Date & Time	: 0-0-0 | 0:0:0
+Creator ID		: Unknown
+Creator Subsystem Name	: 0
+Platform Log ID		: 0
+Log Entry ID		: 2

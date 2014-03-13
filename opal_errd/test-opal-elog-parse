@@ -11,7 +11,22 @@ echo 'test-opal-elog-parse' > $LOG
 ./opal_errd -s $SYSFS -o $OUT/platform -D -e /bin/true 2>&1 \
     | sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' >> $LOG
 
-./opal-elog-parse/opal-elog-parse -l -f $OUT/platform >> $LOG
+./opal-elog-parse/opal-elog-parse -l -f $OUT/platform &>> $LOG 1>&2
+
+./opal-elog-parse/opal-elog-parse -d 1 -f $OUT/platform &>> $LOG 1>&2
+R=$?
+if [ $R -ne 234 ]; then
+    echo 'FAIL:' $R;
+    exit $R
+fi
+
+./opal-elog-parse/opal-elog-parse -d 2 -f $SYSFS/firmware/opal/elog/0x02/raw &>> $LOG 1>&2
+R=$?
+if [ $R -ne 234 ]; then
+    echo 'FAIL:' $R;
+    exit $R
+fi
+
 
 if diff -u test-opal-elog-parse.result $LOG; then
 	rm -rf $SYSFS $OUT $LOG

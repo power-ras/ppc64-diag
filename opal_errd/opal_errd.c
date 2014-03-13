@@ -69,7 +69,7 @@ volatile int terminate;
 static int parse_log(char *buffer)
 {
 	uint32_t logid;
-	char src[ELOG_SRC_SIZE];
+	char src[ELOG_SRC_SIZE+1];
 	uint8_t severity;
 	uint8_t subsysid;
 	uint32_t action;
@@ -78,7 +78,10 @@ static int parse_log(char *buffer)
 	char *failingsubsys = "Not Applicable";
 
 	logid = be32toh(*(uint32_t*)(buffer + ELOG_ID_OFFESET));
+
 	memcpy(src, (buffer + ELOG_SRC_OFFSET), ELOG_SRC_SIZE);
+	src[ELOG_SRC_SIZE] = '\0';
+
 	subsysid = buffer[ELOG_SUBSYSTEM_OFFSET];
 	severity = buffer[ELOG_SEVERITY_OFFSET];
 

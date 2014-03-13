@@ -283,7 +283,8 @@ int main(int argc, char *argv[])
 	}
 
 	setlogmask(LOG_UPTO(LOG_NOTICE));
-	openlog("OPAL_DUMP", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+	openlog("OPAL_DUMP", LOG_CONS | LOG_PID | LOG_NDELAY | LOG_PERROR,
+		LOG_LOCAL1);
 
 	snprintf(sysfs_path, sizeof(sysfs_path), "%s/firmware/opal/dump",
 		 opt_sysfs);

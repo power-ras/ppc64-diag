@@ -401,37 +401,37 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	snprintf(sysfs_path, sizeof(sysfs_path), "%s/firmware/opal/elog",
-		 opt_sysfs);
-
-	rc = stat(sysfs_path, &s);
-	if (rc != 0) {
-		fprintf(stderr, "Error accessing sysfs: %s (%d: %s)\n",
-			sysfs_path, errno, strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-
-	inotifyfd = inotify_init();
-	if (inotifyfd == -1) {
-		fprintf(stderr, "Error setting up inotify (%d:%s)\n",
-			errno, strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-
-	rc = inotify_add_watch(inotifyfd, sysfs_path, IN_CREATE);
-	if (rc == -1) {
-		fprintf(stderr, "Error adding inotify watch for %s (%d: %s)\n",
-			sysfs_path, errno, strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-
-
 	/* syslog initialization */
 	setlogmask(LOG_UPTO(LOG_NOTICE));
 	log_options = LOG_CONS | LOG_PID | LOG_NDELAY;
 	if (!opt_daemon)
 		log_options |= LOG_PERROR;
 	openlog("ELOG", log_options, LOG_LOCAL1);
+
+
+	snprintf(sysfs_path, sizeof(sysfs_path), "%s/firmware/opal/elog",
+		 opt_sysfs);
+
+	rc = stat(sysfs_path, &s);
+	if (rc != 0) {
+		syslog(LOG_ERR, "Error accessing sysfs: %s (%d: %s)\n",
+		       sysfs_path, errno, strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	inotifyfd = inotify_init();
+	if (inotifyfd == -1) {
+		syslog(LOG_ERR, "Error setting up inotify (%d:%s)\n",
+		       errno, strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	rc = inotify_add_watch(inotifyfd, sysfs_path, IN_CREATE);
+	if (rc == -1) {
+		syslog(LOG_ERR, "Error adding inotify watch for %s (%d: %s)\n",
+		       sysfs_path, errno, strerror(errno));
+		exit(EXIT_FAILURE);
+	}
 
 	/* Convert the opal_errd process to a daemon. */
 	if (opt_daemon) {

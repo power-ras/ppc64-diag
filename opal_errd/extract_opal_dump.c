@@ -275,25 +275,25 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	setlogmask(LOG_UPTO(LOG_NOTICE));
+	openlog("OPAL_DUMP", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+
 	snprintf(sysfs_path, sizeof(sysfs_path), "%s/firmware/opal/dump",
 		 opt_sysfs);
 
 	rc = stat(sysfs_path, &s);
 	if (rc != 0) {
-		fprintf(stderr, "Error accessing sysfs: %s (%d: %s)\n",
-			sysfs_path, errno, strerror(errno));
+		syslog(LOG_ERR, "Error accessing sysfs: %s (%d: %s)\n",
+		       sysfs_path, errno, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
 	rc = stat(opt_output_dir, &s);
 	if (rc != 0) {
-		fprintf(stderr, "Error accessing output dir: %s (%d: %s)\n",
-			opt_output_dir, errno, strerror(errno));
+		syslog(LOG_ERR, "Error accessing output dir: %s (%d: %s)\n",
+		       opt_output_dir, errno, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
-
-	setlogmask(LOG_UPTO(LOG_NOTICE));
-	openlog("OPAL_DUMP", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
 
 start:
 	rc = find_and_process_dumps(sysfs_path, opt_output_dir);

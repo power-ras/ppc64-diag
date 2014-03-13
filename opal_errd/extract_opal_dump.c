@@ -198,24 +198,30 @@ static int find_and_process_dumps(const char *opal_dump_dir,
 {
 	int rc;
 	int retval= 0;
-	DIR *d;
+	struct dirent **namelist;
 	struct dirent *dirent;
 	char dump_path[PATH_MAX];
 	int is_dir= 0;
 	struct stat sbuf;
+	int n;
+	int i;
 
-	d = opendir(opal_dump_dir);
-	if (d == NULL)
+	n = scandir(opal_dump_dir, &namelist, NULL, alphasort);
+	if (n < 0)
 		return -1;
 
-	while ((dirent = readdir(d))) {
+	for (i = 0; i < n; i++) {
+		dirent = namelist[i];
+
+		if (dirent->d_name[0] == '.') {
+			free(namelist[i]);
+			continue;
+		}
+
 		snprintf(dump_path, sizeof(dump_path), "%s/%s",
 			 opal_dump_dir, dirent->d_name);
 
 		is_dir = 0;
-
-		if (dirent->d_name[0] == '.')
-			continue;
 
 		if (dirent->d_type == DT_DIR) {
 			is_dir = 1;
@@ -236,9 +242,10 @@ static int find_and_process_dumps(const char *opal_dump_dir,
 			if (opt_ack_dump)
 				ack_dump(dump_path);
 		}
+		free(namelist[i]);
 	}
 
-	closedir(d);
+	free(namelist);
 
 	return retval;
 }

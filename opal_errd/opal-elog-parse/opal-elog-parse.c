@@ -73,7 +73,7 @@ int elogdisplayentry(uint32_t eid)
 		pos = pos + len;
 		logid = be32toh(*(uint32_t*)(buffer+ELOG_ID_OFFSET));
 		if (logid == eid) {
-			parse_opal_event(buffer, len);
+			ret = parse_opal_event(buffer, len);
 			break;
 		}
 	}

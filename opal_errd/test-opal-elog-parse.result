@@ -44,3 +44,18 @@ Creator ID		: Unknown
 Creator Subsystem Name	: 0
 Platform Log ID		: 0
 Log Entry ID		: 3
+ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
+|-------------------------------------------------------------|
+|                    Private Header                           |
+|-------------------------------------------------------------|
+Section ID		: PH
+Section Length		: 0x0030 (48)
+Version			: 1
+Sub_type		: 0
+Component ID		: 0
+Create Date & Time      : 1994-01-01 | 01:02:03
+Commit Date & Time	: 2000-12-31 | 10:14:44
+Creator ID		: OPAL
+Creator Subsystem Name	: 0
+Platform Log ID		: b0010203
+Log Entry ID		: 4

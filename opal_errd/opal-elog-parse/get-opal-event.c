@@ -233,6 +233,18 @@ int print_opal_priv_hdr_scn(struct opal_priv_hdr_scn *privhdr)
 	case 'S':
 		printf(" SLIC\n");
 		break;
+	case 'B':
+		printf(" Hostboot\n");
+		break;
+	case 'T':
+		printf(" OCC\n");
+		break;
+	case 'M':
+		printf(" I/O Drawer\n");
+		break;
+	case 'K':
+		printf(" OPAL\n");
+		break;
 	default:
 		printf(" Unknown\n");
 		break;

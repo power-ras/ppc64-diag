@@ -4,4 +4,4 @@ ELOG[XXXX]: LID[3]::SRC[TESTSRC3]::Platform Firmware::Predictive Error::Service 
 ELOG[XXXX]: LID[4]::SRC[TESTSRC4]::Software::Unrecoverable Error::Service action and call home required
 ELOG[XXXX]: LID[5]::SRC[TESTSRC5]::Not Applicable::NONE::Service action and call home required
 platform
-9d06ae6969b245254bddd149fcbeb777  platform
+e5b7b940a9ef615dcb4af7defcb0756f  platform

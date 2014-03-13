@@ -58,7 +58,7 @@ struct	opal_mtms_scn {
 	struct	opal_v6_hdr v6hdr;
 	char	model[OPAL_SYS_MODEL_LEN];
 	char	serial_no[OPAL_SYS_SERIAL_LEN];
-};
+} __packed;
 
 /* Extended header section */
 struct opal_eh_scn {
@@ -121,20 +121,26 @@ struct opal_src_scn {
 	uint8_t		wordcount;
 	uint16_t	reserved_1;
 	uint16_t	srclength;
-	uint32_t    ext_refcode2:32;
-	uint32_t    ext_refcode3:32;
-	uint32_t    ext_refcode4:32;
-	uint32_t    ext_refcode5:32;
-	uint32_t    ext_refcode6:32;
-	uint32_t    ext_refcode7:32;
-	uint32_t    ext_refcode8:32;
-	uint32_t    ext_refcode9:32;
-	char        primary_refcode[36];
-	uint32_t    subscn_id:8;
-	uint32_t    subscn_platform_data:8;
-	uint32_t    subscn_length:16;
-	struct opal_fru_scn *fru_scns;
-};
+	uint32_t    ext_refcode2;
+	uint32_t    ext_refcode3;
+	uint32_t    ext_refcode4;
+	uint32_t    ext_refcode5;
+	uint32_t    ext_refcode6;
+	uint32_t    ext_refcode7;
+	uint32_t    ext_refcode8;
+	uint32_t    ext_refcode9;
+	char        primary_refcode[32];
+
+	/* Optional subsection header
+	 * TODO: should be struct as there could be several
+	 */
+	/* uint8_t    subscn_id;
+	 * uint8_t    subscn_flags;
+	 * uint16_t    subscn_length;
+	 */
+	/* and the subsection of length subscn_length would go here */
+	/* but we currently don't parse it */
+} __packed;
 
 /* Private Header section */
 struct opal_priv_hdr_scn {
@@ -160,10 +166,10 @@ struct opal_priv_hdr_scn {
 /* user header section */
 struct opal_usr_hdr_scn {
 	struct opal_v6_hdr v6hdr;
-	uint32_t    subsystem_id:8;     /**< subsystem id */
-	uint32_t    event_data:8;
-	uint32_t    event_severity:8;
-	uint32_t    event_type:8;       /**< error/event severity */
+	uint8_t    subsystem_id;     /**< subsystem id */
+	uint8_t    event_data;
+	uint8_t    event_severity;
+	uint8_t    event_type;       /**< error/event severity */
 #define OPAL_UH_TYPE_NA                   0x00
 #define OPAL_UH_TYPE_INFO_ONLY            0x01
 #define OPAL_UH_TYPE_DUMP_NOTIFICATION    0x08
@@ -179,18 +185,18 @@ struct opal_usr_hdr_scn {
 #define OPAL_UH_TYPE_NORMAL_SHUTDOWN      0xD0
 #define OPAL_UH_TYPE_ABNORMAL_SHUTDOWN    0xE0
 
-	uint32_t    reserved1:32;
-	uint32_t    reserved2:16;
-	uint32_t    action:16;          /**< erro action code */
+	uint32_t    reserved1;
+	uint8_t     problem_domain;
+	uint8_t     problem_vector;
+	uint16_t    action;          /**< erro action code */
 #define OPAL_UH_ACTION_SERVICE           0x8000
 #define OPAL_UH_ACTION_HIDDEN            0x4000
 #define OPAL_UH_ACTION_REPORT_EXTERNALLY 0x2000
 #define OPAL_UH_ACTION_HMC_ONLY          0x1000
 #define OPAL_UH_ACTION_CALL_HOME         0x0800
 #define OPAL_UH_ACTION_ISO_INCOMPLETE    0x0400
-
-	uint32_t	reserved3:32;
-};
+	uint32_t	reserved2;
+} __packed;
 
 extern int parse_opal_event(char *, int);
 #endif

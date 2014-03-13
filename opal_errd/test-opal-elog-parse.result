@@ -4,6 +4,7 @@ ELOG[XXXX]: LID[2]::SRC[TESTSRC2]::Processor, including internal cache::Recovera
 ELOG[XXXX]: LID[3]::SRC[TESTSRC3]::Platform Firmware::Predictive Error::Service action and call home required
 ELOG[XXXX]: LID[50000004]::SRC[TESTSRC4]::Software::Unrecoverable Error::Service action and call home required
 ELOG[XXXX]: LID[5]::SRC[TESTSRC5]::Not Applicable::NONE::Service action and call home required
+ELOG[XXXX]: LID[5055ed2e]::SRC[B182950C]::Platform Firmware::Informational Error::No service action required
 |-------------------------------------------------------------|
 | Entry Id      Event Severity                       SRC      |
 |-------------------------------------------------------------|
@@ -12,6 +13,7 @@ ELOG[XXXX]: LID[5]::SRC[TESTSRC5]::Not Applicable::NONE::Service action and call
 | 0x00000003   Predictive Error                     TESTSRC3 |
 | 0x50000004   Unrecoverable Error                  TESTSRC4 |
 | 0x00000005   NONE                                 TESTSRC5 |
+| 0x5055ED2E   Informational Error                  B182950C |
 Read Completed
 ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
 ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
@@ -44,7 +46,6 @@ Creator ID		: Unknown
 Creator Subsystem Name	: 0
 Platform Log ID		: 0
 Log Entry ID		: 3
-ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
 |-------------------------------------------------------------|
 |                    Private Header                           |
 |-------------------------------------------------------------|
@@ -59,3 +60,56 @@ Creator ID		: OPAL
 Creator Subsystem Name	: 0
 Platform Log ID		: b0010203
 Log Entry ID		: 50000004
+|-------------------------------------------------------------|
+|                    Private Header                           |
+|-------------------------------------------------------------|
+Section ID		: PH
+Section Length		: 0x0030 (48)
+Version			: 1
+Sub_type		: 0
+Component ID		: 9500
+Create Date & Time      : 2014-02-18 | 06:43:54
+Commit Date & Time	: 2014-02-18 | 06:43:54
+Creator ID		: Service Processor
+Creator Subsystem Name	: 0
+Platform Log ID		: 5055ed2e
+Log Entry ID		: 5055ed2e
+|-------------------------------------------------------------|
+|                      User Header                            |
+|-------------------------------------------------------------|
+Section ID		: UH
+Section Length		: 18
+Version			: 1
+Sub_type		: 0
+Component ID		: 9500
+Subsystem ID		: Platform Firmware
+Event Data		: 3
+Event Type		: Miscellaneous, informational only.
+Event Severity		: Informational or non-error event.
+Action Flag		: Unknown action flag (0x00006000).
+|-------------------------------------------------------------|
+|                     Primary Reference                       |
+|-------------------------------------------------------------|
+Section ID		: PS
+Section Length		: 50
+Version			: 1
+Sub_type		: 1
+Component ID		: 9500
+SRC Version		: 2
+flags			: 0
+SRC Length		: 48
+Primary Reference Code	: B182950C                        
+Hex Words 2 - 5		: 020000f0 2b2c0e10 c103a401 000000ff
+Hex Words 6 - 9		: 00000042 e8ca2c00 00000000 00000000
+|-------------------------------------------------------------|
+|              Machine Type/Model & Serial Number	      |
+|-------------------------------------------------------------|
+Section ID		: MT
+Section Length		: 1c
+Version			: 1
+Sub_type		: 0
+Component ID		: 3100
+Machine Type Model	: 8246-L2D
+Serial Number		: 060E8EA
+|-------------------------------------------------------------|
+

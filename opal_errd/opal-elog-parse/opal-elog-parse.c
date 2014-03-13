@@ -17,6 +17,7 @@
 
 #define DEFAULT_opt_platform_log "/var/log/platform"
 char *opt_platform_log = DEFAULT_opt_platform_log;
+int opt_display_all = 0;
 
 #define ELOG_ID_OFFSET          0x2c
 #define ELOG_SRC_OFFSET         0x78
@@ -37,6 +38,7 @@ void print_usage(char *command)
 {
 	printf("Usage: %s { -d  <entryid> | -l  | -s | -h } [ -f file ]\n"
 		"\t-d: Display error log entry details\n"
+	        "\t-a: Display all error log entry details\n"
 		"\t-l: list all error logs\n"
 		"\t-s: list all call home logs\n"
 	        "\t-f file: use file as platform log file (default %s)\n"
@@ -72,9 +74,10 @@ int elogdisplayentry(uint32_t eid)
 		}
 		pos = pos + len;
 		logid = be32toh(*(uint32_t*)(buffer+ELOG_ID_OFFSET));
-		if (logid == eid) {
+		if (opt_display_all || logid == eid) {
 			ret = parse_opal_event(buffer, len);
-			break;
+			if (!opt_display_all)
+				break;
 		}
 	}
 	close(platform_log_fd);
@@ -152,7 +155,7 @@ int main(int argc, char *argv[])
 	char do_operation = '\0';
 	const char *eid_opt;
 
-	while ((opt = getopt(argc, argv, "d:lshf:")) != -1) {
+	while ((opt = getopt(argc, argv, "ad:lshf:")) != -1) {
 		switch (opt) {
 		case 'd':
 			eid_opt = optarg;
@@ -166,6 +169,10 @@ int main(int argc, char *argv[])
 				print_usage(argv[0]);
 				return -1;
 			}
+			do_operation = opt;
+			break;
+		case 'a':
+			opt_display_all = 1;
 			do_operation = opt;
 			break;
 		case 'f':
@@ -191,6 +198,8 @@ int main(int argc, char *argv[])
 		break;
 	case 'd':
 		eid = strtoul(eid_opt, 0, 0);
+		/* fallthrough */
+	case 'a':
 		ret = elogdisplayentry(eid);
 		break;
 	case 's':

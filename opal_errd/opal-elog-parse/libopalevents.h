@@ -19,6 +19,10 @@
 #define OE_SRC_EH_SZ		76
 #define OE_MT_SCN_SZ		28
 
+#ifndef __packed
+#define __packed __attribute__((packed))
+#endif
+
 /**
  * Definition of date format in opal events
  */
@@ -49,12 +53,12 @@ enum elogSectionId {
 
 /* Error log section header */
 struct opal_v6_hdr {
-	enum elogSectionId id:16;	/* section id */
+	char            id[2];
 	uint16_t	length;		/* section length */
 	uint8_t		version;	/* section version */
 	uint8_t		subtype;	/* section sub-type id */
 	uint16_t	component_id;	/* component id of section creator */
-};
+} __packed;
 
 /* opal MTMS section */
 struct	opal_mtms_scn {

@@ -3,6 +3,8 @@
 #include <string.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <ctype.h>
+#include <assert.h>
 #include "libopalevents.h"
 
 struct id_msg usr_hdr_event_type[] =  {
@@ -73,7 +75,8 @@ int print_usr_hdr_subsystem_id(struct opal_usr_hdr_scn *usrhdr)
 	printf("|-------------------------------------------------------------|\n");
 	printf("|                      User Header                            |\n");
 	printf("|-------------------------------------------------------------|\n");
-	printf("Section ID		: %x\n", usrhdr->v6hdr.id);
+	printf("Section ID		: %c%c\n",
+	       usrhdr->v6hdr.id[0], usrhdr->v6hdr.id[1]);
 	printf("Section Length		: %x\n", usrhdr->v6hdr.length);
 	printf("Version			: %x\n", usrhdr->v6hdr.version);
 	printf("Sub_type		: %x\n", usrhdr->v6hdr.subtype);
@@ -125,14 +128,15 @@ int print_src_refcode(struct opal_src_scn *src)
 
 int print_mt_scn(struct opal_mtms_scn *mtms)
 {
-	if (mtms->v6hdr.id != OPAL_MTMS_SCN) {
+	if (strncmp(mtms->v6hdr.id, "MT", 2)) {
 		errno = EFAULT;
 		return 0;
 	}
 	printf("|-------------------------------------------------------------|\n");
 	printf("|              Machine Type/Model & Serial Number	      |\n");
 	printf("|-------------------------------------------------------------|\n");
-	printf("Section ID		: %x\n", mtms->v6hdr.id);
+	printf("Section ID		: %c%c\n",
+	       mtms->v6hdr.id[0], mtms->v6hdr.id[1]);
 	printf("Section Length		: %x\n", mtms->v6hdr.length);
 	printf("Version			: %x\n", mtms->v6hdr.version);
 	printf("Sub_type		: %x\n", mtms->v6hdr.subtype);
@@ -145,14 +149,15 @@ int print_mt_scn(struct opal_mtms_scn *mtms)
 
 int print_opal_src_scn(struct opal_src_scn *src)
 {
-	if (src->v6hdr.id != OPAL_PRIMARY_SRC_SCN) {
+	if (strncmp(src->v6hdr.id, "PS", 2)) {
 		errno = EFAULT;
 		return 0;
 	}
 	printf("|-------------------------------------------------------------|\n");
 	printf("|                     Primary Reference                       |\n");
 	printf("|-------------------------------------------------------------|\n");
-	printf("Section ID		: %x\n", src->v6hdr.id);
+	printf("Section ID		: %c%c\n",
+	       src->v6hdr.id[0],  src->v6hdr.id[1]);
 	printf("Section Length		: %x\n", src->v6hdr.length);
 	printf("Version			: %x\n", src->v6hdr.version);
 	printf("Sub_type		: %x\n", src->v6hdr.subtype);
@@ -166,7 +171,7 @@ int print_opal_src_scn(struct opal_src_scn *src)
 
 int print_opal_usr_hdr_scn(struct opal_usr_hdr_scn *usrhdr)
 {
-	if (usrhdr->v6hdr.id != OPAL_USR_HDR_SCN) {
+	if (strncmp(usrhdr->v6hdr.id, "UH", 2)) {
 		errno = EFAULT;
 		return 0;
 	}
@@ -178,15 +183,17 @@ int print_opal_usr_hdr_scn(struct opal_usr_hdr_scn *usrhdr)
 
 int print_opal_priv_hdr_scn(struct opal_priv_hdr_scn *privhdr)
 {
-	if (privhdr->v6hdr.id != OPAL_PRIV_HDR_SCN) {
+	if (strncmp(privhdr->v6hdr.id, "PH", 2)) {
 		errno = EFAULT;
 		return 0;
 	}
 	printf("|-------------------------------------------------------------|\n");
 	printf("|                    Private Header                           |\n");
 	printf("|-------------------------------------------------------------|\n");
-	printf("Section ID		: %x\n", privhdr->v6hdr.id);
-	printf("Section Length		: %x\n", privhdr->v6hdr.length);
+	printf("Section ID		: %c%c\n",
+	       privhdr->v6hdr.id[0], privhdr->v6hdr.id[1]);
+	printf("Section Length		: 0x%x (%u)\n",
+	       privhdr->v6hdr.length, privhdr->v6hdr.length);
 	printf("Version			: %x\n", privhdr->v6hdr.version);
 	printf("Sub_type		: %x\n", privhdr->v6hdr.subtype);
 	printf("Component ID		: %x\n", privhdr->v6hdr.component_id);
@@ -231,6 +238,7 @@ int parse_mt_scn(char *buf, int buflen)
 {
 	struct opal_mtms_scn *mt;
 	uint16_t id = 0;
+	fprintf(stderr, "buf %p len %u\n",buf, buflen);
 check:
 	memcpy(&id, buf, 2);
 	if (id == OPAL_MTMS_SCN)
@@ -295,25 +303,101 @@ int parse_usr_hdr_scn(char *buf, int buflen)
 	return OE_USR_HDR_SCN_SZ;
 }
 
+static int parse_section_header(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+{
+	if (buflen < 8) {
+		fprintf(stderr, "ERROR %s: section header is too small, "
+			"is meant to be 8 bytes, only %u found.\n",
+			__func__, buflen);
+		return -EINVAL;
+	}
+
+	const struct opal_v6_hdr* bufhdr = (struct opal_v6_hdr*)buf;
+
+	assert(sizeof(struct opal_v6_hdr) == 8);
+
+	memcpy(hdr->id, bufhdr->id, 2);
+	hdr->length = be16toh(bufhdr->length);
+	hdr->version = bufhdr->version;
+	hdr->subtype = bufhdr->subtype;
+	hdr->component_id = be16toh(bufhdr->component_id);
+
+	if (hdr->length < 8) {
+		fprintf(stderr, "ERROR %s: section header is corrupt. "
+			"Length < 8 bytes and must be at least 8 bytes "
+			"to include the length of itself. "
+			"Id 0x%x%x Length %u Version %u Subtype %u "
+			"Component ID: %u\n",
+			__func__,
+			hdr->id[0], hdr->id[1],
+			hdr->length, hdr->version, hdr->subtype,
+			hdr->component_id);
+		return -EINVAL;
+	}
+
+	return 0;
+}
+
 /* parse all required sections of the log */
 int parse_opal_event(char *buf, int buflen)
 {
-	static int len;
-	len = parse_priv_hdr_scn(buf, buflen);
-	if (len < buflen) {
-		buflen -= len;
-		buf = buf + len;
-		len = parse_usr_hdr_scn(buf, buflen);
+	int rc;
+	struct opal_v6_hdr hdr;
+	int i;
+	char *start = buf;
+
+	while (buflen) {
+		rc = parse_section_header(&hdr, buf, buflen);
+		if (rc < 0)
+			return rc;
+
+		if (strncmp(hdr.id, "PH", 2) == 0) {
+			// FIXME required 
+			parse_priv_hdr_scn(buf, buflen);
+		} else if (strncmp(hdr.id, "UH", 2) == 0) {
+			// fixme required
+			parse_usr_hdr_scn(buf, buflen);
+		} else if (strncmp(hdr.id, "PS", 2) == 0) {
+			// FIXME sometimes required
+			parse_src_scn(buf, buflen);
+		} else if (strncmp(hdr.id, "EH", 2) == 0) {
+			// FIXME required
+		} else if (strncmp(hdr.id, "MT", 2) == 0) {
+			// FIXME: required
+			parse_mt_scn(buf, buflen);
+		} else if (strncmp(hdr.id, "SS", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "DH", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "SW", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "LP", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "LR", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "HM", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "EP", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "IE", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "MI", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "CH", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "UD", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "EI", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "ED", 2) == 0) { // FIXME
+		} else {
+			printf("Unknown section header: %c%c at %lu:\n",
+			       hdr.id[0], hdr.id[1], buf-start);
+			printf("Length: %u (incl 8 byte header)\n", hdr.length);
+			printf("Hex:\n");
+			for (i = 8; i < hdr.length; i++) {
+				printf("0x%02x ", *(buf+i));
+				if (i % 16)
+					printf("\n");
+			}
+			printf("Text (. = unprintable):\n");
+			for (i = 8; i < hdr.length; i++) {
+				printf("%c",
+				       (isgraph(*(buf+i)) | isspace(*(buf+i))) ?
+				       *(buf+i) : '.');
+			}
+		}
+
+		buf+= hdr.length;
 	}
-	if (len < buflen) {
-		buflen -= len;
-		buf = buf + len;
-		len = parse_src_scn(buf, buflen);
-	}
-	if (len < buflen) {
-		buflen -= len;
-		buf = buf + len;
-		len = parse_mt_scn(buf, buflen);
-	}
+
 	return 0;
 }

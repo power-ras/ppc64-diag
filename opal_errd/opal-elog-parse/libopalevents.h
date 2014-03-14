@@ -24,16 +24,6 @@ struct opal_datetime {
 	uint8_t    hundredths;
 } __packed;
 
-
-/* Error log section ID's */
-enum elogSectionId {
-	OPAL_PRIV_HDR_SCN	= 0x5048, /* PH */
-	OPAL_USR_HDR_SCN	= 0x5548, /* UH */
-	OPAL_EH_HDR_SCN		= 0x4548, /* EH */
-	OPAL_PRIMARY_SRC_SCN	= 0x5053, /* PS */
-	OPAL_MTMS_SCN		= 0x4D54, /* MT */
-};
-
 /* Error log section header */
 struct opal_v6_hdr {
 	char            id[2];

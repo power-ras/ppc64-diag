@@ -288,6 +288,22 @@ int print_eh_scn(struct opal_eh_scn *eh)
 	return 0;
 }
 
+static int print_ch_scn(struct opal_ch_scn *ch)
+{
+	printf("|-------------------------------------------------------------|\n");
+	printf("|                   Call Home Log Comment                     |\n");
+	printf("|-------------------------------------------------------------|\n");
+	printf("Section ID		: %c%c\n",
+	       ch->v6hdr.id[0], ch->v6hdr.id[1]);
+	printf("Section Length		: %x\n", ch->v6hdr.length);
+	printf("Version			: %x\n", ch->v6hdr.version);
+	printf("Sub_type		: %x\n", ch->v6hdr.subtype);
+	printf("Component ID		: %x\n", ch->v6hdr.component_id);
+	printf("Call Home Comment	: %s\n", ch->comment);
+
+	return 0;
+}
+
 /* parse MTMS section of the log */
 int parse_mt_scn(const struct opal_v6_hdr *hdr,
 		 const char *buf, int buflen)
@@ -500,6 +516,30 @@ static int parse_eh_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	return 0;
 }
 
+/* Call Home Section */
+static int parse_ch_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+{
+	struct opal_ch_scn *ch;
+	struct opal_ch_scn *bufch = (struct opal_ch_scn*)buf;
+
+	ch = (struct opal_ch_scn*) malloc(hdr->length);
+	if (!ch)
+		return -ENOMEM;
+
+	if (buflen < sizeof(struct opal_ch_scn)) {
+		fprintf(stderr, "%s: corrupted, expected length >= %lu, got %u\n",
+			__func__,
+			sizeof(struct opal_ch_scn), buflen);
+		return -EINVAL;
+	}
+
+	ch->v6hdr = *hdr;
+
+	strncpy(ch->comment, bufch->comment, OPAL_CH_COMMENT_MAX_LEN);
+
+	print_ch_scn(ch);
+	return 0;
+}
 static int parse_section_header(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {
 	if (buflen < 8) {
@@ -582,7 +622,8 @@ int parse_opal_event(char *buf, int buflen)
 		} else if (strncmp(hdr.id, "EP", 2) == 0) { // FIXME
 		} else if (strncmp(hdr.id, "IE", 2) == 0) { // FIXME
 		} else if (strncmp(hdr.id, "MI", 2) == 0) { // FIXME
-		} else if (strncmp(hdr.id, "CH", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "CH", 2) == 0) {
+			parse_ch_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "UD", 2) == 0) { // FIXME
 		} else if (strncmp(hdr.id, "EI", 2) == 0) { // FIXME
 		} else if (strncmp(hdr.id, "ED", 2) == 0) { // FIXME

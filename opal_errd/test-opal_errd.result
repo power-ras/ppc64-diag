@@ -3,6 +3,7 @@ ELOG[XXXX]: LID[2]::SRC[TESTSRC2]::Processor, including internal cache::Recovera
 ELOG[XXXX]: LID[3]::SRC[TESTSRC3]::Platform Firmware::Predictive Error::Service action and call home required
 ELOG[XXXX]: LID[50000004]::SRC[TESTSRC4]::Software::Unrecoverable Error::Service action and call home required
 ELOG[XXXX]: LID[5]::SRC[TESTSRC5]::Not Applicable::NONE::Service action and call home required
+ELOG[XXXX]: LID[50000006]::SRC[CALLHOME]::Power/Cooling System::NONE::No service action required
 ELOG[XXXX]: LID[5055ed2e]::SRC[B182950C]::Platform Firmware::Informational Error::No service action required
 platform
-11113d4769267b24a024c906045100a3  platform
+22a3594fc4dcca31256e21ca65fa044a  platform

@@ -45,6 +45,15 @@ if [ $R -ne 0 ]; then
     exit $R
 fi
 
+# Simualted log with a Call Hom esection
+./opal-elog-parse/opal-elog-parse -d 0x50000006 -f $SYSFS/firmware/opal/elog/0x06/raw &>> $LOG 1>&2
+R=$?
+if [ $R -ne 0 ]; then
+    echo 'FAIL:' $R;
+    exit $R
+fi
+
+
 # Our first "real" elog, this should parse 100% successfully
 ./opal-elog-parse/opal-elog-parse -d 0x5055ED2E -f $SYSFS/firmware/opal/elog/0x5055ED2E/raw &>> $LOG 1>&2
 R=$?

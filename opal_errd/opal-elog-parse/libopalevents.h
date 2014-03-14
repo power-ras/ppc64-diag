@@ -57,6 +57,13 @@ struct opal_eh_scn {
 	char	opalsymid[0]; // variable sized
 } __packed;
 
+/* Extended header section */
+struct opal_ch_scn {
+	struct	opal_v6_hdr v6hdr;
+#define OPAL_CH_COMMENT_MAX_LEN 144
+	char comment[0]; // varsized up to 144 byte null terminated
+} __packed;
+
 struct id_msg{
 	int id;
 	const char *msg;

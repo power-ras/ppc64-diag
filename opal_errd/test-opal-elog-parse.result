@@ -4,6 +4,7 @@ ELOG[XXXX]: LID[2]::SRC[TESTSRC2]::Processor, including internal cache::Recovera
 ELOG[XXXX]: LID[3]::SRC[TESTSRC3]::Platform Firmware::Predictive Error::Service action and call home required
 ELOG[XXXX]: LID[50000004]::SRC[TESTSRC4]::Software::Unrecoverable Error::Service action and call home required
 ELOG[XXXX]: LID[5]::SRC[TESTSRC5]::Not Applicable::NONE::Service action and call home required
+ELOG[XXXX]: LID[50000006]::SRC[CALLHOME]::Power/Cooling System::NONE::No service action required
 ELOG[XXXX]: LID[5055ed2e]::SRC[B182950C]::Platform Firmware::Informational Error::No service action required
 |-------------------------------------------------------------|
 | Entry Id      Event Severity                       SRC      |
@@ -13,6 +14,7 @@ ELOG[XXXX]: LID[5055ed2e]::SRC[B182950C]::Platform Firmware::Informational Error
 | 0x00000003   Predictive Error                     TESTSRC3 |
 | 0x50000004   Unrecoverable Error                  TESTSRC4 |
 | 0x00000005   NONE                                 TESTSRC5 |
+| 0x50000006   NONE                                 CALLHOME |
 | 0x5055ED2E   Informational Error                  B182950C |
 Read Completed
 ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
@@ -60,6 +62,29 @@ Creator ID		: OPAL
 Creator Subsystem Name	: 0
 Platform Log ID		: b0010203
 Log Entry ID		: 50000004
+|-------------------------------------------------------------|
+|                    Private Header                           |
+|-------------------------------------------------------------|
+Section ID		: PH
+Section Length		: 0x0030 (48)
+Version			: 1
+Sub_type		: 0
+Component ID		: 0
+Create Date & Time      : 2014-03-14 | 14:36:66
+Commit Date & Time	: 2014-03-14 | 14:37:00
+Creator ID		: OPAL
+Creator Subsystem Name	: 0
+Platform Log ID		: b0040506
+Log Entry ID		: 50000006
+|-------------------------------------------------------------|
+|                   Call Home Log Comment                     |
+|-------------------------------------------------------------|
+Section ID		: CH
+Section Length		: 23
+Version			: 0
+Sub_type		: 0
+Component ID		: 0
+Call Home Comment	: call home comment goes here
 |-------------------------------------------------------------|
 |                    Private Header                           |
 |-------------------------------------------------------------|

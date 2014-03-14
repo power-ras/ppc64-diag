@@ -102,6 +102,20 @@ Primary Reference Code	: B182950C
 Hex Words 2 - 5		: 020000f0 2b2c0e10 c103a401 000000ff
 Hex Words 6 - 9		: 00000042 e8ca2c00 00000000 00000000
 |-------------------------------------------------------------|
+|                   Extended User Header                      |
+|-------------------------------------------------------------|
+Section ID		: EH
+Section Length		: 60
+Version			: 1
+Sub_type		: 0
+Component ID		: 3100
+Machine Type Model	: 8246-L2D
+Serial Number		: 060E8EA
+Server Firmware Release Version : ZL770_057
+Firmware subsystem Driver Version : b1126p_1320.770
+Event Common reference Time (UTC):    0-00-00 | 00:00:00
+Symptom ID             : B182950C_2B2C0E10
+|-------------------------------------------------------------|
 |              Machine Type/Model & Serial Number	      |
 |-------------------------------------------------------------|
 Section ID		: MT

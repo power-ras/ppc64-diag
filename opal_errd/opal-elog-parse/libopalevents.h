@@ -7,7 +7,6 @@
 #define OPAL_SYS_MODEL_LEN	8
 #define OPAL_SYS_SERIAL_LEN	12
 #define OPAL_VER_LEN		16
-#define OPAL_SYMPID_LEN		80
 
 #ifndef __packed
 #define __packed __attribute__((packed))
@@ -33,28 +32,30 @@ struct opal_v6_hdr {
 	uint16_t	component_id;	/* component id of section creator */
 } __packed;
 
+struct opal_mt_struct {
+	char	model[OPAL_SYS_MODEL_LEN];
+	char	serial_no[OPAL_SYS_SERIAL_LEN];
+} __packed;
+
 /* opal MTMS section */
 struct	opal_mtms_scn {
 	struct	opal_v6_hdr v6hdr;
-	char	model[OPAL_SYS_MODEL_LEN];
-	char	serial_no[OPAL_SYS_SERIAL_LEN];
+	struct opal_mt_struct mt;
 } __packed;
 
 /* Extended header section */
 struct opal_eh_scn {
 	struct	opal_v6_hdr v6hdr;
-	char	model[OPAL_SYS_MODEL_LEN];
-	char	serial_no[OPAL_SYS_SERIAL_LEN];
-	char	opal_release_version[OPAL_VER_LEN];
-	char	opal_subsys_version[OPAL_VER_LEN];
-	uint16_t reserved_0;
-	uint32_t extended_header_date;
-	uint32_t extended_header_time;
+	struct opal_mt_struct mt;
+	char	opal_release_version[OPAL_VER_LEN]; // Null terminated
+	char	opal_subsys_version[OPAL_VER_LEN]; // Null terminated
+	uint32_t reserved_0;
+	struct opal_datetime event_ref_datetime;
 	uint16_t reserved_1;
 	uint8_t reserved_2;
 	uint8_t opal_symid_len;
-	char	opalsymid[OPAL_SYMPID_LEN];
-};
+	char	opalsymid[0]; // variable sized
+} __packed;
 
 struct id_msg{
 	int id;

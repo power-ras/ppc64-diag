@@ -133,9 +133,9 @@ int print_mt_scn(struct opal_mtms_scn *mtms)
 	char model[OPAL_SYS_MODEL_LEN+1];
 	char serial_no[OPAL_SYS_SERIAL_LEN+1];
 
-	memcpy(model, mtms->model, OPAL_SYS_MODEL_LEN);
+	memcpy(model, mtms->mt.model, OPAL_SYS_MODEL_LEN);
 	model[OPAL_SYS_MODEL_LEN] = '\0';
-	memcpy(serial_no, mtms->serial_no, OPAL_SYS_SERIAL_LEN);
+	memcpy(serial_no, mtms->mt.serial_no, OPAL_SYS_SERIAL_LEN);
 	model[OPAL_SYS_SERIAL_LEN] = '\0';
 
 	printf("|-------------------------------------------------------------|\n");
@@ -249,6 +249,45 @@ int print_opal_priv_hdr_scn(struct opal_priv_hdr_scn *privhdr)
 	return 0;
 }
 
+int print_eh_scn(struct opal_eh_scn *eh)
+{
+	char model[OPAL_SYS_MODEL_LEN+1];
+	char serial_no[OPAL_SYS_SERIAL_LEN+1];
+
+	memcpy(model, eh->mt.model, OPAL_SYS_MODEL_LEN);
+	model[OPAL_SYS_MODEL_LEN] = '\0';
+	memcpy(serial_no, eh->mt.serial_no, OPAL_SYS_SERIAL_LEN);
+	model[OPAL_SYS_SERIAL_LEN] = '\0';
+
+	printf("|-------------------------------------------------------------|\n");
+	printf("|                   Extended User Header                      |\n");
+	printf("|-------------------------------------------------------------|\n");
+	printf("Section ID		: %c%c\n",
+	       eh->v6hdr.id[0], eh->v6hdr.id[1]);
+	printf("Section Length		: %x\n", eh->v6hdr.length);
+	printf("Version			: %x\n", eh->v6hdr.version);
+	printf("Sub_type		: %x\n", eh->v6hdr.subtype);
+	printf("Component ID		: %x\n", eh->v6hdr.component_id);
+	printf("Machine Type Model	: %s\n", model);
+	printf("Serial Number		: %s\n", serial_no);
+	printf("Server Firmware Release Version : %s\n",
+	       eh->opal_release_version);
+	printf("Firmware subsystem Driver Version : %s\n",
+	       eh->opal_subsys_version);
+	printf("Event Common reference Time (UTC): "
+	       "%4u-%02u-%02u | %02u:%02u:%02u\n",
+	       eh->event_ref_datetime.year,
+	       eh->event_ref_datetime.month,
+	       eh->event_ref_datetime.day,
+	       eh->event_ref_datetime.hour,
+	       eh->event_ref_datetime.minutes,
+	       eh->event_ref_datetime.seconds);
+	if (eh->opal_symid_len)
+		printf("Symptom ID             : %s\n", eh->opalsymid);
+
+	return 0;
+}
+
 /* parse MTMS section of the log */
 int parse_mt_scn(const struct opal_v6_hdr *hdr,
 		 const char *buf, int buflen)
@@ -272,8 +311,8 @@ int parse_mt_scn(const struct opal_v6_hdr *hdr,
 	}
 
 	mt.v6hdr = *hdr;
-	memcpy(mt.model, bufmt->model, OPAL_SYS_MODEL_LEN);
-	memcpy(mt.serial_no, bufmt->serial_no, OPAL_SYS_SERIAL_LEN);
+	memcpy(mt.mt.model, bufmt->mt.model, OPAL_SYS_MODEL_LEN);
+	memcpy(mt.mt.serial_no, bufmt->mt.serial_no, OPAL_SYS_SERIAL_LEN);
 
 	print_mt_scn(&mt);
 	return 0;
@@ -427,6 +466,40 @@ int parse_usr_hdr_scn(const struct opal_v6_hdr *hdr,
 	return 0;
 }
 
+/* Extended User Header Section */
+static int parse_eh_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+{
+	struct opal_eh_scn *eh;
+	struct opal_eh_scn *bufeh = (struct opal_eh_scn*)buf;
+
+	eh = (struct opal_eh_scn*) malloc(hdr->length);
+	if (!eh)
+		return -ENOMEM;
+
+	if (buflen < sizeof(struct opal_eh_scn)) {
+		fprintf(stderr, "%s: corrupted, expected length >= %lu, got %u\n",
+			__func__,
+			sizeof(struct opal_eh_scn), buflen);
+		return -EINVAL;
+	}
+
+	eh->v6hdr = *hdr;
+	memcpy(eh->mt.model, bufeh->mt.model, OPAL_SYS_MODEL_LEN);
+	memcpy(eh->mt.serial_no, bufeh->mt.serial_no, OPAL_SYS_SERIAL_LEN);
+
+	/* these are meant to be null terimnated strings, so should be safe */
+	strcpy(eh->opal_release_version, bufeh->opal_release_version);
+	strcpy(eh->opal_subsys_version, bufeh->opal_subsys_version);
+
+	eh->event_ref_datetime = parse_opal_datetime(bufeh->event_ref_datetime);
+
+	eh->opal_symid_len = bufeh->opal_symid_len;
+	strcpy(eh->opalsymid, bufeh->opalsymid);
+
+	print_eh_scn(eh);
+	return 0;
+}
+
 static int parse_section_header(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {
 	if (buflen < 8) {
@@ -496,7 +569,7 @@ int parse_opal_event(char *buf, int buflen)
 			// FIXME sometimes required
 			parse_src_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "EH", 2) == 0) {
-			// FIXME required
+			parse_eh_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "MT", 2) == 0) {
 			// FIXME: required
 			parse_mt_scn(&hdr, buf, buflen);

@@ -133,11 +133,6 @@ int print_mt_scn(struct opal_mtms_scn *mtms)
 	char model[OPAL_SYS_MODEL_LEN+1];
 	char serial_no[OPAL_SYS_SERIAL_LEN+1];
 
-	if (strncmp(mtms->v6hdr.id, "MT", 2)) {
-		errno = EFAULT;
-		return 0;
-	}
-
 	memcpy(model, mtms->model, OPAL_SYS_MODEL_LEN);
 	model[OPAL_SYS_MODEL_LEN] = '\0';
 	memcpy(serial_no, mtms->serial_no, OPAL_SYS_SERIAL_LEN);
@@ -160,10 +155,6 @@ int print_mt_scn(struct opal_mtms_scn *mtms)
 
 int print_opal_src_scn(struct opal_src_scn *src)
 {
-	if (strncmp(src->v6hdr.id, "PS", 2)) {
-		errno = EFAULT;
-		return 0;
-	}
 	printf("|-------------------------------------------------------------|\n");
 	printf("|                     Primary Reference                       |\n");
 	printf("|-------------------------------------------------------------|\n");
@@ -182,10 +173,6 @@ int print_opal_src_scn(struct opal_src_scn *src)
 
 int print_opal_usr_hdr_scn(struct opal_usr_hdr_scn *usrhdr)
 {
-	if (strncmp(usrhdr->v6hdr.id, "UH", 2)) {
-		errno = EFAULT;
-		return 0;
-	}
 	print_usr_hdr_subsystem_id(usrhdr);
 	print_usr_hdr_event_data(usrhdr);
 	print_usr_hdr_action(usrhdr);
@@ -194,10 +181,6 @@ int print_opal_usr_hdr_scn(struct opal_usr_hdr_scn *usrhdr)
 
 int print_opal_priv_hdr_scn(struct opal_priv_hdr_scn *privhdr)
 {
-	if (strncmp(privhdr->v6hdr.id, "PH", 2)) {
-		errno = EFAULT;
-		return 0;
-	}
 	printf("|-------------------------------------------------------------|\n");
 	printf("|                    Private Header                           |\n");
 	printf("|-------------------------------------------------------------|\n");

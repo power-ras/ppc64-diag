@@ -4,20 +4,10 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#define OPAL_EVENT_HDR		1
-#define OE_EVENT_HDR_SZ		8
-#define OE_PRVT_HDR_SCN_SZ	48
-#define OE_USR_HDR_SCN_SZ	24
-#define OE_SRC_SCN_SZ		80
-#define OE_SRC_SUBSCN_SZ	4
-#define OE_FRU_SCN_SZ		4
-#define OE_FRU_HDR_SZ		4
 #define OPAL_SYS_MODEL_LEN	8
 #define OPAL_SYS_SERIAL_LEN	12
 #define OPAL_VER_LEN		16
 #define OPAL_SYMPID_LEN		80
-#define OE_SRC_EH_SZ		76
-#define OE_MT_SCN_SZ		28
 
 #ifndef __packed
 #define __packed __attribute__((packed))

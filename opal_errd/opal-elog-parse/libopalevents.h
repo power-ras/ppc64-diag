@@ -109,7 +109,8 @@ struct opal_src_scn {
 	uint32_t    ext_refcode7;
 	uint32_t    ext_refcode8;
 	uint32_t    ext_refcode9;
-	char        primary_refcode[32];
+#define OPAL_SRC_SCN_PRIMARY_REFCODE_LEN 32
+	char        primary_refcode[OPAL_SRC_SCN_PRIMARY_REFCODE_LEN];
 
 	/* Optional subsection header
 	 * TODO: should be struct as there could be several

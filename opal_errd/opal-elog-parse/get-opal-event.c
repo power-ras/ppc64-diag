@@ -111,13 +111,13 @@ int print_usr_hdr_subsystem_id(struct opal_usr_hdr_scn *usrhdr)
 
 int print_src_refcode(struct opal_src_scn *src)
 {
-	int i;
-	printf("Primary Reference Code	: ");
-	for (i = 0; i < 32; i++) {
-		if (src->primary_refcode[i] == '\0')
-			break;
-		printf("%c", src->primary_refcode[i]);
-	}
+	char primary_refcode_display[OPAL_SRC_SCN_PRIMARY_REFCODE_LEN+1];
+
+	memcpy(primary_refcode_display, src->primary_refcode,
+	       OPAL_SRC_SCN_PRIMARY_REFCODE_LEN);
+	primary_refcode_display[OPAL_SRC_SCN_PRIMARY_REFCODE_LEN] = '\0';
+
+	printf("Primary Reference Code	: %s", primary_refcode_display);
 	printf("\n");
 	printf("Hex Words 2 - 5		: %08x %08x %08x %08x\n",
 	       src->ext_refcode2, src->ext_refcode3,
@@ -333,7 +333,8 @@ int parse_src_scn(const struct opal_v6_hdr *hdr,
 	src.ext_refcode8 = be32toh(bufsrc->ext_refcode8);
 	src.ext_refcode9 = be32toh(bufsrc->ext_refcode9);
 
-	memcpy(src.primary_refcode, bufsrc->primary_refcode, 32);
+	memcpy(src.primary_refcode, bufsrc->primary_refcode,
+	       OPAL_SRC_SCN_PRIMARY_REFCODE_LEN);
 
 	print_opal_src_scn(&src);
 	return 0;

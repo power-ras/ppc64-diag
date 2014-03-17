@@ -90,7 +90,7 @@ int eloglist(uint32_t service_flag)
 	int len = 0, ret = 0;
 	char *parse;
 	uint32_t logid;
-	char src[4];
+	char src[8];
 	char buffer[OPAL_ERROR_LOG_MAX];
 	char severity;
 	static int pos;
@@ -118,7 +118,7 @@ int eloglist(uint32_t service_flag)
 		}
 		pos = pos + len;
 		logid = be32toh(*(uint32_t*)(buffer+ELOG_ID_OFFSET));
-		memcpy(src, (buffer + ELOG_SRC_OFFSET), 8);
+		memcpy(src, (buffer + ELOG_SRC_OFFSET), sizeof(src));
 		severity = buffer[ELOG_SEVERITY_OFFSET];
 		action = be32toh(*(uint32_t *)(buffer + ELOG_ACTION_OFFSET));
 		switch (severity) {

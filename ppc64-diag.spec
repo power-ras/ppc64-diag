@@ -60,46 +60,32 @@ ln -sfv /usr/sbin/usysattn $RPM_BUILD_ROOT/usr/sbin/usysfault
 
 %post
 # Post-install script --------------------------------------------------
-if [ "`grep platform /proc/cpuinfo | awk '{print $3}'`" == "PowerNV" ]; then
-    if [ "$1" = "1" ]; then # first install
-        /sbin/chkconfig --add opal_errd
-        /etc/init.d/opal_errd start
-    elif [ "$1" = "2" ]; then # upgrade
-        /etc/init.d/opal_errd restart
-    fi
-else
-    /etc/ppc64-diag/ppc64_diag_setup --register >/dev/null
-    /etc/ppc64-diag/lp_diag_setup --register >/dev/null
-    if [ "$1" = "1" ]; then # first install
-        /sbin/chkconfig --add rtas_errd
-        /etc/init.d/rtas_errd start
-    elif [ "$1" = "2" ]; then # upgrade
-        /etc/init.d/rtas_errd restart
-    fi
+# We will install both opal_errd and rtas_errd daemon and during boottime
+# daemon will fail gracefully if its not relevant to the running platform
+/etc/ppc64-diag/ppc64_diag_setup --register >/dev/null 2>&1
+/etc/ppc64-diag/lp_diag_setup --register >/dev/null 2>&1
+if [ "$1" = "1" ]; then # first install
+    /sbin/chkconfig --add rtas_errd
+    /sbin/chkconfig --add opal_errd
+    /etc/init.d/opal_errd start >/dev/null || /etc/init.d/rtas_errd start >/dev/null
+elif [ "$1" = "2" ]; then # upgrade
+    /etc/init.d/rtas_errd restart >/dev/null || /etc/init.d/opal_errd restart >/dev/null
 fi
 
 %preun
 # Pre-uninstall script -------------------------------------------------
-if [ "`grep platform /proc/cpuinfo | awk '{print $3}'`" == "PowerNV" ]; then
-    if [ "$1" = "0" ]; then # last uninstall
-        /etc/init.d/opal_errd stop
-        /sbin/chkconfig --del opal_errd
-    fi
-else
-    if [ "$1" = "0" ]; then # last uninstall
-        /etc/init.d/rtas_errd stop
-        /sbin/chkconfig --del rtas_errd
-        /etc/ppc64-diag/ppc64_diag_setup --unregister >/dev/null
-        /etc/ppc64-diag/lp_diag_setup --unregister >/dev/null
-    fi
+if [ "$1" = "0" ]; then # last uninstall
+    /etc/init.d/opal_errd stop >/dev/null || /etc/init.d/rtas_errd stop >/dev/null
+    /sbin/chkconfig --del opal_errd
+    /sbin/chkconfig --del rtas_errd
+    /etc/ppc64-diag/ppc64_diag_setup --unregister >/dev/null
+    /etc/ppc64-diag/lp_diag_setup --unregister >/dev/null
 fi
 
 %triggerin -- librtas
 # trigger on librtas upgrades ------------------------------------------
-if [ "`grep platform /proc/cpuinfo | awk '{print $3}'`" != "PowerNV" ]; then
-    if [ "$2" = "2" ]; then
-        /etc/init.d/rtas_errd restart
-    fi
+if [ "$2" = "2" ]; then
+    /etc/init.d/opal_errd restart >/dev/null || /etc/init.d/rtas_errd restart >/dev/null
 fi
 
 %changelog

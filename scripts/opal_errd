@@ -16,8 +16,7 @@
 # 5		Daemon not installed
 # 6		Daemon not configured
 # 7		Daemon not running
-# 8		Unsupported platform
-# 9 - 199	Reserved
+# 8 - 199	Reserved
 
 ### BEGIN INIT INFO
 # Provides:		opal_errd
@@ -35,11 +34,10 @@ OE_BIN=/usr/sbin/opal_errd
 test -x $OE_BIN || exit 5
 
 # This daemon runs only on PowerNV platform
-machine=`uname -m`
 platform=`cat /proc/cpuinfo | grep platform | awk '{print $3}'`
-if [ "$machine" != "ppc64" ] || [ "$platform" != "PowerNV" ]; then
+if [ ! -e "/sys/firmware/opal/elog" ]; then
 	echo "opal_errd daemon is not supported on the $platform platform"
-	exit 8
+	exit 0
 fi
 
 if [[ -f /etc/rc.status ]]; then

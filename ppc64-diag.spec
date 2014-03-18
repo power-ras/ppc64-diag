@@ -41,6 +41,7 @@ make
 make install DESTDIR=$RPM_BUILD_ROOT
 chmod 644 $RPM_BUILD_ROOT/etc/ppc64-diag/servevent_parse.pl
 mkdir $RPM_BUILD_ROOT/etc/ppc64-diag/ses_pages
+mkdir $RPM_BUILD_ROOT/var/log/dump
 ln -sfv /usr/sbin/usysattn $RPM_BUILD_ROOT/usr/sbin/usysfault
 
 %files
@@ -50,6 +51,7 @@ ln -sfv /usr/sbin/usysattn $RPM_BUILD_ROOT/usr/sbin/usysfault
 /usr/sbin/*
 %dir /etc/ppc64-diag
 %dir /etc/ppc64-diag/ses_pages
+%dir /var/log/dump
 %config /etc/ppc64-diag/*
 %config /etc/rc.powerfail
 %config %attr(755,root,root) /etc/init.d/rtas_errd

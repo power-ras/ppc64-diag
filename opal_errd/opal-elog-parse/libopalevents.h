@@ -81,8 +81,8 @@ struct sev_type{
 	{0x01, " Miscellaneous, informational only."},\
 	{0x08, " Dump notification."},\
 	{0x10, " Previously reported error has been corrected by system."},\
-	{0x20, " System resources manually ."}, \
-	{0x21, " System resources deconfigured by system due" }, \
+	{0x20, " System resources manually deconfigured by user."}, \
+	{0x21, " System resources deconfigured by system due to prior error event."}, \
 	{0x22, " Resource deallocation event notification."}, \
 	{0x30, " Customer environmental problem has returned to normal."}, \
 	{0x40, " Concurrent maintenance event."}, \
@@ -91,7 +91,7 @@ struct sev_type{
 	{0x80, " Dynamic reconfiguration event."}, \
 	{0xD0, " Normal system/platform shutdown or powered off."}, \
 	{0xE0, " Platform powered off by user without normal shutdown."}, \
-	{0,    " Unknown event type."}
+	{0,    " Not applicable."}
 
 #define SEVERITY_TYPE \
 	{0x00, " Informational or non-error event."}, \

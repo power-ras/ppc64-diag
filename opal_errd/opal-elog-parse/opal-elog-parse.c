@@ -55,9 +55,9 @@ int elogdisplayentry(uint32_t eid)
 	char buffer[OPAL_ERROR_LOG_MAX];
 	platform_log_fd = open(opt_platform_log, O_RDONLY);
 	if (platform_log_fd <= 0) {
-		fprintf(stderr, "Could not open error log file at either %s or "
-		       " %s\nThe error log parse tool cannot continue and will "
-		       "exit", opt_platform_log, strerror(errno));
+		fprintf(stderr, "Could not open error log file : %s (%s).\n "
+		       "The error log parse tool cannot continue and will "
+		       "exit.\n", opt_platform_log, strerror(errno));
 		close(platform_log_fd);
 		return -1;
 	}
@@ -97,10 +97,11 @@ int eloglist(uint32_t service_flag)
 	uint32_t action;
 	platform_log_fd = open(opt_platform_log, O_RDONLY);
 	if (platform_log_fd <= 0) {
-		fprintf(stderr, "Could not open error log file at either %s or "
-		       " %s\nThe error log parse tool cannot continue and will "
-		       "exit", opt_platform_log, strerror(errno));
+		fprintf(stderr, "Could not open error log file : %s (%s).\n "
+		       "The error log parse tool cannot continue and will "
+		       "exit.\n", opt_platform_log, strerror(errno));
 		close(platform_log_fd);
+		return -1;
 	}
 	printf("|-------------------------------------------------------------|\n");
 	printf("| Entry Id      Event Severity                       SRC      |\n");

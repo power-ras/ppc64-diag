@@ -32,12 +32,16 @@
 #include <endian.h>
 #include <inttypes.h>
 
-char *opt_sysfs = "/sys";
-char *opt_output = "/var/log/platform";
+#define DEFAULT_SYSFS_PATH		"/sys"
+#define DEFAULT_OUTPUT_FILE		"/var/log/platform"
+#define DEFAULT_EXTRACT_DUMP_CMD	"/usr/sbin/extract_opal_dump"
+
+char *opt_sysfs = DEFAULT_SYSFS_PATH;
+char *opt_output = DEFAULT_OUTPUT_FILE;
 int opt_daemon = 1;
 int opt_watch = 1;
 
-char *opt_extract_opal_dump_cmd = "/usr/sbin/extract_opal_dump";
+char *opt_extract_opal_dump_cmd = DEFAULT_EXTRACT_DUMP_CMD;
 
 /*
  * As per PEL v6 (defined in PAPR spec) fixed offset for
@@ -351,10 +355,11 @@ static void help(const char* argv0)
 {
 	fprintf(stderr, "%s help:\n\n", argv0);
 	fprintf(stderr, "-e cmd  - path to extract_opal_dump (default %s)\n",
-		opt_extract_opal_dump_cmd);
+		DEFAULT_EXTRACT_DUMP_CMD);
 	fprintf(stderr, "-o file - output log entries to file (default %s)\n",
-		opt_output);
-	fprintf(stderr, "-s dir  - path to sysfs (default %s)\n", opt_sysfs);
+		DEFAULT_OUTPUT_FILE);
+	fprintf(stderr, "-s dir  - path to sysfs (default %s)\n",
+		DEFAULT_SYSFS_PATH);
 	fprintf(stderr, "-D      - don't daemonize, just run once.\n");
 	fprintf(stderr, "-w      - watch for new events (default when daemon)\n");
 	fprintf(stderr, "-h      - help (this message)\n");

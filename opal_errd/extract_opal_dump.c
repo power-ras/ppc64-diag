@@ -21,10 +21,13 @@
 #include <endian.h>
 #include <syslog.h>
 
+#define DEFAULT_SYSFS_PATH	"/sys"
+#define DEFAULT_OUTPUT_DIR	"/var/log/dump"
+
 int opt_ack_dump = 1;
 int opt_wait = 0;
-char *opt_sysfs = "/sys";
-char *opt_output_dir = "/var/log/dump";
+char *opt_sysfs = DEFAULT_SYSFS_PATH;
+char *opt_output_dir = DEFAULT_OUTPUT_DIR;
 
 static void help(const char* argv0)
 {
@@ -32,9 +35,9 @@ static void help(const char* argv0)
 	fprintf(stderr, "\n");
 	fprintf(stderr, "-A     - Don't acknowledge dump\n");
 	fprintf(stderr, "-s dir - sysfs directory (default %s)\n",
-		opt_sysfs);
+		DEFAULT_SYSFS_PATH);
 	fprintf(stderr, "-o dir - directory to save dumps (default %s)\n",
-		opt_output_dir);
+		DEFAULT_OUTPUT_DIR);
 	fprintf(stderr, "-w     - wait for a dump\n");
 	fprintf(stderr, "-h     - help (this message)\n");
 }

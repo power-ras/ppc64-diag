@@ -160,11 +160,6 @@ static int parse_log(char *buffer, size_t bufsz)
 
 /**
  * Check platform dump
- *
- * FIXME:
- *   Presently we are calling dump extractor for every error/event.
- *   We have to parse the error/event and call dump extractor only
- *   for dump available event.
  */
 static void check_platform_dump(void)
 {
@@ -328,8 +323,6 @@ static int process_elog(const char *elog_path)
 		       " (%d:%s)\n", opt_output_dir, errno, strerror(errno));
 	}
 
-	check_platform_dump();
-
 	parse_log(buf, bufsz);
 
 	ret = 0;
@@ -423,6 +416,7 @@ int main(int argc, char *argv[])
 	int rc = 0;
 	int opt;
 	char sysfs_path[PATH_MAX];
+	char elog_path[PATH_MAX];
 	struct stat s;
 	int inotifyfd;
 	char inotifybuf[sizeof(struct inotify_event) + NAME_MAX + 1];
@@ -470,7 +464,15 @@ int main(int argc, char *argv[])
 	openlog("ELOG", log_options, LOG_LOCAL1);
 
 	/* Use PATH_MAX but admit that it may be insufficient */
-	rc = snprintf(sysfs_path, PATH_MAX, "%s/firmware/opal/elog", opt_sysfs);
+	rc = snprintf(sysfs_path, sizeof(sysfs_path), "%s/firmware/opal",
+		      opt_sysfs);
+	if (rc >= PATH_MAX) {
+		syslog(LOG_ERR, "sysfs_path for opal dir is too big\n");
+		exit(EXIT_FAILURE);
+	}
+
+	/* elog log path */
+	rc = snprintf(elog_path, sizeof(elog_path), "%s/elog", sysfs_path);
 	if (rc >= PATH_MAX) {
 		syslog(LOG_ERR, "sysfs_path for elogs too big\n");
 		exit(EXIT_FAILURE);
@@ -531,7 +533,10 @@ int main(int argc, char *argv[])
 
 	/* Read error/event log until we get termination signal */
 	while (!terminate) {
-		find_and_read_elog_events(sysfs_path);
+		find_and_read_elog_events(elog_path);
+
+		check_platform_dump();
+
 		if (!opt_watch) {
 			terminate = 1;
 		} else {

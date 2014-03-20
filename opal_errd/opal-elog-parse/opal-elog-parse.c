@@ -38,7 +38,7 @@ static int platform_log_fd = -1;
 
 void print_usage(char *command)
 {
-	printf("Usage: %s { -d  <entryid> | -l  | -s | -h } [ -f file ]\n"
+	printf("Usage: %s { -d  <entryid> | -a | -l | -s | -h } [ -f file ]\n"
 		"\t-d: Display error log entry details\n"
 	        "\t-a: Display all error log entry details\n"
 		"\t-l: list all error logs\n"
@@ -173,6 +173,7 @@ int main(int argc, char *argv[])
 {
 	uint32_t eid = 0;
 	int opt = 0, ret = 0;
+	int arg_cnt = 0;
 	char do_operation = '\0';
 	const char *eid_opt;
 
@@ -183,16 +184,11 @@ int main(int argc, char *argv[])
 			/* fallthrough */
 		case 'l':
 		case 's':
-			if (do_operation != '\0') {
-				fprintf(stderr, "Only one operation "
-					"(-d | -l | -s) can "
-					"be selected at any one time.\n");
-				print_usage(argv[0]);
-				return -1;
-			}
+			arg_cnt++;
 			do_operation = opt;
 			break;
 		case 'a':
+			arg_cnt++;
 			opt_display_all = 1;
 			do_operation = opt;
 			break;
@@ -201,16 +197,23 @@ int main(int argc, char *argv[])
 			break;
 		case 'h':
 			print_usage(argv[0]);
-			break;
+			exit(EXIT_SUCCESS);
 		default:
 			print_usage(argv[0]);
-			break;
+			exit(EXIT_FAILURE);
 		}
 	}
 	if (argc == 1) {
 		fprintf(stderr, "No parameters are specified\n");
 		print_usage(argv[0]);
 		ret = -1;
+	}
+
+	if (arg_cnt > 1) {
+		fprintf(stderr, "Only one operation (-d | -a | -l | -s) "
+			"can be selected at any one time.\n");
+		print_usage(argv[0]);
+		return -1;
 	}
 
 	switch (do_operation) {

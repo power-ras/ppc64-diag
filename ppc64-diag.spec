@@ -1,5 +1,5 @@
 Name:	ppc64-diag
-Version:	2.6.3
+Version:	2.6.4
 Release:	0
 Summary: 	PowerLinux Platform Diagnostics
 Group: 		System Environment/Base
@@ -89,6 +89,10 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Fri Mar 21 2014 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.6.4
+- Added support for PowerKVM host (opal_errd, extract_opal_dump)
+- Added support to parse PEL format log (opal-elog-parse)
+
 * Fri Mar 07 2014 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.6.3
 - Added platform validation code
 - Add support for hotplugging qemu pci devices via RTAS event

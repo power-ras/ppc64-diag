@@ -392,7 +392,7 @@ static uint8_t from_bcd8(uint8_t bcd)
 		((bcd & 0xf0) >> 4) * 10;
 }
 
-static struct opal_datetime parse_opal_datetime(const struct opal_datetime in)
+struct opal_datetime parse_opal_datetime(const struct opal_datetime in)
 {
 	struct opal_datetime out;
 

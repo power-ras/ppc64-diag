@@ -20,7 +20,9 @@ char *opt_platform_log = DEFAULT_opt_platform_log;
 int opt_display_all = 0;
 
 #define ELOG_ID_OFFSET          0x2c
+#define ELOG_COMMIT_TIME_OFFSET	0x10
 #define ELOG_SRC_OFFSET         0x78
+#define ELOG_SUBSYS_ID_OFFSET	0x38
 #define ELOG_SEVERITY_OFFSET    0x3a
 #define OPAL_ERROR_LOG_MAX      16384
 #define ELOG_ACTION_OFFSET      0x42
@@ -103,13 +105,17 @@ int eloglist(uint32_t service_flag)
 		close(platform_log_fd);
 		return -1;
 	}
-	printf("|-------------------------------------------------------------|\n");
-	printf("| Entry Id      Event Severity                       SRC      |\n");
-	printf("|-------------------------------------------------------------|\n");
+	printf("|------------------------------------------------------------------------------|\n");
+	printf("| Entry Id    SRC       Date                 Subsystem  Event Severity         |\n");
+	printf("|------------------------------------------------------------------------------|\n");
 	while (lseek(platform_log_fd, pos, 0) >= 0) {
+		struct opal_datetime date_time_in, date_time_out;
+		uint8_t subsys;
+
 		memset(buffer, 0, sizeof(buffer));
 		len = read(platform_log_fd, (char *)buffer, OPAL_ERROR_LOG_MAX);
 		if (len == 0) {
+			printf("|------------------------------------------------------------------------------|\n");
 			printf("Read Completed\n");
 			break;
 		} else if (len < 0) {
@@ -124,7 +130,7 @@ int eloglist(uint32_t service_flag)
 		action = be32toh(*(uint32_t *)(buffer + ELOG_ACTION_OFFSET));
 		switch (severity) {
 		case OPAL_INFORMATION_LOG:
-			parse = "Informational Error";
+			parse = "Informational Event";
 			break;
 		case OPAL_RECOVERABLE_LOG:
 			parse = "Recoverable Error";
@@ -139,11 +145,25 @@ int eloglist(uint32_t service_flag)
 			parse = "NONE";
 			break;
 		}
+
+		date_time_in = *(const struct opal_datetime *)(buffer + ELOG_COMMIT_TIME_OFFSET);
+		date_time_out = parse_opal_datetime(date_time_in);
+		subsys = buffer[ELOG_SUBSYS_ID_OFFSET];
 		if (service_flag != 1)
-			printf("| 0x%08X   %-36.36s %8.8s |\n", logid, parse, src);
+			printf("| 0x%08X  %8.8s  %4u-%02u-%02u %02u:%02u:%02u  0x%2x       %-22.22s |\n",
+				logid, src,
+				date_time_out.year, date_time_out.month,
+				date_time_out.day, date_time_out.hour,
+				date_time_out.minutes, date_time_out.seconds,
+				subsys, parse);
 		else if ((action == ELOG_ACTION_FLAG) && (service_flag == 1))
 			/* list only service action logs */
-			printf("| 0x%08X   %-36.36s %8.8s |\n", logid, parse, src);
+			printf("| 0x%08X  %8.8s  %4u-%02u-%02u %02u:%02u:%02u  0x%2x       %-22.22s |\n",
+				logid, src,
+				date_time_out.year, date_time_out.month,
+				date_time_out.day, date_time_out.hour,
+				date_time_out.minutes, date_time_out.seconds,
+				subsys, parse);
 	}
 	close(platform_log_fd);
 	return ret;

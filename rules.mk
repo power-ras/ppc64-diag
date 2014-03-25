@@ -1,7 +1,7 @@
 #
 # Common Makefile definitions
 #
-
+SHELL=/bin/bash
 PWD = $(shell echo `pwd`)
 INSTALL = /usr/bin/install
 

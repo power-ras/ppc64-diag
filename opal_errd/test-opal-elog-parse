@@ -38,7 +38,7 @@ if [ $R -ne 234 ]; then
 fi
 
 # Next log entry is from FSP A, so has 0x50
-./opal-elog-parse/opal-elog-parse -d 0x50000004 -f $SYSFS/firmware/opal/elog/0x04/raw &>> $LOG 1>&2
+./opal-elog-parse/opal-elog-parse -d 0x50000004 -f $SYSFS/firmware/opal/elog/0x50000004/raw &>> $LOG 1>&2
 R=$?
 if [ $R -ne 0 ]; then
     echo 'FAIL:' $R;
@@ -46,7 +46,7 @@ if [ $R -ne 0 ]; then
 fi
 
 # Simualted log with a Call Hom esection
-./opal-elog-parse/opal-elog-parse -d 0x50000006 -f $SYSFS/firmware/opal/elog/0x06/raw &>> $LOG 1>&2
+./opal-elog-parse/opal-elog-parse -d 0x50000006 -f $SYSFS/firmware/opal/elog/0x50000006/raw &>> $LOG 1>&2
 R=$?
 if [ $R -ne 0 ]; then
     echo 'FAIL:' $R;
@@ -55,7 +55,7 @@ fi
 
 
 # Our first "real" elog, this should parse 100% successfully
-./opal-elog-parse/opal-elog-parse -d 0x5055ED2E -f $SYSFS/firmware/opal/elog/0x5055ED2E/raw &>> $LOG 1>&2
+./opal-elog-parse/opal-elog-parse -d 0x5055ed2e -f $SYSFS/firmware/opal/elog/0x5055ed2e/raw &>> $LOG 1>&2
 R=$?
 if [ $R -ne 0 ]; then
     echo 'FAIL:' $R;

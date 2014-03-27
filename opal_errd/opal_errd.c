@@ -91,7 +91,7 @@ static int parse_log(char *buffer)
 
 	switch (severity) {
 	case OPAL_INFORMATION_LOG:
-		parse = "Informational Error";
+		parse = "Informational Event";
 		break;
 	case OPAL_RECOVERABLE_LOG:
 		parse = "Recoverable Error";

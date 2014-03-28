@@ -28,6 +28,12 @@ int opt_display_all = 0;
 #define ELOG_ACTION_OFFSET      0x42
 #define ELOG_ACTION_FLAG        0xa8000000
 
+#define ELOG_SRC_SIZE		8
+#define OPAL_ERROR_LOG_MAX      16384
+#define ELOG_ACTION_FLAG        0xa8000000
+
+#define ELOG_MIN_READ_OFFSET	ELOG_SRC_OFFSET + ELOG_SRC_SIZE
+
 /* Severity of the log */
 #define OPAL_INFORMATION_LOG    0x00
 #define OPAL_RECOVERABLE_LOG    0x10
@@ -73,6 +79,11 @@ int elogdisplayentry(uint32_t eid)
 			fprintf(stderr, "Read Platform log failed\n");
 			ret = -1;
 			break;
+		/* Make sure we read minimum data needed in this function */
+		} else if (len < (ELOG_ID_OFFSET + sizeof(logid))) {
+			fprintf(stderr, "Partially read elog, cannot parse\n");
+			ret = -1;
+			break;
 		}
 		pos = pos + len;
 		logid = be32toh(*(uint32_t*)(buffer+ELOG_ID_OFFSET));
@@ -92,7 +103,7 @@ int eloglist(uint32_t service_flag)
 	int len = 0, ret = 0;
 	char *parse;
 	uint32_t logid;
-	char src[8];
+	char src[ELOG_SRC_SIZE];
 	char buffer[OPAL_ERROR_LOG_MAX];
 	char severity;
 	static int pos;
@@ -120,6 +131,10 @@ int eloglist(uint32_t service_flag)
 			break;
 		} else if (len < 0) {
 			fprintf(stderr, "Read Platform log failed\n");
+			ret = -1;
+			break;
+		} else if (len < ELOG_MIN_READ_OFFSET) {
+			fprintf(stderr, "Partially read elog, cannot parse\n");
 			ret = -1;
 			break;
 		}

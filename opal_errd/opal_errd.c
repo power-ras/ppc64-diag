@@ -51,13 +51,14 @@ char *opt_extract_opal_dump_cmd = DEFAULT_EXTRACT_DUMP_CMD;
 #define ELOG_ID_SIZE		4
 #define ELOG_SRC_SIZE		8
 
-#define ELOG_ID_OFFESET		0x2c
 #define ELOG_DATE_OFFSET	0x8
 #define ELOG_TIME_OFFSET	0xc
-#define ELOG_SRC_OFFSET		0x78
+#define ELOG_ID_OFFESET		0x2c
 #define ELOG_SEVERITY_OFFSET	0x3a
 #define ELOG_SUBSYSTEM_OFFSET	0x38
 #define ELOG_ACTION_OFFSET	0x42
+#define ELOG_SRC_OFFSET		0x78
+#define ELOG_MIN_READ_OFFSET	ELOG_SRC_OFFSET + ELOG_SRC_SIZE
 
 /* Severity of the log */
 #define OPAL_INFORMATION_LOG	0x00
@@ -70,7 +71,7 @@ char *opt_extract_opal_dump_cmd = DEFAULT_EXTRACT_DUMP_CMD;
 volatile int terminate;
 
 /* Parse required fields from error log */
-static int parse_log(char *buffer)
+static int parse_log(char *buffer, size_t bufsz)
 {
 	uint32_t logid;
 	char src[ELOG_SRC_SIZE+1];
@@ -80,6 +81,11 @@ static int parse_log(char *buffer)
 	char *parse = "NONE";
 	char *parse_action = "NONE";
 	char *failingsubsys = "Not Applicable";
+
+	if (bufsz < ELOG_MIN_READ_OFFSET) {
+		syslog(LOG_NOTICE, "Insufficent data, cannot parse elog.\n");
+		return -1;
+	}
 
 	logid = be32toh(*(uint32_t*)(buffer + ELOG_ID_OFFESET));
 
@@ -278,7 +284,7 @@ static int process_elog(const char *elog_path)
 
 	check_platform_dump();
 
-	parse_log(buf);
+	parse_log(buf, bufsz);
 
 	ret = 0;
 err:

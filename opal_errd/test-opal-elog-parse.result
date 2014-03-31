@@ -96,13 +96,11 @@ Call Home Comment	: call home comment goes here
 |------------------------------------------------------------------------------|
 |                                 User Header                                  |
 |------------------------------------------------------------------------------|
-Section ID		: UH
-Section Length		: 18
-Version			: 1
-Sub_type		: 0
-Component ID		: 9500
-Subsystem ID		: Platform Firmware
-| Event Scope              : 3                                                 |
+| Section Version          : 1                                                 |
+| Sub-section type         : 0                                                 |
+| Component ID             : 0x9500                                            |
+| Subsystem                : Hypervisor firmware                               |
+| Event Scope              : Single platform                                   |
 | Event Severity           : Informational or non-error event.                 |
 | Event Type               : Miscellaneous, informational only.                |
 | Action Flags             : Report to Operating System                        |

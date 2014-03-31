@@ -89,10 +89,16 @@ struct event_scope{
 	const char *desc;
 };
 
+struct generic_desc{
+	int id;
+	const char *desc;
+};
+
 #define MAX_EVENT	sizeof(usr_hdr_event_type)/sizeof(struct id_msg)
 #define MAX_SEV		sizeof(usr_hdr_severity)/sizeof(struct sev_type)
 #define MAX_CREATORS		sizeof(prv_hdr_creator_id)/sizeof(struct creator_id)
 #define MAX_SUBSYSTEMS		sizeof(usr_hdr_subsystem_id)/sizeof(struct subsystem_id)
+#define MAX_EVENT_SCOPE	sizeof(usr_hdr_event_scope)/sizeof(struct event_scope)
 
 #define EVENT_TYPE \
 	{0x01, "Miscellaneous, informational only."},\
@@ -113,10 +119,30 @@ struct event_scope{
 
 #define SEVERITY_TYPE \
 	{0x00, "Informational or non-error event."}, \
-	{0x10, "Recovered error, general."}, \
-	{0x20, "Predictive error, general."}, \
-	{0x21, "Predictive error, degraded performance."}, \
-	{0x22, "Predictive error, fault may be corrected after platform re-IPL."}
+	{0x10, "Recovered error"}, \
+	{0x20, "Predictive error"}, \
+	{0x21, "Predicting degraded performance."}, \
+	{0x22, "Predicting fault may be corrected after platform re-IPL."}, \
+	{0x23, "Predicting fault may be corrected after IPL, degraded performance"}, \
+	{0x24, "Predicting loss of redundancy"}, \
+	{0x40, "Unrecoverable error"}, \
+	{0x41, "Error bypassed with degraded performance"}, \
+	{0x44, "Error bypassed with loss of redundancy"}, \
+	{0x45, "Error bypassed with loss of redundancy and performance"}, \
+	{0x48, "Error bypassed with loss of function"}, \
+	{0x50, "Critical error"}, \
+	{0x51, "Critical error system termination"}, \
+	{0x52, "Critical error failure likely or imminent"}, \
+	{0x53, "Critical error partition(s) terminal"}, \
+	{0x54, "Critical error partition(s) failure likely or imminent"}, \
+	{0x60, "Error on diagnostic test"}, \
+	{0x61, "Error on diagnostic test, resource may produce incorrect results"}, \
+	{0x70, "Symptom"}, \
+	{0x71, "Symptom recovered"}, \
+	{0x72, "Symptom predictive"}, \
+	{0x74, "Symptom unrecoverable"}, \
+	{0x75, "Symptom critical"}, \
+	{0x76, "Symptom diagnosis error"}
 
 #define CREATORS \
 	{'C', "Hardware Management Console"}, \
@@ -225,6 +251,12 @@ struct event_scope{
 	{0xd0, "Unknown"}, \
 	{0xe0, "Unknown"}, \
 	{0xf0, "Unknown"}
+
+#define EVENT_SCOPE \
+	{0x1, "Single partition"}, \
+	{0x2, "Multiple partitions"}, \
+	{0x3, "Single platform"}, \
+	{0x4, "Possibly multiple platforms"}
 
 /* Primary SRC section */
 struct opal_src_scn {

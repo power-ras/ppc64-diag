@@ -27,6 +27,10 @@ struct creator_id prv_hdr_creator_id[] = {
 	CREATORS
 };
 
+struct event_scope usr_hdr_event_scope[] = {
+	EVENT_SCOPE
+};
+
 static int print_bar(void)
 {
 	int i;
@@ -172,63 +176,49 @@ int print_usr_hdr_action(struct opal_usr_hdr_scn *usrhdr)
 	return 0;
 }
 
+static int get_field_desc(struct generic_desc *data, int length, int id, int default_id, int default_index) {
+	int i;
+	int to_print = default_index;
+	for (i = 0; i < length; i++) {
+		if (id == data[i].id) {
+			return i;
+		} else if(default_id == usr_hdr_subsystem_id[i].id) {
+			to_print = i;
+		}
+	}
+	return to_print;
+}
+
 int print_usr_hdr_event_data(struct opal_usr_hdr_scn *usrhdr)
 {
-	int i;
-	print_line("Event Scope", "%x", usrhdr->event_data);
+	int to_print;
 
-	for (i = 0; i < MAX_SEV; i++) {
-		if (usrhdr->event_severity == usr_hdr_severity[i].sev) {
-			print_line("Event Severity","%s", usr_hdr_severity[i].desc);
-			break;
-		}
-	}
+	to_print = get_field_desc((struct generic_desc *)usr_hdr_event_scope, MAX_EVENT_SCOPE, usrhdr->event_data, usrhdr->event_data, -1);
+	if (to_print >= 0)
+		print_line("Event Scope", "%s", usr_hdr_event_scope[to_print].desc);
 
-	for (i = 0; i < MAX_EVENT; i++) {
-		if (usrhdr->event_type == usr_hdr_event_type[i].id) {
-			print_line("Event Type","%s", usr_hdr_event_type[i].msg);
-			break;
-		}
-	}
+	to_print = get_field_desc((struct generic_desc *)usr_hdr_severity, MAX_SEV, usrhdr->event_severity, usrhdr->event_severity & 0xF0, 0);
+	print_line("Event Severity", "%s", usr_hdr_severity[to_print].desc);
+
+	to_print = get_field_desc((struct generic_desc *)usr_hdr_event_type, MAX_EVENT, usrhdr->event_type, usrhdr->event_type, -1);
+	if (to_print >= 0)
+		print_line("Event Type", "%s", usr_hdr_event_type[to_print].msg);
 
 	return 0;
 }
 
 int print_usr_hdr_subsystem_id(struct opal_usr_hdr_scn *usrhdr)
 {
+	int to_print;
 	unsigned int id = usrhdr->subsystem_id;
 	print_header("User Header");
-	printf("Section ID		: %c%c\n",
-	       usrhdr->v6hdr.id[0], usrhdr->v6hdr.id[1]);
-	printf("Section Length		: %x\n", usrhdr->v6hdr.length);
-	printf("Version			: %x\n", usrhdr->v6hdr.version);
-	printf("Sub_type		: %x\n", usrhdr->v6hdr.subtype);
-	printf("Component ID		: %x\n", usrhdr->v6hdr.component_id);
-	printf("Subsystem ID		:");
-	if ((id >= 0x10) && (id <= 0x1F))
-		printf(" Processor, including internal cache\n");
-	else if ((id >= 0x20) && (id <= 0x2F))
-		printf(" Memory, including external cache\n");
-	else if ((id >= 0x30) && (id <= 0x3F))
-		printf(" I/O hub, bridge, bus\n");
-	else if ((id >= 0x40) && (id <= 0x4F))
-		printf(" I/O adapter, device and peripheral\n");
-	else if ((id >= 0x50) && (id <= 0x5F))
-		printf(" CEC Hardware\n");
-	else if ((id >= 0x60) && (id <= 0x6F))
-		printf(" Power/Cooling System\n");
-	else if ((id >= 0x70) && (id <= 0x79))
-		printf(" Other Subsystems\n");
-	else if ((id >= 0x7A) && (id <= 0x7F))
-		printf(" Surveillance Error\n");
-	else if ((id >= 0x80) && (id <= 0x8F))
-		printf(" Platform Firmware\n");
-	else if ((id >= 0x90) && (id <= 0x9F))
-		printf(" Software)\n");
-	else if ((id >= 0xA0) && (id <= 0xAF))
-		printf(" External Environment\n");
-	else
-		printf("\n");
+	print_line("Section Version", "%d", usrhdr->v6hdr.version);
+	print_line("Sub-section type", "%d", usrhdr->v6hdr.subtype);
+	print_line("Component ID", "0x%x", usrhdr->v6hdr.component_id);
+	to_print = get_field_desc((struct generic_desc *)usr_hdr_subsystem_id,
+			                     MAX_SUBSYSTEMS, id, id & 0xF0, 0);
+	print_line("Subsystem", "%s", usr_hdr_subsystem_id[to_print].name);
+
 	return 0;
 }
 

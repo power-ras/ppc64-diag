@@ -167,31 +167,29 @@ int print_usr_hdr_action(struct opal_usr_hdr_scn *usrhdr)
 int print_usr_hdr_event_data(struct opal_usr_hdr_scn *usrhdr)
 {
 	int i;
-	printf("Event Data		: %x\n", usrhdr->event_data);
-	printf("Event Type		:");
+	print_line("Event Scope", "%x", usrhdr->event_data);
+
+	for (i = 0; i < MAX_SEV; i++) {
+		if (usrhdr->event_severity == usr_hdr_severity[i].sev) {
+			print_line("Event Severity","%s", usr_hdr_severity[i].desc);
+			break;
+		}
+	}
 
 	for (i = 0; i < MAX_EVENT; i++) {
 		if (usrhdr->event_type == usr_hdr_event_type[i].id) {
-			printf("%s\n", usr_hdr_event_type[i].msg);
+			print_line("Event Type","%s", usr_hdr_event_type[i].msg);
 			break;
 		}
 	}
-	printf("Event Severity		:");
-	for (i = 0; i < MAX_SEV; i++) {
-		if (usrhdr->event_severity == usr_hdr_severity[i].sev) {
-			printf("%s\n", usr_hdr_severity[i].desc);
-			break;
-		}
-	}
+
 	return 0;
 }
 
 int print_usr_hdr_subsystem_id(struct opal_usr_hdr_scn *usrhdr)
 {
 	unsigned int id = usrhdr->subsystem_id;
-	printf("|-------------------------------------------------------------|\n");
-	printf("|                      User Header                            |\n");
-	printf("|-------------------------------------------------------------|\n");
+	print_header("User Header");
 	printf("Section ID		: %c%c\n",
 	       usrhdr->v6hdr.id[0], usrhdr->v6hdr.id[1]);
 	printf("Section Length		: %x\n", usrhdr->v6hdr.length);

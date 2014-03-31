@@ -100,18 +100,18 @@ Creator ID		: Service Processor
 Creator Subsystem Name	: 0
 Platform Log ID		: 5055ed2e
 Log Entry ID		: 5055ed2e
-|-------------------------------------------------------------|
-|                      User Header                            |
-|-------------------------------------------------------------|
+|------------------------------------------------------------------------------|
+|                                 User Header                                  |
+|------------------------------------------------------------------------------|
 Section ID		: UH
 Section Length		: 18
 Version			: 1
 Sub_type		: 0
 Component ID		: 9500
 Subsystem ID		: Platform Firmware
-Event Data		: 3
-Event Type		: Miscellaneous, informational only.
-Event Severity		: Informational or non-error event.
+| Event Scope              : 3                                                 |
+| Event Severity           :  Informational or non-error event.                |
+| Event Type               :  Miscellaneous, informational only.               |
 | Action Flags             : Report to Operating System                        |
 |-------------------------------------------------------------|
 |                     Primary Reference                       |

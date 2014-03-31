@@ -112,7 +112,7 @@ Subsystem ID		: Platform Firmware
 Event Data		: 3
 Event Type		: Miscellaneous, informational only.
 Event Severity		: Informational or non-error event.
-Action Flag		: Unknown action flag (0x00006000).
+| Action Flags             : Report to Operating System                        |
 |-------------------------------------------------------------|
 |                     Primary Reference                       |
 |-------------------------------------------------------------|

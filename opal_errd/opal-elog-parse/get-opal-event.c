@@ -132,32 +132,35 @@ static int print_line(char *entry, const char *format, ...)
 
 int print_usr_hdr_action(struct opal_usr_hdr_scn *usrhdr)
 {
-	printf("Action Flag		:");
-	switch (usrhdr->action) {
-	case 0xa800:
-		printf(" Service Action");
-		if (usrhdr->action & 0x4000)
-			printf(" hidden error");
-		if (usrhdr->action & 0x0800)
-			printf(" call home");
-		printf(" Required.\n");
-		break;
-	case 0x2000:
-		printf(" Report Externally, ");
+	char *entry = "Action Flags";
+
+	if (usrhdr->action & 0x2000) {
 		if (usrhdr->action & 0x1000)
-			printf("HMC only\n");
+			print_line(entry,"Report to HMC");
 		else
-			printf("HMC and Hypervisor\n");
-		break;
-	case 0x0400:
-		printf(" Error isolation incomplete,\n"
-		       "further analysis required.\n");
-		break;
-	case 0x0000:
-		break;
-	default:
-		printf(" Unknown action flag (0x%08x).\n", usrhdr->action);
+			print_line(entry, "Report to Operating System");
+		entry = "";
 	}
+
+	if (usrhdr->action & 0x8000) {
+		print_line(entry, "Service Action Required");
+		if (usrhdr->action & 0x0800)
+			print_line("","HMC Call Home");
+		if(usrhdr->action & 0x0100)
+			print_line("","Termination Error");
+		entry = "";
+	}
+
+	if (usrhdr->action & 0x0400) {
+		print_line(entry, "Error isolation incomplete");
+		print_line("","Further analysis required");
+		entry = "";
+	}
+
+	if(entry[0] != '\0') {
+		print_line(entry, "Unknown action flag (0x%08x)", usrhdr->action);
+	}
+
 	return 0;
 }
 

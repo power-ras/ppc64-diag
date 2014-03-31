@@ -212,7 +212,8 @@ int print_usr_hdr_subsystem_id(struct opal_usr_hdr_scn *usrhdr)
 	int to_print;
 	unsigned int id = usrhdr->subsystem_id;
 	print_header("User Header");
-	print_line("Section Version", "%d", usrhdr->v6hdr.version);
+	print_line("Section Version", "%d (%c%c)", usrhdr->v6hdr.version,
+	       usrhdr->v6hdr.id[0],  usrhdr->v6hdr.id[1]);
 	print_line("Sub-section type", "%d", usrhdr->v6hdr.subtype);
 	print_line("Component ID", "0x%x", usrhdr->v6hdr.component_id);
 	to_print = get_field_desc((struct generic_desc *)usr_hdr_subsystem_id,
@@ -230,12 +231,11 @@ int print_src_refcode(struct opal_src_scn *src)
 	       OPAL_SRC_SCN_PRIMARY_REFCODE_LEN);
 	primary_refcode_display[OPAL_SRC_SCN_PRIMARY_REFCODE_LEN] = '\0';
 
-	printf("Primary Reference Code	: %s", primary_refcode_display);
-	printf("\n");
-	printf("Hex Words 2 - 5		: %08x %08x %08x %08x\n",
+	print_line("Primary Reference Code", "%s", primary_refcode_display);
+	print_line("Hex Words 2 - 5", "0x%08x 0x%08x 0x%08x 0x%08x",
 	       src->ext_refcode2, src->ext_refcode3,
 	       src->ext_refcode4, src->ext_refcode5);
-	printf("Hex Words 6 - 9		: %08x %08x %08x %08x\n",
+	print_line("Hex Words 6 - 9", "0x%08x 0x%08x 0x%08x 0x%08x",
 	       src->ext_refcode6, src->ext_refcode7,
 	       src->ext_refcode8, src->ext_refcode9);
 	return 0;
@@ -268,18 +268,14 @@ int print_mt_scn(struct opal_mtms_scn *mtms)
 
 int print_opal_src_scn(struct opal_src_scn *src)
 {
-	printf("|-------------------------------------------------------------|\n");
-	printf("|                     Primary Reference                       |\n");
-	printf("|-------------------------------------------------------------|\n");
-	printf("Section ID		: %c%c\n",
+	print_header("Primary System Reference Code");
+	print_line("Section Version","%d (%c%c)", src->v6hdr.version,
 	       src->v6hdr.id[0],  src->v6hdr.id[1]);
-	printf("Section Length		: %x\n", src->v6hdr.length);
-	printf("Version			: %x\n", src->v6hdr.version);
-	printf("Sub_type		: %x\n", src->v6hdr.subtype);
-	printf("Component ID		: %x\n", src->v6hdr.component_id);
-	printf("SRC Version		: %x\n", src->version);
-	printf("flags			: %x\n", src->flags);
-	printf("SRC Length		: %x\n", src->srclength);
+	print_line("Sub-section type", "%d", src->v6hdr.subtype);
+	print_line("SRC Format", "0x%x", src->flags);
+	print_line("SRC Version", "0x%x", src->version);
+	print_line("Valid Word Count", "0x%x", src->wordcount);
+	print_line("SRC Length", "%x", src->srclength);
 	print_src_refcode(src);
 	return 0;
 }

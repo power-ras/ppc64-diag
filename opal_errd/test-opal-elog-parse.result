@@ -96,7 +96,7 @@ Call Home Comment	: call home comment goes here
 |------------------------------------------------------------------------------|
 |                                 User Header                                  |
 |------------------------------------------------------------------------------|
-| Section Version          : 1                                                 |
+| Section Version          : 1 (UH)                                            |
 | Sub-section type         : 0                                                 |
 | Component ID             : 0x9500                                            |
 | Subsystem                : Hypervisor firmware                               |
@@ -104,20 +104,18 @@ Call Home Comment	: call home comment goes here
 | Event Severity           : Informational or non-error event.                 |
 | Event Type               : Miscellaneous, informational only.                |
 | Action Flags             : Report to Operating System                        |
-|-------------------------------------------------------------|
-|                     Primary Reference                       |
-|-------------------------------------------------------------|
-Section ID		: PS
-Section Length		: 50
-Version			: 1
-Sub_type		: 1
-Component ID		: 9500
-SRC Version		: 2
-flags			: 0
-SRC Length		: 48
-Primary Reference Code	: B182950C                        
-Hex Words 2 - 5		: 020000f0 2b2c0e10 c103a401 000000ff
-Hex Words 6 - 9		: 00000042 e8ca2c00 00000000 00000000
+|------------------------------------------------------------------------------|
+|                        Primary System Reference Code                         |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PS)                                            |
+| Sub-section type         : 1                                                 |
+| SRC Format               : 0x0                                               |
+| SRC Version              : 0x2                                               |
+| Valid Word Count         : 0x9                                               |
+| SRC Length               : 48                                                |
+| Primary Reference Code   : B182950C                                          |
+| Hex Words 2 - 5          : 0x020000f0 0x2b2c0e10 0xc103a401 0x000000ff       |
+| Hex Words 6 - 9          : 0x00000042 0xe8ca2c00 0x00000000 0x00000000       |
 |-------------------------------------------------------------|
 |                   Extended User Header                      |
 |-------------------------------------------------------------|

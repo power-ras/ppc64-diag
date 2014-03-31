@@ -25,6 +25,7 @@ ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must
 |------------------------------------------------------------------------------|
 | Section Version          : 0 (PH)                                            |
 | Sub-section type         : 0x0                                               |
+| Section Length           : 0x30                                              |
 | Component ID             : 0                                                 |
 | Created at               :    0-00-00 | 00:00:00                             |
 | Committed at             :    0-00-00 | 00:00:00                             |
@@ -38,6 +39,7 @@ ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must
 |------------------------------------------------------------------------------|
 | Section Version          : 1 (PH)                                            |
 | Sub-section type         : 0x0                                               |
+| Section Length           : 0x30                                              |
 | Component ID             : 0                                                 |
 | Created at               : 2014-03-12 | 14:24:12                             |
 | Committed at             : 2014-03-13 | 13:01:56                             |
@@ -50,6 +52,7 @@ ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must
 |------------------------------------------------------------------------------|
 | Section Version          : 1 (PH)                                            |
 | Sub-section type         : 0x0                                               |
+| Section Length           : 0x30                                              |
 | Component ID             : 0                                                 |
 | Created at               : 1994-01-01 | 01:02:03                             |
 | Committed at             : 2000-12-31 | 10:14:44                             |
@@ -63,6 +66,7 @@ ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must
 |------------------------------------------------------------------------------|
 | Section Version          : 1 (PH)                                            |
 | Sub-section type         : 0x0                                               |
+| Section Length           : 0x30                                              |
 | Component ID             : 0                                                 |
 | Created at               : 2014-03-14 | 14:36:66                             |
 | Committed at             : 2014-03-14 | 14:37:00                             |
@@ -85,6 +89,7 @@ Call Home Comment	: call home comment goes here
 |------------------------------------------------------------------------------|
 | Section Version          : 1 (PH)                                            |
 | Sub-section type         : 0x0                                               |
+| Section Length           : 0x30                                              |
 | Component ID             : 9500                                              |
 | Created at               : 2014-02-18 | 06:43:54                             |
 | Committed at             : 2014-02-18 | 06:43:54                             |
@@ -97,8 +102,9 @@ Call Home Comment	: call home comment goes here
 |                                 User Header                                  |
 |------------------------------------------------------------------------------|
 | Section Version          : 1 (UH)                                            |
-| Sub-section type         : 0                                                 |
-| Component ID             : 0x9500                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x18                                              |
+| Component ID             : 9500                                              |
 | Subsystem                : Hypervisor firmware                               |
 | Event Scope              : Single platform                                   |
 | Event Severity           : Informational or non-error event.                 |
@@ -108,7 +114,9 @@ Call Home Comment	: call home comment goes here
 |                        Primary System Reference Code                         |
 |------------------------------------------------------------------------------|
 | Section Version          : 1 (PS)                                            |
-| Sub-section type         : 1                                                 |
+| Sub-section type         : 0x1                                               |
+| Section Length           : 0x50                                              |
+| Component ID             : 9500                                              |
 | SRC Format               : 0x0                                               |
 | SRC Version              : 0x2                                               |
 | Valid Word Count         : 0x9                                               |

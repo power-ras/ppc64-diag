@@ -142,6 +142,15 @@ static int print_line(char *entry, const char *format, ...)
 	return written;
 }
 
+static int print_opal_v6_hdr(struct opal_v6_hdr hdr) {
+	print_line("Section Version", "%d (%c%c)", hdr.version,
+					hdr.id[0], hdr.id[1]);
+	print_line("Sub-section type", "0x%x", hdr.subtype);
+	print_line("Section Length", "0x%x", hdr.length);
+	print_line("Component ID", "%x", hdr.component_id);
+	return 0;
+}
+
 int print_usr_hdr_action(struct opal_usr_hdr_scn *usrhdr)
 {
 	char *entry = "Action Flags";
@@ -212,10 +221,7 @@ int print_usr_hdr_subsystem_id(struct opal_usr_hdr_scn *usrhdr)
 	int to_print;
 	unsigned int id = usrhdr->subsystem_id;
 	print_header("User Header");
-	print_line("Section Version", "%d (%c%c)", usrhdr->v6hdr.version,
-	       usrhdr->v6hdr.id[0],  usrhdr->v6hdr.id[1]);
-	print_line("Sub-section type", "%d", usrhdr->v6hdr.subtype);
-	print_line("Component ID", "0x%x", usrhdr->v6hdr.component_id);
+	print_opal_v6_hdr(usrhdr->v6hdr);
 	to_print = get_field_desc((struct generic_desc *)usr_hdr_subsystem_id,
 			                     MAX_SUBSYSTEMS, id, id & 0xF0, 0);
 	print_line("Subsystem", "%s", usr_hdr_subsystem_id[to_print].name);
@@ -269,9 +275,7 @@ int print_mt_scn(struct opal_mtms_scn *mtms)
 int print_opal_src_scn(struct opal_src_scn *src)
 {
 	print_header("Primary System Reference Code");
-	print_line("Section Version","%d (%c%c)", src->v6hdr.version,
-	       src->v6hdr.id[0],  src->v6hdr.id[1]);
-	print_line("Sub-section type", "%d", src->v6hdr.subtype);
+	print_opal_v6_hdr(src->v6hdr);
 	print_line("SRC Format", "0x%x", src->flags);
 	print_line("SRC Version", "0x%x", src->version);
 	print_line("Valid Word Count", "0x%x", src->wordcount);
@@ -288,15 +292,12 @@ int print_opal_usr_hdr_scn(struct opal_usr_hdr_scn *usrhdr)
 	return 0;
 }
 
+
 int print_opal_priv_hdr_scn(struct opal_priv_hdr_scn *privhdr)
 {
 	int i;
 	print_header("Private Header");
-	print_line("Section Version", "%d (%c%c)", privhdr->v6hdr.version,
-					privhdr->v6hdr.id[0], privhdr->v6hdr.id[1]);
-	print_line("Sub-section type", "0x%x", privhdr->v6hdr.subtype);
-
-	print_line("Component ID", "%x", privhdr->v6hdr.component_id);
+	print_opal_v6_hdr(privhdr->v6hdr);
 	print_line("Created at", "%4u-%02u-%02u | %02u:%02u:%02u",
 	       privhdr->create_datetime.year,
 	       privhdr->create_datetime.month,

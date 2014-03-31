@@ -338,31 +338,28 @@ int print_eh_scn(struct opal_eh_scn *eh)
 	memcpy(serial_no, eh->mt.serial_no, OPAL_SYS_SERIAL_LEN);
 	model[OPAL_SYS_SERIAL_LEN] = '\0';
 
-	printf("|-------------------------------------------------------------|\n");
-	printf("|                   Extended User Header                      |\n");
-	printf("|-------------------------------------------------------------|\n");
-	printf("Section ID		: %c%c\n",
+	print_header("Extended User Header");
+	print_line("Version", "%d (%c%c)", eh->v6hdr.version,
 	       eh->v6hdr.id[0], eh->v6hdr.id[1]);
-	printf("Section Length		: %x\n", eh->v6hdr.length);
-	printf("Version			: %x\n", eh->v6hdr.version);
-	printf("Sub_type		: %x\n", eh->v6hdr.subtype);
-	printf("Component ID		: %x\n", eh->v6hdr.component_id);
-	printf("Machine Type Model	: %s\n", model);
-	printf("Serial Number		: %s\n", serial_no);
-	printf("Server Firmware Release Version : %s\n",
+	print_line("Sub-section type", "%d", eh->v6hdr.subtype);
+	print_line("Component ID", "%x", eh->v6hdr.component_id);
+	print_line("Reporting Machine Type", "%s", model);
+	print_line("Reporting Serial Number", "%s", serial_no);
+	print_line("FW Released Ver", "%s",
 	       eh->opal_release_version);
-	printf("Firmware subsystem Driver Version : %s\n",
+	print_line("FW SubSys Version", "%s",
 	       eh->opal_subsys_version);
-	printf("Event Common reference Time (UTC): "
-	       "%4u-%02u-%02u | %02u:%02u:%02u\n",
+	print_line("Common Ref Time (UTC)",
+	       "%4u-%02u-%02u | %02u:%02u:%02u",
 	       eh->event_ref_datetime.year,
 	       eh->event_ref_datetime.month,
 	       eh->event_ref_datetime.day,
 	       eh->event_ref_datetime.hour,
 	       eh->event_ref_datetime.minutes,
 	       eh->event_ref_datetime.seconds);
+	print_line("Symptom Id Len", "%d", eh->opal_symid_len);
 	if (eh->opal_symid_len)
-		printf("Symptom ID             : %s\n", eh->opalsymid);
+		print_line("Symptom Id", "%s", eh->opalsymid);
 
 	return 0;
 }

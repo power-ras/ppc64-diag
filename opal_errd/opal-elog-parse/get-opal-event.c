@@ -146,24 +146,24 @@ int print_usr_hdr_action(struct opal_usr_hdr_scn *usrhdr)
 {
 	char *entry = "Action Flags";
 
-	if (usrhdr->action & 0x2000) {
-		if (usrhdr->action & 0x1000)
+	if (usrhdr->action & OPAL_UH_ACTION_REPORT_EXTERNALLY) {
+		if (usrhdr->action & OPAL_UH_ACTION_HMC_ONLY)
 			print_line(entry,"Report to HMC");
 		else
 			print_line(entry, "Report to Operating System");
 		entry = "";
 	}
 
-	if (usrhdr->action & 0x8000) {
+	if (usrhdr->action & OPAL_UH_ACTION_SERVICE) {
 		print_line(entry, "Service Action Required");
-		if (usrhdr->action & 0x0800)
+		if (usrhdr->action & OPAL_UH_ACTION_CALL_HOME)
 			print_line("","HMC Call Home");
-		if(usrhdr->action & 0x0100)
+		if(usrhdr->action & OPAL_UH_ACTION_TERMINATION)
 			print_line("","Termination Error");
 		entry = "";
 	}
 
-	if (usrhdr->action & 0x0400) {
+	if (usrhdr->action & OPAL_UH_ACTION_ISO_INCOMPLETE) {
 		print_line(entry, "Error isolation incomplete");
 		print_line("","Further analysis required");
 		entry = "";

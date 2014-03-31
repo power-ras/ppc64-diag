@@ -47,21 +47,21 @@ struct	opal_mtms_scn {
 struct opal_eh_scn {
 	struct	opal_v6_hdr v6hdr;
 	struct opal_mt_struct mt;
-	char	opal_release_version[OPAL_VER_LEN]; // Null terminated
-	char	opal_subsys_version[OPAL_VER_LEN]; // Null terminated
+	char	opal_release_version[OPAL_VER_LEN]; /* Null terminated */
+	char	opal_subsys_version[OPAL_VER_LEN]; /* Null terminated */
 	uint32_t reserved_0;
 	struct opal_datetime event_ref_datetime;
 	uint16_t reserved_1;
 	uint8_t reserved_2;
 	uint8_t opal_symid_len;
-	char	opalsymid[0]; // variable sized
+	char	opalsymid[0]; /* variable sized */
 } __packed;
 
 /* Extended header section */
 struct opal_ch_scn {
 	struct	opal_v6_hdr v6hdr;
 #define OPAL_CH_COMMENT_MAX_LEN 144
-	char comment[0]; // varsized up to 144 byte null terminated
+	char comment[0]; /* varsized up to 144 byte null terminated */
 } __packed;
 
 struct id_msg{
@@ -342,6 +342,7 @@ struct opal_usr_hdr_scn {
 #define OPAL_UH_ACTION_HMC_ONLY          0x1000
 #define OPAL_UH_ACTION_CALL_HOME         0x0800
 #define OPAL_UH_ACTION_ISO_INCOMPLETE    0x0400
+#define OPAL_UH_ACTION_TERMINATION       0x0100
 	uint32_t	reserved2;
 } __packed;
 

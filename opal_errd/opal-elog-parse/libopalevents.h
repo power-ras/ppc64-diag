@@ -78,27 +78,28 @@ struct sev_type{
 #define MAX_SEV		sizeof(usr_hdr_severity)/sizeof(struct sev_type)
 
 #define EVENT_TYPE \
-	{0x01, " Miscellaneous, informational only."},\
-	{0x08, " Dump notification."},\
-	{0x10, " Previously reported error has been corrected by system."},\
-	{0x20, " System resources manually deconfigured by user."}, \
-	{0x21, " System resources deconfigured by system due to prior error event."}, \
-	{0x22, " Resource deallocation event notification."}, \
-	{0x30, " Customer environmental problem has returned to normal."}, \
-	{0x40, " Concurrent maintenance event."}, \
-	{0x60, " Capacity upgrade event."}, \
-	{0x70, " Resource sparing event."}, \
-	{0x80, " Dynamic reconfiguration event."}, \
-	{0xD0, " Normal system/platform shutdown or powered off."}, \
-	{0xE0, " Platform powered off by user without normal shutdown."}, \
-	{0,    " Not applicable."}
+	{0x01, "Miscellaneous, informational only."},\
+	{0x02, "Tracing event"}, \
+	{0x08, "Dump notification."},\
+	{0x10, "Previously reported error has been corrected by system."},\
+	{0x20, "System resources manually deconfigured by user."}, \
+	{0x21, "System resources deconfigured by system due to prior error event." }, \
+	{0x22, "Resource deallocation event notification."}, \
+	{0x30, "Customer environmental problem has returned to normal."}, \
+	{0x40, "Concurrent maintenance event."}, \
+	{0x60, "Capacity upgrade event."}, \
+	{0x70, "Resource sparing event."}, \
+	{0x80, "Dynamic reconfiguration event."}, \
+	{0xD0, "Normal system/platform shutdown or powered off."}, \
+	{0xE0, "Platform powered off by user without normal shutdown."}, \
+	{0,    "Unknown event type."}
 
 #define SEVERITY_TYPE \
-	{0x00, " Informational or non-error event."}, \
-	{0x10, " Recovered error, general."}, \
-	{0x20, " Predictive error, general."}, \
-	{0x21, " Predictive error, degraded performance."}, \
-	{0x22, " Predictive error, fault may be corrected after platform re-IPL."}
+	{0x00, "Informational or non-error event."}, \
+	{0x10, "Recovered error, general."}, \
+	{0x20, "Predictive error, general."}, \
+	{0x21, "Predictive error, degraded performance."}, \
+	{0x22, "Predictive error, fault may be corrected after platform re-IPL."}
 
 /* Primary SRC section */
 struct opal_src_scn {

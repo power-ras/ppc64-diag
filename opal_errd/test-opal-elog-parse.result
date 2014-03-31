@@ -110,8 +110,8 @@ Sub_type		: 0
 Component ID		: 9500
 Subsystem ID		: Platform Firmware
 | Event Scope              : 3                                                 |
-| Event Severity           :  Informational or non-error event.                |
-| Event Type               :  Miscellaneous, informational only.               |
+| Event Severity           : Informational or non-error event.                 |
+| Event Type               : Miscellaneous, informational only.                |
 | Action Flags             : Report to Operating System                        |
 |-------------------------------------------------------------|
 |                     Primary Reference                       |

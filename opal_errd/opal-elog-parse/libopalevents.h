@@ -250,11 +250,11 @@ struct generic_desc{
 	{0x76, "Symptom diagnosis error"}
 
 #define CREATORS \
-	{'C', "Hardware Management Console"}, \
+	{'C', "HMC"}, \
 	{'E', "Service Processor"}, \
 	{'H', "PHYP"}, \
 	{'W', "Power Control"}, \
-	{'L', "Partition Firmware"}, \
+	{'L', "Partition FW"}, \
 	{'S', "SLIC"}, \
 	{'B', "Hostboot"}, \
 	{'T', "OCC"}, \

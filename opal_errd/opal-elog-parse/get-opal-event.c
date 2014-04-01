@@ -399,9 +399,19 @@ int print_opal_usr_hdr_scn(struct opal_usr_hdr_scn *usrhdr)
 }
 
 
-int print_opal_priv_hdr_scn(struct opal_priv_hdr_scn *privhdr)
+const char *get_creator_name(uint8_t creator_id)
 {
 	int i;
+	for (i = 0; i < MAX_CREATORS; i++) {
+		if (creator_id != prv_hdr_creator_id[i].id)
+			continue;
+		return prv_hdr_creator_id[i].name;
+	}
+	return "Unknown";
+}
+
+int print_opal_priv_hdr_scn(struct opal_priv_hdr_scn *privhdr)
+{
 	print_header("Private Header");
 	print_opal_v6_hdr(privhdr->v6hdr);
 	print_line("Created at", "%4u-%02u-%02u | %02u:%02u:%02u",
@@ -418,12 +428,7 @@ int print_opal_priv_hdr_scn(struct opal_priv_hdr_scn *privhdr)
 				 privhdr->commit_datetime.hour,
 				 privhdr->commit_datetime.minutes,
 				 privhdr->commit_datetime.seconds);
-	for (i = 0; i < MAX_CREATORS; i++) {
-		if (privhdr->creator_id == prv_hdr_creator_id[i].id) {
-			print_line("Created by", "%s", prv_hdr_creator_id[i].name);
-			break;
-		}
-	}
+	print_line("Created by", "%s", get_creator_name(privhdr->creator_id));
 	print_line("Creator Sub Id", "0x%x (%u), 0x%x (%u)",
 			privhdr->creator_subid_hi,
 			privhdr->creator_subid_hi,

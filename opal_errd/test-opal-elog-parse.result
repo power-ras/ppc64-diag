@@ -7,17 +7,16 @@ ELOG[XXXX]: LID[50000004]::SRC[TESTSRC4]::Software::Unrecoverable Error::Service
 ELOG[XXXX]: LID[50000006]::SRC[CALLHOME]::Power/Cooling System::NONE::No service action required
 ELOG[XXXX]: LID[5055ed2e]::SRC[B182950C]::Platform Firmware::Informational Event::No service action required
 |------------------------------------------------------------------------------|
-| Entry Id    SRC       Date                 Subsystem  Event Severity         |
+|ID         SRC      Date       Time      Creator           Event Severity     |
 |------------------------------------------------------------------------------|
-| 0x00000001  TESTSRC1     0-00-00 00:00:00  0x 0       Informational Event    |
-| 0x00000002  TESTSRC2     0-00-00 00:00:00  0x1a       Recoverable Error      |
-| 0x00000003  TESTSRC3  2014-03-13 13:01:56  0x80       Predictive Error       |
-| 0x00000005  TESTSRC5     0-00-00 00:00:00  0xff       NONE                   |
-| 0x50000004  TESTSRC4  2000-12-31 10:14:44  0x99       Unrecoverable Error    |
-| 0x50000006  CALLHOME  2014-03-14 14:37:00  0x63       NONE                   |
-| 0x5055ED2E  B182950C  2014-02-18 06:43:54  0x82       Informational Event    |
+|0x00000001 TESTSRC1    0-00-00 00:00:00  Unknown           Informational Event|
+|0x00000002 TESTSRC2    0-00-00 00:00:00  Unknown           Recoverable Error  |
+|0x00000003 TESTSRC3 2014-03-13 13:01:56  Unknown           Predictive Error   |
+|0x00000005 TESTSRC5    0-00-00 00:00:00  Unknown           NONE               |
+|0x50000004 TESTSRC4 2000-12-31 10:14:44  OPAL              Unrecoverable Error|
+|0x50000006 CALLHOME 2014-03-14 14:37:00  OPAL              NONE               |
+|0x5055ED2E B182950C 2014-02-18 06:43:54  Service Processor Informational Event|
 |------------------------------------------------------------------------------|
-Read Completed
 ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
 ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
 |------------------------------------------------------------------------------|
@@ -29,6 +28,7 @@ ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must
 | Component ID             : 0                                                 |
 | Created at               :    0-00-00 | 00:00:00                             |
 | Committed at             :    0-00-00 | 00:00:00                             |
+| Created by               : Unknown                                           |
 | Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
 | Platform Log Id          : 0x0                                               |
 | Entry ID                 : 0x2                                               |
@@ -43,6 +43,7 @@ ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must
 | Component ID             : 0                                                 |
 | Created at               : 2014-03-12 | 14:24:12                             |
 | Committed at             : 2014-03-13 | 13:01:56                             |
+| Created by               : Unknown                                           |
 | Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
 | Platform Log Id          : 0x0                                               |
 | Entry ID                 : 0x3                                               |

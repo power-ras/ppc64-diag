@@ -481,4 +481,5 @@ struct opal_usr_hdr_scn {
 
 extern int parse_opal_event(char *, int);
 extern struct opal_datetime parse_opal_datetime(const struct opal_datetime);
+extern const char *get_creator_name(uint8_t);
 #endif

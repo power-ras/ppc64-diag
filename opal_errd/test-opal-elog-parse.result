@@ -20,63 +20,57 @@ ELOG[XXXX]: LID[5055ed2e]::SRC[B182950C]::Platform Firmware::Informational Error
 Read Completed
 ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
 ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
-|-------------------------------------------------------------|
-|                    Private Header                           |
-|-------------------------------------------------------------|
-Section ID		: PH
-Section Length		: 0x0030 (48)
-Version			: 0 UNKNOWN VERSION
-Sub_type		: 0
-Component ID		: 0
-Create Date & Time      :    0-00-00 | 00:00:00
-Commit Date & Time	:    0-00-00 | 00:00:00
-Creator ID		: Unknown
-Creator Subsystem Name	: 0
-Platform Log ID		: 0
-Log Entry ID		: 2
+|------------------------------------------------------------------------------|
+|                                Private Header                                |
+|------------------------------------------------------------------------------|
+| Section Version          : 0 (PH)                                            |
+| Sub-section type         : 0x0                                               |
+| Component ID             : 0                                                 |
+| Created at               :    0-00-00 | 00:00:00                             |
+| Committed at             :    0-00-00 | 00:00:00                             |
+| Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
+| Platform Log Id          : 0x0                                               |
+| Entry ID                 : 0x2                                               |
+| Section Count            : 0                                                 |
 ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
-|-------------------------------------------------------------|
-|                    Private Header                           |
-|-------------------------------------------------------------|
-Section ID		: PH
-Section Length		: 0x0030 (48)
-Version			: 1
-Sub_type		: 0
-Component ID		: 0
-Create Date & Time      : 2014-03-12 | 14:24:12
-Commit Date & Time	: 2014-03-13 | 13:01:56
-Creator ID		: Unknown
-Creator Subsystem Name	: 0
-Platform Log ID		: 0
-Log Entry ID		: 3
-|-------------------------------------------------------------|
-|                    Private Header                           |
-|-------------------------------------------------------------|
-Section ID		: PH
-Section Length		: 0x0030 (48)
-Version			: 1
-Sub_type		: 0
-Component ID		: 0
-Create Date & Time      : 1994-01-01 | 01:02:03
-Commit Date & Time	: 2000-12-31 | 10:14:44
-Creator ID		: OPAL
-Creator Subsystem Name	: 0
-Platform Log ID		: b0010203
-Log Entry ID		: 50000004
-|-------------------------------------------------------------|
-|                    Private Header                           |
-|-------------------------------------------------------------|
-Section ID		: PH
-Section Length		: 0x0030 (48)
-Version			: 1
-Sub_type		: 0
-Component ID		: 0
-Create Date & Time      : 2014-03-14 | 14:36:66
-Commit Date & Time	: 2014-03-14 | 14:37:00
-Creator ID		: OPAL
-Creator Subsystem Name	: 0
-Platform Log ID		: b0040506
-Log Entry ID		: 50000006
+|------------------------------------------------------------------------------|
+|                                Private Header                                |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PH)                                            |
+| Sub-section type         : 0x0                                               |
+| Component ID             : 0                                                 |
+| Created at               : 2014-03-12 | 14:24:12                             |
+| Committed at             : 2014-03-13 | 13:01:56                             |
+| Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
+| Platform Log Id          : 0x0                                               |
+| Entry ID                 : 0x3                                               |
+| Section Count            : 0                                                 |
+|------------------------------------------------------------------------------|
+|                                Private Header                                |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PH)                                            |
+| Sub-section type         : 0x0                                               |
+| Component ID             : 0                                                 |
+| Created at               : 1994-01-01 | 01:02:03                             |
+| Committed at             : 2000-12-31 | 10:14:44                             |
+| Created by               : OPAL                                              |
+| Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
+| Platform Log Id          : 0xb0010203                                        |
+| Entry ID                 : 0x50000004                                        |
+| Section Count            : 1                                                 |
+|------------------------------------------------------------------------------|
+|                                Private Header                                |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PH)                                            |
+| Sub-section type         : 0x0                                               |
+| Component ID             : 0                                                 |
+| Created at               : 2014-03-14 | 14:36:66                             |
+| Committed at             : 2014-03-14 | 14:37:00                             |
+| Created by               : OPAL                                              |
+| Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
+| Platform Log Id          : 0xb0040506                                        |
+| Entry ID                 : 0x50000006                                        |
+| Section Count            : 2                                                 |
 |-------------------------------------------------------------|
 |                   Call Home Log Comment                     |
 |-------------------------------------------------------------|
@@ -86,20 +80,19 @@ Version			: 0
 Sub_type		: 0
 Component ID		: 0
 Call Home Comment	: call home comment goes here
-|-------------------------------------------------------------|
-|                    Private Header                           |
-|-------------------------------------------------------------|
-Section ID		: PH
-Section Length		: 0x0030 (48)
-Version			: 1
-Sub_type		: 0
-Component ID		: 9500
-Create Date & Time      : 2014-02-18 | 06:43:54
-Commit Date & Time	: 2014-02-18 | 06:43:54
-Creator ID		: Service Processor
-Creator Subsystem Name	: 0
-Platform Log ID		: 5055ed2e
-Log Entry ID		: 5055ed2e
+|------------------------------------------------------------------------------|
+|                                Private Header                                |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PH)                                            |
+| Sub-section type         : 0x0                                               |
+| Component ID             : 9500                                              |
+| Created at               : 2014-02-18 | 06:43:54                             |
+| Committed at             : 2014-02-18 | 06:43:54                             |
+| Created by               : Service Processor                                 |
+| Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
+| Platform Log Id          : 0x5055ed2e                                        |
+| Entry ID                 : 0x5055ed2e                                        |
+| Section Count            : 12                                                |
 |------------------------------------------------------------------------------|
 |                                 User Header                                  |
 |------------------------------------------------------------------------------|

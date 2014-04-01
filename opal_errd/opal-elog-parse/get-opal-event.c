@@ -19,6 +19,14 @@ struct sev_type usr_hdr_severity[] = {
 	SEVERITY_TYPE
 };
 
+struct subsystem_id usr_hdr_subsystem_id[] = {
+	SUBSYSTEMS
+};
+
+struct creator_id prv_hdr_creator_id[] = {
+	CREATORS
+};
+
 static int print_bar(void)
 {
 	int i;
@@ -296,71 +304,41 @@ int print_opal_usr_hdr_scn(struct opal_usr_hdr_scn *usrhdr)
 
 int print_opal_priv_hdr_scn(struct opal_priv_hdr_scn *privhdr)
 {
-	printf("|-------------------------------------------------------------|\n");
-	printf("|                    Private Header                           |\n");
-	printf("|-------------------------------------------------------------|\n");
-	printf("Section ID		: %c%c\n",
-	       privhdr->v6hdr.id[0], privhdr->v6hdr.id[1]);
-	printf("Section Length		: 0x%04x (%u)\n",
-	       privhdr->v6hdr.length, privhdr->v6hdr.length);
-	printf("Version			: %x", privhdr->v6hdr.version);
-	if (privhdr->v6hdr.version != 1)
-		printf(" UNKNOWN VERSION");
-	printf("\nSub_type		: %x\n", privhdr->v6hdr.subtype);
-	printf("Component ID		: %x\n", privhdr->v6hdr.component_id);
-	printf("Create Date & Time      : %4u-%02u-%02u | %02u:%02u:%02u\n",
+	int i;
+	print_header("Private Header");
+	print_line("Section Version", "%d (%c%c)", privhdr->v6hdr.version,
+					privhdr->v6hdr.id[0], privhdr->v6hdr.id[1]);
+	print_line("Sub-section type", "0x%x", privhdr->v6hdr.subtype);
+
+	print_line("Component ID", "%x", privhdr->v6hdr.component_id);
+	print_line("Created at", "%4u-%02u-%02u | %02u:%02u:%02u",
 	       privhdr->create_datetime.year,
 	       privhdr->create_datetime.month,
 	       privhdr->create_datetime.day,
 	       privhdr->create_datetime.hour,
 	       privhdr->create_datetime.minutes,
 	       privhdr->create_datetime.seconds);
-	printf("Commit Date & Time	: %4u-%02u-%02u | %02u:%02u:%02u\n",
+	print_line("Committed at", "%4u-%02u-%02u | %02u:%02u:%02u",
 	       privhdr->commit_datetime.year,
 	       privhdr->commit_datetime.month,
 	       privhdr->commit_datetime.day,
 	       privhdr->commit_datetime.hour,
 	       privhdr->commit_datetime.minutes,
 	       privhdr->commit_datetime.seconds);
-	printf("Creator ID		:");
-	switch (privhdr->creator_id) {
-	case 'C':
-		printf(" Hardware Management Console\n");
-		break;
-	case 'E':
-		printf(" Service Processor\n");
-		break;
-	case 'H':
-		printf(" PHYP\n");
-		break;
-	case 'W':
-		printf(" Power Control\n");
-		break;
-	case 'L':
-		printf(" Partition Firmware\n");
-		break;
-	case 'S':
-		printf(" SLIC\n");
-		break;
-	case 'B':
-		printf(" Hostboot\n");
-		break;
-	case 'T':
-		printf(" OCC\n");
-		break;
-	case 'M':
-		printf(" I/O Drawer\n");
-		break;
-	case 'K':
-		printf(" OPAL\n");
-		break;
-	default:
-		printf(" Unknown\n");
-		break;
+	for (i = 0; i < MAX_CREATORS; i++) {
+		if (privhdr->creator_id == prv_hdr_creator_id[i].id) {
+			print_line("Created by", "%s", prv_hdr_creator_id[i].name);
+			break;
+		}
 	}
-	printf("Creator Subsystem Name	: %x\n", privhdr->creator_subid_hi);
-	printf("Platform Log ID		: %x\n", privhdr->plid);
-	printf("Log Entry ID		: %x\n", privhdr->log_entry_id);
+	print_line("Creator Sub Id", "0x%x (%u), 0x%x (%u)",
+			 privhdr->creator_subid_hi,
+			 privhdr->creator_subid_hi,
+			 privhdr->creator_subid_lo,
+			 privhdr->creator_subid_lo);
+	print_line("Platform Log Id", "0x%x", privhdr->plid);
+	print_line("Entry ID", "0x%x", privhdr->log_entry_id);
+	print_line("Section Count","%u",privhdr->scn_count);
 	return 0;
 }
 

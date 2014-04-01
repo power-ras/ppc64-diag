@@ -74,8 +74,25 @@ struct sev_type{
 	const char *desc;
 };
 
+struct creator_id{
+	char id;
+	const char *name;
+};
+
+struct subsystem_id{
+	int id;
+	const char *name;
+};
+
+struct event_scope{
+	int id;
+	const char *desc;
+};
+
 #define MAX_EVENT	sizeof(usr_hdr_event_type)/sizeof(struct id_msg)
 #define MAX_SEV		sizeof(usr_hdr_severity)/sizeof(struct sev_type)
+#define MAX_CREATORS		sizeof(prv_hdr_creator_id)/sizeof(struct creator_id)
+#define MAX_SUBSYSTEMS		sizeof(usr_hdr_subsystem_id)/sizeof(struct subsystem_id)
 
 #define EVENT_TYPE \
 	{0x01, "Miscellaneous, informational only."},\
@@ -100,6 +117,114 @@ struct sev_type{
 	{0x20, "Predictive error, general."}, \
 	{0x21, "Predictive error, degraded performance."}, \
 	{0x22, "Predictive error, fault may be corrected after platform re-IPL."}
+
+#define CREATORS \
+	{'C', "Hardware Management Console"}, \
+	{'E', "Service Processor"}, \
+	{'H', "PHYP"}, \
+	{'W', "Power Control"}, \
+	{'L', "Partition Firmware"}, \
+	{'S', "SLIC"}, \
+	{'B', "Hostboot"}, \
+	{'T', "OCC"}, \
+	{'M', "I/O Drawer"}, \
+	{'K', "OPAL"}, \
+	{'P', "POWERNV"}
+
+#define SUBSYSTEMS \
+	{0x00, "Unknown"}, \
+	{0x10, "Processor subsystem"}, \
+	{0x11, "Processor FRU"}, \
+	{0x12, "Processor chip including internal cache"}, \
+	{0x13, "Processor unit (CPU)"}, \
+	{0x14, "Processor/system bus controller & interface"}, \
+	{0x20, "Memory subsystem"}, \
+	{0x21, "Memory controller"}, \
+	{0x22, "Memory bus interface including SMI"}, \
+	{0x23, "Memory DIMM"}, \
+	{0x24, "Memory card/FRU"}, \
+	{0x25, "External cache"}, \
+	{0x30, "I/O subsystem"}, \
+	{0x31, "I/O hub RIO"}, \
+	{0x32, "I/O bridge, general (PHB, PCI/PCI, PCI/ISA, EADS, etc.)"}, \
+	{0x33, "I/O bus interface"}, \
+	{0x34, "I/O processor"}, \
+	{0x35, "I/O hub others (SMA, Torrent, etc.)"}, \
+	{0x36, "RIO loop and associated RIO hub"}, \
+	{0x37, "RIO loop and associated RIO bridge"}, \
+	{0x38, "PHB"}, \
+	{0x39, "EADS/EADS-X global"}, \
+	{0x3a, "EADS/EADS-X slot"}, \
+	{0x3b, "InfiniBand hub"}, \
+	{0x3c, "Infiniband bridge"}, \
+	{0x40, "I/O adapter - I/O deivce - I/O peripheral"}, \
+	{0x41, "I/O adapter - communication"}, \
+	{0x46, "I/O device"}, \
+	{0x47, "I/O device - DASD"}, \
+	{0x4c, "I/O peripheral"}, \
+	{0x4d, "I/O perpheral - local workstation"}, \
+	{0x4e, "Storage mezzanine expansion subsystem"}, \
+	{0x50, "CEC hardware"}, \
+	{0x51, "CEC hardware - service processor A"}, \
+	{0x52, "CEC hardware - service processor B"}, \
+	{0x53, "CEC hardware - node controller"}, \
+	{0x54, "Reserved for CEC hardware"}, \
+	{0x55, "CEC hardware - VPD device and interface (smart chip and I2C device)"}, \
+	{0x56, "CEC hardware - I2C devices and interface (non VPD)"}, \
+	{0x57, "CEC hardware - CEC chip interface (JTAG, FSI, etc.)"}, \
+	{0x58, "CEC hardware - clock & control"}, \
+	{0x59, "CEC hardware - Op. panel"}, \
+	{0x5a, "CEC hardware - time of day hardware including its battery"}, \
+	{0x5b, "CEC hardware - storage/memory device (NVRAM, Flash, SP DRAM, etc.)"}, \
+	{0x5c, "CEC hardware - Service processor-Hypervisor hardware interface (PSI, PCI, etc.)"}, \
+	{0x5d, "CEC hardware - Service network"}, \
+	{0x5e, "CEC hardware - Service processor-Hostboot hardware interface (FSI Mailbox)"}, \
+	{0x60, "Power/Cooling subsystem & control"}, \
+	{0x61, "Power supply"}, \
+	{0x62, "Power control hardware"}, \
+	{0x63, "Fan, air moving devices"}, \
+	{0x64, "DPSS"}, \
+	{0x70, "Others"}, \
+	{0x71, "HMC subsystem & hardware (excluding code)"}, \
+	{0x72, "Test tool"}, \
+	{0x73, "Removable media"}, \
+	{0x74, "Multiple subsystems"}, \
+	{0x75, "Not applicable (unknown, invalid value, etc.)"}, \
+	{0x76, "Reserved"}, \
+	{0x77, "CMM A"}, \
+	{0x78, "CMM B"}, \
+	{0x7a, "Connection Monitoring - Hypervisor lost communication with service processor"}, \
+	{0x7b, "Connection Monitoring - Service processor lost communication with hypervisor"}, \
+	{0x7c, "Connection Monitoring - Service processor lost communcation with HMC"}, \
+	{0x7e, "Connection Monitoring - HMC lost communication with logical partition"}, \
+	{0x7e, "Connection Monitoring - HMC lost communication with BPA"}, \
+	{0x7f, "Connection Monitoring - HMC lost communication with another HMC"}, \
+	{0x80, "Platform firmware"}, \
+	{0x81, "Service processor firmware"}, \
+	{0x82, "Hypervisor firmware"}, \
+	{0x83, "Partition firmware"}, \
+	{0x84, "SLIC firmware"}, \
+	{0x85, "SPCN firmware"}, \
+	{0x86, "Bulk power formware side A"}, \
+	{0x87, "HMC code/firmware"}, \
+	{0x88, "Bulk power firmware side B"}, \
+	{0x89, "Virtual service processor firmware (VSP)"}, \
+	{0x8a, "Hostboot"}, \
+	{0x8b, "OCC"}, \
+	{0x90, "Software"}, \
+	{0x91, "Operating system software"}, \
+	{0x92, "XPF software"}, \
+	{0x93, "Application software"}, \
+	{0xa0, "External environment"}, \
+	{0xa1, "Input power source (AC)"}, \
+	{0xa2, "Room ambient temperature"}, \
+	{0xa3, "User error"}, \
+	{0xa4, "Unknown"}, \
+	{0xb0, "Unknown"}, \
+	{0xc0, "Unknown"}, \
+	{0xd0, "Unknown"}, \
+	{0xe0, "Unknown"}, \
+	{0xf0, "Unknown"}
 
 /* Primary SRC section */
 struct opal_src_scn {

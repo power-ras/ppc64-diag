@@ -381,6 +381,38 @@ static int print_ch_scn(struct opal_ch_scn *ch)
 	return 0;
 }
 
+int print_ud_scn(struct opal_ud_scn * ud) {
+	print_header("User Defined Data");
+	print_opal_v6_hdr(ud->v6hdr);
+	int i = 0;
+	int written = 0;
+	/*FIXME this data should be parsable if documentation appears/exists
+	 * In the mean time, just dump it in hex
+	 */ 
+	print_line("User data hex","length %d",ud->v6hdr.length - 8);
+	while(i < (ud->v6hdr.length - 8)) {
+		if(written % LINE_LENGTH == 0)
+			written = printf("| ");
+
+			written += printf("%.2x",ud->data[i]);
+
+		if((written + 2) % LINE_LENGTH == 0) {
+			written += printf("|\n");
+		} else {
+			putchar(' ');
+			written++;
+		}
+
+		i++;
+	}
+	while ((written + 2) % LINE_LENGTH) {
+		putchar(' ');
+		written++;
+	}
+	printf("|\n");
+	return 0;
+}
+
 /* parse MTMS section of the log */
 int parse_mt_scn(const struct opal_v6_hdr *hdr,
 		 const char *buf, int buflen)
@@ -617,6 +649,31 @@ static int parse_ch_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	print_ch_scn(ch);
 	return 0;
 }
+
+static int parse_ud_scn(const struct opal_v6_hdr *hdr,
+		      const char *buf, int buflen)
+{
+	struct opal_ud_scn *ud;
+	struct opal_ud_scn *bufud = (struct opal_ud_scn *)buf;
+
+	if (buflen < sizeof(struct opal_ud_scn)) {
+		fprintf(stderr, "%s: corrupted, expected length >= %lu, got %u\n",
+			__func__,
+			sizeof(struct opal_ud_scn), buflen);
+		return -EINVAL;
+	}
+
+	ud = (struct opal_ud_scn *) malloc(hdr->length);
+	if (!ud)
+		return -ENOMEM;
+
+	ud->v6hdr = *hdr;
+	memcpy(ud->data, bufud->data, hdr->length - 8);
+	print_ud_scn(ud);
+	return 0;
+}
+
+
 static int parse_section_header(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {
 	if (buflen < 8) {
@@ -701,7 +758,8 @@ int parse_opal_event(char *buf, int buflen)
 		} else if (strncmp(hdr.id, "MI", 2) == 0) { // FIXME
 		} else if (strncmp(hdr.id, "CH", 2) == 0) {
 			parse_ch_scn(&hdr, buf, buflen);
-		} else if (strncmp(hdr.id, "UD", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "UD", 2) == 0) {
+			parse_ud_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "EI", 2) == 0) { // FIXME
 		} else if (strncmp(hdr.id, "ED", 2) == 0) { // FIXME
 		} else {

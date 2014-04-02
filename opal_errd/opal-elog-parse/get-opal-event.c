@@ -284,17 +284,9 @@ int print_mt_data(struct opal_mt_struct mt) {
 int print_mt_scn(struct opal_mtms_scn *mtms)
 {
 
-	printf("|-------------------------------------------------------------|\n");
-	printf("|              Machine Type/Model & Serial Number	      |\n");
-	printf("|-------------------------------------------------------------|\n");
-	printf("Section ID		: %c%c\n",
-				 mtms->v6hdr.id[0], mtms->v6hdr.id[1]);
-	printf("Section Length		: %x\n", mtms->v6hdr.length);
-	printf("Version			: %x\n", mtms->v6hdr.version);
-	printf("Sub_type		: %x\n", mtms->v6hdr.subtype);
-	printf("Component ID		: %x\n", mtms->v6hdr.component_id);
+	print_header("Machine Type/Model & Serial Number");
+	print_opal_v6_hdr(mtms->v6hdr);
 	print_mt_data(mtms->mt);
-	printf("|-------------------------------------------------------------|\n\n");
 	return 0;
 }
 

@@ -47,6 +47,8 @@ ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must
 | Platform Log Id          : 0x0                                               |
 | Entry ID                 : 0x3                                               |
 | Section Count            : 0                                                 |
+ERROR parse_opal_event: Truncated error log, expected section UH not found
+ERROR parse_opal_event: Truncated error log, expected section EH not found
 |------------------------------------------------------------------------------|
 |                                Private Header                                |
 |------------------------------------------------------------------------------|
@@ -61,6 +63,8 @@ ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must
 | Platform Log Id          : 0xb0010203                                        |
 | Entry ID                 : 0x50000004                                        |
 | Section Count            : 1                                                 |
+ERROR parse_opal_event: Truncated error log, expected section UH not found
+ERROR parse_opal_event: Truncated error log, expected section EH not found
 |------------------------------------------------------------------------------|
 |                                Private Header                                |
 |------------------------------------------------------------------------------|

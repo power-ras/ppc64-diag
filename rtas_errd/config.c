@@ -79,7 +79,7 @@ get_token(char *str, char *str_end, char *tok, int *line_no)
 			 * started then skip ahead to the next line and
 			 * return that point as the end of the search.
 			 */
-			snprintf(tok, str - start + 1, start);
+			snprintf(tok, str - start + 1, "%s", start);
 			
 			while ((str < str_end) && (*str++ != '\n'));
 			(*line_no)++;
@@ -97,7 +97,7 @@ get_token(char *str, char *str_end, char *tok, int *line_no)
 				break;
 			}
 
-			snprintf(tok, str - start + 1, start);
+			snprintf(tok, str - start + 1, "%s", start);
 			return str + 1;
 			break;
 
@@ -112,7 +112,7 @@ get_token(char *str, char *str_end, char *tok, int *line_no)
 				(*line_no)++;
 				str++;
 			} else {
-				snprintf(tok, str - start + 1, start);
+				snprintf(tok, str - start + 1, "%s", start);
 			}
 
 			return str;
@@ -126,10 +126,10 @@ get_token(char *str, char *str_end, char *tok, int *line_no)
 			 * a token on their own.
 			 */
 			if (start == NULL) {
-				snprintf(tok, 2, str);
+				snprintf(tok, 2, "%s", str);
 				str++;
 			} else {
-				snprintf(tok, str - start + 1, start);
+				snprintf(tok, str - start + 1, "%s", start);
 			}
 
 			return str;
@@ -150,10 +150,10 @@ get_token(char *str, char *str_end, char *tok, int *line_no)
 					else
 						str++;
 				}
-				snprintf(tok, str - start + 1, start);
+				snprintf(tok, str - start + 1, "%s", start);
 				str++;
 			} else {
-				snprintf(tok, str - start + 1, start);
+				snprintf(tok, str - start + 1, "%s", start);
 			}
 
 			return str;
@@ -210,7 +210,7 @@ get_config_string(char *start, char *end, char *buf, int *line_no)
 	if (start == NULL)
 		return NULL;
 
-	offset += sprintf(buf, tok);
+	offset += sprintf(buf, "%s", tok);
 
 	start = get_token(start, end, tok, line_no);
 	while ((start != NULL) && (tok[0] != '\n')) {

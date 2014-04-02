@@ -671,7 +671,7 @@ _dbg(const char *fmt, ...)
 	va_end(ap);
 
 	len = reformat_msg(buf);
-	fprintf(stdout, buf);
+	fprintf(stdout, "%s", buf);
 	fflush(stdout);
 }
 

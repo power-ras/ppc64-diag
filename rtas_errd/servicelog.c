@@ -228,7 +228,7 @@ log_event(struct event *event)
 		} else {
 			event->sl_entry->description = (char *)malloc(txtlen+1);
 			snprintf(event->sl_entry->description, txtlen,
-				 event->addl_text);
+				 "%s", event->addl_text);
 		}
 	}
 

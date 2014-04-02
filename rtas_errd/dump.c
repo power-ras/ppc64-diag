@@ -161,7 +161,7 @@ check_scanlog_dump(void)
 		goto scanlog_error;
 	}
 
-	out = open(scanlog_filename, O_WRONLY | O_CREAT | O_TRUNC);
+	out = open(scanlog_filename, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
 	if (out <= 0) {
 		log_msg(NULL, "Could not open %s for writing, %s", 
 			scanlog_filename, strerror(errno));

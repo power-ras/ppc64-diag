@@ -245,7 +245,7 @@ servevent(char *refcode, int sev, char *text, struct dev_vpd *vpd,
 
 	rc = servicelog_open(&slog, 0);
 	if (rc != 0) {
-		fprintf(stderr, servicelog_error(slog));
+		fprintf(stderr, "%s", servicelog_error(slog));
 		return 0;
 	}
 
@@ -254,7 +254,7 @@ servevent(char *refcode, int sev, char *text, struct dev_vpd *vpd,
 	servicelog_close(slog);
 
 	if (rc != 0) {
-		fprintf(stderr, servicelog_error(slog));
+		fprintf(stderr, "%s", servicelog_error(slog));
 		return 0;
 	}
 

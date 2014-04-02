@@ -356,7 +356,7 @@ report_menugoal(struct event *event, struct rtas_priv_hdr_scn *privhdr,
 				offset += sprintf(buffer + offset, msg, 
 						  asctime(date)); 
 			else
-				offset += sprintf(buffer + offset, msg); 
+				offset += sprintf(buffer + offset, "%s", msg);
 		} 
 
 		if (menu_num == 0) {

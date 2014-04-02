@@ -109,7 +109,7 @@ log_epow(struct event *event, char *fmt, ...)
 	va_end(ap);
 
 	log_msg(event, buf);
-	snprintf(event->addl_text, ADDL_TEXT_MAX, buf);
+	snprintf(event->addl_text, ADDL_TEXT_MAX, "%s", buf);
 }
 
 /**

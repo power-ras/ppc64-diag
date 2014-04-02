@@ -1,5 +1,5 @@
 Name:	ppc64-diag
-Version:	2.6.4
+Version:	2.6.5
 Release:	0
 Summary: 	PowerLinux Platform Diagnostics
 Group: 		System Environment/Base
@@ -89,6 +89,11 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Wed Apr 02 2014 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.6.5
+- Fixed number of issues in opal_errd and opal-elog-parse code
+- Bashism fix
+- Fixes to comply with hardened build flags
+
 * Fri Mar 21 2014 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.6.4
 - Added support for PowerKVM host (opal_errd, extract_opal_dump)
 - Added support to parse PEL format log (opal-elog-parse)

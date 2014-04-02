@@ -203,7 +203,8 @@ struct generic_desc{
 #define MAX_CREATORS		sizeof(prv_hdr_creator_id)/sizeof(struct creator_id)
 #define MAX_SUBSYSTEMS		sizeof(usr_hdr_subsystem_id)/sizeof(struct subsystem_id)
 #define MAX_EVENT_SCOPE	sizeof(usr_hdr_event_scope)/sizeof(struct event_scope)
-
+#define MAX_FRU_PRIORITY sizeof(fru_scn_priority)/sizeof(struct generic_desc)
+#define MAX_FRU_ID_COMPONENT sizeof(fru_id_scn_component)/sizeof(struct generic_desc)
 #define EVENT_TYPE \
 	{0x01, "Miscellaneous, informational only."},\
 	{0x02, "Tracing event"}, \
@@ -361,6 +362,27 @@ struct generic_desc{
 	{0x2, "Multiple partitions"}, \
 	{0x3, "Single platform"}, \
 	{0x4, "Possibly multiple platforms"}
+
+#define FRU_PRIORITY \
+	{'L', "Low Prioirty"}, /*Default Value */ \
+	{'H', "Mandatory, replace all with this type as a unit"}, \
+	{'M', "Medium Priority"}, \
+	{'A', "Medium Priority group A"}, \
+	{'B', "Medium Priority group B"}, \
+	{'C', "Medium Priority group C"},
+
+#define FRU_ID_COMPONENT \
+	{0x00, "Reserved"}, \
+	{0x10, "Hardware FRU"}, \
+	{0x20, "Code FRU"}, \
+	{0x30, "Configuration error"}, \
+	{0x40, "Maintenance Procedure required"}, \
+	{0x90, "External FRU"}, \
+	{0xa0, "External code FRU"}, \
+	{0xb0, "Tool FRU"}, \
+	{0xc0, "Symbolic FRU"}, \
+	{0xe0, "Symbolic FRU with trusted location code"}, \
+	{0xf0, "Reserved"}
 
 /* Header ID,
  * Required? (1 = yes, 2 = only with error),

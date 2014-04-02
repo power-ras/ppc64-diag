@@ -128,6 +128,7 @@ Call Home Comment	: call home comment goes here
 | Primary Reference Code   : B182950C                                          |
 | Hex Words 2 - 5          : 0x020000f0 0x2b2c0e10 0xc103a401 0x000000ff       |
 | Hex Words 6 - 9          : 0x00000042 0xe8ca2c00 0x00000000 0x00000000       |
+|                                                                              |
 |------------------------------------------------------------------------------|
 |                             Extended User Header                             |
 |------------------------------------------------------------------------------|
@@ -163,8 +164,8 @@ Section Length		: 1c
 Version			: 1
 Sub_type		: 0
 Component ID		: 3100
-Machine Type Model	: 8246-L2D
-Serial Number		: 060E8EA
+| Machine Type Model       : 8246-L2D                                          |
+| Serial Number            : 060E8EA                                           |
 |-------------------------------------------------------------|
 
 |------------------------------------------------------------------------------|

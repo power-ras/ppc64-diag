@@ -35,6 +35,14 @@ struct header_id elog_hdr_id[] = {
 	HEADER_ORDER
 };
 
+struct generic_desc fru_scn_priority[] = {
+	FRU_PRIORITY
+};
+
+struct generic_desc fru_id_scn_component[] = {
+	FRU_ID_COMPONENT
+};
+
 static int print_bar(void)
 {
 	int i;
@@ -45,12 +53,10 @@ static int print_bar(void)
 	return LINE_LENGTH;
 }
 
-static int print_header(const char *header)
+static int print_center(const char *output)
 {
-	int len = strlen(header);
+	int len = strlen(output);
 	int i;
-
-	print_bar();
 
 	putchar('|');
 
@@ -60,7 +66,7 @@ static int print_header(const char *header)
 		i++;
 	}
 
-	printf("%s", header);
+	printf("%s", output);
 
 	i = 0;
 	while(i < (LINE_LENGTH - 3 - len) / 2) {
@@ -72,6 +78,15 @@ static int print_header(const char *header)
 		putchar(' ');
 
 	printf("|\n");
+
+	return 0;
+}
+
+static int print_header(const char *header)
+{
+	print_bar();
+
+	print_center(header);
 
 	print_bar();
 
@@ -251,15 +266,23 @@ int print_src_refcode(struct opal_src_scn *src)
 	return 0;
 }
 
-int print_mt_scn(struct opal_mtms_scn *mtms)
-{
+int print_mt_data(struct opal_mt_struct mt) {
 	char model[OPAL_SYS_MODEL_LEN+1];
 	char serial_no[OPAL_SYS_SERIAL_LEN+1];
 
-	memcpy(model, mtms->mt.model, OPAL_SYS_MODEL_LEN);
+	memcpy(model, mt.model, OPAL_SYS_MODEL_LEN);
 	model[OPAL_SYS_MODEL_LEN] = '\0';
-	memcpy(serial_no, mtms->mt.serial_no, OPAL_SYS_SERIAL_LEN);
+	memcpy(serial_no, mt.serial_no, OPAL_SYS_SERIAL_LEN);
 	model[OPAL_SYS_SERIAL_LEN] = '\0';
+
+	print_line("Machine Type Model", "%s", model);
+	print_line("Serial Number", "%s", serial_no);
+
+	return 0;
+}
+
+int print_mt_scn(struct opal_mtms_scn *mtms)
+{
 
 	printf("|-------------------------------------------------------------|\n");
 	printf("|              Machine Type/Model & Serial Number	      |\n");
@@ -270,20 +293,80 @@ int print_mt_scn(struct opal_mtms_scn *mtms)
 	printf("Version			: %x\n", mtms->v6hdr.version);
 	printf("Sub_type		: %x\n", mtms->v6hdr.subtype);
 	printf("Component ID		: %x\n", mtms->v6hdr.component_id);
-	printf("Machine Type Model	: %s\n", model);
-	printf("Serial Number		: %s\n", serial_no);
+	print_mt_data(mtms->mt);
 	printf("|-------------------------------------------------------------|\n\n");
 	return 0;
 }
 
+int print_fru_id_scn(struct opal_fru_id_sub_scn id) {
+	int to_print;
+
+	print_center(" ");
+	to_print = get_field_desc(fru_id_scn_component, MAX_FRU_ID_COMPONENT, 
+			id.hdr.flags & 0xF0, 0, -1);
+	print_center(fru_id_scn_component[to_print].desc);
+	if (id.hdr.flags & OPAL_FRU_ID_PART)
+		print_line("Part Number", "%s", id.part);
+
+	if (id.hdr.flags & OPAL_FRU_ID_PROC)
+		print_line("Procedure ID", "%s", id.part);
+
+	if (id.hdr.flags & OPAL_FRU_ID_CCIN)
+		print_line("CCIN", "%c%c%c%c", id.ccin[0], id.ccin[1],
+				id.ccin[2], id.ccin[3]);
+	
+	if (id.hdr.flags & OPAL_FRU_ID_SERIAL) {
+		char tmp[OPAL_FRU_ID_SERIAL_MAX+1];
+		memcpy(tmp, id.serial, OPAL_FRU_ID_SERIAL);
+		tmp[OPAL_FRU_ID_SERIAL] = '\0';
+		print_line("Serial Number", "%s", tmp);
+	}
+
+	return 0;
+}
+
+int print_fru_pe_scn(struct opal_fru_pe_sub_scn pe) {
+	print_mt_data(pe.mtms);
+	print_line("PCE", "%s", pe.pce);
+	return 0;
+}
+
+int print_fru_mr_scn(struct opal_fru_mr_sub_scn mr) {
+
+	int total_mru = mr.hdr.flags & 0x0F;
+	int i;
+	int to_print;
+	for (i = 0; i < total_mru; i++) {
+		print_line("MRU ID", "0x%x", mr.mru[i].id);
+
+		to_print = get_field_desc(fru_scn_priority, MAX_FRU_PRIORITY, mr.mru[i].priority, 'L', 0);
+		print_line("Priority", "%s", fru_scn_priority[to_print].desc);
+	}
+	return 0;
+}
+
 int print_fru_scn(struct opal_fru_scn fru) {
+	int to_print;
 	/* FIXME This printing was to roughly confirm the correctness
 	 * of the parsing. Improve here.
 	 */
-	print_header("FRU Callout section");
-	print_line("Call-out type","0x%x", fru.type);
-	print_line("FRU priority","%c", fru.priority);
+
+		
+	to_print = get_field_desc(fru_scn_priority, MAX_FRU_PRIORITY, fru.priority, 'L', 0);
+	print_line("Priority", "%s", fru_scn_priority[to_print].desc);
 	print_line("Location Code","%s", fru.location_code);
+	if (fru.type & OPAL_FRU_ID_SUB) {
+		print_fru_id_scn(fru.id);
+	}
+
+	if(fru.type & OPAL_FRU_PE_SUB) {
+		print_fru_pe_scn(fru.pe);
+	}
+
+	if(fru.type & OPAL_FRU_MR_SUB) {
+		print_fru_mr_scn(fru.mr);
+	}
+
 	return 0;
 }
 
@@ -300,8 +383,18 @@ int print_opal_src_scn(struct opal_src_scn *src)
 	print_line("Valid Word Count", "0x%x", src->wordcount);
 	print_line("SRC Length", "%x", src->srclength);
 	print_src_refcode(src);
-	if (src->flags & OPAL_SRC_ADD_SCN)
-		print_fru_scn(src->fru);
+	if(src->fru_count) {
+		print_center(" ");
+		print_center("Callout Section");
+		print_center(" ");
+		/* Hardcode this to look like FSP, not what what they want here... */
+		print_line("Additional Sections", "Disabled");
+		print_line("Callout Count", "%d", src->fru_count);
+		int i;
+		for (i = 0; i < src->fru_count; i++)
+			print_fru_scn(src->fru[i]);
+	}
+	print_center(" ");
 	return 0;
 }
 

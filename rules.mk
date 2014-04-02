@@ -13,9 +13,9 @@ SPECFILENAME = ppc64-diag.spec
 # resolves the root directory at which this build is occuring
 ROOT_DIR =                                              \
         $(shell                                         \
-        while [[ `pwd` != "/" ]];                       \
+        while [ `pwd` != "/" ];                         \
         do                                              \
-                if [[ -f `pwd`/$(SPECFILENAME) ]];      \
+                if [ -f `pwd`/$(SPECFILENAME) ];        \
                 then                                    \
                         echo `pwd`;                     \
                         break;                          \

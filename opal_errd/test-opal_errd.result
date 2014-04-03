@@ -4,6 +4,7 @@ ELOG[XXXX]: LID[3]::SRC[TESTSRC3]::Platform Firmware::Predictive Error::Service 
 ELOG[XXXX]: LID[5]::SRC[TESTSRC5]::Not Applicable::NONE::Service action and call home required
 ELOG[XXXX]: LID[50000004]::SRC[TESTSRC4]::Software::Unrecoverable Error::Service action and call home required
 ELOG[XXXX]: LID[50000006]::SRC[CALLHOME]::Power/Cooling System::NONE::No service action required
+ELOG[XXXX]: LID[5034a000]::SRC[11007201]::External Environment::Predictive Error::No service action required
 ELOG[XXXX]: LID[5055ed2e]::SRC[B182950C]::Platform Firmware::Informational Event::No service action required
 platform
-6bdd1e3e2b978d844dcc4945a355e572  platform
+64b383d70ddbb956f09adc805ca4f280  platform

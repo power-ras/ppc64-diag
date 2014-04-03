@@ -15,7 +15,6 @@ echo 'test-opal-elog-parse' > $LOG
 
 # First 3 elogs are completely synthesized and not *entirely* according
 # to spec, but useful in testing.
-
 ./opal-elog-parse/opal-elog-parse -d 1 -f $OUT/platform &>> $LOG 1>&2
 R=$?
 if [ $R -ne 234 ]; then
@@ -62,6 +61,13 @@ if [ $R -ne 0 ]; then
     exit $R
 fi
 
+# Added another test which contains an SRC section with FRU callouts
+./opal-elog-parse/opal-elog-parse -d 0x5034a000 -f $SYSFS/firmware/opal/elog/0x5034a000/raw &>> $LOG 1>&2
+R=$?
+if [ $R -ne 0 ]; then
+    echo 'FAIL:' $R;
+    exit $R
+fi
 
 if diff -u test-opal-elog-parse.result $LOG; then
 	rm -rf $SYSFS $OUT $LOG

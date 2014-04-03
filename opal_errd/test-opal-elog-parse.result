@@ -80,15 +80,14 @@ ERROR parse_opal_event: Truncated error log, expected section EH not found
 | Platform Log Id          : 0xb0040506                                        |
 | Entry ID                 : 0x50000006                                        |
 | Section Count            : 2                                                 |
-|-------------------------------------------------------------|
-|                   Call Home Log Comment                     |
-|-------------------------------------------------------------|
-Section ID		: CH
-Section Length		: 23
-Version			: 0
-Sub_type		: 0
-Component ID		: 0
-Call Home Comment	: call home comment goes here
+|------------------------------------------------------------------------------|
+|                            Call Home Log Comment                             |
+|------------------------------------------------------------------------------|
+| Section Version          : 0 (CH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x23                                              |
+| Component ID             : 0                                                 |
+| Call Home Comment        : call home comment goes here                       |
 |------------------------------------------------------------------------------|
 |                                Private Header                                |
 |------------------------------------------------------------------------------|

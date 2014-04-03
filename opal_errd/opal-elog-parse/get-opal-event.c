@@ -478,16 +478,9 @@ int print_eh_scn(struct opal_eh_scn *eh)
 
 static int print_ch_scn(struct opal_ch_scn *ch)
 {
-	printf("|-------------------------------------------------------------|\n");
-	printf("|                   Call Home Log Comment                     |\n");
-	printf("|-------------------------------------------------------------|\n");
-	printf("Section ID		: %c%c\n",
-				 ch->v6hdr.id[0], ch->v6hdr.id[1]);
-	printf("Section Length		: %x\n", ch->v6hdr.length);
-	printf("Version			: %x\n", ch->v6hdr.version);
-	printf("Sub_type		: %x\n", ch->v6hdr.subtype);
-	printf("Component ID		: %x\n", ch->v6hdr.component_id);
-	printf("Call Home Comment	: %s\n", ch->comment);
+	print_header("Call Home Log Comment");
+	print_opal_v6_hdr(ch->v6hdr);
+	print_line("Call Home Comment", "%s", ch->comment);
 
 	return 0;
 }

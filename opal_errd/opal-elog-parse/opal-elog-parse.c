@@ -12,6 +12,11 @@
 #include <unistd.h>
 #include <inttypes.h>
 #include <endian.h>
+#include <limits.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <syslog.h>
+#include <sys/types.h>
 
 #include "libopalevents.h"
 
@@ -51,6 +56,23 @@ void print_usage(char *command)
 		"\t-s: list all call home logs\n"
 	        "\t-f file: use file as platform log file (default %s)\n"
 	        "\t-h: print the usage\n", command, DEFAULT_opt_platform_log);
+}
+
+static int file_filter(const struct dirent *d)
+{
+        struct stat sbuf;
+        if (d->d_type == DT_DIR)
+           return 0;
+        if (d->d_type == DT_REG)
+           return 1;
+        if (stat(d->d_name,&sbuf))
+           return 0;
+        if (S_ISDIR(sbuf.st_mode))
+           return 0;
+        if (d->d_type == DT_UNKNOWN)
+           return 1;
+
+        return 0;
 }
 
 /* parse error log entry passed by user */

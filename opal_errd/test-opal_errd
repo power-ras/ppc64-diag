@@ -12,7 +12,7 @@ echo "test-opal_errd" > $LOG
     | sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' > $LOG
 
 ls -1 $OUT >> $LOG
-(cd $OUT; md5sum *) >> $LOG
+(cd $OUT/platform; md5sum *) | sort  -t ' ' -k 2 | sed 's/ .*-/  /g'  >> $LOG
 
 if diff -u test-opal_errd.result $LOG; then
 	rm -rf $SYSFS $OUT $LOG

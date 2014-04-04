@@ -8,7 +8,7 @@
 /*
  * This file supports
  *   1. Reading OPAL platform logs from sysfs
- *   2. Writing OPAL platform logs to /var/log/platform
+ *   2. Writing OPAL platform logs to individual files under /var/log/opal-elog
  *   3. ACK platform log
  *   4. Parsing required fields from log and write to syslog
  */
@@ -31,13 +31,14 @@
 #include <assert.h>
 #include <endian.h>
 #include <inttypes.h>
+#include <time.h>
 
 #define DEFAULT_SYSFS_PATH		"/sys"
-#define DEFAULT_OUTPUT_FILE		"/var/log/platform"
+#define DEFAULT_OUTPUT_DIR              "/var/log/opal-elog"
 #define DEFAULT_EXTRACT_DUMP_CMD	"/usr/sbin/extract_opal_dump"
 
 char *opt_sysfs = DEFAULT_SYSFS_PATH;
-char *opt_output = DEFAULT_OUTPUT_FILE;
+char *opt_output = DEFAULT_OUTPUT_DIR;
 int opt_daemon = 1;
 int opt_watch = 1;
 
@@ -209,6 +210,7 @@ static int process_elog(const char *elog_path)
 	int dir_fd = -1;
 	char elog_raw_path[PATH_MAX];
 	char *buf;
+        char *name;
 	size_t bufsz;
 	struct stat sbuf;
 	int ret = -1;
@@ -216,6 +218,7 @@ static int process_elog(const char *elog_path)
 	ssize_t readsz = 0;
 	int rc;
 	char *opt_output_dir = strdup(opt_output);
+        char opt_output_file[PATH_MAX];
 	char outbuf[OPAL_ERROR_LOG_MAX];
 	size_t outbufsz = OPAL_ERROR_LOG_MAX;
 
@@ -246,12 +249,18 @@ static int process_elog(const char *elog_path)
 		sz += readsz;
 	} while(sz != bufsz);
 
-	out_fd = open(opt_output, O_WRONLY | O_APPEND | O_CREAT,
-		      S_IRUSR | S_IWUSR | S_IRGRP);
+
+        /* Parse elog filename */
+        name = basename(dirname(elog_raw_path));
+        snprintf(opt_output_file, sizeof(opt_output_file), "%s/%d-%s",
+                 opt_output,(int)time(NULL),name);
+
+        out_fd = open(opt_output_file, O_WRONLY  | O_CREAT,
+                      S_IRUSR | S_IWUSR | S_IRGRP);
 
 	if (out_fd == -1) {
 		syslog(LOG_ERR, "Failed to write elog: %s (%d:%s)\n",
-		       opt_output, errno, strerror(errno));
+		       opt_output_file, errno, strerror(errno));
 		goto err;
 	}
 
@@ -362,8 +371,8 @@ static void help(const char* argv0)
 	fprintf(stderr, "%s help:\n\n", argv0);
 	fprintf(stderr, "-e cmd  - path to extract_opal_dump (default %s)\n",
 		DEFAULT_EXTRACT_DUMP_CMD);
-	fprintf(stderr, "-o file - output log entries to file (default %s)\n",
-		DEFAULT_OUTPUT_FILE);
+	fprintf(stderr, "-o dir  - output log entries to directory (default %s)\n",
+		DEFAULT_OUTPUT_DIR);
 	fprintf(stderr, "-s dir  - path to sysfs (default %s)\n",
 		DEFAULT_SYSFS_PATH);
 	fprintf(stderr, "-D      - don't daemonize, just run once.\n");
@@ -429,6 +438,24 @@ int main(int argc, char *argv[])
 		       sysfs_path, errno, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
+
+        rc = stat(opt_output, &s);
+        if (rc != 0) {
+            if (errno == ENOENT){
+                rc = mkdir(opt_output,
+                           S_IRGRP | S_IRUSR | S_IWGRP | S_IWUSR | S_IXUSR);
+                if (rc != 0){
+                    syslog(LOG_ERR, "Error creating output directory: %s (%d: %s)\n",
+                           opt_output, errno, strerror(errno));
+                    exit(EXIT_FAILURE);
+                }
+            } else {
+                syslog(LOG_ERR, "Error accessing directory: %s (%d: %s)\n",
+                       opt_output, errno, strerror(errno));
+                exit(EXIT_FAILURE);
+            }
+        }
+
 
 	inotifyfd = inotify_init();
 	if (inotifyfd == -1) {

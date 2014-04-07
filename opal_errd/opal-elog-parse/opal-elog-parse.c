@@ -33,11 +33,10 @@ int opt_display_all = 0;
 #define ELOG_ACTION_OFFSET	0x42
 #define ELOG_SRC_OFFSET		0x78
 #define OPAL_ERROR_LOG_MAX	16384
-#define ELOG_ACTION_FLAG	0xa8000000
+#define ELOG_ACTION_FLAG	0xa800
 
 #define ELOG_SRC_SIZE		8
 #define OPAL_ERROR_LOG_MAX      16384
-#define ELOG_ACTION_FLAG        0xa8000000
 
 #define ELOG_MIN_READ_OFFSET	ELOG_SRC_OFFSET + ELOG_SRC_SIZE
 
@@ -123,7 +122,7 @@ void print_elog_summary(char *buffer, int bufsz, uint32_t service_flag)
         uint32_t logid;
         char src[ELOG_SRC_SIZE + 1];
         char severity;
-        uint32_t action;
+        uint16_t action;
         struct opal_datetime date_time_in, date_time_out;
         uint8_t creator_id;
 
@@ -131,7 +130,7 @@ void print_elog_summary(char *buffer, int bufsz, uint32_t service_flag)
         memcpy(src, (buffer + ELOG_SRC_OFFSET), sizeof(src));
         src[ELOG_SRC_SIZE] = '\0';
         severity = buffer[ELOG_SEVERITY_OFFSET];
-        action = be32toh(*(uint32_t *)(buffer + ELOG_ACTION_OFFSET));
+        action = be16toh(*(uint16_t *)(buffer + ELOG_ACTION_OFFSET));
         switch (severity) {
         case OPAL_INFORMATION_LOG:
                 parse = "Informational Event";
@@ -160,7 +159,8 @@ void print_elog_summary(char *buffer, int bufsz, uint32_t service_flag)
                                 date_time_out.day, date_time_out.hour,
                                 date_time_out.minutes, date_time_out.seconds,
                                 get_creator_name(creator_id), parse);
-                else if ((action == ELOG_ACTION_FLAG) && (service_flag == 1))
+                else if (((action & ELOG_ACTION_FLAG) == ELOG_ACTION_FLAG)
+			 && (service_flag == 1))
                         /* list only service action logs */
                         printf("|0x%08X %8.8s %4u-%02u-%02u %02u:%02u:%02u  %-17.17s %-19.19s|\n",
                                 logid, src,

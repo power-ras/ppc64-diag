@@ -195,6 +195,7 @@ static int ack_elog(const char *elog_path)
 		syslog(LOG_ERR, "Failed to acknowledge elog: %s"
 		       " (%d:%s)\n",
 		       ack_file, errno, strerror(errno));
+		close(fd);
 		return -1;
 	}
 
@@ -229,6 +230,10 @@ static int process_elog(const char *elog_path)
 
 	bufsz = sbuf.st_size;
 	buf = (char*)malloc(bufsz);
+	if (!buf) {
+		syslog(LOG_ERR, "Failed to allocate memory\n");
+		return -1;
+	}
 
 	in_fd = open(elog_raw_path, O_RDONLY);
 	if (in_fd == -1) {
@@ -465,6 +470,8 @@ int main(int argc, char *argv[])
 	if (rc == -1) {
 		syslog(LOG_ERR, "Error adding inotify watch for %s (%d: %s)\n",
 		       sysfs_path, errno, strerror(errno));
+		close(inotifyfd);
+		closelog();
 		exit(EXIT_FAILURE);
 	}
 
@@ -475,6 +482,7 @@ int main(int argc, char *argv[])
 			syslog(LOG_NOTICE, "Cannot daemonize opal_errd, "
 			       "opal_errd cannot continue.\n");
 			closelog();
+			close(inotifyfd);
 			return rc;
 		}
 	}

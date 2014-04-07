@@ -67,7 +67,7 @@ char *opt_extract_opal_dump_cmd = DEFAULT_EXTRACT_DUMP_CMD;
 #define OPAL_PREDICTIVE_LOG	0x20
 #define OPAL_UNRECOVERABLE_LOG	0x40
 
-#define ELOG_ACTION_FLAG	0xa8000000
+#define ELOG_ACTION_FLAG	0xa800
 
 volatile int terminate;
 
@@ -78,7 +78,7 @@ static int parse_log(char *buffer, size_t bufsz)
 	char src[ELOG_SRC_SIZE+1];
 	uint8_t severity;
 	uint8_t subsysid;
-	uint32_t action;
+	uint16_t action;
 	char *parse = "NONE";
 	char *parse_action = "NONE";
 	char *failingsubsys = "Not Applicable";
@@ -111,8 +111,8 @@ static int parse_log(char *buffer, size_t bufsz)
 		break;
 	}
 
-	action = be32toh(*(uint32_t *)(buffer + ELOG_ACTION_OFFSET));
-	if (action == ELOG_ACTION_FLAG)
+	action = be16toh(*(uint16_t *)(buffer + ELOG_ACTION_OFFSET));
+	if ((action & ELOG_ACTION_FLAG) == ELOG_ACTION_FLAG)
 		parse_action = "Service action and call home required";
 	else
 		parse_action = "No service action required";

@@ -66,10 +66,34 @@ char *opt_extract_opal_dump_cmd = DEFAULT_EXTRACT_DUMP_CMD;
 #define OPAL_RECOVERABLE_LOG	0x10
 #define OPAL_PREDICTIVE_LOG	0x20
 #define OPAL_UNRECOVERABLE_LOG	0x40
+#define OPAL_CRITICAL_LOG	0x50
+#define OPAL_DIAGNOSTICS_LOG	0x60
+#define OPAL_SYMPTOM_LOG	0x70
 
 #define ELOG_ACTION_FLAG	0xa800
 
 volatile int terminate;
+
+/* Aggregate severities into group */
+static const char *get_severity_desc(uint8_t severity)
+{
+	if (severity >= OPAL_SYMPTOM_LOG)
+		return "Symptom";
+	if (severity >= OPAL_DIAGNOSTICS_LOG)
+		return "Error on diag test";
+	if (severity >= OPAL_CRITICAL_LOG)
+		return "Critical Error";
+	if (severity >= OPAL_UNRECOVERABLE_LOG)
+		return "Unrecoverable Error";
+	if (severity >= OPAL_PREDICTIVE_LOG)
+		return "Predictive Error";
+	if (severity >= OPAL_RECOVERABLE_LOG)
+		return "Recoverable Error";
+	if (severity >= OPAL_INFORMATION_LOG)
+		return "Informational Event";
+
+	return "UNKNOWN";
+}
 
 /* Parse required fields from error log */
 static int parse_log(char *buffer, size_t bufsz)
@@ -79,7 +103,7 @@ static int parse_log(char *buffer, size_t bufsz)
 	uint8_t severity;
 	uint8_t subsysid;
 	uint16_t action;
-	char *parse = "NONE";
+	const char *parse;
 	char *parse_action = "NONE";
 	char *failingsubsys = "Not Applicable";
 
@@ -96,20 +120,7 @@ static int parse_log(char *buffer, size_t bufsz)
 	subsysid = buffer[ELOG_SUBSYSTEM_OFFSET];
 	severity = buffer[ELOG_SEVERITY_OFFSET];
 
-	switch (severity) {
-	case OPAL_INFORMATION_LOG:
-		parse = "Informational Event";
-		break;
-	case OPAL_RECOVERABLE_LOG:
-		parse = "Recoverable Error";
-		break;
-	case OPAL_PREDICTIVE_LOG:
-		parse = "Predictive Error";
-		break;
-	case OPAL_UNRECOVERABLE_LOG:
-		parse = "Unrecoverable Error";
-		break;
-	}
+	parse = get_severity_desc(severity);
 
 	action = be16toh(*(uint16_t *)(buffer + ELOG_ACTION_OFFSET));
 	if ((action & ELOG_ACTION_FLAG) == ELOG_ACTION_FLAG)

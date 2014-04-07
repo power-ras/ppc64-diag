@@ -45,6 +45,9 @@ int opt_display_all = 0;
 #define OPAL_RECOVERABLE_LOG    0x10
 #define OPAL_PREDICTIVE_LOG     0x20
 #define OPAL_UNRECOVERABLE_LOG  0x40
+#define OPAL_CRITICAL_LOG	0x50
+#define OPAL_DIAGNOSTICS_LOG	0x60
+#define OPAL_SYMPTOM_LOG	0x70
 
 static int platform_log_fd = -1;
 
@@ -116,9 +119,30 @@ out:
 
 }
 
+/* Aggregate severities into group */
+static const char *get_severity_desc(uint8_t severity)
+{
+	if (severity >= OPAL_SYMPTOM_LOG)
+		return "Symptom";
+	if (severity >= OPAL_DIAGNOSTICS_LOG)
+		return "Error on diagnostic test";
+	if (severity >= OPAL_CRITICAL_LOG)
+		return "Critical Error";
+	if (severity >= OPAL_UNRECOVERABLE_LOG)
+		return "Unrecoverable Error";
+	if (severity >= OPAL_PREDICTIVE_LOG)
+		return "Predictive Error";
+	if (severity >= OPAL_RECOVERABLE_LOG)
+		return "Recoverable Error";
+	if (severity >= OPAL_INFORMATION_LOG)
+		return "Informational Event";
+
+	return "UNKNOWN";
+}
+
 void print_elog_summary(char *buffer, int bufsz, uint32_t service_flag)
 {
-        char *parse;
+        const char *parse;
         uint32_t logid;
         char src[ELOG_SRC_SIZE + 1];
         char severity;
@@ -131,23 +155,8 @@ void print_elog_summary(char *buffer, int bufsz, uint32_t service_flag)
         src[ELOG_SRC_SIZE] = '\0';
         severity = buffer[ELOG_SEVERITY_OFFSET];
         action = be16toh(*(uint16_t *)(buffer + ELOG_ACTION_OFFSET));
-        switch (severity) {
-        case OPAL_INFORMATION_LOG:
-                parse = "Informational Event";
-                break;
-        case OPAL_RECOVERABLE_LOG:
-                parse = "Recoverable Error";
-                break;
-        case OPAL_PREDICTIVE_LOG:
-                parse = "Predictive Error";
-                break;
-        case OPAL_UNRECOVERABLE_LOG:
-                parse = "Unrecoverable Error";
-                break;
-        default:
-                parse = "NONE";
-                break;
-        }
+
+	parse = get_severity_desc(severity);
 
         date_time_in = *(const struct opal_datetime *)(buffer + ELOG_COMMIT_TIME_OFFSET);
         date_time_out = parse_opal_datetime(date_time_in);

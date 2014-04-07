@@ -83,7 +83,6 @@ static void ack_dump(const char* dump_dir_path)
 		syslog(LOG_ERR, "Failed to acknowledge platform dump: %s"
 		       " (%d:%s)\n",
 		       ack_file, errno, strerror(errno));
-		return;
 	}
 
 	close(fd);
@@ -114,6 +113,10 @@ static int process_dump(const char* dump_dir_path, const char *output_dir)
 
 	bufsz = sbuf.st_size;
 	buf = (char*)malloc(bufsz);
+	if (!buf) {
+		syslog(LOG_ERR, "Failed to allocate memory for dump\n");
+		return -1;
+	}
 
 	in_fd = open(dump_path, O_RDONLY);
 
@@ -135,7 +138,6 @@ static int process_dump(const char* dump_dir_path, const char *output_dir)
 		sz += readsz;
 	} while(sz != bufsz);
 
-	
 	dump_get_file_name(buf, bufsz, outfname, &prefix_size);
 
 	snprintf(dump_path, sizeof(dump_path), "%s/%s.tmp", output_dir, outfname);

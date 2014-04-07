@@ -231,8 +231,6 @@ static int process_elog(const char *elog_path)
 	int rc;
 	char *opt_output_dir = strdup(opt_output);
         char opt_output_file[PATH_MAX];
-	char outbuf[OPAL_ERROR_LOG_MAX];
-	size_t outbufsz = OPAL_ERROR_LOG_MAX;
 
 	snprintf(elog_raw_path, sizeof(elog_raw_path), "%s/raw", elog_path);
 
@@ -279,13 +277,10 @@ static int process_elog(const char *elog_path)
 		goto err;
 	}
 
-	assert(bufsz <= outbufsz);
+	assert(bufsz <= OPAL_ERROR_LOG_MAX);
 
-	memset(outbuf, 0, outbufsz);
-	memcpy(outbuf, buf, bufsz);
-
-	sz = write(out_fd, outbuf, outbufsz);
-	if (sz != outbufsz) {
+	sz = write(out_fd, buf, bufsz);
+	if (sz != bufsz) {
 		syslog(LOG_ERR, "Failed to write elog output file: %s (%d:%s)\n",
 		       opt_output_file, errno, strerror(errno));
 		goto err;

@@ -185,7 +185,7 @@ int print_usr_hdr_action(struct opal_usr_hdr_scn *usrhdr)
 	if (usrhdr->action & OPAL_UH_ACTION_SERVICE) {
 		print_line(entry, "Service Action Required");
 		if (usrhdr->action & OPAL_UH_ACTION_CALL_HOME)
-			print_line("","HMC Call Home");
+			print_line("","Call Home");
 		if(usrhdr->action & OPAL_UH_ACTION_TERMINATION)
 			print_line("","Termination Error");
 		entry = "";

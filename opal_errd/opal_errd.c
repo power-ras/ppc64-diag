@@ -231,7 +231,6 @@ static int process_elog(const char *elog_path)
 	buf = (char*)malloc(bufsz);
 
 	in_fd = open(elog_raw_path, O_RDONLY);
-
 	if (in_fd == -1) {
 		syslog(LOG_ERR, "Failed to open elog: %s (%d:%s)\n",
 		       elog_raw_path, errno, strerror(errno));
@@ -259,7 +258,7 @@ static int process_elog(const char *elog_path)
                       S_IRUSR | S_IWUSR | S_IRGRP);
 
 	if (out_fd == -1) {
-		syslog(LOG_ERR, "Failed to write elog: %s (%d:%s)\n",
+		syslog(LOG_ERR, "Failed to create elog output file: %s (%d:%s)\n",
 		       opt_output_file, errno, strerror(errno));
 		goto err;
 	}
@@ -271,24 +270,23 @@ static int process_elog(const char *elog_path)
 
 	sz = write(out_fd, outbuf, outbufsz);
 	if (sz != outbufsz) {
-		syslog(LOG_ERR, "Failed to write platform dump: %s (%d:%s)\n",
-		       opt_output, errno, strerror(errno));
+		syslog(LOG_ERR, "Failed to write elog output file: %s (%d:%s)\n",
+		       opt_output_file, errno, strerror(errno));
+		goto err;
+	}
+
+	rc = fsync(out_fd);
+	if (rc == -1) {
+		syslog(LOG_ERR, "Failed to sync elog output file: %s (%d:%s)\n",
+		       opt_output_file, errno, strerror(errno));
 		goto err;
 	}
 
 	dir_fd = open(dirname(opt_output_dir), O_RDONLY|O_DIRECTORY);
-
-	rc = fsync(out_fd);
-	if (rc == -1) {
-		syslog(LOG_ERR, "Failed to sync elog: %s (%d:%s)\n",
-		       opt_output, errno, strerror(errno));
-		goto err;
-	}
-
 	rc = fsync(dir_fd);
 	if (rc == -1) {
 		syslog(LOG_ERR, "Failed to sync platform elog directory: %s"
-		       " (%d:%s)\n", opt_output, errno, strerror(errno));
+		       " (%d:%s)\n", opt_output_dir, errno, strerror(errno));
 	}
 
 	check_platform_dump();
@@ -306,7 +304,6 @@ err:
 	free(opt_output_dir);
 	free(buf);
 	return ret;
-
 }
 
 /* Read logs from opal sysfs interface */
@@ -441,21 +438,21 @@ int main(int argc, char *argv[])
 
         rc = stat(opt_output, &s);
         if (rc != 0) {
-            if (errno == ENOENT){
-                rc = mkdir(opt_output,
-                           S_IRGRP | S_IRUSR | S_IWGRP | S_IWUSR | S_IXUSR);
-                if (rc != 0){
-                    syslog(LOG_ERR, "Error creating output directory: %s (%d: %s)\n",
-                           opt_output, errno, strerror(errno));
-                    exit(EXIT_FAILURE);
-                }
-            } else {
-                syslog(LOG_ERR, "Error accessing directory: %s (%d: %s)\n",
-                       opt_output, errno, strerror(errno));
-                exit(EXIT_FAILURE);
-            }
-        }
-
+		if (errno == ENOENT) {
+			rc = mkdir(opt_output,
+				   S_IRGRP | S_IRUSR | S_IWGRP | S_IWUSR | S_IXUSR);
+			if (rc != 0) {
+				syslog(LOG_ERR, "Error creating output directory:"
+				       " %s (%d: %s)\n",
+				       opt_output, errno, strerror(errno));
+				exit(EXIT_FAILURE);
+			}
+		} else {
+			syslog(LOG_ERR, "Error accessing directory: %s (%d: %s)\n",
+			       opt_output, errno, strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+	}
 
 	inotifyfd = inotify_init();
 	if (inotifyfd == -1) {

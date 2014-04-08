@@ -572,12 +572,51 @@ static int parse_ep_scn(const struct opal_v6_hdr *hdr,
 
 	return 0;
 }
+
+static int parse_sw_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+{
+	struct opal_sw_scn sw;
+	struct opal_sw_scn *swbuf = (struct opal_sw_scn *)buf;
+
+	sw.v6hdr = *hdr;
+
+	if (hdr->version == 1) {
+		if (buflen < sizeof(struct opal_sw_v1_scn) + sizeof(struct opal_v6_hdr)) {
+			fprintf(stderr, "%s: corrupted, expected length => %lu, got %u\n",
+					__func__,
+					sizeof(struct opal_sw_v1_scn) + sizeof(struct opal_v6_hdr),
+					buflen);
+			return -EINVAL;
+		}
+		sw.version.v1.rc = be32toh(swbuf->version.v1.rc);
+		sw.version.v1.line_num = be32toh(swbuf->version.v1.line_num);
+		sw.version.v1.object_id = be32toh(swbuf->version.v1.object_id);
+		sw.version.v1.id_length = swbuf->version.v1.id_length;
+	} else if (hdr->version == 2) {
+		if (buflen < sizeof(struct opal_sw_v2_scn) + sizeof(struct opal_v6_hdr)) {
+			fprintf(stderr, "%s: corrupted, expected length == %lu, got %u\n",
+					__func__,
+					sizeof(struct opal_sw_v2_scn) + sizeof(struct opal_v6_hdr),
+					buflen);
+			return -EINVAL;
+		}
+		sw.version.v2.rc = be32toh(swbuf->version.v2.rc);
+		sw.version.v2.file_id = be16toh(swbuf->version.v2.file_id);
+		sw.version.v2.location_id = be16toh(swbuf->version.v2.location_id);
+		sw.version.v2.object_id = be32toh(swbuf->version.v2.object_id);
+	} else {
+		fprintf(stderr, "ERROR %s: unknown version %d\n", __func__, hdr->version);
+	}
+
+	return 0;
+}
+
 static int parse_section_header(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {
-	if (buflen < 8) {
+	if (buflen < sizeof(struct opal_v6_hdr)) {
 		fprintf(stderr, "ERROR %s: section header is too small, "
-			"is meant to be 8 bytes, only %u found.\n",
-			__func__, buflen);
+			"is meant to be %lu bytes, only %u found.\n",
+			__func__, sizeof(struct opal_v6_hdr), buflen);
 		return -EINVAL;
 	}
 
@@ -688,7 +727,8 @@ int parse_opal_event(char *buf, int buflen)
 		} else if (strncmp(hdr.id, "SS", 2) == 0) {
 			parse_src_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "DH", 2) == 0) { // FIXME
-		} else if (strncmp(hdr.id, "SW", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "SW", 2) == 0) {
+			parse_sw_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "LP", 2) == 0) { // FIXME
 		} else if (strncmp(hdr.id, "LR", 2) == 0) { // FIXME
 		} else if (strncmp(hdr.id, "HM", 2) == 0) {

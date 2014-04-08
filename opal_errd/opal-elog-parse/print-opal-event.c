@@ -288,7 +288,7 @@ int print_ch_scn(struct opal_ch_scn *ch)
    return 0;
 }
 
-int print_ud_scn(struct opal_ud_scn * ud)
+int print_ud_scn(struct opal_ud_scn *ud)
 {
    print_header("User Defined Data");
    print_opal_v6_hdr(ud->v6hdr);
@@ -319,4 +319,14 @@ int print_ud_scn(struct opal_ud_scn * ud)
    }
    printf("|\n");
    return 0;
+}
+
+int print_hm_scn(struct opal_hm_scn *hm)
+{
+	print_header("HMC ID");
+
+	print_opal_v6_hdr(hm->v6hdr);
+	print_mt_data(hm->mt);
+
+	return 0;
 }

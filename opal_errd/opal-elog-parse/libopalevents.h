@@ -70,6 +70,11 @@ struct opal_ud_scn {
 	uint8_t data[0]; /* variable sized */
 } __packed;
 
+struct opal_hm_scn {
+	struct opal_v6_hdr v6hdr;
+	struct opal_mt_struct mt;
+} __packed;
+
 struct opal_fru_hdr {
   uint16_t type;
   uint8_t length;

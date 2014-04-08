@@ -57,8 +57,8 @@ void print_usage(char *command)
 		"\t-d: Display error log entry details\n"
 	        "\t-a: Display all error log entry details\n"
 		"\t-l: list all error logs\n"
-		"\t-s: list all call home logs\n"
 	        "\t-p  dir: use dir as platform log directory (default %s)\n"
+		"\t-s: list all service action and call home logs\n"
 	        "\t-f  file: use individual file as platform log\n"
 	        "\t-h: print the usage\n", command, DEFAULT_opt_platform_dir);
 }

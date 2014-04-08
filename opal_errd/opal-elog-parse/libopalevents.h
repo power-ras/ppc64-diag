@@ -134,16 +134,9 @@ struct opal_fru_pe_sub_scn {
   char pce[OPAL_FRU_PE_PCE_MAX];
 } __packed;
 
-struct opal_src_add_scn_hdr {
-  uint8_t id;
-#define OPAL_FRU_MORE 0x01
-  uint8_t flags;
-  uint16_t length;
-} __packed;
-
 struct opal_fru_scn {
+#define OPAL_FRU_SCN_STATIC_SIZE (4 * sizeof(uint8_t))
 #define OPAL_FRU_SCN_ID 0xc0
-  struct opal_src_add_scn_hdr hdr;
   uint8_t length; /* Length of everything below including this */
   uint8_t type;
   uint8_t priority;
@@ -158,33 +151,45 @@ struct opal_fru_scn {
   struct opal_fru_mr_sub_scn mr; /* Optional */
 } __packed;
 
-/* Primary SRC section */
+struct opal_src_add_scn_hdr {
+  uint8_t id;
+#define OPAL_FRU_MORE 0x01
+  uint8_t flags;
+  uint16_t length; /* This is counted in words */
+} __packed;
+
+/* SRC section */
 struct opal_src_scn {
-  struct opal_v6_hdr v6hdr;
-  uint8_t     version;
-  uint8_t     flags;
-  uint8_t     reserved_0;
-  uint8_t     wordcount;
-  uint16_t reserved_1;
-  uint16_t srclength;
-  uint32_t    ext_refcode2;
-  uint32_t    ext_refcode3;
-  uint32_t    ext_refcode4;
-  uint32_t    ext_refcode5;
-  uint32_t    ext_refcode6;
-  uint32_t    ext_refcode7;
-  uint32_t    ext_refcode8;
-  uint32_t    ext_refcode9;
+	struct opal_v6_hdr v6hdr;
+	uint8_t     version;
+	uint8_t     flags;
+	uint8_t     reserved_0;
+	uint8_t     wordcount;
+	uint16_t reserved_1;
+	uint16_t srclength;
+	uint32_t    ext_refcode2;
+	uint32_t    ext_refcode3;
+	uint32_t    ext_refcode4;
+	uint32_t    ext_refcode5;
+	uint32_t    ext_refcode6;
+	uint32_t    ext_refcode7;
+	uint32_t    ext_refcode8;
+	uint32_t    ext_refcode9;
 #define OPAL_SRC_SCN_PRIMARY_REFCODE_LEN 32
-  char        primary_refcode[OPAL_SRC_SCN_PRIMARY_REFCODE_LEN];
-  /* Currently there can only be one type of optional
-   * sub section, in the future this may change.
-   * This will do for now.
-   */
+	char        primary_refcode[OPAL_SRC_SCN_PRIMARY_REFCODE_LEN];
+	/* Currently there can only be one type of optional
+	 * sub section, in the future this may change.
+	 * This will do for now.
+	 */
+#define OPAL_SRC_SCN_STATIC_SIZE sizeof(struct opal_src_scn) \
+	- sizeof(struct opal_src_add_scn_hdr) \
+	- (OPAL_SRC_FRU_MAX * sizeof(struct opal_fru_scn)) \
+	- sizeof(uint8_t)
+	struct opal_src_add_scn_hdr addhdr;
 #define OPAL_SRC_ADD_SCN 0x1
 #define OPAL_SRC_FRU_MAX 10
-  struct opal_fru_scn fru[OPAL_SRC_FRU_MAX]; /*Optional */
-  uint8_t fru_count;
+	struct opal_fru_scn fru[OPAL_SRC_FRU_MAX]; /*Optional */
+	uint8_t fru_count;
 } __packed;
 
 /* Header ID,

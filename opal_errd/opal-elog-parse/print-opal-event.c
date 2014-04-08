@@ -114,12 +114,12 @@ int print_mt_scn(struct opal_mtms_scn *mtms)
 int print_fru_id_scn(struct opal_fru_id_sub_scn id)
 {
    print_center(" ");
-   print_center(get_fru_priority_desc(id.hdr.flags & 0xF0));
+   print_center(get_fru_component_desc(id.hdr.flags & 0xF0));
    if (id.hdr.flags & OPAL_FRU_ID_PART)
       print_line("Part Number", "%s", id.part);
 
    if (id.hdr.flags & OPAL_FRU_ID_PROC)
-      print_line("Procedure ID", "%s", id.part);
+      print_line("Procedure Number", "%s", id.part);
 
    if (id.hdr.flags & OPAL_FRU_ID_CCIN)
       print_line("CCIN", "%c%c%c%c", id.ccin[0], id.ccin[1],
@@ -161,7 +161,8 @@ int print_fru_scn(struct opal_fru_scn fru)
     * of the parsing. Improve here.
     */
    print_line("Priority", "%s", get_fru_priority_desc(fru.priority));
-   print_line("Location Code","%s", fru.location_code);
+	if (fru.location_code[0] != '\0')
+	   print_line("Location Code","%s", fru.location_code);
    if (fru.type & OPAL_FRU_ID_SUB) {
       print_fru_id_scn(fru.id);
    }

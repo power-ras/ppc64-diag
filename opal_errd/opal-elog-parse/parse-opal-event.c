@@ -221,20 +221,11 @@ int parse_fru_scn(struct opal_fru_scn *fru_scn, const char *buf, int buflen)
  *
  * The minimum we need is the start of the opan_fru_src_scn struct
  */
-	int min_length = sizeof(struct opal_src_add_scn_hdr) + (sizeof(uint8_t) * 4);
-	int error = check_buflen(buflen, min_length, __func__);
+	int offset = OPAL_FRU_SCN_STATIC_SIZE;
+	int error = check_buflen(buflen, offset, __func__);
 	if (error)
 		return error;
 
-	fru_scn->hdr.flags = bufsrc->hdr.flags;
-	fru_scn->hdr.id = bufsrc->hdr.id;
-	if (fru_scn->hdr.id != OPAL_FRU_SCN_ID) {
-		fprintf(stderr, "%s: invalid section id, expecting 0x%x but found"
-				" 0x%x", __func__, OPAL_FRU_SCN_ID, fru_scn->hdr.id);
-		return -EINVAL;
-	}
-	//FIXME It is unclear what length hdr.length is talking about
-	fru_scn->hdr.length = be16toh(bufsrc->hdr.length);
 	fru_scn->length = bufsrc->length;
 	fru_scn->type = bufsrc->type;
 	fru_scn->priority = bufsrc->priority;
@@ -246,38 +237,39 @@ int parse_fru_scn(struct opal_fru_scn *fru_scn, const char *buf, int buflen)
 		return -EINVAL;
 	}
 
-	min_length += bufsrc->loc_code_len;
-	error = check_buflen(buflen, min_length, __func__);
+	offset += bufsrc->loc_code_len;
+	error = check_buflen(buflen, offset, __func__);
 	if (error)
 		return error;
 
+	fru_scn->location_code[0] = '\0';
 	memcpy(fru_scn->location_code, bufsrc->location_code, fru_scn->loc_code_len);
 
 	if (fru_scn->type & OPAL_FRU_ID_SUB) {
-		min_length += parse_src_fru_id_scn(&(fru_scn->id), buf + min_length, buflen - min_length);
+		offset += parse_src_fru_id_scn(&(fru_scn->id), buf + offset, buflen - offset);
 		if (error)
 			return error;
 	}
 
 	if (fru_scn->type & OPAL_FRU_PE_SUB) {
-		min_length += parse_src_fru_pe_scn(&(fru_scn->pe), buf + min_length, buflen - min_length);
+		offset += parse_src_fru_pe_scn(&(fru_scn->pe), buf + offset, buflen - offset);
 		if (error)
 			return error;
 	}
 
 	if (fru_scn->type & OPAL_FRU_MR_SUB) {
-		min_length += parse_src_fru_mr_scn(&(fru_scn->mr), buf + min_length, buflen - min_length);
+		offset += parse_src_fru_mr_scn(&(fru_scn->mr), buf + offset, buflen - offset);
 		if (error)
 			return error;
 	}
 
-	if (min_length - sizeof(struct opal_src_add_scn_hdr) != fru_scn->length) {
+	if (offset != fru_scn->length) {
 		fprintf(stderr, "%s: Parsed amount of data does not match the header length"
-					" parsed: %lu vs expected: %d\n", __func__,
-					min_length - sizeof(struct opal_src_add_scn_hdr), fru_scn->length);
+					" parsed: %d vs expected: %d\n", __func__,
+					offset, fru_scn->length);
 		return -EINVAL;
 	}
-	return (fru_scn->hdr.flags & OPAL_FRU_MORE) ? min_length : 0;
+	return offset;
 }
 /* parse SRC section of the log */
 int parse_src_scn(const struct opal_v6_hdr *hdr,
@@ -286,9 +278,7 @@ int parse_src_scn(const struct opal_v6_hdr *hdr,
 	struct opal_src_scn src;
 	struct opal_src_scn *bufsrc = (struct opal_src_scn*)buf;
 
-	int offset = sizeof(struct opal_src_scn) -
-		(sizeof(struct opal_fru_scn) * OPAL_SRC_FRU_MAX) -
-		sizeof(uint8_t);
+	int offset = OPAL_SRC_SCN_STATIC_SIZE;
 
 	int error = check_buflen(buflen, offset, __func__);
 	if (error)
@@ -322,17 +312,28 @@ int parse_src_scn(const struct opal_v6_hdr *hdr,
 				OPAL_SRC_SCN_PRIMARY_REFCODE_LEN);
 
 	src.fru_count = 0;
-	if (!(hdr->length > offset))
-		offset = 0;
-	while(offset) {
-		error = parse_fru_scn(&(src.fru[src.fru_count]), buf + offset, buflen - offset);
-		if (error < 0)
+	if (src.flags & OPAL_SRC_ADD_SCN) {
+		error = check_buflen(buflen, offset + sizeof(struct opal_src_add_scn_hdr), __func__);
+		if (error)
 			return error;
-		else if (error > 0)
+
+		src.addhdr.flags = bufsrc->addhdr.flags;
+		src.addhdr.id = bufsrc->addhdr.id;
+		if (src.addhdr.id != OPAL_FRU_SCN_ID) {
+			fprintf(stderr, "%s: invalid section id, expecting 0x%x but found"
+					" 0x%x", __func__, OPAL_FRU_SCN_ID, src.addhdr.id);
+			return -EINVAL;
+		}
+		src.addhdr.length = be16toh(bufsrc->addhdr.length);
+		offset += sizeof(struct opal_src_add_scn_hdr);
+
+		while(offset < src.srclength) {
+			error = parse_fru_scn(&(src.fru[src.fru_count]), buf + offset, buflen - offset);
+			if (error < 0)
+				return error;
 			offset += error;
-		else
-			offset = 0;
-		src.fru_count++;
+			src.fru_count++;
+		}
 	}
 
 	print_opal_src_scn(&src);

@@ -174,7 +174,7 @@ struct generic_desc{
    {0x4, "Possibly multiple platforms"}
 
 #define FRU_PRIORITY \
-   {'L', "Low Prioirty"}, /*Default Value */ \
+   {'L', "Lowest priority replacement"}, /*Default Value */ \
    {'H', "Mandatory, replace all with this type as a unit"}, \
    {'M', "Medium Priority"}, \
    {'A', "Medium Priority group A"}, \

@@ -277,7 +277,7 @@ ERROR parse_opal_event: Truncated error log, expected section EH not found
 | Priority                 : Mandatory, replace all with this type as a unit   |
 | Location Code            : U78AB.001.WZSGBJ6                                 |
 |                                                                              |
-|                                 Low Prioirty                                 |
+|                                 Symbolic FRU                                 |
 | Part Number              : AMBTEMP                                           |
 | CCIN                     :                                                   |
 | Serial Number            :                                                   |

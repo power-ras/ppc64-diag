@@ -330,3 +330,25 @@ int print_hm_scn(struct opal_hm_scn *hm)
 
 	return 0;
 }
+
+int print_ep_scn(struct opal_ep_scn *ep)
+{
+	print_header("EPOW");
+
+	print_line("Sensor Value", "0x%x", ep->value >> OPAL_EP_VALUE_SHIFT);
+	print_line("EPOW Action", "0x%x", ep->value & OPAL_EP_ACTION_BITS);
+	print_line("EPOW Event", "0x%x", ep->modifier >> OPAL_EP_EVENT_SHIFT);
+	if ((ep->value >> OPAL_EP_VALUE_SHIFT) == OPAL_EP_VALUE_SET) {
+		print_line("EPOW Event Modifier", "%s",
+				get_ep_event_desc(ep->modifier & OPAL_EP_EVENT_BITS));
+		if (ep->v6hdr.version == OPAL_EP_HDR_V) {
+			if (ep->ext_modifier == 0x00)
+				print_line("EPOW Ext Modifier", "System wide shutdown");
+			else if (ep->ext_modifier == 0x01)
+				print_line("EPOW Ext Modifier", "Parition specific shutdown");
+		}
+	}
+	print_line("Platform reason code", "0x%x", ep->reason);
+
+	return 0;
+}

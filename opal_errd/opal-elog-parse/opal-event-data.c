@@ -12,6 +12,7 @@ struct generic_desc{
 #define MAX_EVENT_SCOPE sizeof(usr_hdr_event_scope)/sizeof(struct generic_desc)
 #define MAX_FRU_PRIORITY sizeof(fru_scn_priority)/sizeof(struct generic_desc)
 #define MAX_FRU_ID_COMPONENT sizeof(fru_id_scn_component)/sizeof(struct generic_desc)
+#define MAX_EP_EVENT sizeof(ep_event)/sizeof(struct generic_desc)
 
 #define EVENT_TYPE \
    {0x01, "Miscellaneous, informational only."},\
@@ -193,6 +194,12 @@ struct generic_desc{
    {0xe0, "Symbolic FRU with trusted location code"}, \
    {0xf0, "Reserved"}
 
+#define EP_EVENT \
+	{0x01, "Normal system shutdown with no additional delay"}, \
+	{0x02, "Loss of utility power, system is running on UPS/batter"}, \
+	{0x03, "Loss of system critical functions, system should be shutdown"}, \
+	{0x04, "Ambient temperature too high"}
+
 struct generic_desc usr_hdr_event_type[] =  {
 	   EVENT_TYPE
 };
@@ -219,6 +226,10 @@ struct generic_desc fru_scn_priority[] = {
 
 struct generic_desc fru_id_scn_component[] = {
 	   FRU_ID_COMPONENT
+};
+
+struct generic_desc ep_event[] = {
+		EP_EVENT
 };
 
 int get_field_desc(struct generic_desc *data, uint8_t size, uint8_t id, uint8_t default_id)
@@ -287,5 +298,13 @@ const char *get_fru_priority_desc(uint8_t id)
 	int to_print = get_field_desc(fru_scn_priority, MAX_FRU_PRIORITY, id, 'L');
 	if (to_print != -1)
 		return fru_scn_priority[to_print].desc;
+	return "Unknown";
+}
+
+const char *get_ep_event_desc(int id)
+{
+	int to_print = get_field_desc(ep_event, MAX_EP_EVENT, id, id);
+	if (to_print != -1)
+		return ep_event[to_print].desc;
 	return "Unknown";
 }

@@ -26,4 +26,5 @@ const char *get_fru_priority_desc(uint8_t id);
 
 const char *get_fru_component_desc(uint8_t id);
 
+const char *get_ep_event_desc(int id);
 #endif /* _H_OPAL_EVENTS_DATA */

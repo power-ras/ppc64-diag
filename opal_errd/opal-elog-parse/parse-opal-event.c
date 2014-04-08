@@ -547,6 +547,30 @@ static int parse_hm_scn(const struct opal_v6_hdr *hdr,
 	return 0;
 }
 
+static int parse_ep_scn(const struct opal_v6_hdr *hdr,
+				 const char *buf, int buflen)
+{
+	struct opal_ep_scn ep;
+	struct opal_ep_scn *bufep = (struct opal_ep_scn *)buf;
+
+	if (buflen < sizeof(struct opal_ep_scn)) {
+		fprintf(stderr, "%s: corrupted, expected length >= %lu, got %u\n",
+			__func__,
+			sizeof(struct opal_ep_scn), buflen);
+		return -EINVAL;
+	}
+
+	ep.v6hdr = *hdr;
+
+	ep.value = bufep->value;
+	ep.modifier = bufep->modifier;
+	ep.ext_modifier = be16toh(bufep->ext_modifier);
+	ep.reason = be32toh(bufep->reason);
+
+	print_ep_scn(&ep);
+
+	return 0;
+}
 static int parse_section_header(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {
 	if (buflen < 8) {
@@ -668,7 +692,8 @@ int parse_opal_event(char *buf, int buflen)
 		} else if (strncmp(hdr.id, "LR", 2) == 0) { // FIXME
 		} else if (strncmp(hdr.id, "HM", 2) == 0) {
 			parse_hm_scn(&hdr, buf, buflen);
-		} else if (strncmp(hdr.id, "EP", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "EP", 2) == 0) {
+			parse_ep_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "IE", 2) == 0) { // FIXME
 		} else if (strncmp(hdr.id, "MI", 2) == 0) { // FIXME
 		} else if (strncmp(hdr.id, "CH", 2) == 0) {

@@ -47,4 +47,6 @@ int print_ud_scn(struct opal_ud_scn *ud);
 
 int print_hm_scn(struct opal_hm_scn *hm);
 
+int print_ep_scn(struct opal_ep_scn *ep);
+
 #endif /* _H_OPAL_PRINT_EVENT */

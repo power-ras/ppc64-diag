@@ -6,7 +6,7 @@ include ../../rules.mk
 
 CMDS = opal-elog-parse
 
-OPAL_ELOG_OBJS = get-opal-event.o opal-elog-parse.o
+OPAL_ELOG_OBJS = parse-opal-event.o opal-elog-parse.o print-opal-event.o print_helpers.o opal-event-data.o
 
 all: $(CMDS)
 

@@ -19,6 +19,7 @@
 #include <sys/types.h>
 
 #include "libopalevents.h"
+#include "opal-event-data.h"
 
 #define DEFAULT_opt_platform_dir "/var/log/opal-elog"
 char *opt_platform_dir = DEFAULT_opt_platform_dir;
@@ -119,27 +120,6 @@ out:
 
 }
 
-/* Aggregate severities into group */
-static const char *get_severity_desc(uint8_t severity)
-{
-	if (severity >= OPAL_SYMPTOM_LOG)
-		return "Symptom";
-	if (severity >= OPAL_DIAGNOSTICS_LOG)
-		return "Error on diagnostic test";
-	if (severity >= OPAL_CRITICAL_LOG)
-		return "Critical Error";
-	if (severity >= OPAL_UNRECOVERABLE_LOG)
-		return "Unrecoverable Error";
-	if (severity >= OPAL_PREDICTIVE_LOG)
-		return "Predictive Error";
-	if (severity >= OPAL_RECOVERABLE_LOG)
-		return "Recoverable Error";
-	if (severity >= OPAL_INFORMATION_LOG)
-		return "Informational Event";
-
-	return "UNKNOWN";
-}
-
 void print_elog_summary(char *buffer, int bufsz, uint32_t service_flag)
 {
         const char *parse;
@@ -156,7 +136,8 @@ void print_elog_summary(char *buffer, int bufsz, uint32_t service_flag)
         severity = buffer[ELOG_SEVERITY_OFFSET];
         action = be16toh(*(uint16_t *)(buffer + ELOG_ACTION_OFFSET));
 
-	parse = get_severity_desc(severity);
+		parse = get_severity_desc(severity & 0xF0);
+		/* & with 0xF0 to get only the category of severity, not the full description */
 
         date_time_in = *(const struct opal_datetime *)(buffer + ELOG_COMMIT_TIME_OFFSET);
         date_time_out = parse_opal_datetime(date_time_in);

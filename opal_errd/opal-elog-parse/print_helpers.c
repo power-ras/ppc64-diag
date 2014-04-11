@@ -120,3 +120,31 @@ int print_line(char *entry, const char *format, ...)
 
    return written;
 }
+
+int print_hex(uint8_t *values, int len) {
+	int written = 0;
+	int i = 0;
+	int lines = 0;
+	while(i < len) {
+		if(written % LINE_LENGTH == 0) {
+			written = printf("| ");
+			lines++;
+		}
+			written += printf("%.2x",values[i]);
+
+		if((written + 2) % LINE_LENGTH == 0) {
+			written += printf("|\n");
+		} else {
+			putchar(' ');
+			written++;
+		}
+
+		i++;
+	}
+	while ((written + 2) % LINE_LENGTH) {
+		putchar(' ');
+		written++;
+	}
+	printf("|\n");
+	return lines * LINE_LENGTH;
+}

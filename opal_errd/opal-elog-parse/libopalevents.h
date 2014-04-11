@@ -227,6 +227,15 @@ struct opal_lp_scn {
 	 */
 } __packed;
 
+struct opal_lr_scn {
+	struct opal_v6_hdr v6hdr;
+	uint8_t res_type;
+	uint8_t reserved;
+	uint16_t capacity;
+	uint32_t shared;
+	uint32_t memory_addr;
+} __packed;
+
 /* Header ID,
  * Required? (1 = yes, 2 = only with error),
  * Position (0 = no specific pos),

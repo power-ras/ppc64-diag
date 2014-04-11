@@ -299,32 +299,11 @@ int print_ud_scn(struct opal_ud_scn *ud)
 {
    print_header("User Defined Data");
    print_opal_v6_hdr(ud->v6hdr);
-   int i = 0;
-   int written = 0;
    /*FIXME this data should be parsable if documentation appears/exists
     * In the mean time, just dump it in hex
     */
    print_line("User data hex","length %d",ud->v6hdr.length - 8);
-   while(i < (ud->v6hdr.length - 8)) {
-      if(written % LINE_LENGTH == 0)
-         written = printf("| ");
-
-         written += printf("%.2x",ud->data[i]);
-
-      if((written + 2) % LINE_LENGTH == 0) {
-         written += printf("|\n");
-      } else {
-         putchar(' ');
-         written++;
-      }
-
-      i++;
-   }
-   while ((written + 2) % LINE_LENGTH) {
-      putchar(' ');
-      written++;
-   }
-   printf("|\n");
+   print_hex(ud->data, ud->v6hdr.length - 8);
    return 0;
 }
 

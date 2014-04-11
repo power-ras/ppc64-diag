@@ -293,6 +293,21 @@ struct opal_ed_scn {
 	uint8_t user_data[0]; /* variable length */
 } __packed;
 
+struct opal_dh_scn {
+	struct opal_v6_hdr v6hdr;
+	uint32_t dump_id;
+#define DH_FLAG_DUMP_HEX 0x40
+	uint8_t flags;
+	uint8_t reserved[2];
+	uint8_t length_dump_os;
+	uint64_t dump_size;
+#define DH_DUMP_STR_MAX 40
+	union {
+		char dump_str[DH_DUMP_STR_MAX];
+		uint32_t dump_hex;
+	} shared;
+} __packed;
+
 /* Header ID,
  * Required? (1 = yes, 2 = only with error),
  * Position (0 = no specific pos),

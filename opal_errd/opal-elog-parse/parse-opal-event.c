@@ -802,6 +802,35 @@ static int parse_ed_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	return 0;
 }
 
+static int parse_dh_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+{
+	struct opal_dh_scn dh;
+	struct opal_dh_scn *dhbuf = (struct opal_dh_scn *)buf;
+
+	if (check_buflen(buflen, sizeof(struct opal_dh_scn) - DH_DUMP_STR_MAX,
+				__func__) < 0)
+		return -EINVAL;
+
+	dh.v6hdr = *hdr;
+	dh.dump_id = be32toh(dhbuf->dump_id);
+	dh.flags = dhbuf->flags;
+	dh.length_dump_os = dhbuf->length_dump_os;
+	dh.dump_size = be64toh(dhbuf->dump_size);
+	if (dh.flags & DH_FLAG_DUMP_HEX) {
+		if (check_buflen(buflen, sizeof(struct opal_dh_scn) + sizeof(uint32_t),
+					__func__) < 0)
+			return -EINVAL;
+		dh.shared.dump_hex = be32toh(dh.shared.dump_hex);
+	} else { /* therefor it is in ascii */
+		if (check_buflen(buflen, sizeof(struct opal_dh_scn) + dh.length_dump_os,
+					__func__) < 0)
+			return -EINVAL;
+		memcpy(dh.shared.dump_str, dhbuf->shared.dump_str, dh.length_dump_os);
+	}
+
+	return 0;
+}
+
 static int parse_section_header(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {
 	if (buflen < sizeof(struct opal_v6_hdr)) {
@@ -917,7 +946,8 @@ int parse_opal_event(char *buf, int buflen)
 			parse_mt_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "SS", 2) == 0) {
 			parse_src_scn(&hdr, buf, buflen);
-		} else if (strncmp(hdr.id, "DH", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "DH", 2) == 0) {
+			parse_dh_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "SW", 2) == 0) {
 			parse_sw_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "LP", 2) == 0) {

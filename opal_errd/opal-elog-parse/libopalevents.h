@@ -268,6 +268,22 @@ struct opal_mi_scn {
 	uint32_t reserved;
 } __packed;
 
+struct opal_ei_env_scn {
+	uint32_t corrosion;
+	uint16_t temperature;
+	uint16_t rate;
+} __packed;
+
+struct opal_ei_scn {
+	struct opal_v6_hdr v6hdr;
+	uint64_t g_timestamp;
+	struct opal_ei_env_scn genesis;
+	uint8_t status;
+	uint8_t user_data_scn;
+	uint16_t read_count;
+	struct opal_ei_env_scn readings[0]; /* variable length */
+} __packed;
+
 /* Header ID,
  * Required? (1 = yes, 2 = only with error),
  * Position (0 = no specific pos),

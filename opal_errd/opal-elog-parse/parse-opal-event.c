@@ -731,7 +731,7 @@ static int parse_mi_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	struct opal_mi_scn mi;
 	struct opal_mi_scn *mibuf = (struct opal_mi_scn *)buf;
 
-	if(buflen < sizeof(struct opal_mi_scn)) {
+	if (buflen < sizeof(struct opal_mi_scn)) {
 		fprintf(stderr, "%s: corrupted, expected length => %lu, got %u",
 				__func__, sizeof(struct opal_mi_scn), buflen);
 		return -EINVAL;
@@ -743,6 +743,46 @@ static int parse_mi_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	print_mi_scn(&mi);
 	return 0;
 }
+
+static int parse_ei_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+{
+	struct opal_ei_scn *ei;
+	struct opal_ei_scn *eibuf = (struct opal_ei_scn *)buf;
+
+	if (check_buflen(buflen, sizeof(struct opal_ei_scn), __func__) < 0 ||
+			check_buflen(hdr->length, sizeof(struct opal_ei_scn), __func__) < 0)
+		return -EINVAL;
+
+	ei = (struct opal_ei_scn *) malloc(hdr->length);
+
+	ei->v6hdr = *hdr;
+	ei->g_timestamp = be64toh(eibuf->g_timestamp);
+	ei->genesis.corrosion = be32toh(eibuf->genesis.corrosion);
+	ei->genesis.temperature = be16toh(eibuf->genesis.temperature);
+	ei->genesis.rate = be16toh(eibuf->genesis.rate);
+	ei->status = eibuf->status;
+	ei->user_data_scn = eibuf->user_data_scn;
+	ei->read_count = be16toh(eibuf->read_count);
+	if (check_buflen(hdr->length, sizeof(struct opal_ei_scn) +
+				(ei->read_count * sizeof(struct opal_ei_env_scn)),
+				__func__) < 0 ||
+			check_buflen(buflen, sizeof(struct opal_ei_scn) +
+				(ei->read_count * sizeof(struct opal_ei_env_scn)),
+				__func__)) {
+		free(ei);
+		return -EINVAL;
+	}
+
+	int i;
+	for (i = 0; i < ei->read_count; i++) {
+		ei->readings[i].corrosion = be32toh(eibuf->readings[i].corrosion);
+		ei->readings[i].temperature = be16toh(eibuf->readings[i].temperature);
+		ei->readings[i].rate = be16toh(eibuf->readings[i].rate);
+	}
+
+	return 0;
+}
+
 static int parse_section_header(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {
 	if (buflen < sizeof(struct opal_v6_hdr)) {
@@ -877,7 +917,8 @@ int parse_opal_event(char *buf, int buflen)
 			parse_ch_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "UD", 2) == 0) {
 			parse_ud_scn(&hdr, buf, buflen);
-		} else if (strncmp(hdr.id, "EI", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "EI", 2) == 0) {
+			parse_ei_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "ED", 2) == 0) { // FIXME
 		}
 

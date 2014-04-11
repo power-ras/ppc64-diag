@@ -23,9 +23,15 @@
 
 #define DEFAULT_SYSFS_PATH	"/sys"
 #define DEFAULT_OUTPUT_DIR	"/var/log/dump"
+#define DUMP_TYPE_LEN		7
+
+/* Retention policy : default maximum dumps of each type */
+#define DEFAULT_MAX_DUMP	4
 
 int opt_ack_dump = 1;
 int opt_wait = 0;
+int opt_max_dump = DEFAULT_MAX_DUMP;
+
 char *opt_sysfs = DEFAULT_SYSFS_PATH;
 char *opt_output_dir = DEFAULT_OUTPUT_DIR;
 
@@ -38,6 +44,8 @@ static void help(const char* argv0)
 		DEFAULT_SYSFS_PATH);
 	fprintf(stderr, "-o dir - directory to save dumps (default %s)\n",
 		DEFAULT_OUTPUT_DIR);
+	fprintf(stderr, "-m max - maximum number of dumps of a specific type"
+		" to be saved\n");
 	fprintf(stderr, "-w     - wait for a dump\n");
 	fprintf(stderr, "-h     - help (this message)\n");
 }
@@ -88,6 +96,81 @@ static void ack_dump(const char* dump_dir_path)
 	close(fd);
 }
 
+static int timesort(const struct dirent **file1, const struct dirent **file2)
+{
+	struct stat sbuf1, sbuf2;
+	char dump_path1[PATH_MAX];
+	char dump_path2[PATH_MAX];
+	int rc;
+
+	snprintf(dump_path1, PATH_MAX, "%s/%s",
+		 opt_output_dir, (*file1)->d_name);
+
+	snprintf(dump_path2, PATH_MAX, "%s/%s",
+		 opt_output_dir, (*file2)->d_name);
+
+	rc = stat(dump_path1, &sbuf1);
+	if (rc < 0)
+		return rc;
+
+	rc = stat(dump_path2, &sbuf2);
+	if (rc < 0)
+		return rc;
+
+	return (sbuf2.st_mtime - sbuf1.st_mtime);
+}
+
+
+/**
+ * remove_dump_files
+ * @brief if needed, remove any old dump files
+ *
+ * Users can specify the number of old dumpfiles they wish to save
+ * via command line option. This routine will search through and remove
+ * any dump files of the specified type if the count exceeds the maximum value.
+ *
+ */
+static void remove_dump_files(char *dumpname)
+{
+	struct dirent **namelist;
+	struct dirent *dirent;
+	char dump_path[PATH_MAX];
+	int i;
+	int n;
+	int count = 0;
+
+	n = scandir(opt_output_dir, &namelist, NULL, timesort);
+	if (n < 0)
+		return;
+
+	for (i = 0; i < n; i++) {
+		dirent = namelist[i];
+
+		/* Skip dump files of different type */
+		if (dirent->d_name[0] == '.' ||
+		    strncmp(dumpname, dirent->d_name, DUMP_TYPE_LEN)) {
+			free(namelist[i]);
+			continue;
+		}
+
+		count++;
+		snprintf(dump_path, PATH_MAX, "%s/%s",
+			 opt_output_dir, dirent->d_name);
+
+		free(namelist[i]);
+
+		if (count < opt_max_dump)
+			continue;
+
+		if (unlink(dump_path) < 0)
+			syslog(LOG_NOTICE, "Could not delete file \"%s\" "
+			"(%s) to make room for incoming platform dump."
+			" The new dump will be saved anyways.\n",
+			dump_path, strerror(errno));
+	}
+
+	free(namelist);
+}
 
 static int process_dump(const char* dump_dir_path, const char *output_dir)
 {
@@ -142,6 +225,8 @@ static int process_dump(const char* dump_dir_path, const char *output_dir)
 
 	snprintf(dump_path, sizeof(dump_path), "%s/%s.tmp", output_dir, outfname);
 	snprintf(final_dump_path, sizeof(dump_path), "%s/%s", output_dir, outfname);
+
+	remove_dump_files(outfname);
 
 	out_fd = open(dump_path, O_WRONLY|O_CREAT|O_EXCL, S_IRUSR|S_IRGRP);
 
@@ -264,7 +349,7 @@ int main(int argc, char *argv[])
 	fd_set exceptfds;
 	struct stat s;
 
-	while ((opt = getopt(argc, argv, "As:o:wh")) != -1) {
+	while ((opt = getopt(argc, argv, "As:o:m:wh")) != -1) {
 		switch (opt) {
 		case 'A':
 			opt_ack_dump = 0;
@@ -274,6 +359,15 @@ int main(int argc, char *argv[])
 			break;
 		case 'o':
 			opt_output_dir = optarg;
+			break;
+		case 'm':
+			opt_max_dump = atoi(optarg);
+			if (opt_max_dump <= 0) {
+				syslog(LOG_ERR, "Invalid value specified for "
+					"-m option (%d), using default value %d\n",
+					opt_max_dump, DEFAULT_MAX_DUMP);
+				opt_max_dump = DEFAULT_MAX_DUMP;
+			}
 			break;
 		case 'w':
 			opt_wait = 1;

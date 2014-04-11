@@ -286,6 +286,13 @@ struct opal_ei_scn {
 	struct opal_ei_env_scn readings[0]; /* variable length */
 } __packed;
 
+struct opal_ed_scn {
+	struct opal_v6_hdr v6hdr;
+	uint8_t creator_id;
+	uint8_t reserved[3];
+	uint8_t user_data[0]; /* variable length */
+} __packed;
+
 /* Header ID,
  * Required? (1 = yes, 2 = only with error),
  * Position (0 = no specific pos),

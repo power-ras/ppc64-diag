@@ -784,6 +784,23 @@ static int parse_ei_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	return 0;
 }
 
+static int parse_ed_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+{
+	struct opal_ed_scn *ed;
+	struct opal_ed_scn *edbuf = (struct opal_ed_scn *)buf;
+
+	if (check_buflen(buflen, sizeof(struct opal_ed_scn), __func__) < 0 ||
+			check_buflen(buflen, hdr->length, __func__) < 0 ||
+			check_buflen(hdr->length, sizeof(struct opal_ed_scn), __func__) < 0)
+		return -EINVAL;
+	ed = (struct opal_ed_scn *) malloc(hdr->length);
+	ed->v6hdr = *hdr;
+	ed->creator_id = edbuf->creator_id;
+	memcpy(ed->user_data, edbuf->user_data, hdr->length - 12);
+
+	return 0;
+}
+
 static int parse_section_header(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {
 	if (buflen < sizeof(struct opal_v6_hdr)) {
@@ -920,7 +937,8 @@ int parse_opal_event(char *buf, int buflen)
 			parse_ud_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "EI", 2) == 0) {
 			parse_ei_scn(&hdr, buf, buflen);
-		} else if (strncmp(hdr.id, "ED", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "ED", 2) == 0) {
+			parse_ed_scn(&hdr, buf, buflen);
 		}
 
 		buf+= hdr.length;

@@ -686,6 +686,45 @@ static int parse_lr_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	return 0;
 }
 
+static int parse_ie_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+{
+	struct opal_ie_scn ie;
+	struct opal_ie_scn *iebuf = (struct opal_ie_scn *)buf;
+
+	if (buflen < sizeof(struct opal_ie_scn) - IE_DATA_MAX) {
+		fprintf(stderr, "%s: corrupted, expected length => %lu, got %u\n",
+				__func__, sizeof(struct opal_ie_scn) - IE_DATA_MAX, buflen);
+		return -EINVAL;
+	}
+
+	ie.v6hdr = *hdr;
+	ie.type = iebuf->type;
+	ie.rpc_len = iebuf->rpc_len;
+	ie.scope = iebuf->scope;
+	ie.subtype = iebuf->subtype;
+	ie.drc = be32toh(iebuf->drc);
+	if (ie.type == IE_TYPE_RPC_PASS_THROUGH) {
+		if (buflen < sizeof(struct opal_ie_scn) - IE_DATA_MAX + ie.rpc_len) {
+			fprintf(stderr, "%s: corrupted, exptected length => %lu, got %u",
+					__func__, sizeof(struct opal_ie_scn) - IE_DATA_MAX +
+						ie.rpc_len, buflen);
+			return -EINVAL;
+		}
+		memcpy(ie.data.rpc, iebuf->data.rpc, ie.rpc_len);
+	}
+	if (ie.subtype == IE_SUBTYPE_PLAT_MAX_CHANGE) {
+		if (buflen < sizeof(struct opal_ie_scn) - IE_DATA_MAX + sizeof(uint64_t)) {
+			fprintf(stderr, "%s: corrupted, exptected length => %lu, got %u",
+					__func__, sizeof(struct opal_ie_scn) - IE_DATA_MAX +
+					sizeof(uint64_t), buflen);
+			return -EINVAL;
+		}
+		ie.data.max = be64toh(iebuf->data.max);
+	}
+
+	return 0;
+}
+
 static int parse_section_header(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {
 	if (buflen < sizeof(struct opal_v6_hdr)) {
@@ -812,7 +851,8 @@ int parse_opal_event(char *buf, int buflen)
 			parse_hm_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "EP", 2) == 0) {
 			parse_ep_scn(&hdr, buf, buflen);
-		} else if (strncmp(hdr.id, "IE", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "IE", 2) == 0) {
+			parse_ie_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "MI", 2) == 0) { // FIXME
 		} else if (strncmp(hdr.id, "CH", 2) == 0) {
 			parse_ch_scn(&hdr, buf, buflen);

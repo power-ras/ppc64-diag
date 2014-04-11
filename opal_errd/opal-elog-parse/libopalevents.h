@@ -240,6 +240,28 @@ struct opal_lr_scn {
 	uint32_t memory_addr;
 } __packed;
 
+struct opal_ie_scn {
+	struct opal_v6_hdr v6hdr;
+#define IE_TYPE_ERROR_DET 0x01
+#define IE_TYPE_ERROR_REC 0x02
+#define IE_TYPE_EVENT 0x03
+#define IE_TYPE_RPC_PASS_THROUGH 0x04
+	uint8_t type;
+	uint8_t rpc_len;
+	uint8_t scope;
+#define IE_SUBTYPE_REBALANCE 0x01
+#define IE_SUBTYPE_NODE_ONLINE 0x03
+#define IE_SUBTYPE_NODE_OFFLINE 0x04
+#define IE_SUBTYPE_PLAT_MAX_CHANGE 0x05
+	uint8_t subtype;
+	uint32_t drc;
+#define IE_DATA_MAX 216
+	union {
+		uint8_t rpc[IE_DATA_MAX];
+		uint64_t max;
+	} data;
+} __packed;
+
 /* Header ID,
  * Required? (1 = yes, 2 = only with error),
  * Position (0 = no specific pos),

@@ -335,7 +335,7 @@ int print_hm_scn(struct opal_hm_scn *hm)
 int print_ep_scn(struct opal_ep_scn *ep)
 {
 	print_header("EPOW");
-
+	print_opal_v6_hdr(ep->v6hdr);
 	print_line("Sensor Value", "0x%x", ep->value >> OPAL_EP_VALUE_SHIFT);
 	print_line("EPOW Action", "0x%x", ep->value & OPAL_EP_ACTION_BITS);
 	print_line("EPOW Event", "0x%x", ep->modifier >> OPAL_EP_EVENT_SHIFT);
@@ -350,6 +350,28 @@ int print_ep_scn(struct opal_ep_scn *ep)
 		}
 	}
 	print_line("Platform reason code", "0x%x", ep->reason);
+
+	return 0;
+}
+
+int print_sw_scn(struct opal_sw_scn *sw)
+{
+	print_header("Firmware Error Description");
+	print_opal_v6_hdr(sw->v6hdr);
+	if (sw->v6hdr.version == 1) {
+		print_line("Return Code", "0x%08x", sw->version.v1.rc);
+		print_line("Line Number", "%08d", sw->version.v1.line_num);
+		print_line("Object Identifier", "0x%08x", sw->version.v1.object_id);
+		print_line("File ID Length", "0x%x", sw->version.v1.id_length);
+		print_line("File Identifier", "%s", sw->version.v1.file_id);
+	} else if (sw->v6hdr.version == 2) {
+		print_line("File Identifier", "0x%04x", sw->version.v2.file_id);
+		print_line("Code Location", "0x%04x", sw->version.v2.location_id);
+		print_line("Return Code", "0x%08x", sw->version.v2.rc);
+		print_line("Object Identifier", "0x%08x", sw->version.v2.object_id);
+	} else {
+		print_line("Parse error", "Incompatible version - 0x%x", sw->v6hdr.version);
+	}
 
 	return 0;
 }

@@ -575,10 +575,11 @@ static int parse_ep_scn(const struct opal_v6_hdr *hdr,
 
 static int parse_sw_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {
-	struct opal_sw_scn sw;
+	struct opal_sw_scn *sw;
 	struct opal_sw_scn *swbuf = (struct opal_sw_scn *)buf;
 
-	sw.v6hdr = *hdr;
+	sw = (struct opal_sw_scn *)malloc(hdr->length);
+	sw->v6hdr = *hdr;
 
 	if (hdr->version == 1) {
 		if (buflen < sizeof(struct opal_sw_v1_scn) + sizeof(struct opal_v6_hdr)) {
@@ -588,10 +589,11 @@ static int parse_sw_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 					buflen);
 			return -EINVAL;
 		}
-		sw.version.v1.rc = be32toh(swbuf->version.v1.rc);
-		sw.version.v1.line_num = be32toh(swbuf->version.v1.line_num);
-		sw.version.v1.object_id = be32toh(swbuf->version.v1.object_id);
-		sw.version.v1.id_length = swbuf->version.v1.id_length;
+		sw->version.v1.rc = be32toh(swbuf->version.v1.rc);
+		sw->version.v1.line_num = be32toh(swbuf->version.v1.line_num);
+		sw->version.v1.object_id = be32toh(swbuf->version.v1.object_id);
+		sw->version.v1.id_length = swbuf->version.v1.id_length;
+		strncpy(sw->version.v1.file_id, swbuf->version.v1.file_id, sw->version.v1.id_length);
 	} else if (hdr->version == 2) {
 		if (buflen < sizeof(struct opal_sw_v2_scn) + sizeof(struct opal_v6_hdr)) {
 			fprintf(stderr, "%s: corrupted, expected length == %lu, got %u\n",
@@ -600,14 +602,16 @@ static int parse_sw_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 					buflen);
 			return -EINVAL;
 		}
-		sw.version.v2.rc = be32toh(swbuf->version.v2.rc);
-		sw.version.v2.file_id = be16toh(swbuf->version.v2.file_id);
-		sw.version.v2.location_id = be16toh(swbuf->version.v2.location_id);
-		sw.version.v2.object_id = be32toh(swbuf->version.v2.object_id);
+		sw->version.v2.rc = be32toh(swbuf->version.v2.rc);
+		sw->version.v2.file_id = be16toh(swbuf->version.v2.file_id);
+		sw->version.v2.location_id = be16toh(swbuf->version.v2.location_id);
+		sw->version.v2.object_id = be32toh(swbuf->version.v2.object_id);
 	} else {
 		fprintf(stderr, "ERROR %s: unknown version %d\n", __func__, hdr->version);
+		return -EINVAL;
 	}
 
+	print_sw_scn(sw);
 	return 0;
 }
 

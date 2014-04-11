@@ -615,6 +615,56 @@ static int parse_sw_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	return 0;
 }
 
+static int parse_lp_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+{
+	struct opal_lp_scn *lp;
+	struct opal_lp_scn *lpbuf = (struct opal_lp_scn *)buf;
+	uint16_t *lps;
+	uint16_t *lpsbuf;
+	if (buflen < sizeof(struct opal_lp_scn)) {
+		fprintf(stderr, "%s: corrupted, expected length => %lu, got %u\n",
+				__func__, sizeof(struct opal_lp_scn), buflen);
+		return -EINVAL;
+	}
+
+	lp = malloc(hdr->length);
+	if (!lp) {
+		fprintf(stderr, "%s: out of memory\n", __func__);
+		return -ENOMEM;
+	}
+
+	lp->v6hdr = *hdr;
+	lp->primary = be16toh(lpbuf->primary);
+	lp->length_name = lpbuf->length_name;
+	lp->lp_count = lpbuf->lp_count;
+	lp->partition_id = be32toh(lpbuf->partition_id);
+	lp->name[0] = '\0';
+	if (buflen < sizeof(struct opal_lp_scn) + lp->length_name) {
+		fprintf(stderr, "%s: corrupted, expected length => %lu, got %u",
+				__func__, sizeof(struct opal_lp_scn) + lp->length_name,
+				buflen);
+		return -EINVAL;
+	}
+	memcpy(lp->name, lpbuf->name, lp->length_name);
+
+	if (buflen < sizeof(struct opal_lp_scn) + lp->length_name +
+			(lp->lp_count * sizeof(uint16_t))) {
+		fprintf(stderr, "%s: corrupted, expected length => %lu, got %u",
+				__func__, sizeof(struct opal_lp_scn) + lp->length_name +
+				(lp->lp_count * sizeof(uint16_t)), buflen);
+		return -EINVAL;
+	}
+
+	lpsbuf = (uint16_t *)(lpbuf->name + lpbuf->length_name);
+	lps = (uint16_t *)(lp->name + lp->length_name);
+	int i;
+	for(i = 0; i < lp->lp_count; i++)
+		lps[i] = be16toh(lpsbuf[i]);
+	/* TODO print this
+	 *print_lp_scn(lp);
+	 */
+	return 0;
+}
 static int parse_section_header(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {
 	if (buflen < sizeof(struct opal_v6_hdr)) {
@@ -733,7 +783,8 @@ int parse_opal_event(char *buf, int buflen)
 		} else if (strncmp(hdr.id, "DH", 2) == 0) { // FIXME
 		} else if (strncmp(hdr.id, "SW", 2) == 0) {
 			parse_sw_scn(&hdr, buf, buflen);
-		} else if (strncmp(hdr.id, "LP", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "LP", 2) == 0) {
+			parse_lp_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "LR", 2) == 0) { // FIXME
 		} else if (strncmp(hdr.id, "HM", 2) == 0) {
 			parse_hm_scn(&hdr, buf, buflen);

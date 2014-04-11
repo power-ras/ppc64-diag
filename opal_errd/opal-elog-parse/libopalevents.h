@@ -262,6 +262,12 @@ struct opal_ie_scn {
 	} data;
 } __packed;
 
+struct opal_mi_scn {
+	struct opal_v6_hdr v6hdr;
+	uint32_t flags;
+	uint32_t reserved;
+} __packed;
+
 /* Header ID,
  * Required? (1 = yes, 2 = only with error),
  * Position (0 = no specific pos),

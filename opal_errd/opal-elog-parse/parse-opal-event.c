@@ -726,6 +726,22 @@ static int parse_ie_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	return 0;
 }
 
+static int parse_mi_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+{
+	struct opal_mi_scn mi;
+	struct opal_mi_scn *mibuf = (struct opal_mi_scn *)buf;
+
+	if(buflen < sizeof(struct opal_mi_scn)) {
+		fprintf(stderr, "%s: corrupted, expected length => %lu, got %u",
+				__func__, sizeof(struct opal_mi_scn), buflen);
+		return -EINVAL;
+	}
+
+	mi.v6hdr = *hdr;
+	mi.flags = be32toh(mibuf->flags);
+
+	return 0;
+}
 static int parse_section_header(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {
 	if (buflen < sizeof(struct opal_v6_hdr)) {
@@ -854,7 +870,8 @@ int parse_opal_event(char *buf, int buflen)
 			parse_ep_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "IE", 2) == 0) {
 			parse_ie_scn(&hdr, buf, buflen);
-		} else if (strncmp(hdr.id, "MI", 2) == 0) { // FIXME
+		} else if (strncmp(hdr.id, "MI", 2) == 0) {
+			parse_mi_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "CH", 2) == 0) {
 			parse_ch_scn(&hdr, buf, buflen);
 		} else if (strncmp(hdr.id, "UD", 2) == 0) {

@@ -466,3 +466,12 @@ int print_ei_scn(struct opal_ei_scn *ei)
 
 	return 0;
 }
+
+int print_ed_scn(struct opal_ed_scn *ed)
+{
+	print_header("Extended User Defined Data");
+	print_opal_v6_hdr(ed->v6hdr);
+	print_line("Created by", "%s", get_creator_name(ed->creator_id));
+	print_hex(ed->user_data, ed->v6hdr.length - 12);
+	return 0;
+}

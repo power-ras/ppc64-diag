@@ -798,6 +798,7 @@ static int parse_ed_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	ed->creator_id = edbuf->creator_id;
 	memcpy(ed->user_data, edbuf->user_data, hdr->length - 12);
 
+	print_ed_scn(ed);
 	return 0;
 }
 

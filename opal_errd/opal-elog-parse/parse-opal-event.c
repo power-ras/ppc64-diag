@@ -722,6 +722,7 @@ static int parse_ie_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 		ie.data.max = be64toh(iebuf->data.max);
 	}
 
+	print_ie_scn(&ie);
 	return 0;
 }
 

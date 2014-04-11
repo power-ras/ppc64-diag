@@ -14,6 +14,9 @@ struct generic_desc{
 #define MAX_FRU_ID_COMPONENT sizeof(fru_id_scn_component)/sizeof(struct generic_desc)
 #define MAX_EP_EVENT sizeof(ep_event)/sizeof(struct generic_desc)
 #define MAX_LR_RES sizeof(lr_res)/sizeof(struct generic_desc)
+#define MAX_IE_TYPE sizeof(ie_type)/sizeof(struct generic_desc)
+#define MAX_IE_SCOPE sizeof(ie_scope)/sizeof(struct generic_desc)
+#define MAX_IE_SUBTYPE sizeof(ie_subtype)/sizeof(struct generic_desc)
 
 #define EVENT_TYPE \
    {0x01, "Miscellaneous, informational only."},\
@@ -207,6 +210,26 @@ struct generic_desc{
 	{0x40, "Memory Page"}, \
 	{0x41, "Memory LMB"}
 
+#define IE_TYPE \
+	{0x01, "Error Detected"}, \
+	{0x02, "Error Recovered"}, \
+	{0x03, "Event"}, \
+	{0x04, "RPC Pass Through"}
+
+#define IE_SCOPE \
+	{0x00, "Not Applicable"}, \
+	{0x36, "RIO Hub"}, \
+	{0x37, "RIO Bridge"}, \
+	{0x38, "PHB"}, \
+	{0x39, "EADS global"}, \
+	{0x3A, "Slot"}
+
+#define IE_SUBTYPE \
+	{0x01, "Rebalance request"}, \
+	{0x03, "Node online"}, \
+	{0x04, "Node offline"}, \
+	{0x05, "Change platform max size"}
+
 struct generic_desc usr_hdr_event_type[] =  {
 	   EVENT_TYPE
 };
@@ -241,6 +264,18 @@ struct generic_desc ep_event[] = {
 
 struct generic_desc lr_res[] = {
 	LR_RES
+};
+
+struct generic_desc ie_type[] = {
+	IE_TYPE
+};
+
+struct generic_desc ie_scope[] = {
+	IE_SCOPE
+};
+
+struct generic_desc ie_subtype[] = {
+	IE_SUBTYPE
 };
 
 int get_field_desc(struct generic_desc *data, uint8_t size, uint8_t id, uint8_t default_id)
@@ -325,5 +360,29 @@ const char *get_lr_res_desc(uint8_t id)
 	int to_print = get_field_desc(lr_res, MAX_LR_RES, id, id);
 	if (to_print != -1)
 		return lr_res[to_print].desc;
+	return "Unknown";
+}
+
+const char *get_ie_type_desc(uint8_t id)
+{
+	int to_print = get_field_desc(ie_type, MAX_IE_TYPE, id, id);
+	if (to_print != -1)
+		return ie_type[to_print].desc;
+	return "Unknown";
+}
+
+const char *get_ie_scope_desc(uint8_t id)
+{
+	int to_print = get_field_desc(ie_scope, MAX_IE_SCOPE, id, id);
+	if (to_print != -1)
+		return ie_type[to_print].desc;
+	return "Unknown";
+}
+
+const char *get_ie_subtype_desc(uint8_t id)
+{
+	int to_print = get_field_desc(ie_scope, MAX_IE_SUBTYPE, id, id);
+	if (to_print != -1)
+		return ie_type[to_print].desc;
 	return "Unknown";
 }

@@ -660,9 +660,8 @@ static int parse_lp_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	int i;
 	for(i = 0; i < lp->lp_count; i++)
 		lps[i] = be16toh(lpsbuf[i]);
-	/* TODO print this
-	 *print_lp_scn(lp);
-	 */
+
+	print_lp_scn(lp);
 	return 0;
 }
 static int parse_section_header(struct opal_v6_hdr *hdr, const char *buf, int buflen)

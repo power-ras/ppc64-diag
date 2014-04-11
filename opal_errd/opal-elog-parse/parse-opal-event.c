@@ -828,6 +828,7 @@ static int parse_dh_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 		memcpy(dh.shared.dump_str, dhbuf->shared.dump_str, dh.length_dump_os);
 	}
 
+	print_dh_scn(&dh);
 	return 0;
 }
 

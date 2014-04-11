@@ -17,6 +17,7 @@ struct generic_desc{
 #define MAX_IE_TYPE sizeof(ie_type)/sizeof(struct generic_desc)
 #define MAX_IE_SCOPE sizeof(ie_scope)/sizeof(struct generic_desc)
 #define MAX_IE_SUBTYPE sizeof(ie_subtype)/sizeof(struct generic_desc)
+#define MAX_DH_TYPE sizeof(dh_type)/sizeof(struct generic_desc)
 
 #define EVENT_TYPE \
    {0x01, "Miscellaneous, informational only."},\
@@ -230,6 +231,15 @@ struct generic_desc{
 	{0x04, "Node offline"}, \
 	{0x05, "Change platform max size"}
 
+#define DH_TYPE \
+	{0x01, "FSP Dump"}, \
+	{0x02, "Platform System Dump"}, \
+	{0x03, "Shared Memory Adapter Dump"}, \
+	{0x04, "Power Subsystem Dump"}, \
+	{0x05, "Platform Event Log Entry Dump"}, \
+	{0x06, "Partition Initiated Resource Dump"}, \
+	{0x07, "System Firmware Dump"},
+
 struct generic_desc usr_hdr_event_type[] =  {
 	   EVENT_TYPE
 };
@@ -276,6 +286,10 @@ struct generic_desc ie_scope[] = {
 
 struct generic_desc ie_subtype[] = {
 	IE_SUBTYPE
+};
+
+struct generic_desc dh_type[] = {
+	DH_TYPE
 };
 
 int get_field_desc(struct generic_desc *data, uint8_t size, uint8_t id, uint8_t default_id)
@@ -375,14 +389,22 @@ const char *get_ie_scope_desc(uint8_t id)
 {
 	int to_print = get_field_desc(ie_scope, MAX_IE_SCOPE, id, id);
 	if (to_print != -1)
-		return ie_type[to_print].desc;
+		return ie_scope[to_print].desc;
 	return "Unknown";
 }
 
 const char *get_ie_subtype_desc(uint8_t id)
 {
-	int to_print = get_field_desc(ie_scope, MAX_IE_SUBTYPE, id, id);
+	int to_print = get_field_desc(ie_subtype, MAX_IE_SUBTYPE, id, id);
 	if (to_print != -1)
-		return ie_type[to_print].desc;
+		return ie_subtype[to_print].desc;
+	return "Unknown";
+}
+
+const char *get_dh_type_desc(uint8_t id)
+{
+	int to_print = get_field_desc(dh_type, MAX_DH_TYPE, id, id);
+	if (to_print != -1)
+		return dh_type[to_print].desc;
 	return "Unknown";
 }

@@ -430,3 +430,39 @@ int print_mi_scn(struct opal_mi_scn *mi) {
 
 	return 0;
 }
+
+int print_ei_env_scn(struct opal_ei_env_scn *ei_env)
+{
+	print_line("Avg Norm corrosion", "0x%08x", ei_env->corrosion);
+	print_line("Avg Norm temp", "0x%04x", ei_env->temperature);
+	print_line("Corrosion rate", "0x%04x", ei_env->rate);
+
+	return 0;
+}
+
+int print_ei_scn(struct opal_ei_scn *ei)
+{
+	print_header("Environmental Information");
+	print_opal_v6_hdr(ei->v6hdr);
+	print_center("Genesis Readings");
+	print_line("Timetamp", "0x%016lx", ei->g_timestamp);
+	print_ei_env_scn(&(ei->genesis));
+
+	print_center(" ");
+	if (ei->status == CORROSION_RATE_NORM)
+		print_line("Corrosion Rate Status", "Normal");
+	else if (ei->status == CORROSION_RATE_ABOVE)
+		print_line("Corrosion Rate Status", "Above Normal");
+	else
+		print_line("Corrosion Rate Status", "Unknown");
+
+	print_line("User Data Section", "%s",
+			ei->user_data_scn ? "Present" : "Absent");
+
+	print_line("Sensor Reading Count", "0x%04x", ei->read_count);
+	int i;
+	for(i = 0; i < ei->read_count; i++)
+		print_ei_env_scn(ei->readings + i);
+
+	return 0;
+}

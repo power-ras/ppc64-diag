@@ -278,6 +278,8 @@ struct opal_ei_scn {
 	struct opal_v6_hdr v6hdr;
 	uint64_t g_timestamp;
 	struct opal_ei_env_scn genesis;
+#define CORROSION_RATE_NORM 0x00
+#define CORROSION_RATE_ABOVE 0x01
 	uint8_t status;
 	uint8_t user_data_scn;
 	uint16_t read_count;

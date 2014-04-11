@@ -780,6 +780,7 @@ static int parse_ei_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 		ei->readings[i].rate = be16toh(eibuf->readings[i].rate);
 	}
 
+	print_ei_scn(ei);
 	return 0;
 }
 

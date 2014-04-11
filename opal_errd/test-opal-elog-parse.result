@@ -115,7 +115,8 @@ ERROR parse_opal_event: Truncated error log, expected section EH not found
 | Event Scope              : Single platform                                   |
 | Event Severity           : Informational Event                               |
 | Event Type               : Miscellaneous, informational only.                |
-| Action Flags             : Report to Operating System                        |
+| Action Flags             : Healthy System Event                              |
+|                          : No Service Action Required                        |
 |------------------------------------------------------------------------------|
 |                        Primary System Reference Code                         |
 |------------------------------------------------------------------------------|

@@ -18,32 +18,38 @@ int print_usr_hdr_action(struct opal_usr_hdr_scn *usrhdr)
 {
    char *entry = "Action Flags";
 
-   if (usrhdr->action & OPAL_UH_ACTION_REPORT_EXTERNALLY) {
-      if (usrhdr->action & OPAL_UH_ACTION_HMC_ONLY)
-         print_line(entry,"Report to HMC");
-      else
-         print_line(entry, "Report to Operating System");
-      entry = "";
-   }
+	if (!(usrhdr->action & OPAL_UH_ACTION_HEALTH)) {
+		if (usrhdr->action & OPAL_UH_ACTION_REPORT_EXTERNALLY) {
+			if (usrhdr->action & OPAL_UH_ACTION_HMC_ONLY)
+				print_line(entry,"Report to Hypervisor");
+			else
+				print_line(entry, "Report to Operating System");
+				entry = "";
+		}
 
-   if (usrhdr->action & OPAL_UH_ACTION_SERVICE) {
-      print_line(entry, "Service Action Required");
-      if (usrhdr->action & OPAL_UH_ACTION_CALL_HOME)
-         print_line("","HMC Call Home");
-      if(usrhdr->action & OPAL_UH_ACTION_TERMINATION)
-         print_line("","Termination Error");
-      entry = "";
-   }
+		if (usrhdr->action & OPAL_UH_ACTION_SERVICE) {
+			print_line(entry, "Service Action Required");
+			if (usrhdr->action & OPAL_UH_ACTION_CALL_HOME)
+				print_line("","Call Home");
+			if(usrhdr->action & OPAL_UH_ACTION_TERMINATION)
+				print_line("","Termination Error");
+			entry = "";
+		}
 
-   if (usrhdr->action & OPAL_UH_ACTION_ISO_INCOMPLETE) {
-      print_line(entry, "Error isolation incomplete");
-      print_line("","Further analysis required");
-      entry = "";
-   }
+		if (usrhdr->action & OPAL_UH_ACTION_ISO_INCOMPLETE) {
+			print_line(entry, "Error isolation incomplete");
+			print_line("","Further analysis required");
+			entry = "";
+		}
+	} else {
+		print_line(entry, "Healthy System Event");
+		print_line("", "No Service Action Required");
+		entry = "";
+	}
 
-   if(entry[0] != '\0') {
-      print_line(entry, "Unknown action flag (0x%08x)", usrhdr->action);
-   }
+	if (entry[0] != '\0') {
+		print_line(entry, "Unknown action flag (0x%08x)", usrhdr->action);
+	}
 
    return 0;
 }
@@ -324,7 +330,7 @@ int print_ud_scn(struct opal_ud_scn *ud)
 
 int print_hm_scn(struct opal_hm_scn *hm)
 {
-	print_header("HMC ID");
+	print_header("Hypervisor ID");
 
 	print_opal_v6_hdr(hm->v6hdr);
 	print_mt_data(hm->mt);

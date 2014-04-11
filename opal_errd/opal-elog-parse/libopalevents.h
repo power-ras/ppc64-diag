@@ -301,7 +301,7 @@ struct opal_usr_hdr_scn {
 	uint8_t     problem_vector;
 	uint16_t    action;          /**< erro action code */
 #define OPAL_UH_ACTION_SERVICE           0x8000
-#define OPAL_UH_ACTION_HIDDEN            0x4000
+#define OPAL_UH_ACTION_HEALTH            0x4000
 #define OPAL_UH_ACTION_REPORT_EXTERNALLY 0x2000
 #define OPAL_UH_ACTION_HMC_ONLY          0x1000
 #define OPAL_UH_ACTION_CALL_HOME         0x0800

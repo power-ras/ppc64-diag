@@ -59,7 +59,7 @@ struct generic_desc{
    {0x76, "Symptom diagnosis error"}
 
 #define CREATORS \
-   {'C', "HMC"}, \
+   {'C', "Hypervisor"}, \
    {'E', "Service Processor"}, \
    {'H', "PHYP"}, \
    {'W', "Power Control"}, \
@@ -126,7 +126,7 @@ struct generic_desc{
    {0x63, "Fan, air moving devices"}, \
    {0x64, "DPSS"}, \
    {0x70, "Others"}, \
-   {0x71, "HMC subsystem & hardware (excluding code)"}, \
+   {0x71, "Hypervisor subsystem & hardware (excluding code)"}, \
    {0x72, "Test tool"}, \
    {0x73, "Removable media"}, \
    {0x74, "Multiple subsystems"}, \
@@ -136,10 +136,10 @@ struct generic_desc{
    {0x78, "CMM B"}, \
    {0x7a, "Connection Monitoring - Hypervisor lost communication with service processor"}, \
    {0x7b, "Connection Monitoring - Service processor lost communication with hypervisor"}, \
-   {0x7c, "Connection Monitoring - Service processor lost communcation with HMC"}, \
-   {0x7e, "Connection Monitoring - HMC lost communication with logical partition"}, \
-   {0x7e, "Connection Monitoring - HMC lost communication with BPA"}, \
-   {0x7f, "Connection Monitoring - HMC lost communication with another HMC"}, \
+   {0x7c, "Connection Monitoring - Service processor lost communcation with hypervisor"}, \
+   {0x7e, "Connection Monitoring - Hypervisor lost communication with logical partition"}, \
+   {0x7e, "Connection Monitoring - Hypervisor lost communication with BPA"}, \
+   {0x7f, "Connection Monitoring - Hypervisor lost communication with another hypervisor"}, \
    {0x80, "Platform firmware"}, \
    {0x81, "Service processor firmware"}, \
    {0x82, "Hypervisor firmware"}, \
@@ -147,7 +147,7 @@ struct generic_desc{
    {0x84, "SLIC firmware"}, \
    {0x85, "SPCN firmware"}, \
    {0x86, "Bulk power formware side A"}, \
-   {0x87, "HMC code/firmware"}, \
+   {0x87, "Hypervisor code/firmware"}, \
    {0x88, "Bulk power firmware side B"}, \
    {0x89, "Virtual service processor firmware (VSP)"}, \
    {0x8a, "Hostboot"}, \

@@ -422,3 +422,11 @@ int print_ie_scn(struct opal_ie_scn *ie)
 
 	return 0;
 }
+
+int print_mi_scn(struct opal_mi_scn *mi) {
+	print_header("Manufacturing Information");
+	print_opal_v6_hdr(mi->v6hdr);
+	print_line("Policy Flags", "0x%08x", mi->flags);
+
+	return 0;
+}

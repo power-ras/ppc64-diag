@@ -740,6 +740,7 @@ static int parse_mi_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	mi.v6hdr = *hdr;
 	mi.flags = be32toh(mibuf->flags);
 
+	print_mi_scn(&mi);
 	return 0;
 }
 static int parse_section_header(struct opal_v6_hdr *hdr, const char *buf, int buflen)

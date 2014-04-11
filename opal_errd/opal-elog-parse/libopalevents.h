@@ -229,6 +229,10 @@ struct opal_lp_scn {
 
 struct opal_lr_scn {
 	struct opal_v6_hdr v6hdr;
+#define LR_RES_TYPE_PROC 0x10
+#define LR_RES_TYPE_SHARED_PROC 0x11
+#define LR_RES_TYPE_MEMORY_PAGE 0x40
+#define LR_RES_TYPE_MEMORY_LMB 0x41
 	uint8_t res_type;
 	uint8_t reserved;
 	uint16_t capacity;

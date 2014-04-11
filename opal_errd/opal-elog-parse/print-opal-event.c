@@ -402,3 +402,22 @@ int print_lp_scn(struct opal_lp_scn *lp)
 
 	return 0;
 }
+
+int print_lr_scn(struct opal_lr_scn *lr)
+{
+	print_header("Logical Resource");
+	print_opal_v6_hdr(lr->v6hdr);
+	print_line("Resource Type", "%s", get_lr_res_desc(lr->res_type));
+	if (lr->res_type & LR_RES_TYPE_SHARED_PROC)
+		print_line("Entitled Capacity", "0x%04x", lr->capacity);
+	if (lr->res_type & LR_RES_TYPE_PROC)
+		print_line("Logical CPU ID", "0x%08x", lr->shared);
+	if (lr->res_type & LR_RES_TYPE_MEMORY_LMB)
+		print_line("DRC Index", "0x%08x", lr->shared);
+	if (lr->res_type & LR_RES_TYPE_MEMORY_PAGE) {
+		print_line("Memory Logical Address  0-31", "0x%08x", lr->shared);
+		print_line("Memory Logical Address 32-63", "0x%08x", lr->memory_addr);
+	}
+
+	return 0;
+}

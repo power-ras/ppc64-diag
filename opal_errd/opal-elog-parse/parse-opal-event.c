@@ -682,6 +682,7 @@ static int parse_lr_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	lr.shared = be32toh(lrbuf->shared);
 	lr.memory_addr = be32toh(lrbuf->memory_addr);
 
+	print_lr_scn(&lr);
 	return 0;
 }
 

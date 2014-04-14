@@ -41,6 +41,7 @@ char *opt_sysfs = DEFAULT_SYSFS_PATH;
 char *opt_output = DEFAULT_OUTPUT_DIR;
 int opt_daemon = 1;
 int opt_watch = 1;
+char *opt_max_dump;
 
 char *opt_extract_opal_dump_cmd = DEFAULT_EXTRACT_DUMP_CMD;
 
@@ -168,6 +169,8 @@ static int parse_log(char *buffer, size_t bufsz)
 static void check_platform_dump(void)
 {
 	int rc;
+	int length = PATH_MAX + strlen(opt_extract_opal_dump_cmd);
+	char dump_cmd[length];
 	struct stat sbuf;
 
 	if (stat(opt_extract_opal_dump_cmd, &sbuf) < 0) {
@@ -176,10 +179,23 @@ static void check_platform_dump(void)
 		return;
 	}
 
-	rc = system(opt_extract_opal_dump_cmd);
+	rc = snprintf(dump_cmd, length, "%s -s %s",
+		 opt_extract_opal_dump_cmd, opt_sysfs);
+
+	if (opt_max_dump)	/* Append -m flag */
+		rc += snprintf(dump_cmd + rc, length - rc,
+			       " -m %s", opt_max_dump);
+
+	if (rc >= length) {
+		syslog(LOG_NOTICE, "Failed to execute platform dump extractor"
+		       " (%s) as command options were truncated.\n", dump_cmd);
+		return;
+	}
+
+	rc = system(dump_cmd);
 	if (rc) {
 		syslog(LOG_NOTICE, "Failed to execute platform dump "
-		       "extractor (%s).\n", opt_extract_opal_dump_cmd);
+		       "extractor (%s).\n", dump_cmd);
 		return;
 	}
 }
@@ -385,6 +401,8 @@ static void help(const char* argv0)
 		DEFAULT_SYSFS_PATH);
 	fprintf(stderr, "-D      - don't daemonize, just run once.\n");
 	fprintf(stderr, "-w      - watch for new events (default when daemon)\n");
+	fprintf(stderr, "-m max  - maximum number of dumps of a specific type"
+			" to be saved\n");
 	fprintf(stderr, "-h      - help (this message)\n");
 }
 
@@ -401,7 +419,7 @@ int main(int argc, char *argv[])
 	int r;
 	int log_options;
 
-	while ((opt = getopt(argc, argv, "De:ho:s:w")) != -1) {
+	while ((opt = getopt(argc, argv, "De:ho:s:m:w")) != -1) {
 		switch (opt) {
 		case 'D':
 			opt_daemon = 0;
@@ -419,6 +437,9 @@ int main(int argc, char *argv[])
 			break;
 		case 's':
 			opt_sysfs = optarg;
+			break;
+		case 'm':
+			opt_max_dump = optarg;
 			break;
 		case 'h':
 			help(argv[0]);

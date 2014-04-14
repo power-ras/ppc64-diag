@@ -206,7 +206,11 @@ static int ack_elog(const char *elog_path)
 	int fd;
 	int rc;
 
-	snprintf(ack_file, sizeof(ack_file), "%s/acknowledge", elog_path);
+	rc = snprintf(ack_file, sizeof(ack_file), "%s/acknowledge", elog_path);
+	if (rc >= PATH_MAX) {
+		syslog(LOG_ERR, "Path to elog ack file is too big\n");
+		return -1;
+	}
 
 	fd = open(ack_file, O_WRONLY);
 
@@ -248,7 +252,12 @@ static int process_elog(const char *elog_path)
 	char *opt_output_dir = strdup(opt_output);
         char opt_output_file[PATH_MAX];
 
-	snprintf(elog_raw_path, sizeof(elog_raw_path), "%s/raw", elog_path);
+	rc = snprintf(elog_raw_path, sizeof(elog_raw_path),
+		      "%s/raw", elog_path);
+	if (rc >= PATH_MAX) {
+		syslog(LOG_ERR, "Path to elog file is too big\n");
+		return -1;
+	}
 
 	if (stat(elog_raw_path, &sbuf) == -1)
 		return -1;
@@ -278,14 +287,17 @@ static int process_elog(const char *elog_path)
 		sz += readsz;
 	} while(sz != bufsz);
 
+	/* Parse elog filename */
+	name = basename(dirname(elog_raw_path));
+	rc = snprintf(opt_output_file, sizeof(opt_output_file), "%s/%d-%s",
+		      opt_output,(int)time(NULL),name);
+	if (rc >= PATH_MAX) {
+		syslog(LOG_ERR, "Path to elog output file is too big\n");
+		return -1;
+	}
 
-        /* Parse elog filename */
-        name = basename(dirname(elog_raw_path));
-        snprintf(opt_output_file, sizeof(opt_output_file), "%s/%d-%s",
-                 opt_output,(int)time(NULL),name);
-
-        out_fd = open(opt_output_file, O_WRONLY  | O_CREAT,
-                      S_IRUSR | S_IWUSR | S_IRGRP);
+	out_fd = open(opt_output_file, O_WRONLY  | O_CREAT,
+			S_IRUSR | S_IWUSR | S_IRGRP);
 
 	if (out_fd == -1) {
 		syslog(LOG_ERR, "Failed to create elog output file: %s (%d:%s)\n",
@@ -457,9 +469,12 @@ int main(int argc, char *argv[])
 		log_options |= LOG_PERROR;
 	openlog("ELOG", log_options, LOG_LOCAL1);
 
-
-	snprintf(sysfs_path, sizeof(sysfs_path), "%s/firmware/opal/elog",
-		 opt_sysfs);
+	/* Use PATH_MAX but admit that it may be insufficient */
+	rc = snprintf(sysfs_path, PATH_MAX, "%s/firmware/opal/elog", opt_sysfs);
+	if (rc >= PATH_MAX) {
+		syslog(LOG_ERR, "sysfs_path for elogs too big\n");
+		exit(EXIT_FAILURE);
+	}
 
 	rc = stat(sysfs_path, &s);
 	if (rc != 0) {

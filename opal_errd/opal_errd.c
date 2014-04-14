@@ -176,6 +176,11 @@ static void check_platform_dump(void)
 
 	rc = snprintf(dump_cmd, length, "%s -s %s",
 		 opt_extract_opal_dump_cmd, opt_sysfs);
+	if (rc >= length) {
+		syslog(LOG_NOTICE, "Failed to execute platform dump extractor"
+		       " (%s) as command options were truncated.\n", dump_cmd);
+		return;
+	}
 
 	if (opt_max_dump)	/* Append -m flag */
 		rc += snprintf(dump_cmd + rc, length - rc,

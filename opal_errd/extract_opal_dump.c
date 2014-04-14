@@ -96,6 +96,32 @@ static void ack_dump(const char* dump_dir_path)
 	close(fd);
 }
 
+/**
+ * Check for duplicate file
+ */
+static void check_dup_dump_file(char *dumpname)
+{
+	struct stat sbuf;
+	char dump_path[PATH_MAX];
+	int rc;
+
+	rc = snprintf(dump_path, PATH_MAX, "%s/%s", opt_output_dir, dumpname);
+	if (rc >= PATH_MAX) {
+		syslog(LOG_NOTICE, "Path to dump file (%s) is too big",
+		       dumpname);
+		return;
+	}
+
+	if (stat(dump_path, &sbuf) == -1)
+		return;
+
+	if (unlink(dump_path) < 0)
+		syslog(LOG_NOTICE, "Could not delete file \"%s\" "
+		       "(%s) to make room for incoming platform dump."
+		       " The new dump will be saved anyways.\n",
+		       dump_path, strerror(errno));
+}
+
 static int timesort(const struct dirent **file1, const struct dirent **file2)
 {
 	struct stat sbuf1, sbuf2;
@@ -120,7 +146,6 @@ static int timesort(const struct dirent **file1, const struct dirent **file2)
 	return (sbuf2.st_mtime - sbuf1.st_mtime);
 }
 
-
 /**
  * remove_dump_files
  * @brief if needed, remove any old dump files
@@ -138,6 +163,8 @@ static void remove_dump_files(char *dumpname)
 	int i;
 	int n;
 	int count = 0;
+
+	check_dup_dump_file(dumpname);
 
 	n = scandir(opt_output_dir, &namelist, NULL, timesort);
 	if (n < 0)

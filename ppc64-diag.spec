@@ -1,6 +1,6 @@
 Name:	ppc64-diag
-Version:	2.6.5
-Release:	0
+Version:	2.6.6
+Release:	1
 Summary: 	PowerLinux Platform Diagnostics
 Group: 		System Environment/Base
 License: 	Eclipse Public License (EPL) v1.0
@@ -91,6 +91,11 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Tue Apr 15 2014 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.6.6
+- Log rotator for opal_errd
+- Dump retention policy for extract_opal_dump
+- Couple of fixes in opal_errd and opal-elog-parse file
+
 * Wed Apr 02 2014 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.6.5
 - Fixed number of issues in opal_errd and opal-elog-parse code
 - Bashism fix

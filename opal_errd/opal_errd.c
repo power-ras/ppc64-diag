@@ -37,8 +37,18 @@
 #define DEFAULT_OUTPUT_DIR              "/var/log/opal-elog"
 #define DEFAULT_EXTRACT_DUMP_CMD	"/usr/sbin/extract_opal_dump"
 
+/**
+ * ELOG retention policy
+ *
+ * Retain logs upto 30 days with max 1000 logs.
+ */
+#define DEFAULT_MAX_ELOGS               1000
+#define DEFAULT_MAX_DAYS                30
+
 char *opt_sysfs = DEFAULT_SYSFS_PATH;
 char *opt_output = DEFAULT_OUTPUT_DIR;
+int opt_max_logs = DEFAULT_MAX_ELOGS;
+int opt_max_age = DEFAULT_MAX_DAYS;
 int opt_daemon = 1;
 int opt_watch = 1;
 char *opt_max_dump;
@@ -94,6 +104,82 @@ static const char *get_severity_desc(uint8_t severity)
 		return "Informational Event";
 
 	return "UNKNOWN";
+}
+
+/* may move this into header to avoid code duplication */
+static int file_filter(const struct dirent *d)
+{
+        struct stat sbuf;
+
+        if (d->d_type == DT_DIR)
+           return 0;
+        if (d->d_type == DT_REG)
+           return 1;
+        if (stat(d->d_name,&sbuf))
+           return 0;
+        if (S_ISDIR(sbuf.st_mode))
+           return 0;
+        if (d->d_type == DT_UNKNOWN)
+           return 1;
+
+        return 0;
+}
+
+static int rotate_logs(const char *elog_dir, int max_logs, int max_age)
+{
+        int i;
+        int nfiles;
+        int ret = 0;
+        int prune = 0;
+        int del;
+        struct dirent **filelist;
+        char *elog_name;
+        char *elog_date;
+        int max = max_age * 24 * 60 * 60;
+        int now = (int) time(NULL);
+
+        /* Retrieve file list */
+        chdir(elog_dir);
+        nfiles = scandir(elog_dir, &filelist, file_filter, alphasort);
+        if (nfiles < 0)
+            return -1;
+
+        /* Check number of files */
+        if (nfiles > max_logs)
+            prune = 1;
+
+	for (i = 0; i < nfiles; i++) {
+		del = 0;
+		elog_name = strdup(filelist[i]->d_name);
+		if (!elog_name) {
+			syslog(LOG_NOTICE, "Failed to allocate memory\n");
+			free(filelist[i]);
+			continue;
+		}
+
+		/* Names are ordered 'oldest first' from scandir */
+		if(prune && i < (nfiles - max_logs))
+			del = 1;
+
+		/* Extract date from filename */
+		elog_date = strtok(elog_name, "-");
+		int date = strtol(elog_date, NULL, 10);
+		if(now - date > max)
+			del = 1;
+
+		if(del) {
+			ret = remove(filelist[i]->d_name);
+			if(ret)
+				syslog(LOG_NOTICE, "Error removing %s\n",
+				       filelist[i]->d_name);
+		}
+
+		free(filelist[i]);
+		free(elog_name);
+        }
+        free(filelist);
+
+        return ret;
 }
 
 /* Parse required fields from error log */
@@ -539,6 +625,7 @@ int main(int argc, char *argv[])
 	/* Read error/event log until we get termination signal */
 	while (!terminate) {
 		find_and_read_elog_events(elog_path);
+		rotate_logs(opt_output, opt_max_logs, opt_max_age);
 
 		check_platform_dump();
 

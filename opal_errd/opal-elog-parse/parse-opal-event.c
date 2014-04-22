@@ -496,9 +496,18 @@ static int parse_ch_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 		return -EINVAL;
 	}
 
+	if (hdr->length - sizeof(struct opal_v6_hdr) > OPAL_CH_COMMENT_MAX_LEN) {
+		fprintf(stderr, "%s: corrupted, call home comment is longer than %u,"
+			  " got %lu\n", __func__, OPAL_CH_COMMENT_MAX_LEN,
+			  hdr->length - sizeof(struct opal_v6_hdr));
+		return -EINVAL;
+	}
+
 	ch->v6hdr = *hdr;
 
-	strncpy(ch->comment, bufch->comment, OPAL_CH_COMMENT_MAX_LEN);
+	strncpy(ch->comment, bufch->comment, hdr->length - sizeof(struct opal_v6_hdr));
+	/* Make sure there is a null byte at the end */
+	ch->comment[hdr->length - sizeof(struct opal_v6_hdr)] = '\0';
 
 	print_ch_scn(ch);
 	return 0;

@@ -130,8 +130,8 @@ static int rotate_logs(const char *elog_dir, int max_logs, int max_age)
         int i;
         int nfiles;
         int ret = 0;
-        int prune = 0;
-        int del;
+        int old = 1;
+        int trim = 1;
         struct dirent **filelist;
         char *elog_name;
         char *elog_date;
@@ -144,12 +144,12 @@ static int rotate_logs(const char *elog_dir, int max_logs, int max_age)
         if (nfiles < 0)
             return -1;
 
-        /* Check number of files */
-        if (nfiles > max_logs)
-            prune = 1;
-
 	for (i = 0; i < nfiles; i++) {
-		del = 0;
+		if(!old && !trim){
+		    free(filelist[i]);
+		    continue;
+		}
+
 		elog_name = strdup(filelist[i]->d_name);
 		if (!elog_name) {
 			syslog(LOG_NOTICE, "Failed to allocate memory\n");
@@ -158,16 +158,29 @@ static int rotate_logs(const char *elog_dir, int max_logs, int max_age)
 		}
 
 		/* Names are ordered 'oldest first' from scandir */
-		if(prune && i < (nfiles - max_logs))
-			del = 1;
+		if(i >= (nfiles - max_logs))
+			trim = 0;
 
 		/* Extract date from filename */
 		elog_date = strtok(elog_name, "-");
-		int date = strtol(elog_date, NULL, 10);
-		if(now - date > max)
-			del = 1;
+		if(!elog_date){
+		    syslog(LOG_NOTICE, "Failed to read file\n");
+		    free(filelist[i]);
+		    continue;
+		}
 
-		if(del) {
+		errno = 0;
+		int date = strtol(elog_date, NULL, 10);
+		if(errno || !date){
+		    syslog(LOG_NOTICE, "Failed to parse file date\n");
+		    free(elog_name);
+		    free(filelist[i]);
+		    continue;
+		}
+		if(now - date < max)
+			old = 0;
+
+		if(old || trim) {
 			ret = remove(filelist[i]->d_name);
 			if(ret)
 				syslog(LOG_NOTICE, "Error removing %s\n",

@@ -7,6 +7,7 @@ include ../rules.mk
 CMDS = opal_errd extract_opal_dump
 
 OPAL_ERRD_OBJS = opal_errd.o
+OPAL_ERRD_LIBS = -ludev
 OPAL_DUMP_OBJS = extract_opal_dump.o
 
 SUBDIRS = opal-elog-parse

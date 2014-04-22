@@ -24,7 +24,7 @@
 #include <signal.h>
 #include <sys/stat.h>
 #include <limits.h>
-#include <sys/types.h>
+#include <poll.h>
 #include <dirent.h>
 #include <libgen.h>
 #include <sys/inotify.h>
@@ -32,11 +32,21 @@
 #include <endian.h>
 #include <inttypes.h>
 #include <time.h>
+#include <libudev.h>
+
+#define INOTIFY_FD	0
+#define UDEV_FD		1
+#define POLL_TIMEOUT	1000 /* In milliseconds */
 
 #define DEFAULT_SYSFS_PATH		"/sys"
 #define DEFAULT_OUTPUT_DIR              "/var/log/opal-elog"
 #define DEFAULT_EXTRACT_DUMP_CMD	"/usr/sbin/extract_opal_dump"
 
+/**
+ * Length of elog ID string (including the null)
+ * eg: 0x12345678
+ */
+#define ELOG_STR_SIZE	11
 /**
  * ELOG retention policy
  *
@@ -522,12 +532,16 @@ int main(int argc, char *argv[])
 	char sysfs_path[PATH_MAX];
 	char elog_path[PATH_MAX];
 	struct stat s;
-	int inotifyfd;
 	char inotifybuf[sizeof(struct inotify_event) + NAME_MAX + 1];
-	fd_set fds;
-	struct timeval tv;
 	int r;
 	int log_options;
+	struct udev *udev = NULL;
+	struct udev_monitor *udev_mon = NULL;
+	struct udev_device *udev_dev = NULL;
+	struct pollfd fds[2];
+	fds[INOTIFY_FD].fd = -1;
+	const char *devpath;
+	char elog_str_name[ELOG_STR_SIZE];
 
 	while ((opt = getopt(argc, argv, "De:ho:s:m:w")) != -1) {
 		switch (opt) {
@@ -607,34 +621,65 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	inotifyfd = inotify_init();
-	if (inotifyfd == -1) {
+	fds[INOTIFY_FD].fd = inotify_init();
+	if (fds[INOTIFY_FD].fd == -1) {
 		syslog(LOG_ERR, "Error setting up inotify (%d:%s)\n",
 		       errno, strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-
-	rc = inotify_add_watch(inotifyfd, sysfs_path, IN_CREATE);
-	if (rc == -1) {
-		syslog(LOG_ERR, "Error adding inotify watch for %s (%d: %s)\n",
-		       sysfs_path, errno, strerror(errno));
-		close(inotifyfd);
 		closelog();
 		exit(EXIT_FAILURE);
 	}
 
+	rc = inotify_add_watch(fds[INOTIFY_FD].fd, sysfs_path, IN_CREATE);
+	if (rc == -1) {
+		syslog(LOG_ERR, "Error adding inotify watch for %s (%d: %s)\n",
+		       sysfs_path, errno, strerror(errno));
+		goto exit;
+	}
+
+
+	udev = udev_new();
+	if (!udev) {
+		syslog(LOG_ERR, "Error creating udev object");
+		goto exit;
+	}
+
+	udev_mon = udev_monitor_new_from_netlink(udev, "udev");
+	if (!udev_mon) {
+		syslog(LOG_ERR, "Error creating udev monitor object");
+		goto exit;
+	}
+
+	rc = udev_monitor_filter_add_match_subsystem_devtype(udev_mon, "dump", NULL);
+	if (rc < 0) {
+		syslog(LOG_ERR, "Error (%d) adding udev match to dump", rc);
+		goto exit;
+	}
+
+	rc = udev_monitor_filter_add_match_subsystem_devtype(udev_mon, "elog", NULL);
+	if (rc < 0) {
+		syslog(LOG_ERR, "Error (%d) adding udev match to elog", rc);
+		goto exit;
+	}
+
+	rc = udev_monitor_enable_receiving(udev_mon);
+	if (rc < 0) {
+		syslog(LOG_ERR, "Error (%d) enabling recieving on udev", rc);
+		goto exit;
+	}
+
+	fds[UDEV_FD].fd = udev_monitor_get_fd(udev_mon);
 	/* Convert the opal_errd process to a daemon. */
 	if (opt_daemon) {
 		rc = daemon(0, 0);
 		if (rc) {
 			syslog(LOG_NOTICE, "Cannot daemonize opal_errd, "
 			       "opal_errd cannot continue.\n");
-			closelog();
-			close(inotifyfd);
-			return rc;
+			goto exit;
 		}
 	}
 
+	fds[INOTIFY_FD].events = POLLIN;
+	fds[UDEV_FD].events = POLLIN;
 	/* Read error/event log until we get termination signal */
 	while (!terminate) {
 		find_and_read_elog_events(elog_path);
@@ -648,17 +693,30 @@ int main(int argc, char *argv[])
 			/* We don't care about the content of the inotify
 			 * event, we'll just scan the directory anyway
 			 */
-			FD_ZERO(&fds);
-			FD_SET(inotifyfd, &fds);
-			tv.tv_sec = 1;
-			tv.tv_usec = 0;
-			r = select(inotifyfd+1, &fds, NULL, NULL, &tv);
-			if (r > 0 && FD_ISSET(inotifyfd, &fds))
-				read(inotifyfd, inotifybuf, sizeof(inotifybuf));
+			r = poll(fds, sizeof(fds)/sizeof(struct pollfd), POLL_TIMEOUT);
+			if (r > 0 && fds[INOTIFY_FD].revents)
+				read(fds[INOTIFY_FD].fd, inotifybuf, sizeof(inotifybuf));
+			if (r > 0 && fds[UDEV_FD].revents) {
+				udev_dev = udev_monitor_receive_device(udev_mon);
+				devpath = udev_device_get_devpath(udev_dev);
+				if (devpath && strrchr(devpath, '/'))
+					strncpy(elog_str_name, strrchr(devpath, '/'), ELOG_STR_SIZE);
+				udev_device_unref(udev_dev);
+				/* The id of the elog should be in elog_str_name
+				 * Perhaps more can be done with the udev information
+				 */
+			}
 		}
 	}
 
-	close(inotifyfd);
+exit:
+	if (udev_mon)
+		udev_monitor_unref(udev_mon);
+	if (udev)
+		udev_unref(udev);
+	if (fds[INOTIFY_FD].fd >= 0)
+		close(fds[INOTIFY_FD].fd);
+
 	closelog();
 
 	return rc;

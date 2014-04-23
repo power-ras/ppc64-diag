@@ -89,6 +89,7 @@ struct opal_ep_scn {
 	uint32_t reason;
 } __packed;
 
+#define OPAL_SW_V2_SIZE (sizeof(struct opal_sw_v2_scn) + sizeof(struct opal_v6_hdr))
 struct opal_sw_v2_scn {
 	uint32_t rc;
 	uint16_t file_id;
@@ -96,6 +97,7 @@ struct opal_sw_v2_scn {
 	uint32_t object_id;
 } __packed;
 
+#define OPAL_SW_V1_SIZE (sizeof(struct opal_sw_v1_scn) + sizeof(struct opal_v6_hdr))
 struct opal_sw_v1_scn {
 	uint32_t rc;
 	uint32_t line_num;

@@ -466,13 +466,19 @@ static int parse_eh_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	memcpy(eh->mt.model, bufeh->mt.model, OPAL_SYS_MODEL_LEN);
 	memcpy(eh->mt.serial_no, bufeh->mt.serial_no, OPAL_SYS_SERIAL_LEN);
 
-	/* these are meant to be null terimnated strings, so should be safe */
-	strcpy(eh->opal_release_version, bufeh->opal_release_version);
-	strcpy(eh->opal_subsys_version, bufeh->opal_subsys_version);
+	strncpy(eh->opal_release_version, bufeh->opal_release_version, OPAL_VER_LEN);
+	strncpy(eh->opal_subsys_version, bufeh->opal_subsys_version, OPAL_VER_LEN);
 
 	eh->event_ref_datetime = parse_opal_datetime(bufeh->event_ref_datetime);
 
 	eh->opal_symid_len = bufeh->opal_symid_len;
+	/* Best to have strlen walk random memory rather than overflow eh->opalsymid */
+	if (hdr->length < sizeof(struct opal_eh_scn) + strlen(bufeh->opalsymid)) {
+		fprintf(stderr, "%s: corrupted EH section, opalsymid is larger than header"
+				" specified length %lu > %u", __func__,
+				sizeof(struct opal_eh_scn) + strlen(bufeh->opalsymid), hdr->length);
+		return -EINVAL;
+	}
 	strcpy(eh->opalsymid, bufeh->opalsymid);
 
 	print_eh_scn(eh);
@@ -531,7 +537,7 @@ static int parse_ud_scn(const struct opal_v6_hdr *hdr,
 		return -ENOMEM;
 
 	ud->v6hdr = *hdr;
-	memcpy(ud->data, bufud->data, hdr->length - 8);
+	memcpy(ud->data, bufud->data, hdr->length - sizeof(struct opal_v6_hdr));
 	print_ud_scn(ud);
 	return 0;
 }
@@ -588,35 +594,43 @@ static int parse_sw_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	struct opal_sw_scn *swbuf = (struct opal_sw_scn *)buf;
 
 	sw = (struct opal_sw_scn *)malloc(hdr->length);
-	sw->v6hdr = *hdr;
+	if(!sw)
+		return -ENOMEM;
+
 
 	if (hdr->version == 1) {
-		if (buflen < sizeof(struct opal_sw_v1_scn) + sizeof(struct opal_v6_hdr)) {
+		if (buflen < OPAL_SW_V1_SIZE || hdr->length < OPAL_SW_V1_SIZE) {
 			fprintf(stderr, "%s: corrupted, expected length => %lu, got %u\n",
-					__func__,
-					sizeof(struct opal_sw_v1_scn) + sizeof(struct opal_v6_hdr),
-					buflen);
+					__func__, OPAL_SW_V1_SIZE,
+					buflen < hdr->length ? buflen : hdr->length);
 			return -EINVAL;
 		}
+		sw->v6hdr = *hdr;
 		sw->version.v1.rc = be32toh(swbuf->version.v1.rc);
 		sw->version.v1.line_num = be32toh(swbuf->version.v1.line_num);
 		sw->version.v1.object_id = be32toh(swbuf->version.v1.object_id);
 		sw->version.v1.id_length = swbuf->version.v1.id_length;
-		strncpy(sw->version.v1.file_id, swbuf->version.v1.file_id, sw->version.v1.id_length);
-	} else if (hdr->version == 2) {
-		if (buflen < sizeof(struct opal_sw_v2_scn) + sizeof(struct opal_v6_hdr)) {
-			fprintf(stderr, "%s: corrupted, expected length == %lu, got %u\n",
-					__func__,
-					sizeof(struct opal_sw_v2_scn) + sizeof(struct opal_v6_hdr),
-					buflen);
+		if (hdr->length < sw->version.v1.id_length + OPAL_SW_V1_SIZE) {
+			fprintf(stderr, "%s: corrupted, expected length => %lu, got %u\n",
+					__func__, OPAL_SW_V1_SIZE + sw->version.v1.id_length,
+					hdr->length);
 			return -EINVAL;
 		}
+		strncpy(sw->version.v1.file_id, swbuf->version.v1.file_id, sw->version.v1.id_length);
+	} else if (hdr->version == 2) {
+		if (buflen < OPAL_SW_V2_SIZE || hdr->length < OPAL_SW_V2_SIZE) {
+			fprintf(stderr, "%s: corrupted, expected length == %lu, got %u\n",
+					__func__, OPAL_SW_V2_SIZE,
+					buflen < hdr->length ? buflen : hdr->length);
+			return -EINVAL;
+		}
+		sw->v6hdr = *hdr;
 		sw->version.v2.rc = be32toh(swbuf->version.v2.rc);
 		sw->version.v2.file_id = be16toh(swbuf->version.v2.file_id);
 		sw->version.v2.location_id = be16toh(swbuf->version.v2.location_id);
 		sw->version.v2.object_id = be32toh(swbuf->version.v2.object_id);
 	} else {
-		fprintf(stderr, "ERROR %s: unknown version %d\n", __func__, hdr->version);
+		fprintf(stderr, "ERROR %s: unknown version 0x%x\n", __func__, hdr->version);
 		return -EINVAL;
 	}
 
@@ -630,9 +644,11 @@ static int parse_lp_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	struct opal_lp_scn *lpbuf = (struct opal_lp_scn *)buf;
 	uint16_t *lps;
 	uint16_t *lpsbuf;
-	if (buflen < sizeof(struct opal_lp_scn)) {
+	if (buflen < sizeof(struct opal_lp_scn) ||
+			hdr->length < sizeof(struct opal_lp_scn)) {
 		fprintf(stderr, "%s: corrupted, expected length => %lu, got %u\n",
-				__func__, sizeof(struct opal_lp_scn), buflen);
+				__func__, sizeof(struct opal_lp_scn),
+				buflen < hdr->length ? buflen : hdr->length);
 		return -EINVAL;
 	}
 
@@ -648,19 +664,20 @@ static int parse_lp_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	lp->lp_count = lpbuf->lp_count;
 	lp->partition_id = be32toh(lpbuf->partition_id);
 	lp->name[0] = '\0';
-	if (buflen < sizeof(struct opal_lp_scn) + lp->length_name) {
-		fprintf(stderr, "%s: corrupted, expected length => %lu, got %u",
-				__func__, sizeof(struct opal_lp_scn) + lp->length_name,
-				buflen);
+	int expected_len = sizeof(struct opal_lp_scn) + lp->length_name;
+	if (buflen < expected_len || hdr->length < expected_len) {
+		fprintf(stderr, "%s: corrupted, expected length => %u, got %u",
+				__func__, expected_len,
+				buflen < hdr->length ? buflen : hdr->length);
 		return -EINVAL;
 	}
 	memcpy(lp->name, lpbuf->name, lp->length_name);
 
-	if (buflen < sizeof(struct opal_lp_scn) + lp->length_name +
-			(lp->lp_count * sizeof(uint16_t))) {
-		fprintf(stderr, "%s: corrupted, expected length => %lu, got %u",
-				__func__, sizeof(struct opal_lp_scn) + lp->length_name +
-				(lp->lp_count * sizeof(uint16_t)), buflen);
+	expected_len += lp->lp_count * sizeof(uint16_t);
+	if (buflen < expected_len || hdr->length < expected_len) {
+		fprintf(stderr, "%s: corrupted, expected length => %u, got %u",
+				__func__, expected_len,
+				buflen < hdr->length ? buflen : hdr->length);
 		return -EINVAL;
 	}
 
@@ -763,6 +780,8 @@ static int parse_ei_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 		return -EINVAL;
 
 	ei = (struct opal_ei_scn *) malloc(hdr->length);
+	if (!ei)
+		return -ENOMEM;
 
 	ei->v6hdr = *hdr;
 	ei->g_timestamp = be64toh(eibuf->g_timestamp);
@@ -803,6 +822,9 @@ static int parse_ed_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 			check_buflen(hdr->length, sizeof(struct opal_ed_scn), __func__) < 0)
 		return -EINVAL;
 	ed = (struct opal_ed_scn *) malloc(hdr->length);
+	if (!ed)
+		return -ENOMEM;
+
 	ed->v6hdr = *hdr;
 	ed->creator_id = edbuf->creator_id;
 	memcpy(ed->user_data, edbuf->user_data, hdr->length - 12);
@@ -876,7 +898,7 @@ static int parse_section_header(struct opal_v6_hdr *hdr, const char *buf, int bu
 	return 0;
 }
 
-int header_id_lookup(char* id) {
+int header_id_lookup(char *id) {
 	int i;
 	for (i = 0; i < HEADER_ORDER_MAX; i++)
 		if (strncmp(id,elog_hdr_id[i].id,2) == 0)
@@ -982,7 +1004,7 @@ int parse_opal_event(char *buf, int buflen)
 			parse_ed_scn(&hdr, buf, buflen);
 		}
 
-		buf+= hdr.length;
+		buf += hdr.length;
 
 		if (nrsections == ph.scn_count)
 			break;

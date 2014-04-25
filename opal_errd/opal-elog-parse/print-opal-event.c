@@ -119,8 +119,6 @@ int print_mt_scn(struct opal_mtms_scn *mtms)
 
 int print_fru_id_scn(struct opal_fru_id_sub_scn id)
 {
-   print_center(" ");
-   print_center(get_fru_component_desc(id.hdr.flags & 0xF0));
    if (id.hdr.flags & OPAL_FRU_ID_PART)
       print_line("Part Number", "%s", id.part);
 
@@ -133,8 +131,8 @@ int print_fru_id_scn(struct opal_fru_id_sub_scn id)
 
    if (id.hdr.flags & OPAL_FRU_ID_SERIAL) {
       char tmp[OPAL_FRU_ID_SERIAL_MAX+1];
-      memcpy(tmp, id.serial, OPAL_FRU_ID_SERIAL);
-      tmp[OPAL_FRU_ID_SERIAL] = '\0';
+      memset(tmp, 0, OPAL_FRU_ID_SERIAL_MAX+1);
+      memcpy(tmp, id.serial, OPAL_FRU_ID_SERIAL_MAX);
       print_line("Serial Number", "%s", tmp);
    }
 
@@ -166,6 +164,8 @@ int print_fru_scn(struct opal_fru_scn fru)
    /* FIXME This printing was to roughly confirm the correctness
     * of the parsing. Improve here.
     */
+   print_center(" ");
+   print_center(get_fru_component_desc(fru.id.hdr.flags & 0xF0));
    print_line("Priority", "%s", get_fru_priority_desc(fru.priority));
 	if (fru.location_code[0] != '\0')
 	   print_line("Location Code","%s", fru.location_code);

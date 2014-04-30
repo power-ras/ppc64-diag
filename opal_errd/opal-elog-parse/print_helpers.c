@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "print_helpers.h"
 
@@ -124,27 +125,37 @@ int print_line(char *entry, const char *format, ...)
 int print_hex(uint8_t *values, int len) {
 	int written = 0;
 	int i = 0;
+	int j = 0;
 	int lines = 0;
-	while(i < len) {
-		if(written % LINE_LENGTH == 0) {
-			written = printf("| ");
+	/* Going to run into problems if we don't have an integer number of words */
+	if (len % sizeof(uint32_t))
+		return 0;
+
+	while (i < len) {
+		if (written % LINE_LENGTH == 0) {
+			written = printf("|   %08x    ", i);
 			lines++;
 		}
-			written += printf("%.2x",values[i]);
 
-		if((written + 2) % LINE_LENGTH == 0) {
-			written += printf("|\n");
-		} else {
+		for (j = 0; j < len - i && j < 16; j += 4)
+			written += printf("%08x  ", be32toh(*((uint32_t *) (values + j + i))));
+
+		/* padd with spaces before printing the chars*/
+		while (written < LINE_LENGTH - 20) {
 			putchar(' ');
 			written++;
 		}
 
-		i++;
+		for (j = 0; j < len - i && j < 16; j++)
+			written += printf("%c", isprint(values[j + i]) ? values[j + i] : '.');
+
+		i += j;
+		while ((written + 2) % LINE_LENGTH != 0) {
+			putchar(' ');
+			written++;
+		}
+		written += printf("|\n");
 	}
-	while ((written + 2) % LINE_LENGTH) {
-		putchar(' ');
-		written++;
-	}
-	printf("|\n");
+
 	return lines * LINE_LENGTH;
 }

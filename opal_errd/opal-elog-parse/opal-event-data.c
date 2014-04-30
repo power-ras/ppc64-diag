@@ -20,6 +20,7 @@ struct generic_desc{
 #define MAX_DH_TYPE sizeof(dh_type)/sizeof(struct generic_desc)
 
 #define EVENT_TYPE \
+   {0x00, "Not applicable."}, \
    {0x01, "Miscellaneous, informational only."},\
    {0x02, "Tracing event"}, \
    {0x08, "Dump notification."},\
@@ -33,8 +34,7 @@ struct generic_desc{
    {0x70, "Resource sparing event."}, \
    {0x80, "Dynamic reconfiguration event."}, \
    {0xD0, "Normal system/platform shutdown or powered off."}, \
-   {0xE0, "Platform powered off by user without normal shutdown."}, \
-   {0,    "Unknown event type."}
+   {0xE0, "Platform powered off by user without normal shutdown."}
 
 #define SEVERITY_TYPE \
    {0x00, "Informational Event"}, \

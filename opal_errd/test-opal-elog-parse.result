@@ -253,7 +253,7 @@ ERROR parse_opal_event: Truncated error log, expected section EH not found
 | Subsystem                : Room ambient temperature                          |
 | Event Scope              : Single platform                                   |
 | Event Severity           : Predictive Error                                  |
-| Event Type               : Unknown event type.                               |
+| Event Type               : Not applicable.                                   |
 | Action Flags             : Report to Operating System                        |
 |                          : Service Action Required                           |
 |------------------------------------------------------------------------------|

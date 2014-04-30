@@ -38,6 +38,7 @@ int opt_display_all = 0;
 
 #define ELOG_SRC_SIZE		8
 #define OPAL_ERROR_LOG_MAX      16384
+#define ELOG_BUF_MAX            OPAL_ERROR_LOG_MAX * 10
 
 #define ELOG_MIN_READ_OFFSET	ELOG_SRC_OFFSET + ELOG_SRC_SIZE
 
@@ -81,7 +82,7 @@ static int file_filter(const struct dirent *d)
         return 0;
 }
 
-int read_elog(char path[], void *buf, size_t count){
+int read_elog(char path[], char **buf){
 
         struct stat sbuf;
         size_t bufsz;
@@ -89,11 +90,26 @@ int read_elog(char path[], void *buf, size_t count){
         ssize_t sz = 0;
         int ret = 0;
 
+        chdir(opt_platform_dir);
         if (stat(path, &sbuf) == -1){
             fprintf(stderr, "Error accessing %s\n",path);
             return -1;
         }
+
         bufsz = sbuf.st_size;
+        if(bufsz > OPAL_ERROR_LOG_MAX){
+            fprintf(stderr, "Notice: Oversized elog encountered\n");
+            if(bufsz > ELOG_BUF_MAX){
+                fprintf(stderr, "Error: elog size greater than max: %zd bytes\n", bufsz);
+                return -1;
+            }
+        }
+
+        *buf = malloc(bufsz);
+        if(!buf){
+            fprintf(stderr, "Failed to allocate buffer\n");
+            return -1;
+        }
 
         platform_log_fd = open(path, O_RDONLY);
         if (platform_log_fd <= 0) {
@@ -104,11 +120,15 @@ int read_elog(char path[], void *buf, size_t count){
 
         sz = 0;
         do {
-            readsz = read(platform_log_fd, (char *)buf, count);
+            readsz = read(platform_log_fd, *buf, bufsz);
             if (readsz < 0) {
                     fprintf(stderr, "Read Platform log failed\n");
                     ret = -1;
                     goto out;
+            }
+            if(!readsz){
+                fprintf(stderr, "Early EOF\n");
+                break;
             }
             sz += readsz;
         } while(sz != bufsz);
@@ -166,19 +186,21 @@ int elogdisplayentry(uint32_t eid)
 {
 	uint32_t logid;
 	int ret = 0;
-	char buffer[OPAL_ERROR_LOG_MAX];
-        struct dirent **filelist;
-        int nfiles;
-        ssize_t sz = 0;
-        int i;
+	char *buffer;
+	struct dirent **filelist;
+	int nfiles;
+	ssize_t sz = 0;
+	int i;
+	int done = 0;
 
         if(opt_display_file){
-            sz = read_elog(opt_platform_file, (char *)buffer, OPAL_ERROR_LOG_MAX);
+            sz = read_elog(opt_platform_file, &buffer);
             if(sz < 0) {
                 return -1;
             /* Make sure we read minimum data needed in this function */
             } else if (sz < (ELOG_ID_OFFSET + sizeof(logid))){
                        fprintf(stderr, "Partially read elog, cannot parse\n");
+                       free(buffer);
                        return -1;
             }
 
@@ -186,6 +208,7 @@ int elogdisplayentry(uint32_t eid)
             if (opt_display_all || logid == eid) {
                     ret = parse_opal_event(buffer, sz);
             }
+            free(buffer);
 
         } else {
             nfiles = scandir(opt_platform_dir, &filelist,
@@ -200,14 +223,18 @@ int elogdisplayentry(uint32_t eid)
             }
 
             for (i = 0; i < nfiles; i++){
+                if(done){
+                    free(filelist[i]);
+                    continue;
+                }
 
-                chdir(opt_platform_dir);
-                sz = read_elog(filelist[i]->d_name, (char *)buffer, OPAL_ERROR_LOG_MAX);
+                sz = read_elog(filelist[i]->d_name, &buffer);
                 if(sz < 0) {
                     return -1;
                 /* Make sure we read minimum data needed in this function */
                 } else if (sz < (ELOG_ID_OFFSET + sizeof(logid))){
                            fprintf(stderr, "Partially read elog, cannot parse\n");
+                           free(buffer);
                            continue;
                 }
 
@@ -215,10 +242,12 @@ int elogdisplayentry(uint32_t eid)
                     logid = be32toh(*(uint32_t*)(buffer+ELOG_ID_OFFSET));
                     if (opt_display_all || logid == eid) {
                             ret = parse_opal_event(buffer, sz);
-                            if (!opt_display_all)
-                                    break;
+                            if (!opt_display_all){
+                                done = 1;
+                            }
                     }
                 }
+                free(buffer);
                 free(filelist[i]);
 
             }
@@ -233,7 +262,7 @@ int elogdisplayentry(uint32_t eid)
 int eloglist(uint32_t service_flag)
 {
 	int ret = 0;
-	char buffer[OPAL_ERROR_LOG_MAX];
+	char *buffer;
         struct dirent **filelist;
         int nfiles;
         ssize_t sz = 0;
@@ -244,15 +273,17 @@ int eloglist(uint32_t service_flag)
 	printf("|------------------------------------------------------------------------------|\n");
 
         if(opt_display_file){
-            sz = read_elog(opt_platform_file, (char *)buffer, OPAL_ERROR_LOG_MAX);
+            sz = read_elog(opt_platform_file, &buffer);
             if (sz <= 0) {
                 return -1;
             } else if (sz < ELOG_MIN_READ_OFFSET) {
                 fprintf(stderr, "Partially read elog, cannot parse\n");
+                free(buffer);
                 return -1;
             }
 
             print_elog_summary(buffer, sz, service_flag);
+            free(buffer);
 
         } else {
             nfiles = scandir(opt_platform_dir, &filelist,
@@ -269,16 +300,17 @@ int eloglist(uint32_t service_flag)
 
             for (i = 0; i < nfiles; i++){
 
-                chdir(opt_platform_dir);
-                sz = read_elog(filelist[i]->d_name, (char *)buffer, OPAL_ERROR_LOG_MAX);
+                sz = read_elog(filelist[i]->d_name, &buffer);
                 if (sz <= 0){
                     continue;
                 } else if (sz < ELOG_MIN_READ_OFFSET) {
                     fprintf(stderr, "Partially read elog, cannot parse\n");
+                    free(buffer);
                     continue;
                 }
 
                 print_elog_summary(buffer, sz, service_flag);
+                free(buffer);
                 free(filelist[i]);
             }
 

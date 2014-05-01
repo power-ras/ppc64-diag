@@ -7,7 +7,6 @@
 #include <assert.h>
 #include "libopalevents.h"
 #include "print-opal-event.h"
-#include "opal-event-data.h"
 
 struct header_id elog_hdr_id[] = {
 			HEADER_ORDER

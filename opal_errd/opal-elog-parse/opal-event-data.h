@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-#include "libopalevents.h"
-
 struct generic_desc{
 	uint8_t id;
 	const char *desc;

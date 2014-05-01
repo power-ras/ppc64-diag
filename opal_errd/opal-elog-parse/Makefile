@@ -4,6 +4,16 @@
 
 include ../../rules.mk
 
+Q =
+
+ifndef V
+Q = @
+else
+ifeq ($(V),0)
+Q = @
+endif
+endif
+
 CMDS = opal-elog-parse
 
 OPAL_ELOG_OBJS = parse-opal-event.o opal-elog-parse.o print-opal-event.o print_helpers.o opal-event-data.o
@@ -12,7 +22,24 @@ all: $(CMDS)
 
 opal-elog-parse: $(OPAL_ELOG_OBJS)
 	@echo "LD $(WORK_DIR)/$@"
-	$(CC) $(CFLAGS) -o $@ $^
+	$(Q)$(CC) $(CFLAGS) -o $@ $^
+
+opal-elog-parse.o: opal-elog-parse.c libopalevents.h opal-event-data.h
+	@echo "CC $(WORK_DIR)/$@"
+	$(Q)$(CC) $(CFLAGS) -c $<
+
+parse-opal-event.o: parse-opal-event.c libopalevents.h print-opal-event.h
+	@echo "CC $(WORK_DIR)/$@"
+	$(Q)$(CC) $(CFLAGS) -c $<
+
+print-opal-event.o: print-opal-event.c print-opal-event.h libopalevents.h opal-event-data.h print_helpers.h
+	@echo "CC $(WORK_DIR)/$@"
+	$(Q)$(CC) $(CFLAGS) -c $<
+
+#opal-event-data and print_helpers
+%.o: %.c %.h
+	@echo "CC $(WORK_DIR)/$@"
+	$(Q)$(CC) $(CFLAGS) -c $<
 
 install: all
 	@$(call install_sbin,$(CMDS),$(DESTDIR))
@@ -22,4 +49,4 @@ uninstall:
 
 clean:
 	@echo "Cleaning up $(WORK_DIR) files..."
-	@rm -rf $(CMDS) $(OPAL_ELOG_OBJS)
+	$(Q)rm -rf $(CMDS) $(OPAL_ELOG_OBJS)

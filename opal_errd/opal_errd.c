@@ -175,6 +175,7 @@ static int rotate_logs(const char *elog_dir, int max_logs, int max_age)
 		elog_date = strtok(elog_name, "-");
 		if(!elog_date){
 		    syslog(LOG_NOTICE, "Failed to read file\n");
+		    free(elog_name);
 		    free(filelist[i]);
 		    continue;
 		}

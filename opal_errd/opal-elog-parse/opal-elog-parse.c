@@ -34,7 +34,8 @@ int opt_display_all = 0;
 #define ELOG_ACTION_OFFSET	0x42
 #define ELOG_SRC_OFFSET		0x78
 #define OPAL_ERROR_LOG_MAX	16384
-#define ELOG_ACTION_FLAG	0xa800
+/* Service Action or Customer Attention Required */
+#define ELOG_ACTION_FLAG	0x8000
 
 #define ELOG_SRC_SIZE		8
 #define OPAL_ERROR_LOG_MAX      16384
@@ -60,7 +61,7 @@ void print_usage(char *command)
 	        "\t-a: Display all error log entry details\n"
 		"\t-l: list all error logs\n"
 	        "\t-p  dir: use dir as platform log directory (default %s)\n"
-		"\t-s: list all service action and call home logs\n"
+		"\t-s: list all service action logs\n"
 	        "\t-f  file: use individual file as platform log\n"
 	        "\t-h: print the usage\n", command, DEFAULT_opt_platform_dir);
 }
@@ -169,7 +170,7 @@ void print_elog_summary(char *buffer, int bufsz, uint32_t service_flag)
                                 date_time_out.day, date_time_out.hour,
                                 date_time_out.minutes, date_time_out.seconds,
                                 get_creator_name(creator_id), parse);
-                else if (((action & ELOG_ACTION_FLAG) == ELOG_ACTION_FLAG)
+	else if (((action & ELOG_ACTION_FLAG) == ELOG_ACTION_FLAG)
 			 && (service_flag == 1))
                         /* list only service action logs */
                         printf("|0x%08X %8.8s %4u-%02u-%02u %02u:%02u:%02u  %-17.17s %-19.19s|\n",

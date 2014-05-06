@@ -415,8 +415,6 @@ static int process_elog(const char *elog_path)
 		goto err;
 	}
 
-	assert(bufsz <= OPAL_ERROR_LOG_MAX);
-
 	sz = write(out_fd, buf, bufsz);
 	if (sz != bufsz) {
 		syslog(LOG_ERR, "Failed to write elog output file: %s (%d:%s)\n",

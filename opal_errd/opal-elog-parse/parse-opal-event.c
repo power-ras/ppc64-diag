@@ -7,6 +7,8 @@
 #include <assert.h>
 #include "libopalevents.h"
 #include "print-opal-event.h"
+#include "opal-event-data.h"
+#include "parse-opal-event.h"
 
 struct header_id elog_hdr_id[] = {
 			HEADER_ORDER
@@ -1099,4 +1101,10 @@ int parse_opal_event(char *buf, int buflen)
 		}
 	}
 	return rc;
+}
+
+int parse_opal_event_log(char *buf, int buflen, struct opal_event_log_scn **log)
+{
+	*log = NULL;
+	return -ENOSYS;
 }

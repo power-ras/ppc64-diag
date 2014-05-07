@@ -405,6 +405,5 @@ struct opal_usr_hdr_scn {
 	uint32_t	reserved2;
 } __packed;
 
-extern int parse_opal_event(char *, int);
 extern struct opal_datetime parse_opal_datetime(const struct opal_datetime);
 #endif

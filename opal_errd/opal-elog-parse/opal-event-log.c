@@ -60,3 +60,16 @@ get_nth_opal_event_log_scn(opal_event_log *log, int n)
 
 	return NULL;
 }
+
+int free_opal_event_log(opal_event_log *log) {
+	if (!log)
+		return -EINVAL;
+
+	int i = 0;
+	while(has_more_elements(log[i])) {
+		free(log[i].scn);
+		i++;
+	}
+
+	return 0;
+}

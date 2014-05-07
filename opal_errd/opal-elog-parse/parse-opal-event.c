@@ -1002,8 +1002,7 @@ int header_id_lookup(char *id) {
 	return -1;
 }
 
-/* parse all required sections of the log */
-int parse_opal_event(char *buf, int buflen)
+int parse_opal_event_log(char *buf, int buflen, struct opal_event_log_scn **r_log)
 {
 	int rc;
 	struct opal_v6_hdr hdr;
@@ -1016,6 +1015,8 @@ int parse_opal_event(char *buf, int buflen)
 	int i;
 	opal_event_log *log = NULL;
 	int log_pos = 0;
+
+	*r_log = NULL;
 	while (buflen) {
 		rc = parse_section_header(&hdr, buf, buflen);
 		if (rc < 0) {
@@ -1177,22 +1178,13 @@ int parse_opal_event(char *buf, int buflen)
 	}
 	if(log) {
 		/* we could get here but have failed to parse sections of have an
-	 	 * unexpectady trunkated buffer pad log with NULLS
+	 	 * unexpectady truncated buffer pad log with NULLS
 	 	 */
 		char nulStr2[2] = {'\0','\0'};
 		for(i = log_pos; i < ph->scn_count; i++) {
 			add_opal_event_log_scn(log, nulStr2, NULL, i);
 		}
-
-		print_opal_event_log(log);
-
-		i = 0;
-		while(has_more_elements(log[i])) {
-			free(log[i].scn);
-			i++;
-		}
-
-		free(log);
+		*r_log = log;
 	}
 
 	for (i = 0; i < HEADER_ORDER_MAX; i++) {
@@ -1208,8 +1200,18 @@ int parse_opal_event(char *buf, int buflen)
 	return rc;
 }
 
-int parse_opal_event_log(char *buf, int buflen, struct opal_event_log_scn **log)
+/* parse all required sections of the log */
+int parse_opal_event(char *buf, int buflen)
 {
-	*log = NULL;
-	return -ENOSYS;
+	int rc;
+	opal_event_log *log = NULL;
+
+	rc = parse_opal_event_log(buf, buflen, &log);
+
+	if (log) {
+		print_opal_event_log(log);
+		free_opal_event_log(log);
+	}
+
+	return rc;
 }

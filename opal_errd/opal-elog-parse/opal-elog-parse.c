@@ -20,6 +20,7 @@
 
 #include "libopalevents.h"
 #include "opal-event-data.h"
+#include "parse-opal-event.h"
 
 #define DEFAULT_opt_platform_dir "/var/log/opal-elog"
 char *opt_platform_dir = DEFAULT_opt_platform_dir;

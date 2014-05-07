@@ -18,5 +18,6 @@ void *get_opal_event_log_scn(opal_event_log *log, const char *id, int n);
 
 void *get_opal_event_log_scn(opal_event_log *log, const char *id, int n);
 
+int free_opal_event_log(opal_event_log *log);
 
 #endif /* _H_OPAL_EVENT_LOG */

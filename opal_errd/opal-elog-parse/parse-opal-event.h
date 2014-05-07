@@ -6,6 +6,8 @@
 
 int parse_opal_event_log(char *buf, int buflen, struct opal_event_log_scn **log);
 
+int parse_opal_event(char *buf, int buflen);
+
 __attribute__ ((unused))
 static struct opal_priv_hdr_scn *get_priv_hdr_scn(opal_event_log *log) {
 	return (struct opal_priv_hdr_scn *) get_opal_event_log_scn(log, "PH", 0);

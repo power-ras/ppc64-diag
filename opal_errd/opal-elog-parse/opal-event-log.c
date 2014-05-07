@@ -46,7 +46,7 @@ void *get_opal_event_log_scn(opal_event_log *log, const char *id, int n) {
 }
 
 struct opal_event_log_scn *
-get_nth_opal_event_log_scn(opal_event_log log, int n)
+get_nth_opal_event_log_scn(opal_event_log *log, int n)
 {
 	if (n < 0)
 		return NULL;

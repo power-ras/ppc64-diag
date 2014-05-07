@@ -122,7 +122,7 @@ int parse_src_fru_pe_scn(struct opal_fru_pe_sub_scn *pe, const char *buf, int bu
 					__func__, OPAL_FRU_PE_TYPE, pe->hdr.type);
 		return -EINVAL;
 	}
-
+	pe->pce[0] = '\0';
 	/* Check to see if we have a string */
 	if(pe->hdr.length > min_length) {
 		/* Ensure string isn't too log */
@@ -137,7 +137,6 @@ int parse_src_fru_pe_scn(struct opal_fru_pe_sub_scn *pe, const char *buf, int bu
 				return error;
 
 		memcpy(pe->pce, buf + min_length, pe->hdr.length - min_length);
-
 		min_length = pe->hdr.length;
 	}
 	return min_length;
@@ -229,6 +228,12 @@ int parse_fru_scn(struct opal_fru_scn *fru_scn, const char *buf, int buflen)
 	fru_scn->type = bufsrc->type;
 	fru_scn->priority = bufsrc->priority;
 	fru_scn->loc_code_len = bufsrc->loc_code_len;
+	if (bufsrc->loc_code_len % 4) {
+		fprintf(stderr, "%s: invalide location code length, must be multiple "
+				"of 4, got: %u", __func__, bufsrc->loc_code_len);
+		return -EINVAL;
+	}
+
 	if (fru_scn->loc_code_len > OPAL_FRU_LOC_CODE_MAX) {
 		fprintf(stderr, "%s: invalid location_code length. Expecting value <= %d"
 				" but got %d", __func__, OPAL_FRU_LOC_CODE_MAX,
@@ -326,7 +331,7 @@ int parse_src_scn(const struct opal_v6_hdr *hdr,
 		src.addhdr.length = be16toh(bufsrc->addhdr.length);
 		offset += sizeof(struct opal_src_add_scn_hdr);
 
-		while(offset < src.srclength) {
+		while(offset < src.srclength && src.fru_count < OPAL_SRC_FRU_MAX) {
 			error = parse_fru_scn(&(src.fru[src.fru_count]), buf + offset, buflen - offset);
 			if (error < 0)
 				return error;

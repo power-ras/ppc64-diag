@@ -20,8 +20,13 @@ ELOG[XXXX]: LID[5055ed2e]::SRC[B182950C]::Platform Firmware::Informational Event
 |0x5055ED2E B182950C 2014-02-18 06:43:54  Service Processor Informational Event|
 |------------------------------------------------------------------------------|
 ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
+ERROR parse_opal_event: Truncated error log, expected section PH not found
+ERROR parse_opal_event: Truncated error log, expected section UH not found
+ERROR parse_opal_event: Truncated error log, expected section EH not found
 0x02
-ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
+parse_priv_hdr_scn: section header has an invalid section count 0, should be greater than 0, setting section count to 1 to attempt recovery
+ERROR parse_opal_event: Truncated error log, expected section UH not found
+ERROR parse_opal_event: Truncated error log, expected section EH not found
 |------------------------------------------------------------------------------|
 |                                Private Header                                |
 |------------------------------------------------------------------------------|
@@ -35,9 +40,11 @@ ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must
 | Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
 | Platform Log Id          : 0x0                                               |
 | Entry ID                 : 0x2                                               |
-| Section Count            : 0                                                 |
+| Section Count            : 1                                                 |
 0x03
-ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
+parse_priv_hdr_scn: section header has an invalid section count 0, should be greater than 0, setting section count to 1 to attempt recovery
+ERROR parse_opal_event: Truncated error log, expected section UH not found
+ERROR parse_opal_event: Truncated error log, expected section EH not found
 |------------------------------------------------------------------------------|
 |                                Private Header                                |
 |------------------------------------------------------------------------------|
@@ -51,7 +58,7 @@ ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must
 | Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
 | Platform Log Id          : 0x0                                               |
 | Entry ID                 : 0x3                                               |
-| Section Count            : 0                                                 |
+| Section Count            : 1                                                 |
 0x50000004
 ERROR parse_opal_event: Truncated error log, expected section UH not found
 ERROR parse_opal_event: Truncated error log, expected section EH not found

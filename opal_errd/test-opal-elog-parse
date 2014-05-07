@@ -42,7 +42,7 @@ fi
 echo '0x50000004' >> $LOG
 $VALGRIND ./opal-elog-parse/opal-elog-parse -d 0x50000004 -f $SYSFS/firmware/opal/elog/0x50000004/raw &>> $LOG 1>&2
 R=$?
-if [ $R -ne 0 ]; then
+if [ $R -ne 234 ]; then
     echo 'FAIL:' $R;
     exit $R
 fi
@@ -51,7 +51,7 @@ fi
 echo '0x50000006' >> $LOG
 $VALGRIND ./opal-elog-parse/opal-elog-parse -d 0x50000006 -f $SYSFS/firmware/opal/elog/0x50000006/raw &>> $LOG 1>&2
 R=$?
-if [ $R -ne 0 ]; then
+if [ $R -ne 234 ]; then
     echo 'FAIL:' $R;
     exit $R
 fi

@@ -422,7 +422,12 @@ int parse_priv_hdr_scn(struct opal_priv_hdr_scn **r_privhdr,
 	privhdr->commit_datetime = parse_opal_datetime(bufhdr->commit_datetime);
 	privhdr->creator_id = bufhdr->creator_id;
 	privhdr->scn_count = bufhdr->scn_count;
-
+	if (privhdr->scn_count < 1) {
+		fprintf(stderr, "%s: section header has an invalid section count %u, "
+				"should be greater than 0, setting section count to 1 "
+				"to attempt recovery\n", __func__, privhdr->scn_count);
+		privhdr->scn_count = 1;
+	}
 	// FIXME: are these ASCII? Need spec clarification
 	privhdr->creator_subid_hi = bufhdr->creator_subid_hi;
 	privhdr->creator_subid_lo = bufhdr->creator_subid_lo;
@@ -1009,12 +1014,13 @@ int parse_opal_event(char *buf, int buflen)
 	int nrsections = 0;
 	int is_error = 0;
 	int i;
-	opal_event_log *log;
+	opal_event_log *log = NULL;
 	int log_pos = 0;
 	while (buflen) {
 		rc = parse_section_header(&hdr, buf, buflen);
-		if (rc < 0)
-			return rc;
+		if (rc < 0) {
+			break;
+		}
 
 		header_pos = header_id_lookup(hdr.id);
 		if (header_pos == -1) {
@@ -1063,16 +1069,17 @@ int parse_opal_event(char *buf, int buflen)
 				log = create_opal_event_log(ph->scn_count);
 				if (!log) {
 					free(ph);
-					fprintf(stderr, "ERROR %s: Could not allocate internal log buffer",
+					fprintf(stderr, "ERROR %s: Could not allocate internal log buffer\n",
 							__func__);
 					return -ENOMEM;
 				}
 				add_opal_event_log_scn(log, "PH", ph, log_pos++);
-				print_opal_priv_hdr_scn(ph);
 			} else {
 				/* We didn't parse the private header and therefore couldn't malloc
 				 * the log array, must stop
 				 */
+				fprintf(stderr, "ERROR %s: Unable to parse private header section"
+						" cannot continue\n", __func__);
 				return -EINVAL;
 			}
 		} else if (strncmp(hdr.id, "UH", 2) == 0) {
@@ -1080,120 +1087,86 @@ int parse_opal_event(char *buf, int buflen)
 			if (parse_usr_hdr_scn(&usr, &hdr, buf, buflen,
 					      &is_error) == 0) {
 				add_opal_event_log_scn(log, "UH", usr, log_pos++);
-				print_opal_usr_hdr_scn(usr);
-				free(usr);
 			}
 		} else if (strncmp(hdr.id, "PS", 2) == 0) {
 			struct opal_src_scn *src;
 			if (parse_src_scn(&src, &hdr, buf, buflen) == 0) {
 				add_opal_event_log_scn(log, "PS", src, log_pos++);
-				print_opal_src_scn(src);
-				free(src);
 			}
 		} else if (strncmp(hdr.id, "EH", 2) == 0) {
 			struct opal_eh_scn *eh;
 			if (parse_eh_scn(&eh, &hdr, buf, buflen) == 0) {
 				add_opal_event_log_scn(log, "EH", eh, log_pos++);
-				print_eh_scn(eh);
-				free(eh);
 			}
 		} else if (strncmp(hdr.id, "MT", 2) == 0) {
 			struct opal_mtms_scn *mt;
 			if (parse_mt_scn(&mt, &hdr, buf, buflen) == 0) {
 				add_opal_event_log_scn(log, "MT", mt, log_pos++);
-				print_mt_scn(mt);
-				free(mt);
 			}
 		} else if (strncmp(hdr.id, "SS", 2) == 0) {
 			struct opal_src_scn *src;
 			if (parse_src_scn(&src, &hdr, buf, buflen) == 0) {
 				add_opal_event_log_scn(log, "SS", src, log_pos++);
-				print_opal_src_scn(src);
-				free(src);
 			}
 		} else if (strncmp(hdr.id, "DH", 2) == 0) {
 			struct opal_dh_scn *dh;
 			if (parse_dh_scn(&dh, &hdr, buf, buflen) == 0) {
 				add_opal_event_log_scn(log, "DH", dh, log_pos++);
-				print_dh_scn(dh);
-				free(dh);
 			}
 		} else if (strncmp(hdr.id, "SW", 2) == 0) {
 			struct opal_sw_scn *sw;
 			if (parse_sw_scn(&sw, &hdr, buf, buflen) == 0) {
 				add_opal_event_log_scn(log, "SW", sw, log_pos++);
-				print_sw_scn(sw);
-				free(sw);
 			}
 		} else if (strncmp(hdr.id, "LP", 2) == 0) {
 			struct opal_lp_scn *lp;
 			if (parse_lp_scn(&lp, &hdr, buf, buflen) == 0) {
 				add_opal_event_log_scn(log, "LP", lp, log_pos++);
-				print_lp_scn(lp);
-				free(lp);
 			}
 		} else if (strncmp(hdr.id, "LR", 2) == 0) {
 			struct opal_lr_scn *lr;
 			if (parse_lr_scn(&lr, &hdr, buf, buflen) == 0) {
 				add_opal_event_log_scn(log, "LR", lr, log_pos++);
-				print_lr_scn(lr);
-				free(lr);
 			}
 		} else if (strncmp(hdr.id, "HM", 2) == 0) {
 			struct opal_hm_scn *hm;
 			if (parse_hm_scn(&hm, &hdr, buf, buflen) == 0) {
 				add_opal_event_log_scn(log, "HM", hm, log_pos++);
-				print_hm_scn(hm);
-				free(hm);
 			}
 		} else if (strncmp(hdr.id, "EP", 2) == 0) {
 			struct opal_ep_scn *ep;
 			if (parse_ep_scn(&ep, &hdr, buf, buflen) == 0) {
 				add_opal_event_log_scn(log, "EP", ep, log_pos++);
-				print_ep_scn(ep);
-				free(ep);
 			}
 		} else if (strncmp(hdr.id, "IE", 2) == 0) {
 			struct opal_ie_scn *ie;
 			if (parse_ie_scn(&ie, &hdr, buf, buflen) == 0) {
 				add_opal_event_log_scn(log, "IE", ie, log_pos++);
-				print_ie_scn(ie);
-				free(ie);
 			}
 		} else if (strncmp(hdr.id, "MI", 2) == 0) {
 			struct opal_mi_scn *mi;
 			if (parse_mi_scn(&mi, &hdr, buf, buflen) == 0) {
 				add_opal_event_log_scn(log, "MI", mi, log_pos++);
-				print_mi_scn(mi);
-				free(mi);
 			}
 		} else if (strncmp(hdr.id, "CH", 2) == 0) {
 			struct opal_ch_scn *ch;
 			if (parse_ch_scn(&ch, &hdr, buf, buflen) == 0) {
 				add_opal_event_log_scn(log, "CH", ch, log_pos++);
-				print_ch_scn(ch);
-				free(ch);
 			}
 		} else if (strncmp(hdr.id, "UD", 2) == 0) {
 			struct opal_ud_scn *ud;
 			if (parse_ud_scn(&ud, &hdr, buf, buflen) == 0) {
 				add_opal_event_log_scn(log, "UD", ud, log_pos++);
-				print_ud_scn(ud);
-				free(ud);
 			}
 		} else if (strncmp(hdr.id, "EI", 2) == 0) {
 			struct opal_ei_scn *ei;
 			if (parse_ei_scn(&ei, &hdr, buf, buflen) == 0) {
 				add_opal_event_log_scn(log, "EI", ei, log_pos++);
-				print_ei_scn(ei);
-				free(ei);
 			}
 		} else if (strncmp(hdr.id, "ED", 2) == 0) {
 			struct opal_ed_scn *ed;
 			if (parse_ed_scn(&ed, &hdr, buf, buflen) == 0) {
 				add_opal_event_log_scn(log, "ED", ed, log_pos++);
-				print_ed_scn(ed);
-				free(ed);
 			}
 		}
 
@@ -1202,6 +1175,25 @@ int parse_opal_event(char *buf, int buflen)
 		if (nrsections == ph->scn_count)
 			break;
 	}
+	if(log) {
+		/* we could get here but have failed to parse sections of have an
+	 	 * unexpectady trunkated buffer pad log with NULLS
+	 	 */
+		char nulStr2[2] = {'\0','\0'};
+		for(i = log_pos; i < ph->scn_count; i++) {
+			add_opal_event_log_scn(log, nulStr2, NULL, i);
+		}
+
+		print_opal_event_log(log);
+
+		i = 0;
+		while(has_more_elements(log[i])) {
+			free(log[i].scn);
+			i++;
+		}
+
+		free(log);
+	}
 
 	for (i = 0; i < HEADER_ORDER_MAX; i++) {
 		if (((elog_hdr_id[i].req & HEADER_REQ) ||
@@ -1209,10 +1201,10 @@ int parse_opal_event(char *buf, int buflen)
 				&& elog_hdr_id[i].max != 0) {
 			fprintf(stderr,"ERROR %s: Truncated error log, expected section %s"
 					" not found\n", __func__, elog_hdr_id[i].id);
+			rc = -EINVAL;
 		}
 	}
-	free(ph);
-	free(log);
+
 	return rc;
 }
 

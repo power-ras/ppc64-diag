@@ -523,7 +523,9 @@ static int parse_ch_scn(struct opal_ch_scn **r_ch,
 
 	strncpy(ch->comment, bufch->comment, hdr->length - sizeof(struct opal_v6_hdr));
 	/* Make sure there is a null byte at the end */
-	ch->comment[hdr->length - sizeof(struct opal_v6_hdr)] = '\0';
+
+	if (hdr->length - sizeof(struct opal_v6_hdr) > 0)
+		ch->comment[hdr->length - sizeof(struct opal_v6_hdr)-1] = '\0';
 
 	return 0;
 }

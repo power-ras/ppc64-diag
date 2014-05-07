@@ -87,7 +87,7 @@ ERROR parse_opal_event: Truncated error log, expected section EH not found
 |------------------------------------------------------------------------------|
 | Section Version          : 0 (CH)                                            |
 | Sub-section type         : 0x0                                               |
-| Section Length           : 0x23                                              |
+| Section Length           : 0x24                                              |
 | Component ID             : 0                                                 |
 | Call Home Comment        : call home comment goes here                       |
 |------------------------------------------------------------------------------|

@@ -13,7 +13,7 @@ int print_center(const char *output);
 
 int print_header(const char *header);
 
-int print_hex(uint8_t *values, int len);
+int print_hex(const uint8_t *values, int len);
 
 int print_line(char *entry, const char *format, ...)
    __attribute__ ((format (printf, 2, 3)));

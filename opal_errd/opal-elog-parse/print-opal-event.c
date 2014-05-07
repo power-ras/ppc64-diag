@@ -6,7 +6,7 @@
 #include "libopalevents.h"
 #include "opal-event-data.h"
 
-int print_opal_v6_hdr(struct opal_v6_hdr hdr) {
+int print_opal_v6_hdr(const struct opal_v6_hdr hdr) {
    print_line("Section Version", "%d (%c%c)", hdr.version,
                hdr.id[0], hdr.id[1]);
    print_line("Sub-section type", "0x%x", hdr.subtype);
@@ -15,7 +15,7 @@ int print_opal_v6_hdr(struct opal_v6_hdr hdr) {
    return 0;
 }
 
-int print_usr_hdr_action(struct opal_usr_hdr_scn *usrhdr)
+int print_usr_hdr_action(const struct opal_usr_hdr_scn *usrhdr)
 {
    char *entry = "Action Flags";
 
@@ -55,7 +55,7 @@ int print_usr_hdr_action(struct opal_usr_hdr_scn *usrhdr)
    return 0;
 }
 
-int print_usr_hdr_event_data(struct opal_usr_hdr_scn *usrhdr)
+int print_usr_hdr_event_data(const struct opal_usr_hdr_scn *usrhdr)
 {
 	print_line("Event Scope", "%s", get_event_scope(usrhdr->event_data));
 
@@ -66,7 +66,7 @@ int print_usr_hdr_event_data(struct opal_usr_hdr_scn *usrhdr)
    return 0;
 }
 
-int print_usr_hdr_subsystem_id(struct opal_usr_hdr_scn *usrhdr)
+int print_usr_hdr_subsystem_id(const struct opal_usr_hdr_scn *usrhdr)
 {
    print_header("User Header");
    print_opal_v6_hdr(usrhdr->v6hdr);
@@ -75,7 +75,7 @@ int print_usr_hdr_subsystem_id(struct opal_usr_hdr_scn *usrhdr)
    return 0;
 }
 
-int print_src_refcode(struct opal_src_scn *src)
+int print_src_refcode(const struct opal_src_scn *src)
 {
    char primary_refcode_display[OPAL_SRC_SCN_PRIMARY_REFCODE_LEN+1];
 
@@ -93,7 +93,7 @@ int print_src_refcode(struct opal_src_scn *src)
    return 0;
 }
 
-int print_mt_data(struct opal_mt_struct mt)
+int print_mt_data(const struct opal_mt_struct mt)
 {
    char model[OPAL_SYS_MODEL_LEN+1];
    char serial_no[OPAL_SYS_SERIAL_LEN+1];
@@ -109,7 +109,7 @@ int print_mt_data(struct opal_mt_struct mt)
    return 0;
 }
 
-int print_mt_scn(struct opal_mtms_scn *mtms)
+int print_mt_scn(const struct opal_mtms_scn *mtms)
 {
 
    print_header("Machine Type/Model & Serial Number");
@@ -118,7 +118,7 @@ int print_mt_scn(struct opal_mtms_scn *mtms)
    return 0;
 }
 
-int print_fru_id_scn(struct opal_fru_id_sub_scn id)
+int print_fru_id_scn(const struct opal_fru_id_sub_scn id)
 {
    if (id.hdr.flags & OPAL_FRU_ID_PART)
       print_line("Part Number", "%s", id.part);
@@ -140,14 +140,14 @@ int print_fru_id_scn(struct opal_fru_id_sub_scn id)
    return 0;
 }
 
-int print_fru_pe_scn(struct opal_fru_pe_sub_scn pe)
+int print_fru_pe_scn(const struct opal_fru_pe_sub_scn pe)
 {
    print_mt_data(pe.mtms);
    print_line("PCE", "%s", pe.pce);
    return 0;
 }
 
-int print_fru_mr_scn(struct opal_fru_mr_sub_scn mr)
+int print_fru_mr_scn(const struct opal_fru_mr_sub_scn mr)
 {
 
    int total_mru = mr.hdr.flags & 0x0F;
@@ -160,7 +160,7 @@ int print_fru_mr_scn(struct opal_fru_mr_sub_scn mr)
    return 0;
 }
 
-int print_fru_scn(struct opal_fru_scn fru)
+int print_fru_scn(const struct opal_fru_scn fru)
 {
    /* FIXME This printing was to roughly confirm the correctness
     * of the parsing. Improve here.
@@ -185,7 +185,7 @@ int print_fru_scn(struct opal_fru_scn fru)
    return 0;
 }
 
-int print_opal_src_scn(struct opal_src_scn *src)
+int print_opal_src_scn(const struct opal_src_scn *src)
 {
    if (src->v6hdr.id[0] == 'P')
       print_header("Primary System Reference Code");
@@ -213,7 +213,7 @@ int print_opal_src_scn(struct opal_src_scn *src)
    return 0;
 }
 
-int print_opal_usr_hdr_scn(struct opal_usr_hdr_scn *usrhdr)
+int print_opal_usr_hdr_scn(const struct opal_usr_hdr_scn *usrhdr)
 {
    print_usr_hdr_subsystem_id(usrhdr);
    print_usr_hdr_event_data(usrhdr);
@@ -221,7 +221,7 @@ int print_opal_usr_hdr_scn(struct opal_usr_hdr_scn *usrhdr)
    return 0;
 }
 
-int print_opal_priv_hdr_scn(struct opal_priv_hdr_scn *privhdr)
+int print_opal_priv_hdr_scn(const struct opal_priv_hdr_scn *privhdr)
 {
    print_header("Private Header");
    print_opal_v6_hdr(privhdr->v6hdr);
@@ -251,7 +251,7 @@ int print_opal_priv_hdr_scn(struct opal_priv_hdr_scn *privhdr)
    return 0;
 }
 
-int print_eh_scn(struct opal_eh_scn *eh)
+int print_eh_scn(const struct opal_eh_scn *eh)
 {
    char model[OPAL_SYS_MODEL_LEN+1];
    char serial_no[OPAL_SYS_SERIAL_LEN+1];
@@ -287,7 +287,7 @@ int print_eh_scn(struct opal_eh_scn *eh)
    return 0;
 }
 
-int print_ch_scn(struct opal_ch_scn *ch)
+int print_ch_scn(const struct opal_ch_scn *ch)
 {
    print_header("Call Home Log Comment");
    print_opal_v6_hdr(ch->v6hdr);
@@ -296,7 +296,7 @@ int print_ch_scn(struct opal_ch_scn *ch)
    return 0;
 }
 
-int print_ud_scn(struct opal_ud_scn *ud)
+int print_ud_scn(const struct opal_ud_scn *ud)
 {
    print_header("User Defined Data");
    print_opal_v6_hdr(ud->v6hdr);
@@ -308,7 +308,7 @@ int print_ud_scn(struct opal_ud_scn *ud)
    return 0;
 }
 
-int print_hm_scn(struct opal_hm_scn *hm)
+int print_hm_scn(const struct opal_hm_scn *hm)
 {
 	print_header("Hypervisor ID");
 
@@ -318,7 +318,7 @@ int print_hm_scn(struct opal_hm_scn *hm)
 	return 0;
 }
 
-int print_ep_scn(struct opal_ep_scn *ep)
+int print_ep_scn(const struct opal_ep_scn *ep)
 {
 	print_header("EPOW");
 	print_opal_v6_hdr(ep->v6hdr);
@@ -340,7 +340,7 @@ int print_ep_scn(struct opal_ep_scn *ep)
 	return 0;
 }
 
-int print_sw_scn(struct opal_sw_scn *sw)
+int print_sw_scn(const struct opal_sw_scn *sw)
 {
 	print_header("Firmware Error Description");
 	print_opal_v6_hdr(sw->v6hdr);
@@ -362,7 +362,7 @@ int print_sw_scn(struct opal_sw_scn *sw)
 	return 0;
 }
 
-int print_lp_scn(struct opal_lp_scn *lp)
+int print_lp_scn(const struct opal_lp_scn *lp)
 {
 	print_header("Logical Partition");
 	print_opal_v6_hdr(lp->v6hdr);
@@ -383,7 +383,7 @@ int print_lp_scn(struct opal_lp_scn *lp)
 	return 0;
 }
 
-int print_lr_scn(struct opal_lr_scn *lr)
+int print_lr_scn(const struct opal_lr_scn *lr)
 {
 	print_header("Logical Resource");
 	print_opal_v6_hdr(lr->v6hdr);
@@ -402,7 +402,7 @@ int print_lr_scn(struct opal_lr_scn *lr)
 	return 0;
 }
 
-int print_ie_scn(struct opal_ie_scn *ie)
+int print_ie_scn(const struct opal_ie_scn *ie)
 {
 	print_header("IO Event");
 	print_opal_v6_hdr(ie->v6hdr);
@@ -424,7 +424,7 @@ int print_ie_scn(struct opal_ie_scn *ie)
 	return 0;
 }
 
-int print_mi_scn(struct opal_mi_scn *mi) {
+int print_mi_scn(const struct opal_mi_scn *mi) {
 	print_header("Manufacturing Information");
 	print_opal_v6_hdr(mi->v6hdr);
 	print_line("Policy Flags", "0x%08x", mi->flags);
@@ -432,7 +432,7 @@ int print_mi_scn(struct opal_mi_scn *mi) {
 	return 0;
 }
 
-int print_ei_env_scn(struct opal_ei_env_scn *ei_env)
+int print_ei_env_scn(const struct opal_ei_env_scn *ei_env)
 {
 	print_line("Avg Norm corrosion", "0x%08x", ei_env->corrosion);
 	print_line("Avg Norm temp", "0x%04x", ei_env->temperature);
@@ -441,7 +441,7 @@ int print_ei_env_scn(struct opal_ei_env_scn *ei_env)
 	return 0;
 }
 
-int print_ei_scn(struct opal_ei_scn *ei)
+int print_ei_scn(const struct opal_ei_scn *ei)
 {
 	print_header("Environmental Information");
 	print_opal_v6_hdr(ei->v6hdr);
@@ -468,7 +468,7 @@ int print_ei_scn(struct opal_ei_scn *ei)
 	return 0;
 }
 
-int print_ed_scn(struct opal_ed_scn *ed)
+int print_ed_scn(const struct opal_ed_scn *ed)
 {
 	print_header("Extended User Defined Data");
 	print_opal_v6_hdr(ed->v6hdr);
@@ -477,7 +477,7 @@ int print_ed_scn(struct opal_ed_scn *ed)
 	return 0;
 }
 
-int print_dh_scn(struct opal_dh_scn *dh)
+int print_dh_scn(const struct opal_dh_scn *dh)
 {
 	print_header("Dump Locator");
 	print_opal_v6_hdr(dh->v6hdr);

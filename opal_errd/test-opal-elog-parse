@@ -22,6 +22,7 @@ if [ $R -ne 234 ]; then
     exit $R
 fi
 
+echo '0x02' >> $LOG
 $VALGRIND ./opal-elog-parse/opal-elog-parse -d 2 -f $SYSFS/firmware/opal/elog/0x02/raw &>> $LOG 1>&2
 R=$?
 if [ $R -ne 234 ]; then
@@ -29,6 +30,7 @@ if [ $R -ne 234 ]; then
     exit $R
 fi
 
+echo '0x03' >> $LOG
 $VALGRIND ./opal-elog-parse/opal-elog-parse -d 3 -f $SYSFS/firmware/opal/elog/0x03/raw &>> $LOG 1>&2
 R=$?
 if [ $R -ne 234 ]; then
@@ -37,6 +39,7 @@ if [ $R -ne 234 ]; then
 fi
 
 # Next log entry is from FSP A, so has 0x50
+echo '0x50000004' >> $LOG
 $VALGRIND ./opal-elog-parse/opal-elog-parse -d 0x50000004 -f $SYSFS/firmware/opal/elog/0x50000004/raw &>> $LOG 1>&2
 R=$?
 if [ $R -ne 0 ]; then
@@ -45,6 +48,7 @@ if [ $R -ne 0 ]; then
 fi
 
 # Simualted log with a Call Hom esection
+echo '0x50000006' >> $LOG
 $VALGRIND ./opal-elog-parse/opal-elog-parse -d 0x50000006 -f $SYSFS/firmware/opal/elog/0x50000006/raw &>> $LOG 1>&2
 R=$?
 if [ $R -ne 0 ]; then
@@ -54,6 +58,7 @@ fi
 
 
 # Our first "real" elog, this should parse 100% successfully
+echo '0x5055ed2e' >> $LOG
 $VALGRIND ./opal-elog-parse/opal-elog-parse -d 0x5055ed2e -f $SYSFS/firmware/opal/elog/0x5055ed2e/raw &>> $LOG 1>&2
 R=$?
 if [ $R -ne 0 ]; then
@@ -62,6 +67,7 @@ if [ $R -ne 0 ]; then
 fi
 
 # Added another test which contains an SRC section with FRU callouts
+echo '0x5034a000' >> $LOG
 $VALGRIND ./opal-elog-parse/opal-elog-parse -d 0x5034a000 -f $SYSFS/firmware/opal/elog/0x5034a000/raw &>> $LOG 1>&2
 R=$?
 if [ $R -ne 0 ]; then

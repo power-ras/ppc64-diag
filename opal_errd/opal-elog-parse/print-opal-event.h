@@ -3,6 +3,9 @@
 
 #include "libopalevents.h"
 #include "opal-event-data.h"
+#include "opal-event-log.h"
+
+int print_opal_event_log(opal_event_log *log);
 
 int print_opal_v6_hdr(const struct opal_v6_hdr hdr);
 

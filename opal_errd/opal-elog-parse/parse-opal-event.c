@@ -13,10 +13,9 @@ struct header_id elog_hdr_id[] = {
 };
 
 /* parse MTMS section of the log */
-int parse_mt_scn(const struct opal_v6_hdr *hdr,
+int parse_mt_scn(struct opal_mtms_scn *mt, const struct opal_v6_hdr *hdr,
 		const char *buf, int buflen)
 {
-	struct opal_mtms_scn mt;
 	struct opal_mtms_scn *bufmt = (struct opal_mtms_scn*)buf;
 
 	if (buflen < sizeof(struct opal_mtms_scn)) {
@@ -34,11 +33,10 @@ int parse_mt_scn(const struct opal_v6_hdr *hdr,
 		return -EINVAL;
 	}
 
-	mt.v6hdr = *hdr;
-	memcpy(mt.mt.model, bufmt->mt.model, OPAL_SYS_MODEL_LEN);
-	memcpy(mt.mt.serial_no, bufmt->mt.serial_no, OPAL_SYS_SERIAL_LEN);
+	mt->v6hdr = *hdr;
+	memcpy(mt->mt.model, bufmt->mt.model, OPAL_SYS_MODEL_LEN);
+	memcpy(mt->mt.serial_no, bufmt->mt.serial_no, OPAL_SYS_SERIAL_LEN);
 
-	print_mt_scn(&mt);
 	return 0;
 }
 
@@ -276,10 +274,10 @@ int parse_fru_scn(struct opal_fru_scn *fru_scn, const char *buf, int buflen)
 	return offset;
 }
 /* parse SRC section of the log */
-int parse_src_scn(const struct opal_v6_hdr *hdr,
-			const char *buf, int buflen)
+int parse_src_scn(struct opal_src_scn *src,
+		  const struct opal_v6_hdr *hdr,
+		  const char *buf, int buflen)
 {
-	struct opal_src_scn src;
 	struct opal_src_scn *bufsrc = (struct opal_src_scn*)buf;
 
 	int offset = OPAL_SRC_SCN_STATIC_SIZE;
@@ -298,49 +296,48 @@ int parse_src_scn(const struct opal_v6_hdr *hdr,
 		return -EINVAL;
 	}
 
-	src.v6hdr = *hdr;
-	src.version = bufsrc->version;
-	src.flags = bufsrc->flags;
-	src.wordcount = bufsrc->wordcount;
-	src.srclength = be16toh(bufsrc->srclength);
-	src.ext_refcode2 = be32toh(bufsrc->ext_refcode2);
-	src.ext_refcode3 = be32toh(bufsrc->ext_refcode3);
-	src.ext_refcode4 = be32toh(bufsrc->ext_refcode4);
-	src.ext_refcode5 = be32toh(bufsrc->ext_refcode5);
-	src.ext_refcode6 = be32toh(bufsrc->ext_refcode6);
-	src.ext_refcode7 = be32toh(bufsrc->ext_refcode7);
-	src.ext_refcode8 = be32toh(bufsrc->ext_refcode8);
-	src.ext_refcode9 = be32toh(bufsrc->ext_refcode9);
+	src->v6hdr = *hdr;
+	src->version = bufsrc->version;
+	src->flags = bufsrc->flags;
+	src->wordcount = bufsrc->wordcount;
+	src->srclength = be16toh(bufsrc->srclength);
+	src->ext_refcode2 = be32toh(bufsrc->ext_refcode2);
+	src->ext_refcode3 = be32toh(bufsrc->ext_refcode3);
+	src->ext_refcode4 = be32toh(bufsrc->ext_refcode4);
+	src->ext_refcode5 = be32toh(bufsrc->ext_refcode5);
+	src->ext_refcode6 = be32toh(bufsrc->ext_refcode6);
+	src->ext_refcode7 = be32toh(bufsrc->ext_refcode7);
+	src->ext_refcode8 = be32toh(bufsrc->ext_refcode8);
+	src->ext_refcode9 = be32toh(bufsrc->ext_refcode9);
 
-	memcpy(src.primary_refcode, bufsrc->primary_refcode,
+	memcpy(src->primary_refcode, bufsrc->primary_refcode,
 				OPAL_SRC_SCN_PRIMARY_REFCODE_LEN);
 
-	src.fru_count = 0;
-	if (src.flags & OPAL_SRC_ADD_SCN) {
+	src->fru_count = 0;
+	if (src->flags & OPAL_SRC_ADD_SCN) {
 		error = check_buflen(buflen, offset + sizeof(struct opal_src_add_scn_hdr), __func__);
 		if (error)
 			return error;
 
-		src.addhdr.flags = bufsrc->addhdr.flags;
-		src.addhdr.id = bufsrc->addhdr.id;
-		if (src.addhdr.id != OPAL_FRU_SCN_ID) {
+		src->addhdr.flags = bufsrc->addhdr.flags;
+		src->addhdr.id = bufsrc->addhdr.id;
+		if (src->addhdr.id != OPAL_FRU_SCN_ID) {
 			fprintf(stderr, "%s: invalid section id, expecting 0x%x but found"
-					" 0x%x", __func__, OPAL_FRU_SCN_ID, src.addhdr.id);
+					" 0x%x", __func__, OPAL_FRU_SCN_ID, src->addhdr.id);
 			return -EINVAL;
 		}
-		src.addhdr.length = be16toh(bufsrc->addhdr.length);
+		src->addhdr.length = be16toh(bufsrc->addhdr.length);
 		offset += sizeof(struct opal_src_add_scn_hdr);
 
-		while(offset < src.srclength && src.fru_count < OPAL_SRC_FRU_MAX) {
-			error = parse_fru_scn(&(src.fru[src.fru_count]), buf + offset, buflen - offset);
+		while(offset < src->srclength && src->fru_count < OPAL_SRC_FRU_MAX) {
+			error = parse_fru_scn(&(src->fru[src->fru_count]), buf + offset, buflen - offset);
 			if (error < 0)
 				return error;
 			offset += error;
-			src.fru_count++;
+			src->fru_count++;
 		}
 	}
 
-	print_opal_src_scn(&src);
 	return 0;
 }
 
@@ -409,15 +406,14 @@ int parse_priv_hdr_scn(struct opal_priv_hdr_scn *privhdr,
 
 	privhdr->log_entry_id = be32toh(bufhdr->log_entry_id);
 
-	print_opal_priv_hdr_scn(privhdr);
 	return 0;
 }
 
 /* parse_usr_hdr_scn */
-int parse_usr_hdr_scn(const struct opal_v6_hdr *hdr,
-				const char *buf, int buflen, int *is_error)
+int parse_usr_hdr_scn(struct opal_usr_hdr_scn *usrhdr,
+		      const struct opal_v6_hdr *hdr,
+		      const char *buf, int buflen, int *is_error)
 {
-	struct opal_usr_hdr_scn usrhdr;
 	struct opal_usr_hdr_scn *bufhdr = (struct opal_usr_hdr_scn*)buf;
 
 	if (buflen < sizeof(struct opal_usr_hdr_scn)) {
@@ -435,22 +431,23 @@ int parse_usr_hdr_scn(const struct opal_v6_hdr *hdr,
 		return -EINVAL;
 	}
 
-	usrhdr.v6hdr = *hdr;
-	usrhdr.subsystem_id = bufhdr->subsystem_id;
-	usrhdr.event_data = bufhdr->event_data;
-	usrhdr.event_severity = bufhdr->event_severity;
-	*is_error = !usrhdr.event_severity;
-	usrhdr.event_type = bufhdr->event_type;
-	usrhdr.problem_domain = bufhdr->problem_domain;
-	usrhdr.problem_vector = bufhdr->problem_vector;
-	usrhdr.action = be16toh(bufhdr->action);
+	usrhdr->v6hdr = *hdr;
+	usrhdr->subsystem_id = bufhdr->subsystem_id;
+	usrhdr->event_data = bufhdr->event_data;
+	usrhdr->event_severity = bufhdr->event_severity;
+	*is_error = !usrhdr->event_severity;
+	usrhdr->event_type = bufhdr->event_type;
+	usrhdr->problem_domain = bufhdr->problem_domain;
+	usrhdr->problem_vector = bufhdr->problem_vector;
+	usrhdr->action = be16toh(bufhdr->action);
 
-	print_opal_usr_hdr_scn(&usrhdr);
 	return 0;
 }
 
 /* Extended User Header Section */
-static int parse_eh_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+static int parse_eh_scn(struct opal_eh_scn **r_eh,
+			const struct opal_v6_hdr *hdr,
+			const char *buf, int buflen)
 {
 	struct opal_eh_scn *eh;
 	struct opal_eh_scn *bufeh = (struct opal_eh_scn*)buf;
@@ -459,10 +456,13 @@ static int parse_eh_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	if (!eh)
 		return -ENOMEM;
 
+	*r_eh = eh;
+
 	if (buflen < sizeof(struct opal_eh_scn)) {
 		fprintf(stderr, "%s: corrupted, expected length >= %lu, got %u\n",
 			__func__,
 			sizeof(struct opal_eh_scn), buflen);
+		free(eh);
 		return -EINVAL;
 	}
 
@@ -481,16 +481,18 @@ static int parse_eh_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 		fprintf(stderr, "%s: corrupted EH section, opalsymid is larger than header"
 				" specified length %lu > %u", __func__,
 				sizeof(struct opal_eh_scn) + strlen(bufeh->opalsymid), hdr->length);
+		free(eh);
 		return -EINVAL;
 	}
 	strcpy(eh->opalsymid, bufeh->opalsymid);
 
-	print_eh_scn(eh);
 	return 0;
 }
 
 /* Call Home Section */
-static int parse_ch_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+static int parse_ch_scn(struct opal_ch_scn **r_ch,
+			struct opal_v6_hdr *hdr,
+			const char *buf, int buflen)
 {
 	struct opal_ch_scn *ch;
 	struct opal_ch_scn *bufch = (struct opal_ch_scn*)buf;
@@ -499,10 +501,13 @@ static int parse_ch_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	if (!ch)
 		return -ENOMEM;
 
+	*r_ch = ch;
+
 	if (buflen < sizeof(struct opal_ch_scn)) {
 		fprintf(stderr, "%s: corrupted, expected length >= %lu, got %u\n",
 			__func__,
 			sizeof(struct opal_ch_scn), buflen);
+		free(ch);
 		return -EINVAL;
 	}
 
@@ -510,6 +515,7 @@ static int parse_ch_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 		fprintf(stderr, "%s: corrupted, call home comment is longer than %u,"
 			  " got %lu\n", __func__, OPAL_CH_COMMENT_MAX_LEN,
 			  hdr->length - sizeof(struct opal_v6_hdr));
+		free(ch);
 		return -EINVAL;
 	}
 
@@ -519,12 +525,12 @@ static int parse_ch_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	/* Make sure there is a null byte at the end */
 	ch->comment[hdr->length - sizeof(struct opal_v6_hdr)] = '\0';
 
-	print_ch_scn(ch);
 	return 0;
 }
 
-static int parse_ud_scn(const struct opal_v6_hdr *hdr,
-				const char *buf, int buflen)
+static int parse_ud_scn(struct opal_ud_scn **r_ud,
+			const struct opal_v6_hdr *hdr,
+			const char *buf, int buflen)
 {
 	struct opal_ud_scn *ud;
 	struct opal_ud_scn *bufud = (struct opal_ud_scn *)buf;
@@ -540,16 +546,18 @@ static int parse_ud_scn(const struct opal_v6_hdr *hdr,
 	if (!ud)
 		return -ENOMEM;
 
+	*r_ud = ud;
+
 	ud->v6hdr = *hdr;
 	memcpy(ud->data, bufud->data, hdr->length - sizeof(struct opal_v6_hdr));
-	print_ud_scn(ud);
+
 	return 0;
 }
 
-static int parse_hm_scn(const struct opal_v6_hdr *hdr,
-				 const char *buf, int buflen)
+static int parse_hm_scn(struct opal_hm_scn *hm,
+			const struct opal_v6_hdr *hdr,
+			const char *buf, int buflen)
 {
-	struct opal_hm_scn hm;
 	struct opal_hm_scn *bufhm = (struct opal_hm_scn *)buf;
 
 	if (buflen < sizeof(struct opal_hm_scn)) {
@@ -559,18 +567,17 @@ static int parse_hm_scn(const struct opal_v6_hdr *hdr,
 		return -EINVAL;
 	}
 
-	hm.v6hdr = *hdr;
-	memcpy(hm.mt.model, bufhm->mt.model, OPAL_SYS_MODEL_LEN);
-	memcpy(hm.mt.serial_no, bufhm->mt.serial_no, OPAL_SYS_SERIAL_LEN);
+	hm->v6hdr = *hdr;
+	memcpy(hm->mt.model, bufhm->mt.model, OPAL_SYS_MODEL_LEN);
+	memcpy(hm->mt.serial_no, bufhm->mt.serial_no, OPAL_SYS_SERIAL_LEN);
 
-	print_hm_scn(&hm);
 	return 0;
 }
 
-static int parse_ep_scn(const struct opal_v6_hdr *hdr,
-				 const char *buf, int buflen)
+static int parse_ep_scn(struct opal_ep_scn *ep,
+			const struct opal_v6_hdr *hdr,
+			const char *buf, int buflen)
 {
-	struct opal_ep_scn ep;
 	struct opal_ep_scn *bufep = (struct opal_ep_scn *)buf;
 
 	if (buflen < sizeof(struct opal_ep_scn)) {
@@ -580,19 +587,18 @@ static int parse_ep_scn(const struct opal_v6_hdr *hdr,
 		return -EINVAL;
 	}
 
-	ep.v6hdr = *hdr;
+	ep->v6hdr = *hdr;
 
-	ep.value = bufep->value;
-	ep.modifier = bufep->modifier;
-	ep.ext_modifier = be16toh(bufep->ext_modifier);
-	ep.reason = be32toh(bufep->reason);
-
-	print_ep_scn(&ep);
+	ep->value = bufep->value;
+	ep->modifier = bufep->modifier;
+	ep->ext_modifier = be16toh(bufep->ext_modifier);
+	ep->reason = be32toh(bufep->reason);
 
 	return 0;
 }
 
-static int parse_sw_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+static int parse_sw_scn(struct opal_sw_scn **r_sw,
+			struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {
 	struct opal_sw_scn *sw;
 	struct opal_sw_scn *swbuf = (struct opal_sw_scn *)buf;
@@ -601,6 +607,7 @@ static int parse_sw_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	if(!sw)
 		return -ENOMEM;
 
+	*r_sw = sw;
 
 	if (hdr->version == 1) {
 		if (buflen < OPAL_SW_V1_SIZE || hdr->length < OPAL_SW_V1_SIZE) {
@@ -638,11 +645,11 @@ static int parse_sw_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 		return -EINVAL;
 	}
 
-	print_sw_scn(sw);
 	return 0;
 }
 
-static int parse_lp_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+static int parse_lp_scn(struct opal_lp_scn **r_lp,
+			struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {
 	struct opal_lp_scn *lp;
 	struct opal_lp_scn *lpbuf = (struct opal_lp_scn *)buf;
@@ -662,6 +669,8 @@ static int parse_lp_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 		return -ENOMEM;
 	}
 
+	*r_lp = lp;
+
 	lp->v6hdr = *hdr;
 	lp->primary = be16toh(lpbuf->primary);
 	lp->length_name = lpbuf->length_name;
@@ -673,6 +682,7 @@ static int parse_lp_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 		fprintf(stderr, "%s: corrupted, expected length => %u, got %u",
 				__func__, expected_len,
 				buflen < hdr->length ? buflen : hdr->length);
+		free(lp);
 		return -EINVAL;
 	}
 	memcpy(lp->name, lpbuf->name, lp->length_name);
@@ -682,6 +692,7 @@ static int parse_lp_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 		fprintf(stderr, "%s: corrupted, expected length => %u, got %u",
 				__func__, expected_len,
 				buflen < hdr->length ? buflen : hdr->length);
+		free(lp);
 		return -EINVAL;
 	}
 
@@ -695,9 +706,9 @@ static int parse_lp_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	return 0;
 }
 
-static int parse_lr_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+static int parse_lr_scn(struct opal_lr_scn *lr,
+			struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {
-	struct opal_lr_scn lr;
 	struct opal_lr_scn *lrbuf = (struct opal_lr_scn *)buf;
 
 	if (buflen < sizeof(struct opal_lr_scn)) {
@@ -706,19 +717,19 @@ static int parse_lr_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 		return -EINVAL;
 	}
 
-	lr.v6hdr = *hdr;
-	lr.res_type = lrbuf->res_type;
-	lr.capacity = be16toh(lrbuf->capacity);
-	lr.shared = be32toh(lrbuf->shared);
-	lr.memory_addr = be32toh(lrbuf->memory_addr);
+	lr->v6hdr = *hdr;
+	lr->res_type = lrbuf->res_type;
+	lr->capacity = be16toh(lrbuf->capacity);
+	lr->shared = be32toh(lrbuf->shared);
+	lr->memory_addr = be32toh(lrbuf->memory_addr);
 
-	print_lr_scn(&lr);
 	return 0;
 }
 
-static int parse_ie_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+static int parse_ie_scn(struct opal_ie_scn *ie,
+			struct opal_v6_hdr *hdr,
+			const char *buf, int buflen)
 {
-	struct opal_ie_scn ie;
 	struct opal_ie_scn *iebuf = (struct opal_ie_scn *)buf;
 
 	if (buflen < sizeof(struct opal_ie_scn) - IE_DATA_MAX) {
@@ -727,38 +738,38 @@ static int parse_ie_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 		return -EINVAL;
 	}
 
-	ie.v6hdr = *hdr;
-	ie.type = iebuf->type;
-	ie.rpc_len = iebuf->rpc_len;
-	ie.scope = iebuf->scope;
-	ie.subtype = iebuf->subtype;
-	ie.drc = be32toh(iebuf->drc);
-	if (ie.type == IE_TYPE_RPC_PASS_THROUGH) {
-		if (buflen < sizeof(struct opal_ie_scn) - IE_DATA_MAX + ie.rpc_len) {
+	ie->v6hdr = *hdr;
+	ie->type = iebuf->type;
+	ie->rpc_len = iebuf->rpc_len;
+	ie->scope = iebuf->scope;
+	ie->subtype = iebuf->subtype;
+	ie->drc = be32toh(iebuf->drc);
+	if (ie->type == IE_TYPE_RPC_PASS_THROUGH) {
+		if (buflen < sizeof(struct opal_ie_scn) - IE_DATA_MAX + ie->rpc_len) {
 			fprintf(stderr, "%s: corrupted, exptected length => %lu, got %u",
 					__func__, sizeof(struct opal_ie_scn) - IE_DATA_MAX +
-						ie.rpc_len, buflen);
+						ie->rpc_len, buflen);
 			return -EINVAL;
 		}
-		memcpy(ie.data.rpc, iebuf->data.rpc, ie.rpc_len);
+		memcpy(ie->data.rpc, iebuf->data.rpc, ie->rpc_len);
 	}
-	if (ie.subtype == IE_SUBTYPE_PLAT_MAX_CHANGE) {
+	if (ie->subtype == IE_SUBTYPE_PLAT_MAX_CHANGE) {
 		if (buflen < sizeof(struct opal_ie_scn) - IE_DATA_MAX + sizeof(uint64_t)) {
 			fprintf(stderr, "%s: corrupted, exptected length => %lu, got %u",
 					__func__, sizeof(struct opal_ie_scn) - IE_DATA_MAX +
 					sizeof(uint64_t), buflen);
 			return -EINVAL;
 		}
-		ie.data.max = be64toh(iebuf->data.max);
+		ie->data.max = be64toh(iebuf->data.max);
 	}
 
-	print_ie_scn(&ie);
 	return 0;
 }
 
-static int parse_mi_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+static int parse_mi_scn(struct opal_mi_scn *mi,
+			struct opal_v6_hdr *hdr,
+			const char *buf, int buflen)
 {
-	struct opal_mi_scn mi;
 	struct opal_mi_scn *mibuf = (struct opal_mi_scn *)buf;
 
 	if (buflen < sizeof(struct opal_mi_scn)) {
@@ -767,14 +778,15 @@ static int parse_mi_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 		return -EINVAL;
 	}
 
-	mi.v6hdr = *hdr;
-	mi.flags = be32toh(mibuf->flags);
+	mi->v6hdr = *hdr;
+	mi->flags = be32toh(mibuf->flags);
 
-	print_mi_scn(&mi);
 	return 0;
 }
 
-static int parse_ei_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+static int parse_ei_scn(struct opal_ei_scn **r_ei,
+			struct opal_v6_hdr *hdr,
+			const char *buf, int buflen)
 {
 	struct opal_ei_scn *ei;
 	struct opal_ei_scn *eibuf = (struct opal_ei_scn *)buf;
@@ -786,6 +798,8 @@ static int parse_ei_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	ei = (struct opal_ei_scn *) malloc(hdr->length);
 	if (!ei)
 		return -ENOMEM;
+
+	*r_ei = ei;
 
 	ei->v6hdr = *hdr;
 	ei->g_timestamp = be64toh(eibuf->g_timestamp);
@@ -812,11 +826,12 @@ static int parse_ei_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 		ei->readings[i].rate = be16toh(eibuf->readings[i].rate);
 	}
 
-	print_ei_scn(ei);
 	return 0;
 }
 
-static int parse_ed_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+static int parse_ed_scn(struct opal_ed_scn **r_ed,
+			struct opal_v6_hdr *hdr,
+			const char *buf, int buflen)
 {
 	struct opal_ed_scn *ed;
 	struct opal_ed_scn *edbuf = (struct opal_ed_scn *)buf;
@@ -833,37 +848,35 @@ static int parse_ed_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
 	ed->creator_id = edbuf->creator_id;
 	memcpy(ed->user_data, edbuf->user_data, hdr->length - 12);
 
-	print_ed_scn(ed);
 	return 0;
 }
 
-static int parse_dh_scn(struct opal_v6_hdr *hdr, const char *buf, int buflen)
+static int parse_dh_scn(struct opal_dh_scn *dh,
+			struct opal_v6_hdr *hdr,
+			const char *buf, int buflen)
 {
-	struct opal_dh_scn dh;
 	struct opal_dh_scn *dhbuf = (struct opal_dh_scn *)buf;
 
 	if (check_buflen(buflen, sizeof(struct opal_dh_scn) - DH_DUMP_STR_MAX,
 				__func__) < 0)
 		return -EINVAL;
 
-	dh.v6hdr = *hdr;
-	dh.dump_id = be32toh(dhbuf->dump_id);
-	dh.flags = dhbuf->flags;
-	dh.length_dump_os = dhbuf->length_dump_os;
-	dh.dump_size = be64toh(dhbuf->dump_size);
-	if (dh.flags & DH_FLAG_DUMP_HEX) {
+	dh->v6hdr = *hdr;
+	dh->dump_id = be32toh(dhbuf->dump_id);
+	dh->flags = dhbuf->flags;
+	dh->length_dump_os = dhbuf->length_dump_os;
+	dh->dump_size = be64toh(dhbuf->dump_size);
+	if (dh->flags & DH_FLAG_DUMP_HEX) {
 		if (check_buflen(buflen, sizeof(struct opal_dh_scn) + sizeof(uint32_t),
 					__func__) < 0)
 			return -EINVAL;
-		dh.shared.dump_hex = be32toh(dh.shared.dump_hex);
+		dh->shared.dump_hex = be32toh(dh->shared.dump_hex);
 	} else { /* therefor it is in ascii */
-		if (check_buflen(buflen, sizeof(struct opal_dh_scn) + dh.length_dump_os,
+		if (check_buflen(buflen, sizeof(struct opal_dh_scn) + dh->length_dump_os,
 					__func__) < 0)
 			return -EINVAL;
-		memcpy(dh.shared.dump_str, dhbuf->shared.dump_str, dh.length_dump_os);
+		memcpy(dh->shared.dump_str, dhbuf->shared.dump_str, dh->length_dump_os);
 	}
-
-	print_dh_scn(&dh);
 	return 0;
 }
 
@@ -971,41 +984,102 @@ int parse_opal_event(char *buf, int buflen)
 		}
 
 		if (strncmp(hdr.id, "PH", 2) == 0) {
-			parse_priv_hdr_scn(&ph, &hdr, buf, buflen);
+			if (parse_priv_hdr_scn(&ph, &hdr, buf, buflen) == 0) {
+				print_opal_priv_hdr_scn(&ph);
+			}
 		} else if (strncmp(hdr.id, "UH", 2) == 0) {
-			parse_usr_hdr_scn(&hdr, buf, buflen, &is_error);
+			struct opal_usr_hdr_scn usr;
+			if (parse_usr_hdr_scn(&usr, &hdr, buf, buflen,
+					      &is_error) == 0) {
+				print_opal_usr_hdr_scn(&usr);
+			}
 		} else if (strncmp(hdr.id, "PS", 2) == 0) {
-			parse_src_scn(&hdr, buf, buflen);
+			struct opal_src_scn src;
+			if (parse_src_scn(&src, &hdr, buf, buflen) == 0) {
+				print_opal_src_scn(&src);
+			}
 		} else if (strncmp(hdr.id, "EH", 2) == 0) {
-			parse_eh_scn(&hdr, buf, buflen);
+			struct opal_eh_scn *eh;
+			if (parse_eh_scn(&eh, &hdr, buf, buflen) == 0) {
+				print_eh_scn(eh);
+				free(eh);
+			}
 		} else if (strncmp(hdr.id, "MT", 2) == 0) {
-			parse_mt_scn(&hdr, buf, buflen);
+			struct opal_mtms_scn mt;
+			if (parse_mt_scn(&mt, &hdr, buf, buflen) == 0) {
+				print_mt_scn(&mt);
+			}
 		} else if (strncmp(hdr.id, "SS", 2) == 0) {
-			parse_src_scn(&hdr, buf, buflen);
+			struct opal_src_scn src;
+			if (parse_src_scn(&src, &hdr, buf, buflen) == 0) {
+				print_opal_src_scn(&src);
+			}
 		} else if (strncmp(hdr.id, "DH", 2) == 0) {
-			parse_dh_scn(&hdr, buf, buflen);
+			struct opal_dh_scn dh;
+			if (parse_dh_scn(&dh, &hdr, buf, buflen) == 0) {
+				print_dh_scn(&dh);
+			}
 		} else if (strncmp(hdr.id, "SW", 2) == 0) {
-			parse_sw_scn(&hdr, buf, buflen);
+			struct opal_sw_scn *sw;
+			if (parse_sw_scn(&sw, &hdr, buf, buflen) == 0) {
+				print_sw_scn(sw);
+				free(sw);
+			}
 		} else if (strncmp(hdr.id, "LP", 2) == 0) {
-			parse_lp_scn(&hdr, buf, buflen);
+			struct opal_lp_scn *lp;
+			if (parse_lp_scn(&lp, &hdr, buf, buflen) == 0) {
+				print_lp_scn(lp);
+				free(lp);
+			}
 		} else if (strncmp(hdr.id, "LR", 2) == 0) {
-			parse_lr_scn(&hdr, buf, buflen);
+			struct opal_lr_scn lr;
+			if (parse_lr_scn(&lr, &hdr, buf, buflen) == 0) {
+				print_lr_scn(&lr);
+			}
 		} else if (strncmp(hdr.id, "HM", 2) == 0) {
-			parse_hm_scn(&hdr, buf, buflen);
+			struct opal_hm_scn hm;
+			if (parse_hm_scn(&hm, &hdr, buf, buflen) == 0) {
+				print_hm_scn(&hm);
+			}
 		} else if (strncmp(hdr.id, "EP", 2) == 0) {
-			parse_ep_scn(&hdr, buf, buflen);
+			struct opal_ep_scn ep;
+			if (parse_ep_scn(&ep, &hdr, buf, buflen) == 0) {
+				print_ep_scn(&ep);
+			}
 		} else if (strncmp(hdr.id, "IE", 2) == 0) {
-			parse_ie_scn(&hdr, buf, buflen);
+			struct opal_ie_scn ie;
+			if (parse_ie_scn(&ie, &hdr, buf, buflen) == 0) {
+				print_ie_scn(&ie);
+			}
 		} else if (strncmp(hdr.id, "MI", 2) == 0) {
-			parse_mi_scn(&hdr, buf, buflen);
+			struct opal_mi_scn mi;
+			if (parse_mi_scn(&mi, &hdr, buf, buflen) == 0) {
+				print_mi_scn(&mi);
+			}
 		} else if (strncmp(hdr.id, "CH", 2) == 0) {
-			parse_ch_scn(&hdr, buf, buflen);
+			struct opal_ch_scn *ch;
+			if (parse_ch_scn(&ch, &hdr, buf, buflen) == 0) {
+				print_ch_scn(ch);
+				free(ch);
+			}
 		} else if (strncmp(hdr.id, "UD", 2) == 0) {
-			parse_ud_scn(&hdr, buf, buflen);
+			struct opal_ud_scn *ud;
+			if (parse_ud_scn(&ud, &hdr, buf, buflen) == 0) {
+				print_ud_scn(ud);
+				free(ud);
+			}
 		} else if (strncmp(hdr.id, "EI", 2) == 0) {
-			parse_ei_scn(&hdr, buf, buflen);
+			struct opal_ei_scn *ei;
+			if (parse_ei_scn(&ei, &hdr, buf, buflen) == 0) {
+				print_ei_scn(ei);
+				free(ei);
+			}
 		} else if (strncmp(hdr.id, "ED", 2) == 0) {
-			parse_ed_scn(&hdr, buf, buflen);
+			struct opal_ed_scn *ed;
+			if (parse_ed_scn(&ed, &hdr, buf, buflen) == 0) {
+				print_ed_scn(ed);
+				free(ed);
+			}
 		}
 
 		buf += hdr.length;

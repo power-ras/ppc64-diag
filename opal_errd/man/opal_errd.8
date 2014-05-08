@@ -1,0 +1,51 @@
+.TH OPAL_ERRD 8 2014-05-01 Linux ppc64-diag
+.SH NAME
+opal_errd \- Daemon to read/parse OPAL platform error(s)/event(s)
+.SH SYNOPSIS
+.B opal_errd
+[\fB\-e\fR \fIfile\fR]
+[\fB\-m\fR \fImax\fR]
+[\fB\-o\fR \fIdir\fR]
+[\fB\-s\fR \fIsysfs\fR]
+[\fB\-D\fR | \fB-w\fR]
+.SH DESCRIPTION
+Reads OPAL platform logs from sysfs and writes them to individual files under /var/log/opal-elog.
+Parses required fields from log and writes one line summary to syslog. Also acknowledges platform
+log.
+.SH OPTIONS
+.TP
+.BR \-e " " \fIfile\fR
+Specify custom path to OPAL dump extractor tool (default: /usr/sbin/extract_opal_dump)
+.TP
+.BR \-m " " \fImax\fR
+Maximum number of dumps of a specific type to be retained
+.TP
+.BR \-o " " \fIdir\fR
+Directory to save error/event logs (default: /var/log/opal-elog)
+.TP
+.BR \-s " " \fIsysfs\fR
+Custom path to sysfs
+.TP
+.BR \-D
+Don't daemonize, just run once
+.TP
+.BR \-w
+Watch for new events (default when daemon)
+.TP
+.BR \-h
+Print the usage message and exit
+.SH FILES
+.TP
+/sys/firmware/opal/dump
+Directory to find dump files from OPAL
+.TP
+/sys/firmware/opal/elog
+Directory to find error log files from OPAL
+.TP
+/var/log/opal-elog
+Default directory to store error logs
+.TP
+/usr/sbin/extract_opal_dump
+Default path to dump extractor tool
+.SH SEE ALSO
+.BR opal-elog-dump (8)

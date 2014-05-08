@@ -1,0 +1,37 @@
+.TH opal-elog-parse 8 2014-05-01 Linux ppc64-diag
+.SH NAME
+opal-elog-parse \- Parse OPAL platform error logs
+.SH SYNOPSIS
+.B opal-elog-parse
+{ \fB\-d\fR \fIentryid\fR | \fB\-a \fR| \fB-l \fR| \fB\-s \fR| \fB\-h\fR }
+[\fB\-p\fR \fIdir\fR | \fB\-f\fR \fIfile\fR]
+.SH DESCPTION
+Display OPAL platform error logs
+.SH OPTIONS
+.TP
+.BR \-d " " \fIentryid\fR
+Log entry to parse and display
+.TP
+.BR \-a \fR
+Display all error log entry details
+.TP
+.BR \-l \fR
+List all error logs
+.TP
+.BR \-s \fR
+List all service action logs
+.TP
+.BR \-h \fR
+Print the usage message and exit
+.TP
+.BR \fB-p " " \fIdir\fR
+Use dir as platform log directory (default: /var/log/opa-elog/)
+.TP
+.BR \-f " " \fIfile\fR
+Use individual file as platform log
+.SH FILES
+.TP
+.BR /var/log/opal-elog
+Default directory to store error logs
+.SH SEE ALSO
+.BR opal_errd (8)

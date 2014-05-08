@@ -1,5 +1,5 @@
 /**
- * @file	elog-daemon.c
+ * @file	opal_errd.c
  * @brief	Daemon to read/parse OPAL error/events
  *
  * Copyright (C) 2014 IBM Corporation

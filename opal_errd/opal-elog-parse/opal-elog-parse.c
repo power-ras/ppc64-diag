@@ -390,6 +390,8 @@ int main(int argc, char *argv[])
 		ret = eloglist(1);
 		break;
 	default:
+		fprintf(stderr, "No operation specified\n");
+		print_usage(argv[0]);
 		ret = -1;
 		break;
 	}

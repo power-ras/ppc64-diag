@@ -91,7 +91,8 @@ char *opt_extract_opal_dump_cmd = DEFAULT_EXTRACT_DUMP_CMD;
 #define OPAL_DIAGNOSTICS_LOG	0x60
 #define OPAL_SYMPTOM_LOG	0x70
 
-#define ELOG_ACTION_FLAG	0xa800
+#define ELOG_ACTION_FLAG_SERVICE	0x8000
+#define ELOG_ACTION_FLAG_CALL_HOME	0x0800
 
 volatile int terminate;
 
@@ -234,8 +235,11 @@ static int parse_log(char *buffer, size_t bufsz)
 	parse = get_severity_desc(severity);
 
 	action = be16toh(*(uint16_t *)(buffer + ELOG_ACTION_OFFSET));
-	if ((action & ELOG_ACTION_FLAG) == ELOG_ACTION_FLAG)
+	if ((action & ELOG_ACTION_FLAG_SERVICE) &&
+	    (action & ELOG_ACTION_FLAG_CALL_HOME))
 		parse_action = "Service action and call home required";
+	else if ((action & ELOG_ACTION_FLAG_SERVICE))
+		parse_action = "Service action required";
 	else
 		parse_action = "No service action required";
 
@@ -264,6 +268,11 @@ static int parse_log(char *buffer, size_t bufsz)
 
 	syslog(LOG_NOTICE, "LID[%x]::SRC[%s]::%s::%s::%s\n",
 	       logid, src, failingsubsys, parse, parse_action);
+
+	if ((action & ELOG_ACTION_FLAG_SERVICE) &&
+	    !(action & ELOG_ACTION_FLAG_CALL_HOME))
+		syslog(LOG_NOTICE, "Run \'opal-elog-parse -d 0x%x\' "
+		       "for the details.\n", logid);
 
 	return 0;
 }

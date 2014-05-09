@@ -57,8 +57,10 @@ static int platform_log_fd = -1;
 
 void print_usage(char *command)
 {
-	printf("Usage: %s { -d  <entryid> | -a | -l | -s | -h } [ -p dir | -f file]\n"
+	printf("Usage: %s { -d  <entryid> | -e <entryid> | -a | -l | -s | -h }"
+		  " [ -p dir | -f file]\n"
 		"\t-d: Display error log entry details\n"
+		"\t-e: Erase error log entry details (cannot be combined with -f)\n"
 	        "\t-a: Display all error log entry details\n"
 		"\t-l: list all error logs\n"
 	        "\t-p  dir: use dir as platform log directory (default %s)\n"
@@ -82,6 +84,60 @@ static int file_filter(const struct dirent *d)
            return 1;
 
         return 0;
+}
+
+uint32_t validate_eid_str(const char *eid)
+{
+	char *strtol_end;
+	uint32_t rc = strtoul(eid, &strtol_end, 0);
+
+	/* strtoul parse didn't the entire eid */
+	if (*strtol_end != '\0' || *eid == '\0')
+		rc = 0;
+
+	return rc;
+}
+
+char *get_elog_filename_int(uint32_t eid)
+{
+	struct dirent **filelist;
+	char *ret_str = NULL;
+	char *feid;
+	int i;
+	int nfiles = scandir(opt_platform_dir, &filelist, file_filter, alphasort);
+
+	if (nfiles < 1)
+		return NULL;
+
+	for (i = 0; i < nfiles; i++) {
+		if (ret_str) {
+			free(filelist[i]);
+			continue;
+		}
+
+		feid = strchr(filelist[i]->d_name, '-');
+		if (!feid) {
+			free(filelist[i]);
+			continue;
+		}
+
+		feid++;
+		if (eid == strtoul(feid, 0, 0))
+			ret_str = strdup(filelist[i]->d_name);
+
+		free(filelist[i]);
+	}
+	free(filelist);
+	return ret_str;
+}
+
+char *get_elog_filename_str(const char *eid_str)
+{
+	int eid = validate_eid_str(eid_str);
+	if (eid == 0)
+		return NULL;
+
+	return get_elog_filename_int(eid);
 }
 
 int read_elog(char path[], char **buf){
@@ -326,6 +382,19 @@ int eloglist(uint32_t service_flag)
 	return ret;
 }
 
+int delete_elog(const char *eid)
+{
+	int error = -1;
+	char *f_name = get_elog_filename_str(eid);
+	if (f_name) {
+		error = chdir(opt_platform_dir);
+		if (!error)
+			error = remove(f_name);
+		free(f_name);
+	}
+	return error;
+}
+
 int main(int argc, char *argv[])
 {
 	uint32_t eid = 0;
@@ -334,10 +403,16 @@ int main(int argc, char *argv[])
 	char do_operation = '\0';
 	const char *eid_opt;
 
-	while ((opt = getopt(argc, argv, "ad:lshf:p:")) != -1) {
+	while ((opt = getopt(argc, argv, "ad:lshf:p:e:")) != -1) {
 		switch (opt) {
+		case 'e':
 		case 'd':
 			eid_opt = optarg;
+			eid = validate_eid_str(eid_opt);
+			if (eid == 0) {
+				print_usage(argv[0]);
+				exit(EXIT_FAILURE);
+			}
 			/* fallthrough */
 		case 'l':
 		case 's':
@@ -371,17 +446,26 @@ int main(int argc, char *argv[])
 	}
 
 	if (arg_cnt > 1) {
-		fprintf(stderr, "Only one operation (-d | -a | -l | -s) "
+		fprintf(stderr, "Only one operation (-d | -a | -l | -s | -e) "
 			"can be selected at any one time.\n");
 		print_usage(argv[0]);
 		return -1;
 	}
+
+	if (do_operation == 'e' && opt_display_file) {
+		fprintf(stderr, "Cannot combine -e and -f flags\n");
+		print_usage(argv[0]);
+		return -1;
+	}
+
 	switch (do_operation) {
 	case 'l':
 		ret = eloglist(0);
 		break;
+	case 'e':
+		ret = delete_elog(eid_opt);
+		break;
 	case 'd':
-		eid = strtoul(eid_opt, 0, 0);
 		/* fallthrough */
 	case 'a':
 		ret = elogdisplayentry(eid);

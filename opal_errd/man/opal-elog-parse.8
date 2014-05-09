@@ -3,7 +3,7 @@
 opal-elog-parse \- Parse OPAL platform error logs
 .SH SYNOPSIS
 .B opal-elog-parse
-{ \fB\-d\fR \fIentryid\fR | \fB\-a \fR| \fB-l \fR| \fB\-s \fR| \fB\-h\fR }
+{ \fB\-d\fR \fIentryid\fR | \fB\-e\fR \fIentryid\fR | \fB\-a \fR| \fB-l \fR| \fB\-s \fR| \fB\-h\fR }
 [\fB\-p\fR \fIdir\fR | \fB\-f\fR \fIfile\fR]
 .SH DESCPTION
 Display OPAL platform error logs
@@ -11,6 +11,9 @@ Display OPAL platform error logs
 .TP
 .BR \-d " " \fIentryid\fR
 Log entry to parse and display
+.TP
+.BR \-e " " \fIentryid\fR
+Erase error log entry details (cannot be combined with \fB\-f\fR)
 .TP
 .BR \-a \fR
 Display all error log entry details

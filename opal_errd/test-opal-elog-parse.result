@@ -5,7 +5,8 @@ ELOG[XXXX]: LID[3]::SRC[TESTSRC3]::Platform Firmware::Predictive Error::Service 
 ELOG[XXXX]: LID[5]::SRC[TESTSRC5]::Not Applicable::Symptom::Service action and call home required
 ELOG[XXXX]: LID[50000004]::SRC[TESTSRC4]::Software::Unrecoverable Error::Service action and call home required
 ELOG[XXXX]: LID[50000006]::SRC[CALLHOME]::Power/Cooling System::Error on diag test::No service action required
-ELOG[XXXX]: LID[5034a000]::SRC[11007201]::External Environment::Predictive Error::No service action required
+ELOG[XXXX]: LID[5034a000]::SRC[11007201]::External Environment::Predictive Error::Service action required
+ELOG[XXXX]: Run 'opal-elog-parse -d 0x5034a000' for the details.
 ELOG[XXXX]: LID[5055ed2e]::SRC[B182950C]::Platform Firmware::Informational Event::No service action required
 |------------------------------------------------------------------------------|
 |ID         SRC      Date       Time      Creator           Event Severity     |

@@ -57,16 +57,18 @@ static int platform_log_fd = -1;
 
 void print_usage(char *command)
 {
-	printf("Usage: %s { -d  <entryid> | -e <entryid> | -a | -l | -s | -h }"
-		  " [ -p dir | -f file]\n"
-		"\t-d: Display error log entry details\n"
-		"\t-e: Erase error log entry details (cannot be combined with -f)\n"
-	        "\t-a: Display all error log entry details\n"
-		"\t-l: list all error logs\n"
-	        "\t-p  dir: use dir as platform log directory (default %s)\n"
-		"\t-s: list all service action logs\n"
-	        "\t-f  file: use individual file as platform log\n"
-	        "\t-h: print the usage\n", command, DEFAULT_opt_platform_dir);
+	printf("%s - Parse OPAL plaform error logs\n\n", command);
+	printf("Usage: %s { -d  <logid> | -e <logid> | -a | -l | -s | -h }"
+			" [ -p dir | -f file]\n\n"
+			"\t-a       - Display all error log entry details\n"
+			"\t-d logid - Display error log entry details\n"
+			"\t-e logid - Erase error log entry details (cannot be combined with -f)\n"
+			"\t-l       - List all error logs\n"
+			"\t-s       - List all service action logs\n"
+			"\t-p dir   - Use dir as platform log directory (default %s)\n"
+			"\t-f file  - Use individual file as platform log\n"
+			"\t-h       - Print this message and exit\n",
+			command, DEFAULT_opt_platform_dir);
 }
 
 static int file_filter(const struct dirent *d)
@@ -410,6 +412,7 @@ int main(int argc, char *argv[])
 			eid_opt = optarg;
 			eid = validate_eid_str(eid_opt);
 			if (eid == 0) {
+				fprintf(stderr, "Invalid logid '%s'\n", optarg);
 				print_usage(argv[0]);
 				exit(EXIT_FAILURE);
 			}

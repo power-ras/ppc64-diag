@@ -96,6 +96,13 @@ char *opt_extract_opal_dump_cmd = DEFAULT_EXTRACT_DUMP_CMD;
 
 volatile int terminate;
 
+/* Safe to ignore sig, this only gets called on SIGTERM */
+static void term_handler(int sig)
+{
+	terminate = 1;
+	syslog(LOG_NOTICE, "Received SIGTERM, terminating\n");
+}
+
 /* Aggregate severities into group */
 static const char *get_severity_desc(uint8_t severity)
 {
@@ -550,6 +557,7 @@ int main(int argc, char *argv[])
 	fds[INOTIFY_FD].fd = -1;
 	const char *devpath;
 	char elog_str_name[ELOG_STR_SIZE];
+	struct sigaction siga;
 
 	while ((opt = getopt(argc, argv, "De:ho:s:m:w")) != -1) {
 		switch (opt) {
@@ -647,12 +655,14 @@ int main(int argc, char *argv[])
 
 	udev = udev_new();
 	if (!udev) {
+		rc = -1;
 		syslog(LOG_ERR, "Error creating udev object");
 		goto exit;
 	}
 
 	udev_mon = udev_monitor_new_from_netlink(udev, "udev");
 	if (!udev_mon) {
+		rc = -1;
 		syslog(LOG_ERR, "Error creating udev monitor object");
 		goto exit;
 	}
@@ -682,6 +692,21 @@ int main(int argc, char *argv[])
 		if (rc) {
 			syslog(LOG_NOTICE, "Cannot daemonize opal_errd, "
 			       "opal_errd cannot continue.\n");
+			goto exit;
+		}
+
+		siga.sa_handler = SIG_IGN;
+		sigemptyset(&siga.sa_mask);
+		siga.sa_flags = 0;
+		sigaction(SIGHUP, &siga, NULL);
+
+		/* Setup a signal handler for SIGTERM */
+		siga.sa_handler = &term_handler;
+		rc = sigaction(SIGTERM, &siga, NULL);
+		if (rc) {
+			syslog(LOG_NOTICE, "Could not initialize signal handler"
+			       " for termination signal (SIGTERM), %s\n",
+			       strerror(errno));
 			goto exit;
 		}
 	}

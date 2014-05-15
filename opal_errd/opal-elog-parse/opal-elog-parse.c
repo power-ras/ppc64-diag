@@ -442,11 +442,6 @@ int main(int argc, char *argv[])
 			exit(EXIT_FAILURE);
 		}
 	}
-	if (argc == 1) {
-		fprintf(stderr, "No parameters are specified\n");
-		print_usage(argv[0]);
-		ret = -1;
-	}
 
 	if (arg_cnt > 1) {
 		fprintf(stderr, "Only one operation (-d | -a | -l | -s | -e) "

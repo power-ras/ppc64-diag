@@ -56,19 +56,10 @@
 #define DEFAULT_MAX_ELOGS		1000
 #define DEFAULT_MAX_DAYS		30
 
-char *opt_sysfs = DEFAULT_SYSFS_PATH;
-char *opt_output = DEFAULT_OUTPUT_DIR;
-int opt_watch = 1;
-char *opt_max_dump;
-
-char *opt_extract_opal_dump_cmd = DEFAULT_EXTRACT_DUMP_CMD;
-
 /*
  * As per PEL v6 (defined in PAPR spec) fixed offset for
  * error log information.
  */
-#define OPAL_ERROR_LOG_MAX	16384
-#define ELOG_ID_SIZE		4
 #define ELOG_SRC_SIZE		8
 
 #define ELOG_DATE_OFFSET	0x8
@@ -307,30 +298,31 @@ static int parse_log(char *buffer, size_t bufsz)
 /**
  * Check platform dump
  */
-static void check_platform_dump(void)
+static void check_platform_dump(const char *extract_opal_dump_cmd,
+		const char *sysfs_path, const char *max_dump)
 {
+	if (!extract_opal_dump_cmd || !sysfs_path)
+		return;
 	int rc;
-	int length = PATH_MAX + strlen(opt_extract_opal_dump_cmd);
+	int length = PATH_MAX + strlen(extract_opal_dump_cmd);
 	char dump_cmd[length];
-	struct stat sbuf;
 
-	if (stat(opt_extract_opal_dump_cmd, &sbuf) < 0) {
-		syslog(LOG_NOTICE, "The command \"%s\" does not exist.\n",
-		       opt_extract_opal_dump_cmd);
+	if (access(extract_opal_dump_cmd, X_OK) != 0) {
+		syslog(LOG_NOTICE, "The command \"%s\" is not executable.\n",
+				extract_opal_dump_cmd);
 		return;
 	}
 
 	rc = snprintf(dump_cmd, length, "%s -s %s",
-		 opt_extract_opal_dump_cmd, opt_sysfs);
+			extract_opal_dump_cmd, sysfs_path);
 	if (rc >= length) {
 		syslog(LOG_NOTICE, "Failed to execute platform dump extractor"
 		       " (%s) as command options were truncated.\n", dump_cmd);
 		return;
 	}
 
-	if (opt_max_dump)	/* Append -m flag */
-		rc += snprintf(dump_cmd + rc, length - rc,
-			       " -m %s", opt_max_dump);
+	if (max_dump)	/* Append -m flag */
+		rc += snprintf(dump_cmd + rc, length - rc, " -m %s", max_dump);
 
 	if (rc >= length) {
 		syslog(LOG_NOTICE, "Failed to execute platform dump extractor"
@@ -381,7 +373,7 @@ static int ack_elog(const char *elog_path)
 	return 0;
 }
 
-static int process_elog(const char *elog_path)
+static int process_elog(const char *elog_path, const char *output)
 {
 	int in_fd = -1;
 	int out_fd = -1;
@@ -395,8 +387,8 @@ static int process_elog(const char *elog_path)
 	ssize_t sz = 0;
 	ssize_t readsz = 0;
 	int rc;
-	char *opt_output_dir = strdup(opt_output);
-	char opt_output_file[PATH_MAX];
+	char *output_dir = strdup(output);
+	char output_file[PATH_MAX];
 
 	rc = snprintf(elog_raw_path, sizeof(elog_raw_path),
 		      "%s/raw", elog_path);
@@ -435,41 +427,41 @@ static int process_elog(const char *elog_path)
 
 	/* Parse elog filename */
 	name = basename(dirname(elog_raw_path));
-	rc = snprintf(opt_output_file, sizeof(opt_output_file), "%s/%d-%s",
-		      opt_output,(int)time(NULL),name);
+	rc = snprintf(output_file, sizeof(output_file), "%s/%d-%s",
+			output, (int)time(NULL), name);
 	if (rc >= PATH_MAX) {
 		syslog(LOG_ERR, "Path to elog output file is too big\n");
 		return -1;
 	}
 
-	out_fd = open(opt_output_file, O_WRONLY  | O_CREAT,
+	out_fd = open(output_file, O_WRONLY  | O_CREAT,
 			S_IRUSR | S_IWUSR | S_IRGRP);
 
 	if (out_fd == -1) {
 		syslog(LOG_ERR, "Failed to create elog output file: %s (%d:%s)\n",
-		       opt_output_file, errno, strerror(errno));
+		       output_file, errno, strerror(errno));
 		goto err;
 	}
 
 	sz = write(out_fd, buf, bufsz);
 	if (sz != bufsz) {
 		syslog(LOG_ERR, "Failed to write elog output file: %s (%d:%s)\n",
-		       opt_output_file, errno, strerror(errno));
+		       output_file, errno, strerror(errno));
 		goto err;
 	}
 
 	rc = fsync(out_fd);
 	if (rc == -1) {
 		syslog(LOG_ERR, "Failed to sync elog output file: %s (%d:%s)\n",
-		       opt_output_file, errno, strerror(errno));
+		       output_file, errno, strerror(errno));
 		goto err;
 	}
 
-	dir_fd = open(dirname(opt_output_dir), O_RDONLY|O_DIRECTORY);
+	dir_fd = open(dirname(output_dir), O_RDONLY|O_DIRECTORY);
 	rc = fsync(dir_fd);
 	if (rc == -1) {
 		syslog(LOG_ERR, "Failed to sync platform elog directory: %s"
-		       " (%d:%s)\n", opt_output_dir, errno, strerror(errno));
+		       " (%d:%s)\n", output_dir, errno, strerror(errno));
 	}
 
 	parse_log(buf, bufsz);
@@ -482,13 +474,13 @@ err:
 		close(out_fd);
 	if (dir_fd != -1)
 		close(dir_fd);
-	free(opt_output_dir);
+	free(output_dir);
 	free(buf);
 	return ret;
 }
 
 /* Read logs from opal sysfs interface */
-static int find_and_read_elog_events(const char *elog_dir)
+static int find_and_read_elog_events(const char *elog_dir, const char *output_path)
 {
 	int rc = 0;
 	struct dirent **namelist;
@@ -528,7 +520,7 @@ static int find_and_read_elog_events(const char *elog_dir)
 		}
 
 		if (is_dir) {
-			rc = process_elog(elog_path);
+			rc = process_elog(elog_path, output_path);
 			if (rc != 0 && retval == 0)
 				retval = -1;
 			if (rc == 0 && retval >= 0)
@@ -593,21 +585,29 @@ int main(int argc, char *argv[])
 	int opt;
 	char sysfs_path[PATH_MAX];
 	char elog_path[PATH_MAX];
-	char inotifybuf[sizeof(struct inotify_event) + NAME_MAX + 1];
-	int r;
 	char *extract_opal_dump_cmd = NULL;
+
 	int log_options;
+
 	struct udev *udev = NULL;
 	struct udev_monitor *udev_mon = NULL;
 	struct udev_device *udev_dev = NULL;
 	struct pollfd fds[2];
 	fds[INOTIFY_FD].fd = -1;
+	char inotifybuf[sizeof(struct inotify_event) + NAME_MAX + 1];
+
 	const char *devpath;
 	char elog_str_name[ELOG_STR_SIZE];
 	struct sigaction siga;
+
 	int opt_daemon = 1;
+	int opt_watch = 1;
 	int opt_max_logs = DEFAULT_MAX_ELOGS;
 	int opt_max_age = DEFAULT_MAX_DAYS;
+	const char *opt_extract_opal_dump_cmd = NULL;
+	const char *opt_max_dump = NULL;
+	const char *opt_sysfs = DEFAULT_SYSFS_PATH;
+	const char *opt_output_dir = DEFAULT_OUTPUT_DIR;
 
 	while ((opt = getopt(argc, argv, "De:ho:s:m:wn:a:")) != -1) {
 		switch (opt) {
@@ -620,7 +620,7 @@ int main(int argc, char *argv[])
 			opt_watch = 1;
 			break;
 		case 'o':
-			opt_output = optarg;
+			opt_output_dir = optarg;
 			break;
 		case 'e':
 			opt_extract_opal_dump_cmd = optarg;
@@ -693,20 +693,20 @@ int main(int argc, char *argv[])
 		goto exit;
 	}
 
-	rc = access(opt_output, W_OK);
+	rc = access(opt_output_dir, W_OK);
 	if (rc != 0) {
 		if (errno == ENOENT) {
-			rc = mkdir(opt_output,
+			rc = mkdir(opt_output_dir,
 				   S_IRGRP | S_IRUSR | S_IWGRP | S_IWUSR | S_IXUSR);
 			if (rc != 0) {
 				syslog(LOG_ERR, "Error creating output directory:"
-				       " %s (%d: %s)\n",
-				       opt_output, errno, strerror(errno));
+						" %s (%d: %s)\n", opt_output_dir, errno,
+						strerror(errno));
 				goto exit;
 			}
 		} else {
 			syslog(LOG_ERR, "Error accessing directory: %s (%d: %s)\n",
-			       opt_output, errno, strerror(errno));
+					opt_output_dir, errno, strerror(errno));
 			goto exit;
 		}
 	}
@@ -789,10 +789,12 @@ int main(int argc, char *argv[])
 	fds[UDEV_FD].events = POLLIN;
 	/* Read error/event log until we get termination signal */
 	while (!terminate) {
-		find_and_read_elog_events(elog_path);
-		rotate_logs(opt_output, opt_max_logs, opt_max_age);
+		find_and_read_elog_events(elog_path, opt_output_dir);
+		rotate_logs(opt_output_dir, opt_max_logs, opt_max_age);
 
-		check_platform_dump();
+		if (extract_opal_dump_cmd)
+			check_platform_dump(extract_opal_dump_cmd,
+					opt_sysfs, opt_max_dump);
 
 		if (!opt_watch) {
 			terminate = 1;
@@ -800,10 +802,10 @@ int main(int argc, char *argv[])
 			/* We don't care about the content of the inotify
 			 * event, we'll just scan the directory anyway
 			 */
-			r = poll(fds, sizeof(fds)/sizeof(struct pollfd), POLL_TIMEOUT);
-			if (r > 0 && fds[INOTIFY_FD].revents)
+			rc = poll(fds, sizeof(fds)/sizeof(struct pollfd), POLL_TIMEOUT);
+			if (rc > 0 && fds[INOTIFY_FD].revents)
 				read(fds[INOTIFY_FD].fd, inotifybuf, sizeof(inotifybuf));
-			if (r > 0 && fds[UDEV_FD].revents) {
+			if (rc > 0 && fds[UDEV_FD].revents) {
 				udev_dev = udev_monitor_receive_device(udev_mon);
 				devpath = udev_device_get_devpath(udev_dev);
 				if (devpath && strrchr(devpath, '/'))
@@ -814,6 +816,7 @@ int main(int argc, char *argv[])
 				 */
 			}
 		}
+		rc = 0;
 	}
 
 exit:
@@ -827,6 +830,5 @@ exit:
 
 	free(extract_opal_dump_cmd);
 	closelog();
-
 	return rc;
 }

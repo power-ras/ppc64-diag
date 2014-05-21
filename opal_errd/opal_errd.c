@@ -33,7 +33,7 @@
 #include <inttypes.h>
 #include <time.h>
 #include <libudev.h>
-
+#include "opal-elog-parse/opal-event-data.h"
 #define INOTIFY_FD	0
 #define UDEV_FD		1
 #define POLL_TIMEOUT	1000 /* In milliseconds */
@@ -97,27 +97,6 @@ volatile int terminate;
 static void term_handler(int sig)
 {
 	terminate = 1;
-}
-
-/* Aggregate severities into group */
-static const char *get_severity_desc(uint8_t severity)
-{
-	if (severity >= OPAL_SYMPTOM_LOG)
-		return "Symptom";
-	if (severity >= OPAL_DIAGNOSTICS_LOG)
-		return "Error on diag test";
-	if (severity >= OPAL_CRITICAL_LOG)
-		return "Critical Error";
-	if (severity >= OPAL_UNRECOVERABLE_LOG)
-		return "Unrecoverable Error";
-	if (severity >= OPAL_PREDICTIVE_LOG)
-		return "Predictive Error";
-	if (severity >= OPAL_RECOVERABLE_LOG)
-		return "Recoverable Error";
-	if (severity >= OPAL_INFORMATION_LOG)
-		return "Informational Event";
-
-	return "UNKNOWN";
 }
 
 /* may move this into header to avoid code duplication */
@@ -220,7 +199,7 @@ static int parse_log(char *buffer, size_t bufsz)
 	uint16_t action;
 	const char *parse;
 	char *parse_action = "NONE";
-	char *failingsubsys = "Not Applicable";
+	const char *failingsubsys = "Not Applicable";
 
 	if (bufsz < ELOG_MIN_READ_OFFSET) {
 		syslog(LOG_NOTICE, "Insufficent data, cannot parse elog.\n");
@@ -235,7 +214,8 @@ static int parse_log(char *buffer, size_t bufsz)
 	subsysid = buffer[ELOG_SUBSYSTEM_OFFSET];
 	severity = buffer[ELOG_SEVERITY_OFFSET];
 
-	parse = get_severity_desc(severity);
+	/* Every category has a generic entry at 0x?0 */
+	parse = get_severity_desc(severity & 0xF0);
 
 	action = be16toh(*(uint16_t *)(buffer + ELOG_ACTION_OFFSET));
 	if ((action & ELOG_ACTION_FLAG_SERVICE) &&
@@ -246,28 +226,8 @@ static int parse_log(char *buffer, size_t bufsz)
 	else
 		parse_action = "No service action required";
 
-	if ((subsysid >= 0x10) && (subsysid <= 0x1F))
-		failingsubsys = "Processor, including internal cache";
-	else if ((subsysid >= 0x20) && (subsysid <= 0x2F))
-		failingsubsys = "Memory, including external cache";
-	else if ((subsysid >= 0x30) && (subsysid <= 0x3F))
-		failingsubsys = "I/O (hub, bridge, bus";
-	else if ((subsysid >= 0x40) && (subsysid <= 0x4F))
-		failingsubsys = "I/O adapter, device and peripheral";
-	else if ((subsysid >= 0x50) && (subsysid <= 0x5F))
-		failingsubsys = "CEC Hardware";
-	else if ((subsysid >= 0x60) && (subsysid <= 0x6F))
-		failingsubsys = "Power/Cooling System";
-	else if ((subsysid >= 0x70) && (subsysid <= 0x79))
-		failingsubsys = "Other Subsystems";
-	else if ((subsysid >= 0x7A) && (subsysid <= 0x7F))
-		failingsubsys = "Surveillance Error";
-	else if ((subsysid >= 0x80) && (subsysid <= 0x8F))
-		failingsubsys = "Platform Firmware";
-	else if ((subsysid >= 0x90) && (subsysid <= 0x9F))
-		failingsubsys = "Software";
-	else if ((subsysid >= 0xA0) && (subsysid <= 0xAF))
-		failingsubsys = "External Environment";
+	/* Every category has a generic entry at 0x?0 */
+	failingsubsys = get_subsystem_name(subsysid  & 0xF0);
 
 	syslog(LOG_NOTICE, "LID[%x]::SRC[%s]::%s::%s::%s\n",
 	       logid, src, failingsubsys, parse, parse_action);

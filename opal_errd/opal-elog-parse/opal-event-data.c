@@ -54,8 +54,8 @@ struct generic_desc{
    {0x52, "Critical error failure likely or imminent"}, \
    {0x53, "Critical error partition(s) terminal"}, \
    {0x54, "Critical error partition(s) failure likely or imminent"}, \
-   {0x60, "Error on diagnostic test"}, \
-   {0x61, "Error on diagnostic test, resource may produce incorrect results"}, \
+   {0x60, "Error on diag test"}, \
+   {0x61, "Error on diag test, resource may produce incorrect results"}, \
    {0x70, "Symptom"}, \
    {0x71, "Symptom recovered"}, \
    {0x72, "Symptom predictive"}, \
@@ -77,7 +77,7 @@ struct generic_desc{
    {'P', "POWERNV"}
 
 #define SUBSYSTEMS \
-   {0x00, "Unknown"}, \
+   {0x00, "Not Applicable"}, \
    {0x10, "Processor subsystem"}, \
    {0x11, "Processor FRU"}, \
    {0x12, "Processor chip including internal cache"}, \
@@ -89,7 +89,7 @@ struct generic_desc{
    {0x23, "Memory DIMM"}, \
    {0x24, "Memory card/FRU"}, \
    {0x25, "External cache"}, \
-   {0x30, "I/O subsystem"}, \
+   {0x30, "I/O (hub, bridge, bus)"}, \
    {0x31, "I/O hub RIO"}, \
    {0x32, "I/O bridge, general (PHB, PCI/PCI, PCI/ISA, EADS, etc.)"}, \
    {0x33, "I/O bus interface"}, \
@@ -102,17 +102,17 @@ struct generic_desc{
    {0x3a, "EADS/EADS-X slot"}, \
    {0x3b, "InfiniBand hub"}, \
    {0x3c, "Infiniband bridge"}, \
-   {0x40, "I/O adapter - I/O deivce - I/O peripheral"}, \
+   {0x40, "I/O (adapter, device, peripheral)"}, \
    {0x41, "I/O adapter - communication"}, \
    {0x46, "I/O device"}, \
    {0x47, "I/O device - DASD"}, \
    {0x4c, "I/O peripheral"}, \
    {0x4d, "I/O perpheral - local workstation"}, \
    {0x4e, "Storage mezzanine expansion subsystem"}, \
-   {0x50, "CEC hardware"}, \
-   {0x51, "CEC hardware - service processor A"}, \
-   {0x52, "CEC hardware - service processor B"}, \
-   {0x53, "CEC hardware - node controller"}, \
+   {0x50, "CEC Hardware"}, \
+   {0x51, "CEC Hardware - service processor A"}, \
+   {0x52, "CEC Hardware - service processor B"}, \
+   {0x53, "CEC Hardware - node controller"}, \
    {0x54, "Reserved for CEC hardware"}, \
    {0x55, "CEC hardware - VPD device and interface (smart chip and I2C device)"}, \
    {0x56, "CEC hardware - I2C devices and interface (non VPD)"}, \
@@ -125,12 +125,12 @@ struct generic_desc{
    {0x5c, "CEC hardware - Service processor-Hypervisor hardware interface (PSI, PCI, etc.)"}, \
    {0x5d, "CEC hardware - Service network"}, \
    {0x5e, "CEC hardware - Service processor-Hostboot hardware interface (FSI Mailbox)"}, \
-   {0x60, "Power/Cooling subsystem & control"}, \
+   {0x60, "Power/Cooling System"}, \
    {0x61, "Power supply"}, \
    {0x62, "Power control hardware"}, \
    {0x63, "Fan, air moving devices"}, \
    {0x64, "DPSS"}, \
-   {0x70, "Others"}, \
+   {0x70, "Other Subsystems"}, \
    {0x71, "Hypervisor subsystem & hardware (excluding code)"}, \
    {0x72, "Test tool"}, \
    {0x73, "Removable media"}, \
@@ -145,7 +145,7 @@ struct generic_desc{
    {0x7e, "Connection Monitoring - Hypervisor lost communication with logical partition"}, \
    {0x7e, "Connection Monitoring - Hypervisor lost communication with BPA"}, \
    {0x7f, "Connection Monitoring - Hypervisor lost communication with another hypervisor"}, \
-   {0x80, "Platform firmware"}, \
+   {0x80, "Platform Firmware"}, \
    {0x81, "Service processor firmware"}, \
    {0x82, "Hypervisor firmware"}, \
    {0x83, "Partition firmware"}, \
@@ -161,7 +161,7 @@ struct generic_desc{
    {0x91, "Operating system software"}, \
    {0x92, "XPF software"}, \
    {0x93, "Application software"}, \
-   {0xa0, "External environment"}, \
+   {0xa0, "External Environment"}, \
    {0xa1, "Input power source (AC)"}, \
    {0xa2, "Room ambient temperature"}, \
    {0xa3, "User error"}, \

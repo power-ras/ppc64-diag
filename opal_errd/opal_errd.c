@@ -41,6 +41,7 @@
 #define DEFAULT_SYSFS_PATH		"/sys"
 #define DEFAULT_OUTPUT_DIR		"/var/log/opal-elog"
 #define DEFAULT_EXTRACT_DUMP_CMD	"/usr/sbin/extract_opal_dump"
+#define DEFAULT_EXTRACT_DUMP_FNAME "extract_opal_dump"
 
 /**
  * Length of elog ID string (including the null)
@@ -116,6 +117,69 @@ static int file_filter(const struct dirent *d)
 		return 1;
 
 	return 0;
+}
+
+/* Your job to free the return value */
+static char *find_opal_errd_dir(void)
+{
+	struct stat sb;
+	ssize_t r;
+	char *errd_path;
+	char *path_end;
+	if (lstat("/proc/self/exe", &sb) == -1)
+		return NULL;
+
+	errd_path = malloc(sb.st_size + 1);
+	if (!errd_path)
+		return NULL;
+
+	r = readlink ("/proc/self/exe", errd_path, sb.st_size);
+	if (r <= 0 || r > sb.st_size)
+		return NULL;
+
+	/* Just interested in the path, trim fname  */
+	path_end = strrchr (errd_path, '/');
+	if (path_end == NULL)
+		return NULL;
+	/* + 1 to ensure the trailing / stays in */
+	*(path_end + 1) = '\0';
+	return errd_path;
+}
+
+/* Your job to free the returned path */
+static int find_extract_opal_dump_cmd(char **r_dump_path)
+{
+	char *errd_path;
+	char *dump_path;
+	*r_dump_path = NULL;
+	/* Check default location */
+	if (access(DEFAULT_EXTRACT_DUMP_CMD, X_OK) == 0) {
+		/* Exists */
+		*r_dump_path = strdup(DEFAULT_EXTRACT_DUMP_CMD);
+		return 0;
+	}
+
+	errd_path = find_opal_errd_dir();
+	if (!errd_path)
+		return -1;
+
+	/* Look in whereever errd was executed from */
+	dump_path = malloc(strlen(errd_path) + strlen(DEFAULT_EXTRACT_DUMP_FNAME) + 1);
+	if (!dump_path) {
+		free(errd_path);
+		return -1;
+	}
+
+	strcpy(dump_path, errd_path);
+	strcat(dump_path, DEFAULT_EXTRACT_DUMP_FNAME);
+	free(errd_path);
+	if (access(dump_path, X_OK) == 0) {
+		*r_dump_path = dump_path;
+		return 0;
+	}
+
+	free(dump_path);
+	return -1;
 }
 
 static int rotate_logs(const char *elog_dir, int max_logs, int max_age)
@@ -480,6 +544,29 @@ static int find_and_read_elog_events(const char *elog_dir)
 	return retval;
 }
 
+static char *validate_extract_opal_dump(const char *cmd)
+{
+	char *extract_opal_dump_cmd = NULL;
+	/* User didn't specifiy an extract_opal_dump command */
+	if (!cmd) {
+		if (find_extract_opal_dump_cmd(&extract_opal_dump_cmd) != 0)
+			syslog(LOG_WARNING, "Could not find an opal dump extractor tool\n");
+	} else {
+		if (access(cmd, X_OK) == 0) {
+			extract_opal_dump_cmd = strdup(cmd);
+			if (!extract_opal_dump_cmd)
+				syslog(LOG_ERR, "Memory allocation error, extract_opal_dump "
+						"will not be called\n");
+		} else {
+			syslog(LOG_WARNING, "Couldn't execute extract_opal_dump "
+					"command: %s (%d, %s), dumps will not be extracted\n",
+					cmd, errno, strerror(errno));
+		}
+	}
+
+	return extract_opal_dump_cmd;
+}
+
 static void help(const char* argv0)
 {
 	fprintf(stderr, "%s help:\n\n", argv0);
@@ -508,6 +595,7 @@ int main(int argc, char *argv[])
 	char elog_path[PATH_MAX];
 	char inotifybuf[sizeof(struct inotify_event) + NAME_MAX + 1];
 	int r;
+	char *extract_opal_dump_cmd = NULL;
 	int log_options;
 	struct udev *udev = NULL;
 	struct udev_monitor *udev_mon = NULL;
@@ -574,6 +662,12 @@ int main(int argc, char *argv[])
 	if (!opt_daemon)
 		log_options |= LOG_PERROR;
 	openlog("ELOG", log_options, LOG_LOCAL1);
+
+	/* Do we have a valid extract_opal_dump?
+	 * Confirm that what the user entered is valid
+	 * If not, try to locate a valid extract_opal_dump binary
+	 */
+	extract_opal_dump_cmd = validate_extract_opal_dump(opt_extract_opal_dump_cmd);
 
 	/* Use PATH_MAX but admit that it may be insufficient */
 	rc = snprintf(sysfs_path, sizeof(sysfs_path), "%s/firmware/opal",
@@ -731,6 +825,7 @@ exit:
 	if (fds[INOTIFY_FD].fd >= 0)
 		close(fds[INOTIFY_FD].fd);
 
+	free(extract_opal_dump_cmd);
 	closelog();
 
 	return rc;

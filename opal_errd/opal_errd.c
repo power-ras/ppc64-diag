@@ -506,7 +506,6 @@ int main(int argc, char *argv[])
 	int opt;
 	char sysfs_path[PATH_MAX];
 	char elog_path[PATH_MAX];
-	struct stat s;
 	char inotifybuf[sizeof(struct inotify_event) + NAME_MAX + 1];
 	int r;
 	int log_options;
@@ -581,24 +580,26 @@ int main(int argc, char *argv[])
 		      opt_sysfs);
 	if (rc >= PATH_MAX) {
 		syslog(LOG_ERR, "sysfs_path for opal dir is too big\n");
-		exit(EXIT_FAILURE);
+		rc = EXIT_FAILURE;
+		goto exit;
 	}
 
 	/* elog log path */
 	rc = snprintf(elog_path, sizeof(elog_path), "%s/elog", sysfs_path);
 	if (rc >= PATH_MAX) {
 		syslog(LOG_ERR, "sysfs_path for elogs too big\n");
-		exit(EXIT_FAILURE);
+		rc = EXIT_FAILURE;
+		goto exit;
 	}
 
-	rc = stat(sysfs_path, &s);
+	rc = access(sysfs_path, R_OK);
 	if (rc != 0) {
 		syslog(LOG_ERR, "Error accessing sysfs: %s (%d: %s)\n",
 		       sysfs_path, errno, strerror(errno));
-		exit(EXIT_FAILURE);
+		goto exit;
 	}
 
-	rc = stat(opt_output, &s);
+	rc = access(opt_output, W_OK);
 	if (rc != 0) {
 		if (errno == ENOENT) {
 			rc = mkdir(opt_output,
@@ -607,12 +608,12 @@ int main(int argc, char *argv[])
 				syslog(LOG_ERR, "Error creating output directory:"
 				       " %s (%d: %s)\n",
 				       opt_output, errno, strerror(errno));
-				exit(EXIT_FAILURE);
+				goto exit;
 			}
 		} else {
 			syslog(LOG_ERR, "Error accessing directory: %s (%d: %s)\n",
 			       opt_output, errno, strerror(errno));
-			exit(EXIT_FAILURE);
+			goto exit;
 		}
 	}
 
@@ -620,8 +621,8 @@ int main(int argc, char *argv[])
 	if (fds[INOTIFY_FD].fd == -1) {
 		syslog(LOG_ERR, "Error setting up inotify (%d:%s)\n",
 		       errno, strerror(errno));
-		closelog();
-		exit(EXIT_FAILURE);
+		rc = EXIT_FAILURE;
+		goto exit;
 	}
 
 	rc = inotify_add_watch(fds[INOTIFY_FD].fd, sysfs_path, IN_CREATE);

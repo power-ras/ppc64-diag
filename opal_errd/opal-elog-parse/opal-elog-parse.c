@@ -24,9 +24,6 @@
 
 #define DEFAULT_opt_platform_dir "/var/log/opal-elog"
 char *opt_platform_dir = DEFAULT_opt_platform_dir;
-char *opt_platform_file;
-int opt_display_file = 0;
-int opt_display_all = 0;
 
 #define ELOG_COMMIT_TIME_OFFSET	0x10
 #define ELOG_CREATOR_ID_OFFSET	0x18
@@ -52,8 +49,6 @@ int opt_display_all = 0;
 #define OPAL_CRITICAL_LOG	0x50
 #define OPAL_DIAGNOSTICS_LOG	0x60
 #define OPAL_SYMPTOM_LOG	0x70
-
-static int platform_log_fd = -1;
 
 void print_usage(char *command)
 {
@@ -149,6 +144,7 @@ int read_elog(char path[], char **buf){
         ssize_t readsz = 0;
         ssize_t sz = 0;
         int ret = 0;
+        int platform_log_fd = -1;
 
         chdir(opt_platform_dir);
         if (stat(path, &sbuf) == -1){
@@ -175,6 +171,7 @@ int read_elog(char path[], char **buf){
         if (platform_log_fd <= 0) {
                 fprintf(stderr, "Could not open error log file : %s (%s).\n "
                        "Skipping....\n", path, strerror(errno));
+                ret = -1;
                 goto out;
         }
 
@@ -195,8 +192,10 @@ int read_elog(char path[], char **buf){
         ret = sz;
 
 out:
-        close(platform_log_fd);
-        return ret;
+	close(platform_log_fd);
+	if(ret == -1)
+	    free(*buf);
+	return ret;
 
 }
 
@@ -241,8 +240,39 @@ void print_elog_summary(char *buffer, int bufsz, uint32_t service_flag)
 
 }
 
+/* parse error log entry from file */
+int elogdisplayfile(char *elog_path, uint32_t eid, int display_all)
+{
+	uint32_t logid;
+	int ret = 0;
+	char *buffer;
+	ssize_t sz = 0;
+
+	sz = read_elog(elog_path, &buffer);
+	if(sz < 0) {
+		return -1;
+	/* Make sure we read minimum data needed in this function */
+	} else if (sz < (ELOG_ID_OFFSET + sizeof(logid))){
+		fprintf(stderr, "Partially read elog, cannot parse\n");
+		free(buffer);
+		return -1;
+	}
+
+	logid = be32toh(*(uint32_t*)(buffer+ELOG_ID_OFFSET));
+	if (display_all || logid == eid) {
+		ret = parse_opal_event(buffer, sz);
+	} else {
+		fprintf(stderr, "EID %u does not match %s\n",
+			eid, elog_path);
+		ret = -1;
+	}
+	free(buffer);
+
+	return ret;
+}
+
 /* parse error log entry passed by user */
-int elogdisplayentry(uint32_t eid)
+int elogdisplayentry(uint32_t eid, int display_all)
 {
 	uint32_t logid;
 	int ret = 0;
@@ -253,69 +283,81 @@ int elogdisplayentry(uint32_t eid)
 	int i;
 	int done = 0;
 
-        if(opt_display_file){
-            sz = read_elog(opt_platform_file, &buffer);
-            if(sz < 0) {
-                return -1;
-            /* Make sure we read minimum data needed in this function */
-            } else if (sz < (ELOG_ID_OFFSET + sizeof(logid))){
-                       fprintf(stderr, "Partially read elog, cannot parse\n");
-                       free(buffer);
-                       return -1;
-            }
+	nfiles = scandir(opt_platform_dir, &filelist,
+			 file_filter, alphasort);
+	if (nfiles < 0){
+		fprintf(stderr, "Error accessing directory: %s\n",opt_platform_dir);
+		return -1;
+	}
+	if (nfiles == 0){
+		fprintf(stderr,"0 files found in directory: %s\n",opt_platform_dir);
+		return -1;
+	}
+	for (i = 0; i < nfiles; i++){
+		if(done){
+			free(filelist[i]);
+			continue;
+		}
 
-            logid = be32toh(*(uint32_t*)(buffer+ELOG_ID_OFFSET));
-            if (opt_display_all || logid == eid) {
-                    ret = parse_opal_event(buffer, sz);
-            }
-            free(buffer);
+		sz = read_elog(filelist[i]->d_name, &buffer);
 
-        } else {
-            nfiles = scandir(opt_platform_dir, &filelist,
-                             file_filter, alphasort);
-            if (nfiles < 0){
-                fprintf(stderr, "Error accessing directory: %s\n",opt_platform_dir);
-                return -1;
-            }
-            if (nfiles == 0){
-                fprintf(stderr,"0 files found in directory: %s\n",opt_platform_dir);
-                return -1;
-            }
+		if(sz < 0) {
+			free(filelist[i]);
+			continue;
+		/* Make sure we read minimum data needed in this function */
+		} else if (sz < (ELOG_ID_OFFSET + sizeof(logid))){
+			fprintf(stderr, "Partially read elog, cannot parse\n");
+			free(filelist[i]);
+			free(buffer);
+			continue;
+		}
 
-            for (i = 0; i < nfiles; i++){
-                if(done){
-                    free(filelist[i]);
-                    continue;
-                }
+		logid = be32toh(*(uint32_t*)(buffer+ELOG_ID_OFFSET));
+		if (display_all || logid == eid) {
+			ret = parse_opal_event(buffer, sz);
+			if (!display_all){
+				done = 1;
+			}
+		}
 
-                sz = read_elog(filelist[i]->d_name, &buffer);
-                if(sz < 0) {
-                    return -1;
-                /* Make sure we read minimum data needed in this function */
-                } else if (sz < (ELOG_ID_OFFSET + sizeof(logid))){
-                           fprintf(stderr, "Partially read elog, cannot parse\n");
-                           free(buffer);
-                           continue;
-                }
-
-                if(sz > 0){
-                    logid = be32toh(*(uint32_t*)(buffer+ELOG_ID_OFFSET));
-                    if (opt_display_all || logid == eid) {
-                            ret = parse_opal_event(buffer, sz);
-                            if (!opt_display_all){
-                                done = 1;
-                            }
-                    }
-                }
-                free(buffer);
-                free(filelist[i]);
-
-            }
-            free(filelist);
-        }
+		free(buffer);
+		free(filelist[i]);
+	}
+	free(filelist);
 
 	return ret;
+}
 
+/* print summary of specified file */
+int elog_summary(char *elog_path, uint32_t service_flag)
+{
+	int ret = 0;
+	char *buffer;
+	ssize_t sz = 0;
+
+	printf("|------------------------------------------------------------------------------|\n");
+	printf("|ID         SRC      Date       Time      Creator           Event Severity     |\n");
+	printf("|------------------------------------------------------------------------------|\n");
+
+	sz = read_elog(elog_path, &buffer);
+
+	if (sz <= 0){
+		return -1;
+	}
+	if (sz < ELOG_MIN_READ_OFFSET) {
+		fprintf(stderr, "Partially read elog, cannot parse\n");
+		ret = -1;
+	} else {
+		print_elog_summary(buffer, sz, service_flag);
+	}
+
+	free(buffer);
+
+	if(!ret){
+		printf("|------------------------------------------------------------------------------|\n");
+	}
+
+	return ret;
 }
 
 /* list all the error logs */
@@ -332,51 +374,35 @@ int eloglist(uint32_t service_flag)
 	printf("|ID         SRC      Date       Time      Creator           Event Severity     |\n");
 	printf("|------------------------------------------------------------------------------|\n");
 
-        if(opt_display_file){
-            sz = read_elog(opt_platform_file, &buffer);
-            if (sz <= 0) {
-                return -1;
-            } else if (sz < ELOG_MIN_READ_OFFSET) {
-                fprintf(stderr, "Partially read elog, cannot parse\n");
-                free(buffer);
-                return -1;
-            }
+	nfiles = scandir(opt_platform_dir, &filelist,
+			 file_filter, alphasort);
 
-            print_elog_summary(buffer, sz, service_flag);
-            free(buffer);
+	if (nfiles < 0){
+		fprintf(stderr,"Error accessing directory: %s\n",opt_platform_dir);
+		return -1;
+	}
+	if (nfiles == 0){
+		fprintf(stderr,"0 files found in directory: %s\n",opt_platform_dir);
+		return -1;
+	}
 
-        } else {
-            nfiles = scandir(opt_platform_dir, &filelist,
-                             file_filter, alphasort);
+	for (i = 0; i < nfiles; i++){
+		sz = read_elog(filelist[i]->d_name, &buffer);
 
-            if (nfiles < 0){
-                fprintf(stderr,"Error accessing directory: %s\n",opt_platform_dir);
-                return -1;
-            }
-            if (nfiles == 0){
-                fprintf(stderr,"0 files found in directory: %s\n",opt_platform_dir);
-                return -1;
-            }
+		if (sz <= 0){
+			free(filelist[i]);
+			continue;
+		} else if (sz < ELOG_MIN_READ_OFFSET) {
+			fprintf(stderr, "Partially read elog, cannot parse\n");
+		} else {
+			print_elog_summary(buffer, sz, service_flag);
+		}
 
-            for (i = 0; i < nfiles; i++){
-
-                sz = read_elog(filelist[i]->d_name, &buffer);
-                if (sz <= 0){
-                    continue;
-                } else if (sz < ELOG_MIN_READ_OFFSET) {
-                    fprintf(stderr, "Partially read elog, cannot parse\n");
-                    free(buffer);
-                    continue;
-                }
-
-                print_elog_summary(buffer, sz, service_flag);
-                free(buffer);
-                free(filelist[i]);
-            }
-
+		free(buffer);
+		free(filelist[i]);
+	}
         free(filelist);
 
-        }
         if(!ret){
             printf("|------------------------------------------------------------------------------|\n");
         }
@@ -404,6 +430,9 @@ int main(int argc, char *argv[])
 	int arg_cnt = 0;
 	char do_operation = '\0';
 	const char *eid_opt;
+	char *elog_path;
+	int opt_display_file = 0;
+	int opt_display_all = 0;
 
 	while ((opt = getopt(argc, argv, "ad:lshf:p:e:")) != -1) {
 		switch (opt) {
@@ -428,8 +457,8 @@ int main(int argc, char *argv[])
 			do_operation = opt;
 			break;
 		case 'f':
-                        opt_platform_file = optarg;
-                        opt_display_file = 1;
+			elog_path = optarg;
+			opt_display_file = 1;
 			break;
                 case 'p':
 			opt_platform_dir = optarg;
@@ -458,7 +487,11 @@ int main(int argc, char *argv[])
 
 	switch (do_operation) {
 	case 'l':
-		ret = eloglist(0);
+		if(opt_display_file){
+			ret = elog_summary(elog_path,0);
+		} else {
+			ret = eloglist(0);
+		}
 		break;
 	case 'e':
 		ret = delete_elog(eid_opt);
@@ -466,10 +499,18 @@ int main(int argc, char *argv[])
 	case 'd':
 		/* fallthrough */
 	case 'a':
-		ret = elogdisplayentry(eid);
+		if(opt_display_file){
+			ret = elogdisplayfile(elog_path,eid,opt_display_all);
+		} else {
+			ret = elogdisplayentry(eid,opt_display_all);
+		}
 		break;
 	case 's':
-		ret = eloglist(1);
+		if(opt_display_file){
+			ret = elog_summary(elog_path,1);
+		} else {
+			ret = eloglist(1);
+		}
 		break;
 	default:
 		fprintf(stderr, "No operation specified\n");

@@ -559,6 +559,61 @@ static char *validate_extract_opal_dump(const char *cmd)
 	return extract_opal_dump_cmd;
 }
 
+static int opal_init_udev(struct udev **r_udev,
+			  struct udev_monitor **r_udev_mon, int *r_fd)
+{
+	struct udev *udev = NULL;
+	struct udev_monitor *udev_mon = NULL;
+	int fd = -1;
+	int rc = -1;
+
+	udev = udev_new();
+	if (!udev) {
+		syslog(LOG_ERR, "Error creating udev object");
+		goto init_udev_exit;
+	}
+
+	udev_mon = udev_monitor_new_from_netlink(udev, "udev");
+	if (!udev_mon) {
+		syslog(LOG_ERR, "Error creating udev monitor object");
+		goto init_udev_exit;
+	}
+
+	rc = udev_monitor_filter_add_match_subsystem_devtype(udev_mon, "dump", NULL);
+	if (rc < 0) {
+		syslog(LOG_ERR, "Error (%d) adding udev match to dump", rc);
+		goto init_udev_exit;
+	}
+
+	rc = udev_monitor_filter_add_match_subsystem_devtype(udev_mon, "elog", NULL);
+	if (rc < 0) {
+		syslog(LOG_ERR, "Error (%d) adding udev match to elog", rc);
+		goto init_udev_exit;
+	}
+
+	rc = udev_monitor_enable_receiving(udev_mon);
+	if (rc < 0) {
+		syslog(LOG_ERR, "Error (%d) enabling recieving on udev", rc);
+		goto init_udev_exit;
+	}
+
+	fd = udev_monitor_get_fd(udev_mon);
+
+init_udev_exit:
+	if (rc != 0) {
+		if (udev_mon)
+			udev_monitor_unref(udev_mon);
+		if (udev)
+			udev_unref(udev);
+		udev = NULL;
+		udev_mon = NULL;
+	}
+	*r_udev = udev;
+	*r_udev_mon = udev_mon;
+	*r_fd = fd;
+	return rc;
+}
+
 static void help(const char* argv0)
 {
 	fprintf(stderr, "%s help:\n\n", argv0);
@@ -726,40 +781,10 @@ int main(int argc, char *argv[])
 		goto exit;
 	}
 
-
-	udev = udev_new();
-	if (!udev) {
-		rc = -1;
-		syslog(LOG_ERR, "Error creating udev object");
+	rc = opal_init_udev(&udev, &udev_mon, &(fds[UDEV_FD].fd));
+	if (rc != 0)
 		goto exit;
-	}
 
-	udev_mon = udev_monitor_new_from_netlink(udev, "udev");
-	if (!udev_mon) {
-		rc = -1;
-		syslog(LOG_ERR, "Error creating udev monitor object");
-		goto exit;
-	}
-
-	rc = udev_monitor_filter_add_match_subsystem_devtype(udev_mon, "dump", NULL);
-	if (rc < 0) {
-		syslog(LOG_ERR, "Error (%d) adding udev match to dump", rc);
-		goto exit;
-	}
-
-	rc = udev_monitor_filter_add_match_subsystem_devtype(udev_mon, "elog", NULL);
-	if (rc < 0) {
-		syslog(LOG_ERR, "Error (%d) adding udev match to elog", rc);
-		goto exit;
-	}
-
-	rc = udev_monitor_enable_receiving(udev_mon);
-	if (rc < 0) {
-		syslog(LOG_ERR, "Error (%d) enabling recieving on udev", rc);
-		goto exit;
-	}
-
-	fds[UDEV_FD].fd = udev_monitor_get_fd(udev_mon);
 	/* Convert the opal_errd process to a daemon. */
 	if (opt_daemon) {
 		rc = daemon(0, 0);

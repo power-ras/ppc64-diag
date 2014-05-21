@@ -57,9 +57,6 @@
 
 char *opt_sysfs = DEFAULT_SYSFS_PATH;
 char *opt_output = DEFAULT_OUTPUT_DIR;
-int opt_max_logs = DEFAULT_MAX_ELOGS;
-int opt_max_age = DEFAULT_MAX_DAYS;
-int opt_daemon = 1;
 int opt_watch = 1;
 char *opt_max_dump;
 
@@ -536,6 +533,10 @@ static void help(const char* argv0)
 	fprintf(stderr, "-w      - watch for new events (default when daemon)\n");
 	fprintf(stderr, "-m max  - maximum number of dumps of a specific type"
 			" to be saved\n");
+	fprintf(stderr, "-n max  - maximum number of elogs to keep (default %d)\n",
+			DEFAULT_MAX_ELOGS);
+	fprintf(stderr, "-a days - maximum age in days of elogs to keep (default %d)\n",
+			DEFAULT_MAX_DAYS);
 	fprintf(stderr, "-h      - help (this message)\n");
 }
 
@@ -557,8 +558,11 @@ int main(int argc, char *argv[])
 	const char *devpath;
 	char elog_str_name[ELOG_STR_SIZE];
 	struct sigaction siga;
+	int opt_daemon = 1;
+	int opt_max_logs = DEFAULT_MAX_ELOGS;
+	int opt_max_age = DEFAULT_MAX_DAYS;
 
-	while ((opt = getopt(argc, argv, "De:ho:s:m:w")) != -1) {
+	while ((opt = getopt(argc, argv, "De:ho:s:m:wn:a:")) != -1) {
 		switch (opt) {
 		case 'D':
 			opt_daemon = 0;
@@ -579,6 +583,22 @@ int main(int argc, char *argv[])
 			break;
 		case 'm':
 			opt_max_dump = optarg;
+			break;
+		case 'n':
+			errno = 0;
+			opt_max_logs = strtol(optarg,0,0);
+			if(errno || opt_max_logs < 0){
+			    fprintf(stderr,"Invalid input for -n\n");
+			    exit(EXIT_FAILURE);
+			}
+			break;
+		case 'a':
+			errno = 0;
+			opt_max_age = strtol(optarg,0,0);
+			if(errno || opt_max_age < 0){
+			    fprintf(stderr,"Invalid input for -a\n");
+			    exit(EXIT_FAILURE);
+			}
 			break;
 		case 'h':
 			help(argv[0]);

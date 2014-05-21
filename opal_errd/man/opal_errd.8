@@ -7,6 +7,8 @@ opal_errd \- Daemon to read/parse OPAL platform error(s)/event(s)
 [\fB\-m\fR \fImax\fR]
 [\fB\-o\fR \fIdir\fR]
 [\fB\-s\fR \fIsysfs\fR]
+[\fB\-n\fR \fImax\fR]
+[\fB\-a\fR \fIdays\fR]
 [\fB\-D\fR | \fB-w\fR]
 .SH DESCRIPTION
 Reads OPAL platform logs from sysfs and writes them to individual files under /var/log/opal-elog.
@@ -25,6 +27,12 @@ Directory to save error/event logs (default: /var/log/opal-elog)
 .TP
 .BR \-s " " \fIsysfs\fR
 Custom path to sysfs
+.TP
+.BR \-n " " \fImax\fR
+Maximum number of elogs to keep (default: 1000)
+.TP
+.BR \-a " " \fIdays\fR
+Maximum age in days of elogs to keep (default: 30)
 .TP
 .BR \-D
 Don't daemonize, just run once

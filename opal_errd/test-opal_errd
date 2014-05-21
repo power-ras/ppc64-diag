@@ -8,9 +8,39 @@ cp -pr sysfs-test/* $SYSFS/
 
 echo "test-opal_errd" > $LOG
 
+#Test giving bad pathes
+./opal_errd -s $SYSFS -o $OUT/platform -D -e /not/a/valid/path 2>&1 \
+    | sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' >> $LOG
+RC=${PIPESTATUS[0]}
+if [ "$RC" -ne 0 ] ; then
+	echo FAIL;
+	exit $RC;
+fi
+
+./opal_errd -s /not/a/sysfs -o $OUT/platform -D -e /bin/true 2>&1 \
+    | sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' >> $LOG
+
+RC=${PIPESTATUS[0]}
+if [ "$RC" -ne 255 ] ; then
+	echo FAIL;
+	exit $RC;
+fi
+
+./opal_errd -s $SYSFS -o /cant/mkdir/here -D -e /bin/true 2>&1 \
+    | sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' >> $LOG
+
+RC=${PIPESTATUS[0]}
+if [ "$RC" -ne 255 ] ; then
+	echo FAIL;
+	exit $RC;
+fi
+
+#If the two instances of opal_errd run in the same second filenames overlap
+#and the md5sum output becomes unpredictable, wait a second here
+sleep 1
+
 $VALGRIND ./opal_errd -s $SYSFS -o $OUT/platform -D -e /bin/true 2>&1 \
-    | sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' > $LOG
-R=$?
+    | sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' >> $LOG
 
 ls -1 $OUT >> $LOG
 (cd $OUT/platform; md5sum *) | sort  -t ' ' -k 2 | sed 's/ .*-/  /g'  >> $LOG

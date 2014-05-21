@@ -39,7 +39,7 @@
 #define POLL_TIMEOUT	1000 /* In milliseconds */
 
 #define DEFAULT_SYSFS_PATH		"/sys"
-#define DEFAULT_OUTPUT_DIR              "/var/log/opal-elog"
+#define DEFAULT_OUTPUT_DIR		"/var/log/opal-elog"
 #define DEFAULT_EXTRACT_DUMP_CMD	"/usr/sbin/extract_opal_dump"
 
 /**
@@ -52,8 +52,8 @@
  *
  * Retain logs upto 30 days with max 1000 logs.
  */
-#define DEFAULT_MAX_ELOGS               1000
-#define DEFAULT_MAX_DAYS                30
+#define DEFAULT_MAX_ELOGS		1000
+#define DEFAULT_MAX_DAYS		30
 
 char *opt_sysfs = DEFAULT_SYSFS_PATH;
 char *opt_output = DEFAULT_OUTPUT_DIR;
@@ -123,45 +123,45 @@ static const char *get_severity_desc(uint8_t severity)
 /* may move this into header to avoid code duplication */
 static int file_filter(const struct dirent *d)
 {
-        struct stat sbuf;
+	struct stat sbuf;
 
-        if (d->d_type == DT_DIR)
-           return 0;
-        if (d->d_type == DT_REG)
-           return 1;
-        if (stat(d->d_name,&sbuf))
-           return 0;
-        if (S_ISDIR(sbuf.st_mode))
-           return 0;
-        if (d->d_type == DT_UNKNOWN)
-           return 1;
+	if (d->d_type == DT_DIR)
+		return 0;
+	if (d->d_type == DT_REG)
+		return 1;
+	if (stat(d->d_name,&sbuf))
+		return 0;
+	if (S_ISDIR(sbuf.st_mode))
+		return 0;
+	if (d->d_type == DT_UNKNOWN)
+		return 1;
 
-        return 0;
+	return 0;
 }
 
 static int rotate_logs(const char *elog_dir, int max_logs, int max_age)
 {
-        int i;
-        int nfiles;
-        int ret = 0;
-        int old = 1;
-        int trim = 1;
-        struct dirent **filelist;
-        char *elog_name;
-        char *elog_date;
-        int max = max_age * 24 * 60 * 60;
-        int now = (int) time(NULL);
+	int i;
+	int nfiles;
+	int ret = 0;
+	int old = 1;
+	int trim = 1;
+	struct dirent **filelist;
+	char *elog_name;
+	char *elog_date;
+	int max = max_age * 24 * 60 * 60;
+	int now = (int) time(NULL);
 
-        /* Retrieve file list */
-        chdir(elog_dir);
-        nfiles = scandir(elog_dir, &filelist, file_filter, alphasort);
-        if (nfiles < 0)
-            return -1;
+	/* Retrieve file list */
+	chdir(elog_dir);
+	nfiles = scandir(elog_dir, &filelist, file_filter, alphasort);
+	if (nfiles < 0)
+		return -1;
 
 	for (i = 0; i < nfiles; i++) {
 		if(!old && !trim){
-		    free(filelist[i]);
-		    continue;
+			free(filelist[i]);
+			continue;
 		}
 
 		elog_name = strdup(filelist[i]->d_name);
@@ -178,19 +178,19 @@ static int rotate_logs(const char *elog_dir, int max_logs, int max_age)
 		/* Extract date from filename */
 		elog_date = strtok(elog_name, "-");
 		if(!elog_date){
-		    syslog(LOG_NOTICE, "Failed to read file\n");
-		    free(elog_name);
-		    free(filelist[i]);
-		    continue;
+			syslog(LOG_NOTICE, "Failed to read file\n");
+			free(elog_name);
+			free(filelist[i]);
+			continue;
 		}
 
 		errno = 0;
 		int date = strtol(elog_date, NULL, 10);
 		if(errno || !date){
-		    syslog(LOG_NOTICE, "Failed to parse file date\n");
-		    free(elog_name);
-		    free(filelist[i]);
-		    continue;
+			syslog(LOG_NOTICE, "Failed to parse file date\n");
+			free(elog_name);
+			free(filelist[i]);
+			continue;
 		}
 		if(now - date < max)
 			old = 0;
@@ -204,10 +204,10 @@ static int rotate_logs(const char *elog_dir, int max_logs, int max_age)
 
 		free(filelist[i]);
 		free(elog_name);
-        }
-        free(filelist);
+	}
+	free(filelist);
 
-        return ret;
+	return ret;
 }
 
 /* Parse required fields from error log */
@@ -364,7 +364,7 @@ static int process_elog(const char *elog_path)
 	int dir_fd = -1;
 	char elog_raw_path[PATH_MAX];
 	char *buf;
-        char *name;
+	char *name;
 	size_t bufsz;
 	struct stat sbuf;
 	int ret = -1;
@@ -372,7 +372,7 @@ static int process_elog(const char *elog_path)
 	ssize_t readsz = 0;
 	int rc;
 	char *opt_output_dir = strdup(opt_output);
-        char opt_output_file[PATH_MAX];
+	char opt_output_file[PATH_MAX];
 
 	rc = snprintf(elog_raw_path, sizeof(elog_raw_path),
 		      "%s/raw", elog_path);
@@ -588,16 +588,16 @@ int main(int argc, char *argv[])
 			errno = 0;
 			opt_max_logs = strtol(optarg,0,0);
 			if(errno || opt_max_logs < 0){
-			    fprintf(stderr,"Invalid input for -n\n");
-			    exit(EXIT_FAILURE);
+				fprintf(stderr,"Invalid input for -n\n");
+				exit(EXIT_FAILURE);
 			}
 			break;
 		case 'a':
 			errno = 0;
 			opt_max_age = strtol(optarg,0,0);
 			if(errno || opt_max_age < 0){
-			    fprintf(stderr,"Invalid input for -a\n");
-			    exit(EXIT_FAILURE);
+				fprintf(stderr,"Invalid input for -a\n");
+				exit(EXIT_FAILURE);
 			}
 			break;
 		case 'h':
@@ -638,8 +638,8 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-        rc = stat(opt_output, &s);
-        if (rc != 0) {
+	rc = stat(opt_output, &s);
+	if (rc != 0) {
 		if (errno == ENOENT) {
 			rc = mkdir(opt_output,
 				   S_IRGRP | S_IRUSR | S_IWGRP | S_IWUSR | S_IXUSR);

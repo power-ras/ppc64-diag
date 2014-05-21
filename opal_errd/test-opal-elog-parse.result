@@ -8,6 +8,7 @@ ELOG[XXXX]: LID[50000006]::SRC[CALLHOME]::Power/Cooling System::Error on diag te
 ELOG[XXXX]: LID[5034a000]::SRC[11007201]::External Environment::Predictive Error::Service action required
 ELOG[XXXX]: Run 'opal-elog-parse -d 0x5034a000' for the details.
 ELOG[XXXX]: LID[5055ed2e]::SRC[B182950C]::Platform Firmware::Informational Event::No service action required
+ELOG[XXXX]: Terminating
 |------------------------------------------------------------------------------|
 |ID         SRC      Date       Time      Creator           Event Severity     |
 |------------------------------------------------------------------------------|

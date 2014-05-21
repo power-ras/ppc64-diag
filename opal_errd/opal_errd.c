@@ -100,7 +100,6 @@ volatile int terminate;
 static void term_handler(int sig)
 {
 	terminate = 1;
-	syslog(LOG_NOTICE, "Received SIGTERM, terminating\n");
 }
 
 /* Aggregate severities into group */
@@ -743,6 +742,7 @@ int main(int argc, char *argv[])
 	}
 
 exit:
+	syslog(LOG_NOTICE, "Terminating\n");
 	if (udev_mon)
 		udev_monitor_unref(udev_mon);
 	if (udev)

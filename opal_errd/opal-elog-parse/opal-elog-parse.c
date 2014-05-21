@@ -36,8 +36,8 @@ char *opt_platform_dir = DEFAULT_opt_platform_dir;
 #define ELOG_ACTION_FLAG	0x8000
 
 #define ELOG_SRC_SIZE		8
-#define OPAL_ERROR_LOG_MAX      16384
-#define ELOG_BUF_MAX            OPAL_ERROR_LOG_MAX * 10
+#define OPAL_ERROR_LOG_MAX	16384
+#define ELOG_BUF_MAX		OPAL_ERROR_LOG_MAX * 10
 
 #define ELOG_MIN_READ_OFFSET	ELOG_SRC_OFFSET + ELOG_SRC_SIZE
 
@@ -60,27 +60,27 @@ void print_usage(char *command)
 			"\t-e logid - Erase error log entry details (cannot be combined with -f)\n"
 			"\t-l       - List all error logs\n"
 			"\t-s       - List all service action logs\n"
-			"\t-p dir   - Use dir as platform log directory (default %s)\n"
-			"\t-f file  - Use individual file as platform log\n"
+			"\t-p dir   - Use dir as elog directory (default %s)\n"
+			"\t-f file  - Specify elog by filename\n"
 			"\t-h       - Print this message and exit\n",
 			command, DEFAULT_opt_platform_dir);
 }
 
 static int file_filter(const struct dirent *d)
 {
-        struct stat sbuf;
-        if (d->d_type == DT_DIR)
-           return 0;
-        if (d->d_type == DT_REG)
-           return 1;
-        if (stat(d->d_name,&sbuf))
-           return 0;
-        if (S_ISDIR(sbuf.st_mode))
-           return 0;
-        if (d->d_type == DT_UNKNOWN)
-           return 1;
+	struct stat sbuf;
+	if (d->d_type == DT_DIR)
+		return 0;
+	if (d->d_type == DT_REG)
+		return 1;
+	if (stat(d->d_name,&sbuf))
+		return 0;
+	if (S_ISDIR(sbuf.st_mode))
+		return 0;
+	if (d->d_type == DT_UNKNOWN)
+		return 1;
 
-        return 0;
+	return 0;
 }
 
 uint32_t validate_eid_str(const char *eid)
@@ -139,62 +139,62 @@ char *get_elog_filename_str(const char *eid_str)
 
 int read_elog(char path[], char **buf){
 
-        struct stat sbuf;
-        size_t bufsz;
-        ssize_t readsz = 0;
-        ssize_t sz = 0;
-        int ret = 0;
-        int platform_log_fd = -1;
+	struct stat sbuf;
+	size_t bufsz;
+	ssize_t readsz = 0;
+	ssize_t sz = 0;
+	int ret = 0;
+	int platform_log_fd = -1;
 
-        chdir(opt_platform_dir);
-        if (stat(path, &sbuf) == -1){
-            fprintf(stderr, "Error accessing %s\n",path);
-            return -1;
-        }
+	chdir(opt_platform_dir);
+	if (stat(path, &sbuf) == -1){
+		fprintf(stderr, "Error accessing %s\n",path);
+		return -1;
+	}
 
-        bufsz = sbuf.st_size;
-        if(bufsz > OPAL_ERROR_LOG_MAX){
-            fprintf(stderr, "Notice: Oversized elog encountered\n");
-            if(bufsz > ELOG_BUF_MAX){
-                fprintf(stderr, "Error: elog size greater than max: %zd bytes\n", bufsz);
-                return -1;
-            }
-        }
+	bufsz = sbuf.st_size;
+	if(bufsz > OPAL_ERROR_LOG_MAX){
+		fprintf(stderr, "Notice: Oversized elog encountered\n");
+		if(bufsz > ELOG_BUF_MAX){
+			fprintf(stderr, "Error: elog size greater than max: %zd bytes\n", bufsz);
+			return -1;
+		}
+	}
 
-        *buf = malloc(bufsz);
-        if(!buf){
-            fprintf(stderr, "Failed to allocate buffer\n");
-            return -1;
-        }
+	*buf = malloc(bufsz);
+	if(!buf){
+		fprintf(stderr, "Failed to allocate buffer\n");
+		return -1;
+	}
 
-        platform_log_fd = open(path, O_RDONLY);
-        if (platform_log_fd <= 0) {
-                fprintf(stderr, "Could not open error log file : %s (%s).\n "
-                       "Skipping....\n", path, strerror(errno));
-                ret = -1;
-                goto out;
-        }
+	platform_log_fd = open(path, O_RDONLY);
+	if (platform_log_fd <= 0) {
+		fprintf(stderr, "Could not open error log file : %s (%s).\n "
+			"Skipping....\n", path, strerror(errno));
+		ret = -1;
+		goto out;
+	}
 
-        sz = 0;
-        do {
-            readsz = read(platform_log_fd, *buf, bufsz);
-            if (readsz < 0) {
-                    fprintf(stderr, "Read Platform log failed\n");
-                    ret = -1;
-                    goto out;
-            }
-            if(!readsz){
-                fprintf(stderr, "Early EOF\n");
-                break;
-            }
-            sz += readsz;
-        } while(sz != bufsz);
-        ret = sz;
+	sz = 0;
+	do {
+		readsz = read(platform_log_fd, *buf, bufsz);
+		if (readsz < 0) {
+			fprintf(stderr, "Read Platform log failed\n");
+			ret = -1;
+			goto out;
+		}
+		if(!readsz){
+			fprintf(stderr, "Early EOF\n");
+			break;
+		}
+		sz += readsz;
+	} while(sz != bufsz);
+	ret = sz;
 
 out:
 	close(platform_log_fd);
 	if(ret == -1)
-	    free(*buf);
+		free(*buf);
 	return ret;
 
 }
@@ -365,10 +365,10 @@ int eloglist(uint32_t service_flag)
 {
 	int ret = 0;
 	char *buffer;
-        struct dirent **filelist;
-        int nfiles;
-        ssize_t sz = 0;
-        int i;
+	struct dirent **filelist;
+	int nfiles;
+	ssize_t sz = 0;
+	int i;
 
 	printf("|------------------------------------------------------------------------------|\n");
 	printf("|ID         SRC      Date       Time      Creator           Event Severity     |\n");
@@ -401,11 +401,11 @@ int eloglist(uint32_t service_flag)
 		free(buffer);
 		free(filelist[i]);
 	}
-        free(filelist);
+	free(filelist);
 
-        if(!ret){
-            printf("|------------------------------------------------------------------------------|\n");
-        }
+	if(!ret){
+		printf("|------------------------------------------------------------------------------|\n");
+	}
 
 	return ret;
 }
@@ -460,9 +460,9 @@ int main(int argc, char *argv[])
 			elog_path = optarg;
 			opt_display_file = 1;
 			break;
-                case 'p':
+		case 'p':
 			opt_platform_dir = optarg;
-                        break;
+			break;
 		case 'h':
 			print_usage(argv[0]);
 			exit(EXIT_SUCCESS);

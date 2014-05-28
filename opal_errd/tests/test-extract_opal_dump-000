@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#WARNING: DO NOT RUN THIS FILE DIRECTLY
+#  This file expects to be a part of ppc64-diag test suite
+#  Run this file with ../run_tests -t test-extract_opal_dump -q
+
+check_suite
+copy_sysfs
+
+./extract_opal_dump -s $SYSFS -o $OUT 2> $OUTSTDERR
+
+cat $OUTSTDERR | sed -e 's%/tmp/.*/%%;s/OPAL_DUMP\[[0-9]*\]/OPAL_DUMP[XXXX]/' >> $LOG
+ls -1 $OUT >> $LOG
+(cd $OUT; md5sum *) >> $LOG
+
+diff_with_result $LOG;
+
+register_success

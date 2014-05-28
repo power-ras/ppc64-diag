@@ -1,0 +1,17 @@
+parse_priv_hdr_scn: section header has an invalid section count 0, should be greater than 0, setting section count to 1 to attempt recovery
+ERROR parse_opal_event_log: Truncated error log, expected section UH not found
+ERROR parse_opal_event_log: Truncated error log, expected section EH not found
+|------------------------------------------------------------------------------|
+|                                Private Header                                |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x30                                              |
+| Component ID             : 0                                                 |
+| Created at               : 2014-03-12 | 14:24:12                             |
+| Committed at             : 2014-03-13 | 13:01:56                             |
+| Created by               : Unknown                                           |
+| Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
+| Platform Log Id          : 0x0                                               |
+| Entry ID                 : 0x3                                               |
+| Section Count            : 1                                                 |

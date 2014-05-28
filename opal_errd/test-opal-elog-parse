@@ -1,83 +1,20 @@
 #!/bin/bash
 
-SYSFS=`mktemp -d --tmpdir opal-elog-parse.sysfs.XXXXXXXXXX`
-OUT=`mktemp -d --tmpdir opal-elog-parse.log.XXXXXXXXXX`
-LOG=`mktemp --tmpdir opal-elog-parse.out.XXXXXXXXXX`
+#Use of this file to test is depricated.
+#Consider using ./run_tests
+./run_tests -q -t tests/test-opal-elog-parse-000
 
-cp -pr sysfs-test/* $SYSFS/
+./run_tests -q -t tests/test-opal-elog-parse-001
 
-echo 'test-opal-elog-parse' > $LOG
+./run_tests -q -t tests/test-opal-elog-parse-002
 
-./opal_errd -s $SYSFS -o $OUT/platform -D -e /bin/true 2>&1 \
-    | sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' >> $LOG
+./run_tests -q -t tests/test-opal-elog-parse-003
 
-$VALGRIND ./opal-elog-parse/opal-elog-parse -l -p $OUT/platform &>> $LOG 1>&2
+./run_tests -q -t tests/test-opal-elog-parse-004
 
-# First 3 elogs are completely synthesized and not *entirely* according
-# to spec, but useful in testing.
-$VALGRIND ./opal-elog-parse/opal-elog-parse -d 1 -p $OUT/platform &>> $LOG 1>&2
-R=$?
-if [ $R -ne 234 ]; then
-    echo 'FAIL:' $R;
-    exit $R
-fi
+./run_tests -q -t tests/test-opal-elog-parse-005
 
-echo '0x02' >> $LOG
-$VALGRIND ./opal-elog-parse/opal-elog-parse -d 2 -f $SYSFS/firmware/opal/elog/0x02/raw &>> $LOG 1>&2
-R=$?
-if [ $R -ne 234 ]; then
-    echo 'FAIL:' $R;
-    exit $R
-fi
+./run_tests -q -t tests/test-opal-elog-parse-006
 
-echo '0x03' >> $LOG
-$VALGRIND ./opal-elog-parse/opal-elog-parse -d 3 -f $SYSFS/firmware/opal/elog/0x03/raw &>> $LOG 1>&2
-R=$?
-if [ $R -ne 234 ]; then
-    echo 'FAIL:' $R;
-    exit $R
-fi
+./run_tests -q -t tests/test-opal-elog-parse-007
 
-# Next log entry is from FSP A, so has 0x50
-echo '0x50000004' >> $LOG
-$VALGRIND ./opal-elog-parse/opal-elog-parse -d 0x50000004 -f $SYSFS/firmware/opal/elog/0x50000004/raw &>> $LOG 1>&2
-R=$?
-if [ $R -ne 234 ]; then
-    echo 'FAIL:' $R;
-    exit $R
-fi
-
-# Simualted log with a Call Hom esection
-echo '0x50000006' >> $LOG
-$VALGRIND ./opal-elog-parse/opal-elog-parse -d 0x50000006 -f $SYSFS/firmware/opal/elog/0x50000006/raw &>> $LOG 1>&2
-R=$?
-if [ $R -ne 234 ]; then
-    echo 'FAIL:' $R;
-    exit $R
-fi
-
-
-# Our first "real" elog, this should parse 100% successfully
-echo '0x5055ed2e' >> $LOG
-$VALGRIND ./opal-elog-parse/opal-elog-parse -d 0x5055ed2e -f $SYSFS/firmware/opal/elog/0x5055ed2e/raw &>> $LOG 1>&2
-R=$?
-if [ $R -ne 0 ]; then
-    echo 'FAIL:' $R;
-    exit $R
-fi
-
-# Added another test which contains an SRC section with FRU callouts
-echo '0x5034a000' >> $LOG
-$VALGRIND ./opal-elog-parse/opal-elog-parse -d 0x5034a000 -f $SYSFS/firmware/opal/elog/0x5034a000/raw &>> $LOG 1>&2
-R=$?
-if [ $R -ne 0 ]; then
-    echo 'FAIL:' $R;
-    exit $R
-fi
-
-if diff -u test-opal-elog-parse.result $LOG; then
-	rm -rf $SYSFS $OUT $LOG
-	echo PASS;
-else
-	echo FAIL;
-fi

@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#WARNING: DO NOT RUN THIS FILE DIRECTLY
+#  This file expects to be a part of ppc64-diag test suite
+#  Run this file with ../run_tests -t test-opal_errd-003 -q
+
+check_suite
+copy_sysfs
+
+./opal_errd -s $SYSFS -o /cant/mkdir/here -D -e /bin/true 2>&1 \
+	| sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' >> $LOG
+
+RC=${PIPESTATUS[0]}
+if [ "$RC" -ne 255 ] ; then
+	echo FAIL;
+	register_failure $RC;
+fi
+
+register_success

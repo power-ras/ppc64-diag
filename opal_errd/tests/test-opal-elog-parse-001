@@ -1,0 +1,18 @@
+#! /bin/bash
+
+#WARNING: DO NOT RUN THIS FILE DIRECTLY
+#  This file expects to be a part of ppc64-diag test suite
+#  Run this file with ../run_tests -t 001-test-opal-elog-parse -q
+
+check_suite
+copy_sysfs
+
+./opal_errd -s $SYSFS -o $OUT/platform -D -e /bin/true &>> /dev/null 2>&1
+
+$VALGRIND ./opal-elog-parse/opal-elog-parse -d 1 -p $OUT/platform &>> /dev/null 1>&2
+R=$?
+if [ $R -ne 234 ]; then
+	register_fail $R
+fi
+
+register_success

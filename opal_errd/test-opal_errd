@@ -1,79 +1,14 @@
 #!/bin/bash
 
-SYSFS=`mktemp -d --tmpdir opal_errd.sysfs.XXXXXXXXXX`
-OUT=`mktemp -d --tmpdir opal_errd.log.XXXXXXXXXX`
-LOG=`mktemp --tmpdir opal_errd.out.XXXXXXXXXX`
+#Use of this file to test is depricated.
+#Consider using ./run_tests
+./run_tests -q -t tests/test-opal_errd-000
 
-cp -pr sysfs-test/* $SYSFS/
+./run_tests -q -t tests/test-opal_errd-001
 
-echo "test-opal_errd" > $LOG
+./run_tests -q -t tests/test-opal_errd-002
 
-#Test giving bad pathes
-./opal_errd -s $SYSFS -o $OUT/platform -D -e /not/a/valid/path 2>&1 \
-    | sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' >> $LOG
-RC=${PIPESTATUS[0]}
-if [ "$RC" -ne 0 ] ; then
-	echo FAIL;
-	exit $RC;
-fi
+./run_tests -q -t tests/test-opal_errd-003
 
-./opal_errd -s /not/a/sysfs -o $OUT/platform -D -e /bin/true 2>&1 \
-    | sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' >> $LOG
+./run_tests -q -t tests/test-log-rotate-000
 
-RC=${PIPESTATUS[0]}
-if [ "$RC" -ne 255 ] ; then
-	echo FAIL;
-	exit $RC;
-fi
-
-./opal_errd -s $SYSFS -o /cant/mkdir/here -D -e /bin/true 2>&1 \
-    | sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' >> $LOG
-
-RC=${PIPESTATUS[0]}
-if [ "$RC" -ne 255 ] ; then
-	echo FAIL;
-	exit $RC;
-fi
-
-#If the two instances of opal_errd run in the same second filenames overlap
-#and the md5sum output becomes unpredictable, wait a second here
-sleep 1
-
-$VALGRIND ./opal_errd -s $SYSFS -o $OUT/platform -D -e /bin/true 2>&1 \
-    | sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' >> $LOG
-
-ls -1 $OUT >> $LOG
-(cd $OUT/platform; md5sum *) | sort  -t ' ' -k 2 | sed 's/ .*-/  /g'  >> $LOG
-
-if diff -u test-opal_errd.result $LOG; then
-	rm -rf $SYSFS/* $OUT/*
-else
-	echo 'FAIL:' $R;
-	exit $R
-fi
-
-
-## Test rotate_logs behaviour ##
-cp -pr sysfs-test/* $SYSFS/
-mkdir -p $OUT/platform
-NAME="$(expr $(date +%s) - $(expr 100 \* 24 \* 60 \* 60))-100days"
-touch $OUT/platform/$NAME
-NAME="$(expr $(date +%s) - $(expr 31 \* 24 \* 60 \* 60))-31days"
-touch $OUT/platform/$NAME
-NAME="$(expr $(date +%s) - $(expr 5 \* 24 \* 60 \* 60))-5days"
-touch $OUT/platform/$NAME
-NAME="$(expr $(date +%s) - $(expr 1 \* 24 \* 60 \* 60))-1days"
-touch $OUT/platform/$NAME
-$VALGRIND ./opal_errd -s $SYSFS -o $OUT/platform -D -e /bin/true -n 10 -a 29  2>&1 \
-        | sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' > $LOG
-
-ls -1 $OUT >> $LOG
-(cd $OUT/platform; md5sum *) | sort  -t ' ' -k 2 | sed 's/ .*-/  /g'  >> $LOG
-
-if diff -u test-opal_errd.logresult $LOG; then
-	rm -rf $SYSFS $OUT $LOG
-	echo PASS;
-else
-	echo 'FAIL:' $R;
-	exit $R
-fi

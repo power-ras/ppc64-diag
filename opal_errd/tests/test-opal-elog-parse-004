@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#WARNING: DO NOT RUN THIS FILE DIRECTLY
+#  This file expects to be a part of ppc64-diag test suite
+#  Run this file with ../run_tests -t 004-test-opal-elog-parse -q
+
+check_suite
+copy_sysfs
+
+$VALGRIND ./opal-elog-parse/opal-elog-parse -d 0x50000004 -f $SYSFS/firmware/opal/elog/0x50000004/raw &>> $LOG 1>&2
+R=$?
+if [ $R -ne 234 ]; then
+	register_fail $R;
+fi
+
+diff_with_result $LOG
+
+register_success

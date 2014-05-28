@@ -1,0 +1,16 @@
+ERROR parse_opal_event_log: Truncated error log, expected section UH not found
+ERROR parse_opal_event_log: Truncated error log, expected section EH not found
+|------------------------------------------------------------------------------|
+|                                Private Header                                |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x30                                              |
+| Component ID             : 0                                                 |
+| Created at               : 1994-01-01 | 01:02:03                             |
+| Committed at             : 2000-12-31 | 10:14:44                             |
+| Created by               : OPAL                                              |
+| Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
+| Platform Log Id          : 0xb0010203                                        |
+| Entry ID                 : 0x50000004                                        |
+| Section Count            : 1                                                 |

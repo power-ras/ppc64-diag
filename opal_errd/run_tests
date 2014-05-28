@@ -1,0 +1,83 @@
+#!/bin/bash
+export RED='\e[0;31m'
+export GRN='\e[0;32m'
+export YLW='\e[0;33m'
+export NC='\e[0m' # No Colour
+
+export SYSFS=`mktemp -d --tmpdir ppc64-diag-run_tests.sysfs.XXXXXXXXXX`
+export OUT=`mktemp -d --tmpdir ppc64-diag-run_tests.out.XXXXXXXXXX`
+export LOG=`mktemp --tmpdir ppc64-diag-run_tests.log.XXXXXXXXXX`
+export OUTSTDERR=`mktemp --tmpdir ppc64-diag-run_tests.stderr.XXXXXXXXXX`
+export OUTSTDOUT=`mktemp --tmpdir ppc64-diag-run_tests.stdout.XXXXXXXXXX`
+
+function check_suite {
+	#WARNING: DO NOT RUN THIS FILE DIRECTLY
+	#  This file expects to be a part of ppc64-diag test suite
+	#  Run this file with ../run_tests -t test-opal-elog-parse -q
+
+	#Do some basic checks that the user isn't trying to run this directly
+	if [[ -z "${SYSFS:+x}" ]] ; then
+		echo "Fatal error, you do not appear to be running this script in
+		the ppc64-diag test suite";
+		exit 1;
+	fi
+}
+
+function copy_sysfs {
+	cp -pr sysfs-test/* $SYSFS/
+}
+
+function diff_with_result {
+	if diff -u $RESULT $1; then
+		register_success;
+	else
+		register_fail;
+	fi
+}
+
+function register_success {
+	/bin/true
+}
+
+function register_fail {
+	echo "FAIL $CUR_TEST with RC ${1:-undef}";
+	exit ${1:-1};
+}
+
+Q=0
+all_tests="tests/*"
+
+while getopts ":qt:" opt; do
+	case "$opt" in
+		q)
+			q=1
+			;;
+		t)
+			all_tests=$OPTARG
+	esac
+done
+
+for the_test in $all_tests; do
+	export CUR_TEST=$(basename $the_test)
+	export RESULT="tests-results/$CUR_TEST.result"
+	if [[ $q -eq 1 ]] ; then
+		source "$the_test"
+	else
+		source "$the_test"
+	fi
+	R=$?
+	if [[ $R -ne 0 ]] ; then
+		echo -e "${RED}$the_test FAILED with RC $R${NC}"
+		exit $R
+	fi
+	#reset for next test
+	rm -rf $SYSFS/*
+	rm -rf $OUT/*
+	> $LOG
+	> $OUTSTDERR
+	> $OUTSTDOUT
+done
+
+rm -rf $SYSFS $OUT $LOG $OUTSTDERR $OUTSTDOUT
+echo PASS
+exit 0

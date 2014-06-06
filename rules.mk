@@ -1,7 +1,6 @@
 #
 # Common Makefile definitions
 #
-SHELL=/bin/bash
 PWD = $(shell echo `pwd`)
 INSTALL = /usr/bin/install
 
@@ -29,13 +28,13 @@ SPECFILE = $(ROOT_DIR)/$(SPECFILENAME)
 # Find the correct command to build RPM's
 RPM =							\
 	$(shell						\
-	if [[ -a /bin/rpmbuild ]]; then			\
+	if [ -a /bin/rpmbuild ]; then			\
 		echo "/bin/rpmbuild";			\
-	elif [[ -a /usr/bin/rpmbuild ]]; then		\
+	elif [ -a /usr/bin/rpmbuild ]; then		\
 		echo "/usr/bin/rpmbuild";		\
-	elif [[ -a /bin/rpm ]]; then			\
+	elif [ -a /bin/rpm ]; then			\
 		echo "/bin/rpm";			\
-	elif [[ -a /usr/bin/rpm ]]; then		\
+	elif [ -a /usr/bin/rpm ]; then			\
 		echo "/usr/bin/rpmbuild";		\
 	else						\
 		echo "rpm seems to be non-existant";	\

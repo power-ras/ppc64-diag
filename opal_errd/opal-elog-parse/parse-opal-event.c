@@ -326,56 +326,6 @@ int parse_src_scn(struct opal_src_scn **r_src,
 	return 0;
 }
 
-/* parse private header scn */
-int parse_priv_hdr_scn(struct opal_priv_hdr_scn **r_privhdr,
-					const struct opal_v6_hdr *hdr,
-					const char *buf, int buflen)
-{
-	struct opal_priv_hdr_scn *bufhdr = (struct opal_priv_hdr_scn*)buf;
-	struct opal_priv_hdr_scn *privhdr;
-
-	if (buflen < sizeof(struct opal_priv_hdr_scn)) {
-		fprintf(stderr, "%s: corrupted, expected length %lu, got %u\n",
-			__func__,
-			sizeof(struct opal_priv_hdr_scn), buflen);
-		return -EINVAL;
-	}
-
-	if (hdr->length != sizeof(struct opal_priv_hdr_scn)) {
-		fprintf(stderr, "%s: section header length disagrees with spec"
-			". section header length %u, spec: %lu\n",
-			__func__,
-			hdr->length, sizeof(struct opal_priv_hdr_scn));
-		return -EINVAL;
-	}
-
-	*r_privhdr = (struct opal_priv_hdr_scn*) malloc(sizeof(struct opal_priv_hdr_scn));
-	if (!*r_privhdr)
-		return -ENOMEM;
-	privhdr = *r_privhdr;
-
-	privhdr->v6hdr = *hdr;
-	privhdr->create_datetime = parse_opal_datetime(bufhdr->create_datetime);
-	privhdr->commit_datetime = parse_opal_datetime(bufhdr->commit_datetime);
-	privhdr->creator_id = bufhdr->creator_id;
-	privhdr->scn_count = bufhdr->scn_count;
-	if (privhdr->scn_count < 1) {
-		fprintf(stderr, "%s: section header has an invalid section count %u, "
-				"should be greater than 0, setting section count to 1 "
-				"to attempt recovery\n", __func__, privhdr->scn_count);
-		privhdr->scn_count = 1;
-	}
-	// FIXME: are these ASCII? Need spec clarification
-	privhdr->creator_subid_hi = bufhdr->creator_subid_hi;
-	privhdr->creator_subid_lo = bufhdr->creator_subid_lo;
-
-	privhdr->plid = be32toh(bufhdr->plid);
-
-	privhdr->log_entry_id = be32toh(bufhdr->log_entry_id);
-
-	return 0;
-}
-
 /* parse_usr_hdr_scn */
 int parse_usr_hdr_scn(struct opal_usr_hdr_scn **r_usrhdr,
 		      const struct opal_v6_hdr *hdr,

@@ -8,9 +8,10 @@
 #define __packed __attribute__((packed))
 #endif
 
-#include "opal-v6-hdr.h"
-#include "opal-mtms-scn.h"
 #include "opal-datetime.h"
+#include "opal-v6-hdr.h"
+#include "opal-priv-hdr-scn.h"
+#include "opal-mtms-scn.h"
 
 #define OPAL_VER_LEN		16
 
@@ -318,27 +319,6 @@ struct header_id{
   {"UD", 0, 0, -1}, \
   {"EI", 0, 0, 1}, \
   {"ED", 0, 0, -1}
-
-/* Private Header section */
-struct opal_priv_hdr_scn {
-	struct opal_v6_hdr v6hdr;
-	struct opal_datetime create_datetime;
-	struct opal_datetime commit_datetime;
-	uint8_t creator_id;	/* subsystem component id */
-#define OPAL_PH_CREAT_SERVICE_PROC   'E'
-#define OPAL_PH_CREAT_HYPERVISOR     'H'
-#define OPAL_PH_CREAT_POWER_CONTROL  'W'
-#define OPAL_PH_CREAT_PARTITION_FW   'L'
-
-	uint8_t reserved0;
-	uint8_t reserved1;
-	uint8_t scn_count;	/* number of sections in log */
-	uint32_t reserved2;
-	uint32_t creator_subid_hi;
-	uint32_t creator_subid_lo;
-	uint32_t plid;		/* platform log id */
-	uint32_t log_entry_id;	/* Unique log entry id */
-} __packed;
 
 /* user header section */
 struct opal_usr_hdr_scn {

@@ -241,36 +241,6 @@ int print_opal_usr_hdr_scn(const struct opal_usr_hdr_scn *usrhdr)
    return 0;
 }
 
-int print_opal_priv_hdr_scn(const struct opal_priv_hdr_scn *privhdr)
-{
-   print_header("Private Header");
-   print_opal_v6_hdr(privhdr->v6hdr);
-   print_line("Created at", "%4u-%02u-%02u | %02u:%02u:%02u",
-             privhdr->create_datetime.year,
-             privhdr->create_datetime.month,
-             privhdr->create_datetime.day,
-             privhdr->create_datetime.hour,
-             privhdr->create_datetime.minutes,
-             privhdr->create_datetime.seconds);
-   print_line("Committed at", "%4u-%02u-%02u | %02u:%02u:%02u",
-             privhdr->commit_datetime.year,
-             privhdr->commit_datetime.month,
-             privhdr->commit_datetime.day,
-             privhdr->commit_datetime.hour,
-             privhdr->commit_datetime.minutes,
-             privhdr->commit_datetime.seconds);
-   print_line("Created by", "%s", get_creator_name(privhdr->creator_id));
-   print_line("Creator Sub Id", "0x%x (%u), 0x%x (%u)",
-         privhdr->creator_subid_hi,
-         privhdr->creator_subid_hi,
-         privhdr->creator_subid_lo,
-         privhdr->creator_subid_lo);
-   print_line("Platform Log Id", "0x%x", privhdr->plid);
-   print_line("Entry ID", "0x%x", privhdr->log_entry_id);
-   print_line("Section Count","%u",privhdr->scn_count);
-   return 0;
-}
-
 int print_eh_scn(const struct opal_eh_scn *eh)
 {
    char model[OPAL_SYS_MODEL_LEN+1];

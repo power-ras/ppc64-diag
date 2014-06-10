@@ -12,6 +12,7 @@
 #include "opal-v6-hdr.h"
 #include "opal-priv-hdr-scn.h"
 #include "opal-mtms-scn.h"
+#include "opal-lr-scn.h"
 
 #define OPAL_VER_LEN		16
 
@@ -199,19 +200,6 @@ struct opal_lp_scn {
 	/* uint16_t *lps; variable length
 	 * exists after name, position will be name + length name
 	 */
-} __packed;
-
-struct opal_lr_scn {
-	struct opal_v6_hdr v6hdr;
-#define LR_RES_TYPE_PROC 0x10
-#define LR_RES_TYPE_SHARED_PROC 0x11
-#define LR_RES_TYPE_MEMORY_PAGE 0x40
-#define LR_RES_TYPE_MEMORY_LMB 0x41
-	uint8_t res_type;
-	uint8_t reserved;
-	uint16_t capacity;
-	uint32_t shared;
-	uint32_t memory_addr;
 } __packed;
 
 struct opal_ie_scn {

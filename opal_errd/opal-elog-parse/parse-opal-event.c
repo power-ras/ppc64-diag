@@ -641,32 +641,6 @@ static int parse_lp_scn(struct opal_lp_scn **r_lp,
 	return 0;
 }
 
-static int parse_lr_scn(struct opal_lr_scn **r_lr,
-			struct opal_v6_hdr *hdr, const char *buf, int buflen)
-{
-	struct opal_lr_scn *lrbuf = (struct opal_lr_scn *)buf;
-	struct opal_lr_scn *lr;
-
-	if (buflen < sizeof(struct opal_lr_scn)) {
-		fprintf(stderr, "%s: corrupted, expected length => %lu, got %u\n",
-				__func__, sizeof(struct opal_lr_scn), buflen);
-		return -EINVAL;
-	}
-
-	*r_lr = (struct opal_lr_scn *) malloc(sizeof(struct opal_lr_scn));
-	if (!*r_lr)
-		return -ENOMEM;
-	lr = *r_lr;
-
-	lr->v6hdr = *hdr;
-	lr->res_type = lrbuf->res_type;
-	lr->capacity = be16toh(lrbuf->capacity);
-	lr->shared = be32toh(lrbuf->shared);
-	lr->memory_addr = be32toh(lrbuf->memory_addr);
-
-	return 0;
-}
-
 static int parse_ie_scn(struct opal_ie_scn **r_ie,
 			struct opal_v6_hdr *hdr,
 			const char *buf, int buflen)

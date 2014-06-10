@@ -367,46 +367,6 @@ int parse_usr_hdr_scn(struct opal_usr_hdr_scn **r_usrhdr,
 	return 0;
 }
 
-/* Call Home Section */
-static int parse_ch_scn(struct opal_ch_scn **r_ch,
-			struct opal_v6_hdr *hdr,
-			const char *buf, int buflen)
-{
-	struct opal_ch_scn *ch;
-	struct opal_ch_scn *bufch = (struct opal_ch_scn*)buf;
-
-	*r_ch = (struct opal_ch_scn*) malloc(hdr->length);
-	if (!*r_ch)
-		return -ENOMEM;
-	ch = *r_ch;
-
-	if (buflen < sizeof(struct opal_ch_scn)) {
-		fprintf(stderr, "%s: corrupted, expected length >= %lu, got %u\n",
-			__func__,
-			sizeof(struct opal_ch_scn), buflen);
-		free(ch);
-		return -EINVAL;
-	}
-
-	if (hdr->length - sizeof(struct opal_v6_hdr) > OPAL_CH_COMMENT_MAX_LEN) {
-		fprintf(stderr, "%s: corrupted, call home comment is longer than %u,"
-			  " got %lu\n", __func__, OPAL_CH_COMMENT_MAX_LEN,
-			  hdr->length - sizeof(struct opal_v6_hdr));
-		free(ch);
-		return -EINVAL;
-	}
-
-	ch->v6hdr = *hdr;
-
-	strncpy(ch->comment, bufch->comment, hdr->length - sizeof(struct opal_v6_hdr));
-	/* Make sure there is a null byte at the end */
-
-	if (hdr->length - sizeof(struct opal_v6_hdr) > 0)
-		ch->comment[hdr->length - sizeof(struct opal_v6_hdr)-1] = '\0';
-
-	return 0;
-}
-
 static int parse_lp_scn(struct opal_lp_scn **r_lp,
 			struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {

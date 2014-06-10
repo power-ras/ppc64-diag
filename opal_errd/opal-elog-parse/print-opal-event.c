@@ -241,15 +241,6 @@ int print_opal_usr_hdr_scn(const struct opal_usr_hdr_scn *usrhdr)
    return 0;
 }
 
-int print_ch_scn(const struct opal_ch_scn *ch)
-{
-   print_header("Call Home Log Comment");
-   print_opal_v6_hdr(ch->v6hdr);
-   print_line("Call Home Comment", "%s", ch->comment);
-
-   return 0;
-}
-
 int print_lp_scn(const struct opal_lp_scn *lp)
 {
 	print_header("Logical Partition");

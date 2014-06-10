@@ -18,12 +18,7 @@
 #include "opal-sw-scn.h"
 #include "opal-ud-scn.h"
 #include "opal-hm-scn.h"
-
-struct opal_ch_scn {
-	struct	opal_v6_hdr v6hdr;
-#define OPAL_CH_COMMENT_MAX_LEN 144
-	char comment[0]; /* varsized up to 144 byte null terminated */
-} __packed;
+#include "opal-ch-scn.h"
 
 struct opal_fru_hdr {
   uint16_t type;

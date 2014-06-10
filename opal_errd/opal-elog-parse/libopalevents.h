@@ -20,6 +20,7 @@
 #include "opal-hm-scn.h"
 #include "opal-ch-scn.h"
 #include "opal-lp-scn.h"
+#include "opal-ie-scn.h"
 
 struct opal_fru_hdr {
   uint16_t type;
@@ -124,38 +125,16 @@ struct opal_src_scn {
 	uint8_t fru_count;
 } __packed;
 
-struct opal_ie_scn {
-	struct opal_v6_hdr v6hdr;
-#define IE_TYPE_ERROR_DET 0x01
-#define IE_TYPE_ERROR_REC 0x02
-#define IE_TYPE_EVENT 0x03
-#define IE_TYPE_RPC_PASS_THROUGH 0x04
-	uint8_t type;
-	uint8_t rpc_len;
-	uint8_t scope;
-#define IE_SUBTYPE_REBALANCE 0x01
-#define IE_SUBTYPE_NODE_ONLINE 0x03
-#define IE_SUBTYPE_NODE_OFFLINE 0x04
-#define IE_SUBTYPE_PLAT_MAX_CHANGE 0x05
-	uint8_t subtype;
-	uint32_t drc;
-#define IE_DATA_MAX 216
-	union {
-		uint8_t rpc[IE_DATA_MAX];
-		uint64_t max;
-	} data;
-} __packed;
-
-struct opal_mi_scn {
-	struct opal_v6_hdr v6hdr;
-	uint32_t flags;
-	uint32_t reserved;
-} __packed;
-
 struct opal_ei_env_scn {
 	uint32_t corrosion;
 	uint16_t temperature;
 	uint16_t rate;
+} __packed;
+
+struct opal_mi_scn {
+       struct opal_v6_hdr v6hdr;
+       uint32_t flags;
+       uint32_t reserved;
 } __packed;
 
 struct opal_ei_scn {

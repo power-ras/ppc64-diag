@@ -241,28 +241,6 @@ int print_opal_usr_hdr_scn(const struct opal_usr_hdr_scn *usrhdr)
    return 0;
 }
 
-int print_ie_scn(const struct opal_ie_scn *ie)
-{
-	print_header("IO Event");
-	print_opal_v6_hdr(ie->v6hdr);
-	print_line("Type", "%s", get_ie_type_desc(ie->type));
-	print_line("DRC Index", "0x%08x", ie->drc);
-	if (ie->type != IE_TYPE_EVENT) {
-		print_line("Scope", "%s", get_ie_scope_desc(ie->scope));
-		print_line("Sub Type", "%s", get_ie_subtype_desc(ie->subtype));
-		if (ie->type == IE_TYPE_RPC_PASS_THROUGH) {
-			print_line("RPC Length", "0x%02x", ie->rpc_len);
-			print_center("RPC Data");
-			print_hex(ie->data.rpc, ie->rpc_len);
-		}
-
-		if (ie->subtype == IE_SUBTYPE_PLAT_MAX_CHANGE)
-			print_line("Change platform size to", "0x%016lx", ie->data.max);
-	}
-
-	return 0;
-}
-
 int print_mi_scn(const struct opal_mi_scn *mi) {
 	print_header("Manufacturing Information");
 	print_opal_v6_hdr(mi->v6hdr);

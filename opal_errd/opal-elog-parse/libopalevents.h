@@ -4,10 +4,6 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#ifndef __packed
-#define __packed __attribute__((packed))
-#endif
-
 #include "opal-datetime.h"
 #include "opal-v6-hdr.h"
 #include "opal-priv-hdr-scn.h"
@@ -66,5 +62,4 @@ struct header_id{
   {"EI", 0, 0, 1}, \
   {"ED", 0, 0, -1}
 
-extern struct opal_datetime parse_opal_datetime(const struct opal_datetime);
 #endif

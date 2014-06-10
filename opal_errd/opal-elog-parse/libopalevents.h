@@ -13,24 +13,8 @@
 #include "opal-priv-hdr-scn.h"
 #include "opal-mtms-scn.h"
 #include "opal-lr-scn.h"
+#include "opal-eh-scn.h"
 
-#define OPAL_VER_LEN		16
-
-/* Extended header section */
-struct opal_eh_scn {
-	struct	opal_v6_hdr v6hdr;
-	struct opal_mtms_struct mtms;
-	char	opal_release_version[OPAL_VER_LEN]; /* Null terminated */
-	char	opal_subsys_version[OPAL_VER_LEN]; /* Null terminated */
-	uint32_t reserved_0;
-	struct opal_datetime event_ref_datetime;
-	uint16_t reserved_1;
-	uint8_t reserved_2;
-	uint8_t opal_symid_len;
-	char	opalsymid[0]; /* variable sized */
-} __packed;
-
-/* Extended header section */
 struct opal_ch_scn {
 	struct	opal_v6_hdr v6hdr;
 #define OPAL_CH_COMMENT_MAX_LEN 144

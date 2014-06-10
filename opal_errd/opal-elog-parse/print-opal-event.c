@@ -241,42 +241,6 @@ int print_opal_usr_hdr_scn(const struct opal_usr_hdr_scn *usrhdr)
    return 0;
 }
 
-int print_eh_scn(const struct opal_eh_scn *eh)
-{
-   char model[OPAL_SYS_MODEL_LEN+1];
-   char serial_no[OPAL_SYS_SERIAL_LEN+1];
-
-   memcpy(model, eh->mtms.model, OPAL_SYS_MODEL_LEN);
-   model[OPAL_SYS_MODEL_LEN] = '\0';
-   memcpy(serial_no, eh->mtms.serial_no, OPAL_SYS_SERIAL_LEN);
-   model[OPAL_SYS_SERIAL_LEN] = '\0';
-
-   print_header("Extended User Header");
-   print_line("Version", "%d (%c%c)", eh->v6hdr.version,
-             eh->v6hdr.id[0], eh->v6hdr.id[1]);
-   print_line("Sub-section type", "%d", eh->v6hdr.subtype);
-   print_line("Component ID", "%x", eh->v6hdr.component_id);
-   print_line("Reporting Machine Type", "%s", model);
-   print_line("Reporting Serial Number", "%s", serial_no);
-   print_line("FW Released Ver", "%s",
-             eh->opal_release_version);
-   print_line("FW SubSys Version", "%s",
-             eh->opal_subsys_version);
-   print_line("Common Ref Time (UTC)",
-             "%4u-%02u-%02u | %02u:%02u:%02u",
-             eh->event_ref_datetime.year,
-             eh->event_ref_datetime.month,
-             eh->event_ref_datetime.day,
-             eh->event_ref_datetime.hour,
-             eh->event_ref_datetime.minutes,
-             eh->event_ref_datetime.seconds);
-   print_line("Symptom Id Len", "%d", eh->opal_symid_len);
-   if (eh->opal_symid_len)
-      print_line("Symptom Id", "%s", eh->opalsymid);
-
-   return 0;
-}
-
 int print_ch_scn(const struct opal_ch_scn *ch)
 {
    print_header("Call Home Log Comment");

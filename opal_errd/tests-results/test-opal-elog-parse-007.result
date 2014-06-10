@@ -61,8 +61,8 @@
 | Version                  : 1 (EH)                                            |
 | Sub-section type         : 0                                                 |
 | Component ID             : 3100                                              |
-| Reporting Machine Type   : 8246-L2C                                          |
-| Reporting Serial Number  : 10008FA                                           |
+| Machine Type Model       : 8246-L2C                                          |
+| Serial Number            : 10008FA                                           |
 | FW Released Ver          : ZL770_060                                         |
 | FW SubSys Version        : b1212p_1320.770                                   |
 | Common Ref Time (UTC)    :    0-00-00 | 00:00:00                             |

@@ -316,45 +316,6 @@ int parse_src_scn(struct opal_src_scn **r_src,
 	return 0;
 }
 
-static int parse_dh_scn(struct opal_dh_scn **r_dh,
-			struct opal_v6_hdr *hdr,
-			const char *buf, int buflen)
-{
-	struct opal_dh_scn *dhbuf = (struct opal_dh_scn *)buf;
-	struct opal_dh_scn *dh;
-
-	if (check_buflen(buflen, sizeof(struct opal_dh_scn) - DH_DUMP_STR_MAX,
-				__func__) < 0)
-		return -EINVAL;
-
-	*r_dh = (struct opal_dh_scn *) malloc(sizeof(struct opal_dh_scn));
-	if(!*r_dh)
-		return -ENOMEM;
-	dh = *r_dh;
-
-	dh->v6hdr = *hdr;
-	dh->dump_id = be32toh(dhbuf->dump_id);
-	dh->flags = dhbuf->flags;
-	dh->length_dump_os = dhbuf->length_dump_os;
-	dh->dump_size = be64toh(dhbuf->dump_size);
-	if (dh->flags & DH_FLAG_DUMP_HEX) {
-		if (check_buflen(buflen, sizeof(struct opal_dh_scn) + sizeof(uint32_t),
-					__func__) < 0) {
-			free(dh);
-			return -EINVAL;
-		}
-		dh->shared.dump_hex = be32toh(dh->shared.dump_hex);
-	} else { /* therefore it is in ascii */
-		if (check_buflen(buflen, sizeof(struct opal_dh_scn) + dh->length_dump_os,
-					__func__) < 0) {
-			free(dh);
-			return -EINVAL;
-		}
-		memcpy(dh->shared.dump_str, dhbuf->shared.dump_str, dh->length_dump_os);
-	}
-	return 0;
-}
-
 int header_id_lookup(char *id) {
 	int i;
 	for (i = 0; i < HEADER_ORDER_MAX; i++)

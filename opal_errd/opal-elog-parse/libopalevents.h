@@ -25,6 +25,7 @@
 #include "opal-mi-scn.h"
 #include "opal-ei-scn.h"
 #include "opal-ed-scn.h"
+#include "opal-dh-scn.h"
 
 struct opal_fru_hdr {
   uint16_t type;
@@ -127,21 +128,6 @@ struct opal_src_scn {
 #define OPAL_SRC_FRU_MAX 10
 	struct opal_fru_scn fru[OPAL_SRC_FRU_MAX]; /*Optional */
 	uint8_t fru_count;
-} __packed;
-
-struct opal_dh_scn {
-	struct opal_v6_hdr v6hdr;
-	uint32_t dump_id;
-#define DH_FLAG_DUMP_HEX 0x40
-	uint8_t flags;
-	uint8_t reserved[2];
-	uint8_t length_dump_os;
-	uint64_t dump_size;
-#define DH_DUMP_STR_MAX 40
-	union {
-		char dump_str[DH_DUMP_STR_MAX];
-		uint32_t dump_hex;
-	} shared;
 } __packed;
 
 /* Header ID,

@@ -9,21 +9,11 @@
 #include "print-opal-event.h"
 #include "opal-event-data.h"
 #include "parse-opal-event.h"
+#include "parse_helpers.h"
 
 struct header_id elog_hdr_id[] = {
 			HEADER_ORDER
 };
-
-/* It is imperative that this function return negative on error */
-int check_buflen(int buflen, int min_length, const char *func)
-{
-	if (buflen < min_length) {
-		fprintf(stderr, "%s: corrupted, expected minimum length %d, got %d\n",
-				func, min_length, buflen);
-		return -EINVAL;
-	}
-	return 0;
-}
 
 int parse_opal_fru_hdr(struct opal_fru_hdr *hdr, const char *buf, int buflen) {
 	struct opal_fru_hdr *bufsrc = (struct opal_fru_hdr *)buf;
@@ -363,51 +353,6 @@ int parse_usr_hdr_scn(struct opal_usr_hdr_scn **r_usrhdr,
 	usrhdr->problem_domain = bufhdr->problem_domain;
 	usrhdr->problem_vector = bufhdr->problem_vector;
 	usrhdr->action = be16toh(bufhdr->action);
-
-	return 0;
-}
-
-static int parse_ei_scn(struct opal_ei_scn **r_ei,
-			struct opal_v6_hdr *hdr,
-			const char *buf, int buflen)
-{
-	struct opal_ei_scn *ei;
-	struct opal_ei_scn *eibuf = (struct opal_ei_scn *)buf;
-
-	if (check_buflen(buflen, sizeof(struct opal_ei_scn), __func__) < 0 ||
-			check_buflen(hdr->length, sizeof(struct opal_ei_scn), __func__) < 0)
-		return -EINVAL;
-
-	*r_ei = (struct opal_ei_scn *) malloc(hdr->length);
-	if (!*r_ei)
-		return -ENOMEM;
-
-	ei = *r_ei;
-
-	ei->v6hdr = *hdr;
-	ei->g_timestamp = be64toh(eibuf->g_timestamp);
-	ei->genesis.corrosion = be32toh(eibuf->genesis.corrosion);
-	ei->genesis.temperature = be16toh(eibuf->genesis.temperature);
-	ei->genesis.rate = be16toh(eibuf->genesis.rate);
-	ei->status = eibuf->status;
-	ei->user_data_scn = eibuf->user_data_scn;
-	ei->read_count = be16toh(eibuf->read_count);
-	if (check_buflen(hdr->length, sizeof(struct opal_ei_scn) +
-				(ei->read_count * sizeof(struct opal_ei_env_scn)),
-				__func__) < 0 ||
-			check_buflen(buflen, sizeof(struct opal_ei_scn) +
-				(ei->read_count * sizeof(struct opal_ei_env_scn)),
-				__func__)) {
-		free(ei);
-		return -EINVAL;
-	}
-
-	int i;
-	for (i = 0; i < ei->read_count; i++) {
-		ei->readings[i].corrosion = be32toh(eibuf->readings[i].corrosion);
-		ei->readings[i].temperature = be16toh(eibuf->readings[i].temperature);
-		ei->readings[i].rate = be16toh(eibuf->readings[i].rate);
-	}
 
 	return 0;
 }

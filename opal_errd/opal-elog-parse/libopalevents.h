@@ -22,6 +22,7 @@
 #include "opal-lp-scn.h"
 #include "opal-ie-scn.h"
 #include "opal-mi-scn.h"
+#include "opal-ei-scn.h"
 
 struct opal_fru_hdr {
   uint16_t type;
@@ -124,24 +125,6 @@ struct opal_src_scn {
 #define OPAL_SRC_FRU_MAX 10
 	struct opal_fru_scn fru[OPAL_SRC_FRU_MAX]; /*Optional */
 	uint8_t fru_count;
-} __packed;
-
-struct opal_ei_env_scn {
-	uint32_t corrosion;
-	uint16_t temperature;
-	uint16_t rate;
-} __packed;
-
-struct opal_ei_scn {
-	struct opal_v6_hdr v6hdr;
-	uint64_t g_timestamp;
-	struct opal_ei_env_scn genesis;
-#define CORROSION_RATE_NORM 0x00
-#define CORROSION_RATE_ABOVE 0x01
-	uint8_t status;
-	uint8_t user_data_scn;
-	uint16_t read_count;
-	struct opal_ei_env_scn readings[0]; /* variable length */
 } __packed;
 
 struct opal_ed_scn {

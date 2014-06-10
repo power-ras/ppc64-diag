@@ -457,60 +457,6 @@ static int parse_hm_scn(struct opal_hm_scn **r_hm,
 	return 0;
 }
 
-static int parse_sw_scn(struct opal_sw_scn **r_sw,
-			struct opal_v6_hdr *hdr, const char *buf, int buflen)
-{
-	struct opal_sw_scn *sw;
-	struct opal_sw_scn *swbuf = (struct opal_sw_scn *)buf;
-
-	*r_sw = (struct opal_sw_scn *)malloc(hdr->length);
-	if(!*r_sw)
-		return -ENOMEM;
-	sw = *r_sw;
-
-	if (hdr->version == 1) {
-		if (buflen < OPAL_SW_V1_SIZE || hdr->length < OPAL_SW_V1_SIZE) {
-			fprintf(stderr, "%s: corrupted, expected length => %lu, got %u\n",
-					__func__, OPAL_SW_V1_SIZE,
-					buflen < hdr->length ? buflen : hdr->length);
-			free(sw);
-			return -EINVAL;
-		}
-		sw->v6hdr = *hdr;
-		sw->version.v1.rc = be32toh(swbuf->version.v1.rc);
-		sw->version.v1.line_num = be32toh(swbuf->version.v1.line_num);
-		sw->version.v1.object_id = be32toh(swbuf->version.v1.object_id);
-		sw->version.v1.id_length = swbuf->version.v1.id_length;
-		if (hdr->length < sw->version.v1.id_length + OPAL_SW_V1_SIZE) {
-			fprintf(stderr, "%s: corrupted, expected length => %lu, got %u\n",
-					__func__, OPAL_SW_V1_SIZE + sw->version.v1.id_length,
-					hdr->length);
-			free(sw);
-			return -EINVAL;
-		}
-		strncpy(sw->version.v1.file_id, swbuf->version.v1.file_id, sw->version.v1.id_length);
-	} else if (hdr->version == 2) {
-		if (buflen < OPAL_SW_V2_SIZE || hdr->length < OPAL_SW_V2_SIZE) {
-			fprintf(stderr, "%s: corrupted, expected length == %lu, got %u\n",
-					__func__, OPAL_SW_V2_SIZE,
-					buflen < hdr->length ? buflen : hdr->length);
-			free(sw);
-			return -EINVAL;
-		}
-		sw->v6hdr = *hdr;
-		sw->version.v2.rc = be32toh(swbuf->version.v2.rc);
-		sw->version.v2.file_id = be16toh(swbuf->version.v2.file_id);
-		sw->version.v2.location_id = be16toh(swbuf->version.v2.location_id);
-		sw->version.v2.object_id = be32toh(swbuf->version.v2.object_id);
-	} else {
-		fprintf(stderr, "ERROR %s: unknown version 0x%x\n", __func__, hdr->version);
-		free(sw);
-		return -EINVAL;
-	}
-
-	return 0;
-}
-
 static int parse_lp_scn(struct opal_lp_scn **r_lp,
 			struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {

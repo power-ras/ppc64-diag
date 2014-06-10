@@ -20,7 +20,7 @@ OPAL_ELOG_OBJS = parse-opal-event.o opal-elog-parse.o opal-event-log.o \
                  print_helpers.o opal-event-data.o print-opal-event.o \
                  parse_helpers.o opal-datetime.o opal-v6-hdr.o \
                  opal-mtms-scn.o opal-mtms-struct.o opal-priv-hdr-scn.o \
-                 opal-lr-scn.o opal-eh-scn.o opal-ep-scn.o
+                 opal-lr-scn.o opal-eh-scn.o opal-ep-scn.o opal-sw-scn.o
 
 all: $(CMDS)
 

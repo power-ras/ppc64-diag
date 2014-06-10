@@ -316,29 +316,6 @@ int parse_src_scn(struct opal_src_scn **r_src,
 	return 0;
 }
 
-static int parse_ed_scn(struct opal_ed_scn **r_ed,
-			struct opal_v6_hdr *hdr,
-			const char *buf, int buflen)
-{
-	struct opal_ed_scn *ed;
-	struct opal_ed_scn *edbuf = (struct opal_ed_scn *)buf;
-
-	if (check_buflen(buflen, sizeof(struct opal_ed_scn), __func__) < 0 ||
-			check_buflen(buflen, hdr->length, __func__) < 0 ||
-			check_buflen(hdr->length, sizeof(struct opal_ed_scn), __func__) < 0)
-		return -EINVAL;
-	*r_ed = (struct opal_ed_scn *) malloc(hdr->length);
-	if (!*r_ed)
-		return -ENOMEM;
-	ed = *r_ed;
-
-	ed->v6hdr = *hdr;
-	ed->creator_id = edbuf->creator_id;
-	memcpy(ed->user_data, edbuf->user_data, hdr->length - 12);
-
-	return 0;
-}
-
 static int parse_dh_scn(struct opal_dh_scn **r_dh,
 			struct opal_v6_hdr *hdr,
 			const char *buf, int buflen)

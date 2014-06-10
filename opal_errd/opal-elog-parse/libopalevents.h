@@ -24,6 +24,7 @@
 #include "opal-ie-scn.h"
 #include "opal-mi-scn.h"
 #include "opal-ei-scn.h"
+#include "opal-ed-scn.h"
 
 struct opal_fru_hdr {
   uint16_t type;
@@ -126,13 +127,6 @@ struct opal_src_scn {
 #define OPAL_SRC_FRU_MAX 10
 	struct opal_fru_scn fru[OPAL_SRC_FRU_MAX]; /*Optional */
 	uint8_t fru_count;
-} __packed;
-
-struct opal_ed_scn {
-	struct opal_v6_hdr v6hdr;
-	uint8_t creator_id;
-	uint8_t reserved[3];
-	uint8_t user_data[0]; /* variable length */
 } __packed;
 
 struct opal_dh_scn {

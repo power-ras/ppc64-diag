@@ -173,15 +173,6 @@ int print_opal_src_scn(const struct opal_src_scn *src)
    return 0;
 }
 
-int print_ed_scn(const struct opal_ed_scn *ed)
-{
-	print_header("Extended User Defined Data");
-	print_opal_v6_hdr(ed->v6hdr);
-	print_line("Created by", "%s", get_creator_name(ed->creator_id));
-	print_hex(ed->user_data, ed->v6hdr.length - 12);
-	return 0;
-}
-
 int print_dh_scn(const struct opal_dh_scn *dh)
 {
 	print_header("Dump Locator");

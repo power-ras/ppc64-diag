@@ -24,7 +24,7 @@ int print_usr_hdr_subsystem_id(const struct opal_usr_hdr_scn *usrhdr);
 
 int print_src_refcode(const struct opal_src_scn *src);
 
-int print_mt_data(const struct opal_mt_struct mt);
+int print_mt_data(const struct opal_mtms_struct mtms);
 
 int print_mt_scn(const struct opal_mtms_scn *mtms);
 

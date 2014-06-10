@@ -4,6 +4,8 @@
 #include "opal-event-log.h"
 #include "libopalevents.h"
 
+#include "opal-mtms-scn.h"
+
 int parse_opal_event_log(char *buf, int buflen, struct opal_event_log_scn **log);
 
 int parse_opal_event(char *buf, int buflen);

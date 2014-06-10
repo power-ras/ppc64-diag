@@ -14,40 +14,6 @@ struct header_id elog_hdr_id[] = {
 			HEADER_ORDER
 };
 
-/* parse MTMS section of the log */
-int parse_mt_scn(struct opal_mtms_scn **r_mt, const struct opal_v6_hdr *hdr,
-		const char *buf, int buflen)
-{
-	struct opal_mtms_scn *bufmt = (struct opal_mtms_scn*)buf;
-	struct opal_mtms_scn *mt;
-
-	if (buflen < sizeof(struct opal_mtms_scn)) {
-		fprintf(stderr, "%s: corrupted, expected length %lu, got %u\n",
-			__func__,
-			sizeof(struct opal_mtms_scn), buflen);
-		return -EINVAL;
-	}
-
-	if (hdr->length != sizeof(struct opal_mtms_scn)) {
-		fprintf(stderr, "%s: section header length disagrees with spec"
-			". section header length %u, spec: %lu\n",
-			__func__,
-			hdr->length, sizeof(struct opal_mtms_scn));
-		return -EINVAL;
-	}
-
-	*r_mt = (struct opal_mtms_scn*) malloc(sizeof(struct opal_mtms_scn));
-	if(!*r_mt)
-		return -ENOMEM;
-	mt = *r_mt;
-
-	mt->v6hdr = *hdr;
-	memcpy(mt->mt.model, bufmt->mt.model, OPAL_SYS_MODEL_LEN);
-	memcpy(mt->mt.serial_no, bufmt->mt.serial_no, OPAL_SYS_SERIAL_LEN);
-
-	return 0;
-}
-
 /* It is imperative that this function return negative on error */
 int check_buflen(int buflen, int min_length, const char *func)
 {
@@ -115,7 +81,7 @@ int parse_src_fru_pe_scn(struct opal_fru_pe_sub_scn *pe, const char *buf, int bu
 {
 	struct opal_fru_pe_sub_scn *bufsrc = (struct opal_fru_pe_sub_scn *)buf;
 
-	int min_length = sizeof(struct opal_fru_hdr) + sizeof(struct opal_mt_struct);
+	int min_length = sizeof(struct opal_fru_hdr) + sizeof(struct opal_mtms_struct);
 	int error = check_buflen(buflen, min_length, __func__);
 	if (error)
 		return error;
@@ -502,8 +468,8 @@ static int parse_eh_scn(struct opal_eh_scn **r_eh,
 	}
 
 	eh->v6hdr = *hdr;
-	memcpy(eh->mt.model, bufeh->mt.model, OPAL_SYS_MODEL_LEN);
-	memcpy(eh->mt.serial_no, bufeh->mt.serial_no, OPAL_SYS_SERIAL_LEN);
+	memcpy(eh->mtms.model, bufeh->mtms.model, OPAL_SYS_MODEL_LEN);
+	memcpy(eh->mtms.serial_no, bufeh->mtms.serial_no, OPAL_SYS_SERIAL_LEN);
 
 	strncpy(eh->opal_release_version, bufeh->opal_release_version, OPAL_VER_LEN);
 	strncpy(eh->opal_subsys_version, bufeh->opal_subsys_version, OPAL_VER_LEN);
@@ -608,8 +574,8 @@ static int parse_hm_scn(struct opal_hm_scn **r_hm,
 	hm = *r_hm;
 
 	hm->v6hdr = *hdr;
-	memcpy(hm->mt.model, bufhm->mt.model, OPAL_SYS_MODEL_LEN);
-	memcpy(hm->mt.serial_no, bufhm->mt.serial_no, OPAL_SYS_SERIAL_LEN);
+	memcpy(hm->mtms.model, bufhm->mtms.model, OPAL_SYS_MODEL_LEN);
+	memcpy(hm->mtms.serial_no, bufhm->mtms.serial_no, OPAL_SYS_SERIAL_LEN);
 
 	return 0;
 }
@@ -1065,9 +1031,9 @@ int parse_opal_event_log(char *buf, int buflen, struct opal_event_log_scn **r_lo
 				add_opal_event_log_scn(log, "EH", eh, log_pos++);
 			}
 		} else if (strncmp(hdr.id, "MT", 2) == 0) {
-			struct opal_mtms_scn *mt;
-			if (parse_mt_scn(&mt, &hdr, buf, buflen) == 0) {
-				add_opal_event_log_scn(log, "MT", mt, log_pos++);
+			struct opal_mtms_scn *mtms;
+			if (parse_mtms_scn(&mtms, &hdr, buf, buflen) == 0) {
+				add_opal_event_log_scn(log, "MT", mtms, log_pos++);
 			}
 		} else if (strncmp(hdr.id, "SS", 2) == 0) {
 			struct opal_src_scn *src;

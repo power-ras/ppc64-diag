@@ -4,15 +4,14 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include "opal-v6-hdr.h"
-
-#define OPAL_SYS_MODEL_LEN	8
-#define OPAL_SYS_SERIAL_LEN	12
-#define OPAL_VER_LEN		16
-
 #ifndef __packed
 #define __packed __attribute__((packed))
 #endif
+
+#include "opal-v6-hdr.h"
+#include "opal-mtms-scn.h"
+
+#define OPAL_VER_LEN		16
 
 /* This comes in BCD for some reason, we convert it in parsing */
 struct opal_datetime {
@@ -25,21 +24,10 @@ struct opal_datetime {
 	uint8_t    hundredths;
 } __packed;
 
-struct opal_mt_struct {
-	char	model[OPAL_SYS_MODEL_LEN];
-	char	serial_no[OPAL_SYS_SERIAL_LEN];
-} __packed;
-
-/* opal MTMS section */
-struct	opal_mtms_scn {
-	struct	opal_v6_hdr v6hdr;
-	struct opal_mt_struct mt;
-} __packed;
-
 /* Extended header section */
 struct opal_eh_scn {
 	struct	opal_v6_hdr v6hdr;
-	struct opal_mt_struct mt;
+	struct opal_mtms_struct mtms;
 	char	opal_release_version[OPAL_VER_LEN]; /* Null terminated */
 	char	opal_subsys_version[OPAL_VER_LEN]; /* Null terminated */
 	uint32_t reserved_0;
@@ -65,7 +53,7 @@ struct opal_ud_scn {
 
 struct opal_hm_scn {
 	struct opal_v6_hdr v6hdr;
-	struct opal_mt_struct mt;
+	struct opal_mtms_struct mtms;
 } __packed;
 
 struct opal_ep_scn {
@@ -147,7 +135,7 @@ struct opal_fru_mr_sub_scn {
 struct opal_fru_pe_sub_scn {
 #define OPAL_FRU_PE_TYPE 0x5045 /* 'PE' in hex */
   struct opal_fru_hdr hdr;
-  struct opal_mt_struct mtms;
+  struct opal_mtms_struct mtms;
 #define OPAL_FRU_PE_PCE_MAX 32
   char pce[OPAL_FRU_PE_PCE_MAX];
 } __packed;

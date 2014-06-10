@@ -24,7 +24,7 @@ int print_opal_event_log(opal_event_log *log)
 		} else if (strncmp(log[i].id, "EH", 2) == 0) {
 			print_eh_scn((struct opal_eh_scn *) log[i].scn);
       } else if (strncmp(log[i].id, "MT", 2) == 0) {
-			print_mt_scn((struct opal_mtms_scn *) log[i].scn);
+			print_mtms_scn((struct opal_mtms_scn *) log[i].scn);
 		} else if (strncmp(log[i].id, "SS", 2) == 0) {
 			print_opal_src_scn((struct opal_src_scn *) log[i].scn);
 		} else if (strncmp(log[i].id, "DH", 2) == 0) {
@@ -138,31 +138,6 @@ int print_src_refcode(const struct opal_src_scn *src)
    return 0;
 }
 
-int print_mt_data(const struct opal_mt_struct mt)
-{
-   char model[OPAL_SYS_MODEL_LEN+1];
-   char serial_no[OPAL_SYS_SERIAL_LEN+1];
-
-   memcpy(model, mt.model, OPAL_SYS_MODEL_LEN);
-   model[OPAL_SYS_MODEL_LEN] = '\0';
-   memcpy(serial_no, mt.serial_no, OPAL_SYS_SERIAL_LEN);
-   model[OPAL_SYS_SERIAL_LEN] = '\0';
-
-   print_line("Machine Type Model", "%s", model);
-   print_line("Serial Number", "%s", serial_no);
-
-   return 0;
-}
-
-int print_mt_scn(const struct opal_mtms_scn *mtms)
-{
-
-   print_header("Machine Type/Model & Serial Number");
-   print_opal_v6_hdr(mtms->v6hdr);
-   print_mt_data(mtms->mt);
-   return 0;
-}
-
 int print_fru_id_scn(const struct opal_fru_id_sub_scn id)
 {
    if (id.hdr.flags & OPAL_FRU_ID_PART)
@@ -187,7 +162,7 @@ int print_fru_id_scn(const struct opal_fru_id_sub_scn id)
 
 int print_fru_pe_scn(const struct opal_fru_pe_sub_scn pe)
 {
-   print_mt_data(pe.mtms);
+   print_mtms_struct(pe.mtms);
    print_line("PCE", "%s", pe.pce);
    return 0;
 }
@@ -301,9 +276,9 @@ int print_eh_scn(const struct opal_eh_scn *eh)
    char model[OPAL_SYS_MODEL_LEN+1];
    char serial_no[OPAL_SYS_SERIAL_LEN+1];
 
-   memcpy(model, eh->mt.model, OPAL_SYS_MODEL_LEN);
+   memcpy(model, eh->mtms.model, OPAL_SYS_MODEL_LEN);
    model[OPAL_SYS_MODEL_LEN] = '\0';
-   memcpy(serial_no, eh->mt.serial_no, OPAL_SYS_SERIAL_LEN);
+   memcpy(serial_no, eh->mtms.serial_no, OPAL_SYS_SERIAL_LEN);
    model[OPAL_SYS_SERIAL_LEN] = '\0';
 
    print_header("Extended User Header");
@@ -358,7 +333,7 @@ int print_hm_scn(const struct opal_hm_scn *hm)
 	print_header("Hypervisor ID");
 
 	print_opal_v6_hdr(hm->v6hdr);
-	print_mt_data(hm->mt);
+	print_mtms_struct(hm->mtms);
 
 	return 0;
 }

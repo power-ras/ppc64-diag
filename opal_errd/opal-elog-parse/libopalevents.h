@@ -19,6 +19,7 @@
 #include "opal-ud-scn.h"
 #include "opal-hm-scn.h"
 #include "opal-ch-scn.h"
+#include "opal-lp-scn.h"
 
 struct opal_fru_hdr {
   uint16_t type;
@@ -121,18 +122,6 @@ struct opal_src_scn {
 #define OPAL_SRC_FRU_MAX 10
 	struct opal_fru_scn fru[OPAL_SRC_FRU_MAX]; /*Optional */
 	uint8_t fru_count;
-} __packed;
-
-struct opal_lp_scn {
-	struct opal_v6_hdr v6hdr;
-	uint16_t primary;
-	uint8_t length_name;
-	uint8_t lp_count;
-	uint32_t partition_id;
-	char name[0]; /* variable length */
-	/* uint16_t *lps; variable length
-	 * exists after name, position will be name + length name
-	 */
 } __packed;
 
 struct opal_ie_scn {

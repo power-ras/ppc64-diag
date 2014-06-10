@@ -367,63 +367,6 @@ int parse_usr_hdr_scn(struct opal_usr_hdr_scn **r_usrhdr,
 	return 0;
 }
 
-static int parse_lp_scn(struct opal_lp_scn **r_lp,
-			struct opal_v6_hdr *hdr, const char *buf, int buflen)
-{
-	struct opal_lp_scn *lp;
-	struct opal_lp_scn *lpbuf = (struct opal_lp_scn *)buf;
-	uint16_t *lps;
-	uint16_t *lpsbuf;
-	if (buflen < sizeof(struct opal_lp_scn) ||
-			hdr->length < sizeof(struct opal_lp_scn)) {
-		fprintf(stderr, "%s: corrupted, expected length => %lu, got %u\n",
-				__func__, sizeof(struct opal_lp_scn),
-				buflen < hdr->length ? buflen : hdr->length);
-		return -EINVAL;
-	}
-
-	*r_lp = malloc(hdr->length);
-	if (!*r_lp) {
-		fprintf(stderr, "%s: out of memory\n", __func__);
-		return -ENOMEM;
-	}
-
-	lp = *r_lp;
-
-	lp->v6hdr = *hdr;
-	lp->primary = be16toh(lpbuf->primary);
-	lp->length_name = lpbuf->length_name;
-	lp->lp_count = lpbuf->lp_count;
-	lp->partition_id = be32toh(lpbuf->partition_id);
-	lp->name[0] = '\0';
-	int expected_len = sizeof(struct opal_lp_scn) + lp->length_name;
-	if (buflen < expected_len || hdr->length < expected_len) {
-		fprintf(stderr, "%s: corrupted, expected length => %u, got %u",
-				__func__, expected_len,
-				buflen < hdr->length ? buflen : hdr->length);
-		free(lp);
-		return -EINVAL;
-	}
-	memcpy(lp->name, lpbuf->name, lp->length_name);
-
-	expected_len += lp->lp_count * sizeof(uint16_t);
-	if (buflen < expected_len || hdr->length < expected_len) {
-		fprintf(stderr, "%s: corrupted, expected length => %u, got %u",
-				__func__, expected_len,
-				buflen < hdr->length ? buflen : hdr->length);
-		free(lp);
-		return -EINVAL;
-	}
-
-	lpsbuf = (uint16_t *)(lpbuf->name + lpbuf->length_name);
-	lps = (uint16_t *)(lp->name + lp->length_name);
-	int i;
-	for(i = 0; i < lp->lp_count; i++)
-		lps[i] = be16toh(lpsbuf[i]);
-
-	return 0;
-}
-
 static int parse_ie_scn(struct opal_ie_scn **r_ie,
 			struct opal_v6_hdr *hdr,
 			const char *buf, int buflen)

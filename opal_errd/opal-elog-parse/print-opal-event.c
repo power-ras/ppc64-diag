@@ -241,27 +241,6 @@ int print_opal_usr_hdr_scn(const struct opal_usr_hdr_scn *usrhdr)
    return 0;
 }
 
-int print_lp_scn(const struct opal_lp_scn *lp)
-{
-	print_header("Logical Partition");
-	print_opal_v6_hdr(lp->v6hdr);
-	print_line("Primary Partition ID", "0x%04x", lp->primary);
-	print_line("Logical Partition Log ID", "0x%08x", lp->partition_id);
-	print_line("Length of LP Name", "0x%02x", lp->length_name);
-	print_line("Primary Partition Name", "%s", lp->name);
-	int i;
-	uint16_t *lps = (uint16_t *) (lp->name + lp->length_name);
-	print_line("Target LP Count", "0x%02x", lp->lp_count);
-	for(i = 0; i < lp->lp_count; i+=2) {
-		if (i + 1 < lp->lp_count)
-			print_line("Target LP", "0x%04x    0x%04x", lps[i], lps[i+1]);
-		else
-			print_line("Target LP", "0x%04X", lps[i]);
-	}
-
-	return 0;
-}
-
 int print_ie_scn(const struct opal_ie_scn *ie)
 {
 	print_header("IO Event");

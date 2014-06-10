@@ -250,16 +250,6 @@ int print_ch_scn(const struct opal_ch_scn *ch)
    return 0;
 }
 
-int print_hm_scn(const struct opal_hm_scn *hm)
-{
-	print_header("Hypervisor ID");
-
-	print_opal_v6_hdr(hm->v6hdr);
-	print_mtms_struct(hm->mtms);
-
-	return 0;
-}
-
 int print_lp_scn(const struct opal_lp_scn *lp)
 {
 	print_header("Logical Partition");

@@ -407,31 +407,6 @@ static int parse_ch_scn(struct opal_ch_scn **r_ch,
 	return 0;
 }
 
-static int parse_hm_scn(struct opal_hm_scn **r_hm,
-			const struct opal_v6_hdr *hdr,
-			const char *buf, int buflen)
-{
-	struct opal_hm_scn *bufhm = (struct opal_hm_scn *)buf;
-	struct opal_hm_scn *hm;
-	if (buflen < sizeof(struct opal_hm_scn)) {
-		fprintf(stderr, "%s: corrupted, expected length >= %lu, got %u\n",
-			__func__,
-			sizeof(struct opal_hm_scn), buflen);
-		return -EINVAL;
-	}
-
-	*r_hm = (struct opal_hm_scn *) malloc(sizeof(struct opal_hm_scn));
-	if(!*r_hm)
-		return -ENOMEM;
-	hm = *r_hm;
-
-	hm->v6hdr = *hdr;
-	memcpy(hm->mtms.model, bufhm->mtms.model, OPAL_SYS_MODEL_LEN);
-	memcpy(hm->mtms.serial_no, bufhm->mtms.serial_no, OPAL_SYS_SERIAL_LEN);
-
-	return 0;
-}
-
 static int parse_lp_scn(struct opal_lp_scn **r_lp,
 			struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {

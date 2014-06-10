@@ -17,16 +17,12 @@
 #include "opal-ep-scn.h"
 #include "opal-sw-scn.h"
 #include "opal-ud-scn.h"
+#include "opal-hm-scn.h"
 
 struct opal_ch_scn {
 	struct	opal_v6_hdr v6hdr;
 #define OPAL_CH_COMMENT_MAX_LEN 144
 	char comment[0]; /* varsized up to 144 byte null terminated */
-} __packed;
-
-struct opal_hm_scn {
-	struct opal_v6_hdr v6hdr;
-	struct opal_mtms_struct mtms;
 } __packed;
 
 struct opal_fru_hdr {

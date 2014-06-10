@@ -16,17 +16,12 @@
 #include "opal-eh-scn.h"
 #include "opal-ep-scn.h"
 #include "opal-sw-scn.h"
+#include "opal-ud-scn.h"
 
 struct opal_ch_scn {
 	struct	opal_v6_hdr v6hdr;
 #define OPAL_CH_COMMENT_MAX_LEN 144
 	char comment[0]; /* varsized up to 144 byte null terminated */
-} __packed;
-
-/* User defined data header section */
-struct opal_ud_scn {
-	struct opal_v6_hdr v6hdr;
-	uint8_t data[0]; /* variable sized */
 } __packed;
 
 struct opal_hm_scn {

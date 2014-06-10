@@ -250,18 +250,6 @@ int print_ch_scn(const struct opal_ch_scn *ch)
    return 0;
 }
 
-int print_ud_scn(const struct opal_ud_scn *ud)
-{
-   print_header("User Defined Data");
-   print_opal_v6_hdr(ud->v6hdr);
-   /*FIXME this data should be parsable if documentation appears/exists
-    * In the mean time, just dump it in hex
-    */
-   print_line("User data hex","length %d",ud->v6hdr.length - 8);
-   print_hex(ud->data, ud->v6hdr.length - 8);
-   return 0;
-}
-
 int print_hm_scn(const struct opal_hm_scn *hm)
 {
 	print_header("Hypervisor ID");

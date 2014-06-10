@@ -316,47 +316,6 @@ int parse_src_scn(struct opal_src_scn **r_src,
 	return 0;
 }
 
-/* parse_usr_hdr_scn */
-int parse_usr_hdr_scn(struct opal_usr_hdr_scn **r_usrhdr,
-		      const struct opal_v6_hdr *hdr,
-		      const char *buf, int buflen, int *is_error)
-{
-	struct opal_usr_hdr_scn *bufhdr = (struct opal_usr_hdr_scn*)buf;
-	struct opal_usr_hdr_scn *usrhdr;
-
-	if (buflen < sizeof(struct opal_usr_hdr_scn)) {
-		fprintf(stderr, "%s: corrupted, expected length %lu, got %u\n",
-			__func__,
-			sizeof(struct opal_usr_hdr_scn), buflen);
-		return -EINVAL;
-	}
-
-	if (hdr->length != sizeof(struct opal_usr_hdr_scn)) {
-		fprintf(stderr, "%s: section header length disagrees with spec"
-			". section header length %u, spec: %lu\n",
-			__func__,
-			hdr->length, sizeof(struct opal_usr_hdr_scn));
-		return -EINVAL;
-	}
-
-	*r_usrhdr = (struct opal_usr_hdr_scn*) malloc(sizeof(struct opal_usr_hdr_scn));
-	if(!*r_usrhdr)
-		return -ENOMEM;
-	usrhdr = *r_usrhdr;
-
-	usrhdr->v6hdr = *hdr;
-	usrhdr->subsystem_id = bufhdr->subsystem_id;
-	usrhdr->event_data = bufhdr->event_data;
-	usrhdr->event_severity = bufhdr->event_severity;
-	*is_error = !usrhdr->event_severity;
-	usrhdr->event_type = bufhdr->event_type;
-	usrhdr->problem_domain = bufhdr->problem_domain;
-	usrhdr->problem_vector = bufhdr->problem_vector;
-	usrhdr->action = be16toh(bufhdr->action);
-
-	return 0;
-}
-
 static int parse_ed_scn(struct opal_ed_scn **r_ed,
 			struct opal_v6_hdr *hdr,
 			const char *buf, int buflen)

@@ -326,35 +326,6 @@ int parse_src_scn(struct opal_src_scn **r_src,
 	return 0;
 }
 
-static uint16_t from_bcd16(uint16_t bcd)
-{
-	return  (bcd & 0x000f) +
-		((bcd & 0x00f0) >> 4) * 10 +
-		((bcd & 0x0f00) >> 8) * 100 +
-		((bcd & 0xf000) >> 12) * 1000;
-}
-
-static uint8_t from_bcd8(uint8_t bcd)
-{
-	return  (bcd & 0x0f) +
-		((bcd & 0xf0) >> 4) * 10;
-}
-
-struct opal_datetime parse_opal_datetime(const struct opal_datetime in)
-{
-	struct opal_datetime out;
-
-	out.year =  from_bcd16(be16toh(in.year));
-	out.month = from_bcd8(in.month);
-	out.day =   from_bcd8(in.day);
-	out.hour =  from_bcd8(in.hour);
-	out.minutes =    from_bcd8(in.minutes);
-	out.seconds =    from_bcd8(in.seconds);
-	out.hundredths = from_bcd8(in.hundredths);
-
-	return out;
-}
-
 /* parse private header scn */
 int parse_priv_hdr_scn(struct opal_priv_hdr_scn **r_privhdr,
 					const struct opal_v6_hdr *hdr,

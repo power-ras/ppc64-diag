@@ -10,19 +10,9 @@
 
 #include "opal-v6-hdr.h"
 #include "opal-mtms-scn.h"
+#include "opal-datetime.h"
 
 #define OPAL_VER_LEN		16
-
-/* This comes in BCD for some reason, we convert it in parsing */
-struct opal_datetime {
-	uint16_t   year;
-	uint8_t    month;
-	uint8_t    day;
-	uint8_t    hour;
-	uint8_t    minutes;
-	uint8_t    seconds;
-	uint8_t    hundredths;
-} __packed;
 
 /* Extended header section */
 struct opal_eh_scn {

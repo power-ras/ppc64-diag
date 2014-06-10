@@ -22,7 +22,7 @@ OPAL_ELOG_OBJS = parse-opal-event.o opal-elog-parse.o opal-event-log.o \
                  opal-mtms-scn.o opal-mtms-struct.o opal-priv-hdr-scn.o \
                  opal-lr-scn.o opal-eh-scn.o opal-ep-scn.o opal-sw-scn.o \
                  opal-ud-scn.o opal-hm-scn.o opal-ch-scn.o opal-lp-scn.o \
-                 opal-ie-scn.o
+                 opal-ie-scn.o opal-mi-scn.o
 
 all: $(CMDS)
 

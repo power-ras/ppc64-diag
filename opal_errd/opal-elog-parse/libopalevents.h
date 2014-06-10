@@ -21,6 +21,7 @@
 #include "opal-ch-scn.h"
 #include "opal-lp-scn.h"
 #include "opal-ie-scn.h"
+#include "opal-mi-scn.h"
 
 struct opal_fru_hdr {
   uint16_t type;
@@ -129,12 +130,6 @@ struct opal_ei_env_scn {
 	uint32_t corrosion;
 	uint16_t temperature;
 	uint16_t rate;
-} __packed;
-
-struct opal_mi_scn {
-       struct opal_v6_hdr v6hdr;
-       uint32_t flags;
-       uint32_t reserved;
 } __packed;
 
 struct opal_ei_scn {

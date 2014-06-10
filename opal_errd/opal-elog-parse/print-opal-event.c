@@ -241,14 +241,6 @@ int print_opal_usr_hdr_scn(const struct opal_usr_hdr_scn *usrhdr)
    return 0;
 }
 
-int print_mi_scn(const struct opal_mi_scn *mi) {
-	print_header("Manufacturing Information");
-	print_opal_v6_hdr(mi->v6hdr);
-	print_line("Policy Flags", "0x%08x", mi->flags);
-
-	return 0;
-}
-
 int print_ei_env_scn(const struct opal_ei_env_scn *ei_env)
 {
 	print_line("Avg Norm corrosion", "0x%08x", ei_env->corrosion);

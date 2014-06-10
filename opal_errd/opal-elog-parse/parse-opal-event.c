@@ -367,30 +367,6 @@ int parse_usr_hdr_scn(struct opal_usr_hdr_scn **r_usrhdr,
 	return 0;
 }
 
-static int parse_mi_scn(struct opal_mi_scn **r_mi,
-			struct opal_v6_hdr *hdr,
-			const char *buf, int buflen)
-{
-	struct opal_mi_scn *mibuf = (struct opal_mi_scn *)buf;
-	struct opal_mi_scn *mi;
-
-	if (buflen < sizeof(struct opal_mi_scn)) {
-		fprintf(stderr, "%s: corrupted, expected length => %lu, got %u",
-				__func__, sizeof(struct opal_mi_scn), buflen);
-		return -EINVAL;
-	}
-
-	*r_mi = (struct opal_mi_scn *) malloc(sizeof(struct opal_mi_scn));
-	if (!*r_mi)
-		return -ENOMEM;
-	mi = *r_mi;
-
-	mi->v6hdr = *hdr;
-	mi->flags = be32toh(mibuf->flags);
-
-	return 0;
-}
-
 static int parse_ei_scn(struct opal_ei_scn **r_ei,
 			struct opal_v6_hdr *hdr,
 			const char *buf, int buflen)

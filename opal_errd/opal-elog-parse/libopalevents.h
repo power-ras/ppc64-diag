@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <inttypes.h>
 
+#include "opal-v6-hdr.h"
+
 #define OPAL_SYS_MODEL_LEN	8
 #define OPAL_SYS_SERIAL_LEN	12
 #define OPAL_VER_LEN		16
@@ -21,15 +23,6 @@ struct opal_datetime {
 	uint8_t    minutes;
 	uint8_t    seconds;
 	uint8_t    hundredths;
-} __packed;
-
-/* Error log section header */
-struct opal_v6_hdr {
-	char            id[2];
-	uint16_t	length;		/* section length */
-	uint8_t		version;	/* section version */
-	uint8_t		subtype;	/* section sub-type id */
-	uint16_t	component_id;	/* component id of section creator */
 } __packed;
 
 struct opal_mt_struct {

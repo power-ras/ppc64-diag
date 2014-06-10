@@ -16,7 +16,8 @@ endif
 
 CMDS = opal-elog-parse
 
-OPAL_ELOG_OBJS = parse-opal-event.o opal-elog-parse.o print-opal-event.o print_helpers.o opal-event-data.o opal-event-log.o
+OPAL_ELOG_OBJS = parse-opal-event.o opal-elog-parse.o print-opal-event.o print_helpers.o opal-event-data.o opal-event-log.o \
+                 opal-v6-hdr.o
 
 all: $(CMDS)
 

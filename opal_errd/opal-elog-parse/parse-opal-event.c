@@ -959,41 +959,6 @@ static int parse_dh_scn(struct opal_dh_scn **r_dh,
 	return 0;
 }
 
-static int parse_section_header(struct opal_v6_hdr *hdr, const char *buf, int buflen)
-{
-	if (buflen < sizeof(struct opal_v6_hdr)) {
-		fprintf(stderr, "ERROR %s: section header is too small, "
-			"is meant to be %lu bytes, only %u found.\n",
-			__func__, sizeof(struct opal_v6_hdr), buflen);
-		return -EINVAL;
-	}
-
-	const struct opal_v6_hdr* bufhdr = (struct opal_v6_hdr*)buf;
-
-	assert(sizeof(struct opal_v6_hdr) == 8);
-
-	memcpy(hdr->id, bufhdr->id, 2);
-	hdr->length = be16toh(bufhdr->length);
-	hdr->version = bufhdr->version;
-	hdr->subtype = bufhdr->subtype;
-	hdr->component_id = be16toh(bufhdr->component_id);
-
-	if (hdr->length < 8) {
-		fprintf(stderr, "ERROR %s: section header is corrupt. "
-			"Length < 8 bytes and must be at least 8 bytes "
-			"to include the length of itself. "
-			"Id 0x%x%x Length %u Version %u Subtype %u "
-			"Component ID: %u\n",
-			__func__,
-			hdr->id[0], hdr->id[1],
-			hdr->length, hdr->version, hdr->subtype,
-			hdr->component_id);
-		return -EINVAL;
-	}
-
-	return 0;
-}
-
 int header_id_lookup(char *id) {
 	int i;
 	for (i = 0; i < HEADER_ORDER_MAX; i++)

@@ -60,15 +60,6 @@ int print_opal_event_log(opal_event_log *log)
 	return 0;
 }
 
-int print_opal_v6_hdr(const struct opal_v6_hdr hdr) {
-   print_line("Section Version", "%d (%c%c)", hdr.version,
-               hdr.id[0], hdr.id[1]);
-   print_line("Sub-section type", "0x%x", hdr.subtype);
-   print_line("Section Length", "0x%x", hdr.length);
-   print_line("Component ID", "%x", hdr.component_id);
-   return 0;
-}
-
 int print_usr_hdr_action(const struct opal_usr_hdr_scn *usrhdr)
 {
    char *entry = "Action Flags";

@@ -14,6 +14,7 @@
 #include "opal-mtms-scn.h"
 #include "opal-lr-scn.h"
 #include "opal-eh-scn.h"
+#include "opal-ep-scn.h"
 
 struct opal_ch_scn {
 	struct	opal_v6_hdr v6hdr;
@@ -30,20 +31,6 @@ struct opal_ud_scn {
 struct opal_hm_scn {
 	struct opal_v6_hdr v6hdr;
 	struct opal_mtms_struct mtms;
-} __packed;
-
-struct opal_ep_scn {
-	struct opal_v6_hdr v6hdr;
-#define OPAL_EP_VALUE_SHIFT 4
-#define OPAL_EP_ACTION_BITS 0x0F
-#define OPAL_EP_VALUE_SET 3
-	uint8_t value;
-#define OPAL_EP_EVENT_BITS 0x0F
-#define OPAL_EP_EVENT_SHIFT 4
-	uint8_t modifier;
-#define OPAL_EP_HDR_V 0x02
-	uint16_t ext_modifier;
-	uint32_t reason;
 } __packed;
 
 #define OPAL_SW_V2_SIZE (sizeof(struct opal_sw_v2_scn) + sizeof(struct opal_v6_hdr))

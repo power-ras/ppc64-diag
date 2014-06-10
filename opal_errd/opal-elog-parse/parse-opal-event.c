@@ -457,35 +457,6 @@ static int parse_hm_scn(struct opal_hm_scn **r_hm,
 	return 0;
 }
 
-static int parse_ep_scn(struct opal_ep_scn **r_ep,
-			const struct opal_v6_hdr *hdr,
-			const char *buf, int buflen)
-{
-	struct opal_ep_scn *bufep = (struct opal_ep_scn *)buf;
-	struct opal_ep_scn *ep;
-
-	if (buflen < sizeof(struct opal_ep_scn)) {
-		fprintf(stderr, "%s: corrupted, expected length >= %lu, got %u\n",
-			__func__,
-			sizeof(struct opal_ep_scn), buflen);
-		return -EINVAL;
-	}
-
-	*r_ep = (struct opal_ep_scn *) malloc(sizeof(struct opal_ep_scn));
-	if(!*r_ep)
-		return -ENOMEM;
-	ep = *r_ep;
-
-	ep->v6hdr = *hdr;
-
-	ep->value = bufep->value;
-	ep->modifier = bufep->modifier;
-	ep->ext_modifier = be16toh(bufep->ext_modifier);
-	ep->reason = be32toh(bufep->reason);
-
-	return 0;
-}
-
 static int parse_sw_scn(struct opal_sw_scn **r_sw,
 			struct opal_v6_hdr *hdr, const char *buf, int buflen)
 {

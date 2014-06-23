@@ -1,0 +1,70 @@
+|------------------------------------------------------------------------------|
+|                                Private Header                                |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x30                                              |
+| Component ID             : 2700                                              |
+| Created at               : 2014-03-13 | 08:15:55                             |
+| Committed at             : 2014-03-13 | 08:15:55                             |
+| Created by               : Service Processor                                 |
+| Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
+| Platform Log Id          : 0x5034a000                                        |
+| Entry ID                 : 0x5034a000                                        |
+| Section Count            : 4                                                 |
+|------------------------------------------------------------------------------|
+|                                 User Header                                  |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (UH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x18                                              |
+| Component ID             : 2700                                              |
+| Subsystem                : Room ambient temperature                          |
+| Event Scope              : Single platform                                   |
+| Event Severity           : Predictive Error                                  |
+| Event Type               : Not applicable.                                   |
+| Action Flags             : Report to Operating System                        |
+|                          : Service Action Required                           |
+|------------------------------------------------------------------------------|
+|                        Primary System Reference Code                         |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PS)                                            |
+| Sub-section type         : 0x1                                               |
+| Section Length           : 0xa0                                              |
+| Component ID             : 2700                                              |
+| SRC Format               : 0x1                                               |
+| SRC Version              : 0x2                                               |
+| Valid Word Count         : 0x9                                               |
+| SRC Length               : 98                                                |
+| Primary Reference Code   : 11007201                                          |
+| Hex Words 2 - 5          : 003C0001 00007201 00000000 00000000               |
+| Hex Words 6 - 9          : 00000000 00000000 00000000 00000000               |
+|                                                                              |
+|                               Callout Section                                |
+|                                                                              |
+| Additional Sections      : Disabled                                          |
+| Callout Count            : 1                                                 |
+|                                                                              |
+|                                 Symbolic FRU                                 |
+| Priority                 : Mandatory, replace all with this type as a unit   |
+| Location Code            : U78AB.001.WZSGBJ6                                 |
+| Part Number              : AMBTEMP                                           |
+| CCIN                     :                                                   |
+| Serial Number            :                                                   |
+| Machine Type Model       : 8246-L2C                                          |
+| Serial Number            : 10008FA                                           |
+| PCE                      :                                                   |
+|                                                                              |
+|------------------------------------------------------------------------------|
+|                             Extended User Header                             |
+|------------------------------------------------------------------------------|
+| Version                  : 1 (EH)                                            |
+| Sub-section type         : 0                                                 |
+| Component ID             : 3100                                              |
+| Machine Type Model       : 8246-L2C                                          |
+| Serial Number            : 10008FA                                           |
+| FW Released Ver          : ZL770_060                                         |
+| FW SubSys Version        : b1212p_1320.770                                   |
+| Common Ref Time (UTC)    :    0-00-00 | 00:00:00                             |
+| Symptom Id Len           : 28                                                |
+| Symptom Id               : 11007201_003C0001_00007201                        |

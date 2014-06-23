@@ -37,8 +37,8 @@
 | Valid Word Count         : 0x9                                               |
 | SRC Length               : 98                                                |
 | Primary Reference Code   : 11007201                                          |
-| Hex Words 2 - 5          : 0x003c0001 0x00007201 0x00000000 0x00000000       |
-| Hex Words 6 - 9          : 0x00000000 0x00000000 0x00000000 0x00000000       |
+| Hex Words 2 - 5          : 003C0001 00007201 00000000 00000000               |
+| Hex Words 6 - 9          : 00000000 00000000 00000000 00000000               |
 |                                                                              |
 |                               Callout Section                                |
 |                                                                              |

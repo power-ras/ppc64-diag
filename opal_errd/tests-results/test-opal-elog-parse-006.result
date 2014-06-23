@@ -37,8 +37,8 @@
 | Valid Word Count         : 0x9                                               |
 | SRC Length               : 48                                                |
 | Primary Reference Code   : B182950C                                          |
-| Hex Words 2 - 5          : 0x020000f0 0x2b2c0e10 0xc103a401 0x000000ff       |
-| Hex Words 6 - 9          : 0x00000042 0xe8ca2c00 0x00000000 0x00000000       |
+| Hex Words 2 - 5          : 020000F0 2B2C0E10 C103A401 000000FF               |
+| Hex Words 6 - 9          : 00000042 E8CA2C00 00000000 00000000               |
 |                                                                              |
 |------------------------------------------------------------------------------|
 |                             Extended User Header                             |

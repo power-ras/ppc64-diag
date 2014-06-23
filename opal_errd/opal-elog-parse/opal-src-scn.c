@@ -94,10 +94,10 @@ static int print_src_refcode(const struct opal_src_scn *src)
 	primary_refcode_display[OPAL_SRC_SCN_PRIMARY_REFCODE_LEN] = '\0';
 
 	print_line("Primary Reference Code", "%s", primary_refcode_display);
-	print_line("Hex Words 2 - 5", "0x%08x 0x%08x 0x%08x 0x%08x",
+	print_line("Hex Words 2 - 5", "%08X %08X %08X %08X",
 	           src->ext_refcode2, src->ext_refcode3,
 	           src->ext_refcode4, src->ext_refcode5);
-	print_line("Hex Words 6 - 9", "0x%08x 0x%08x 0x%08x 0x%08x",
+	print_line("Hex Words 6 - 9", "%08X %08X %08X %08X",
 	           src->ext_refcode6, src->ext_refcode7,
 	          src->ext_refcode8, src->ext_refcode9);
 	return 0;

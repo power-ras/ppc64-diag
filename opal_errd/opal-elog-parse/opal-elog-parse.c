@@ -201,42 +201,42 @@ out:
 
 void print_elog_summary(char *buffer, int bufsz, uint32_t service_flag)
 {
-        const char *parse;
-        uint32_t logid;
-        char src[ELOG_SRC_SIZE + 1];
-        char severity;
-        uint16_t action;
-        struct opal_datetime date_time_in, date_time_out;
-        uint8_t creator_id;
+	const char *parse;
+	uint32_t logid;
+	char src[ELOG_SRC_SIZE + 1];
+	char severity;
+	uint16_t action;
+	struct opal_datetime date_time_in, date_time_out;
+	uint8_t creator_id;
 
-        logid = be32toh(*(uint32_t*)(buffer+ELOG_ID_OFFSET));
-        memcpy(src, (buffer + ELOG_SRC_OFFSET), sizeof(src));
-        src[ELOG_SRC_SIZE] = '\0';
-        severity = buffer[ELOG_SEVERITY_OFFSET];
-        action = be16toh(*(uint16_t *)(buffer + ELOG_ACTION_OFFSET));
+	logid = be32toh(*(uint32_t*)(buffer+ELOG_ID_OFFSET));
+	memcpy(src, (buffer + ELOG_SRC_OFFSET), sizeof(src));
+	src[ELOG_SRC_SIZE] = '\0';
+	severity = buffer[ELOG_SEVERITY_OFFSET];
+	action = be16toh(*(uint16_t *)(buffer + ELOG_ACTION_OFFSET));
 
-		parse = get_severity_desc(severity & 0xF0);
-		/* & with 0xF0 to get only the category of severity, not the full description */
+	parse = get_severity_desc(severity & 0xF0);
+	/* & with 0xF0 to get only the category of severity, not the full description */
 
-        date_time_in = *(const struct opal_datetime *)(buffer + ELOG_COMMIT_TIME_OFFSET);
-        date_time_out = parse_opal_datetime(date_time_in);
-        creator_id = buffer[ELOG_CREATOR_ID_OFFSET];
-        if (service_flag != 1)
-                        printf("|0x%08X %8.8s %4u-%02u-%02u %02u:%02u:%02u  %-17.17s %-19.19s|\n",
-                                logid, src,
-                                date_time_out.year, date_time_out.month,
-                                date_time_out.day, date_time_out.hour,
-                                date_time_out.minutes, date_time_out.seconds,
-                                get_creator_name(creator_id), parse);
+	date_time_in = *(const struct opal_datetime *)(buffer + ELOG_COMMIT_TIME_OFFSET);
+	date_time_out = parse_opal_datetime(date_time_in);
+	creator_id = buffer[ELOG_CREATOR_ID_OFFSET];
+	if (service_flag != 1)
+		printf("|0x%08X %8.8s %4u-%02u-%02u %02u:%02u:%02u  %-17.17s %-19.19s|\n",
+		       logid, src,
+		       date_time_out.year, date_time_out.month,
+		       date_time_out.day, date_time_out.hour,
+		       date_time_out.minutes, date_time_out.seconds,
+		       get_creator_name(creator_id), parse);
 	else if (((action & ELOG_ACTION_FLAG) == ELOG_ACTION_FLAG)
-			 && (service_flag == 1))
-                        /* list only service action logs */
-                        printf("|0x%08X %8.8s %4u-%02u-%02u %02u:%02u:%02u  %-17.17s %-19.19s|\n",
-                                logid, src,
-                                date_time_out.year, date_time_out.month,
-                                date_time_out.day, date_time_out.hour,
-                                date_time_out.minutes, date_time_out.seconds,
-                                get_creator_name(creator_id), parse);
+		      && (service_flag == 1))
+		/* list only service action logs */
+		printf("|0x%08X %8.8s %4u-%02u-%02u %02u:%02u:%02u  %-17.17s %-19.19s|\n",
+		       logid, src,
+		       date_time_out.year, date_time_out.month,
+		       date_time_out.day, date_time_out.hour,
+		       date_time_out.minutes, date_time_out.seconds,
+		       get_creator_name(creator_id), parse);
 
 }
 

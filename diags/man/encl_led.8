@@ -1,0 +1,83 @@
+.\"
+.\" Copyright (C) 2012 IBM Corporation
+.\"
+.TH ENCL_LED 8 "July 2012" Linux "PowerLinux Diagnostic Tools"
+.SH NAME
+encl_led - turn SCSI enclosure fault/identify indicators on/off
+.SH SYNOPSIS
+.nf
+\fBencl_led\fR \fIsettings\fR [\fB\-v\fR] \fIenclosure\fR [\fIcomponent\fR]
+\fBencl_led \-l\fR [\fB\-v\fR] \fIenclosure\fR [\fIcomponent\fR]
+\fBencl_led \-V\fR
+\fBencl_led \-h\fR
+.fi
+.SH DESCRIPTION
+The
+.B encl_led
+command turns on or off the fault/identify indicator(s) for the specified
+component in the specified SCSI enclosure or for the enclosure itself
+if no component is specified. The
+.B \-l
+option lists the setting of the specified indicator or for each indicator
+in the enclosure if no component is specified.
+.P
+An
+.I enclosure
+is specified by its
+.BI sg n
+device name or by its location code.
+.P
+A
+.I component
+(for example, a power supply, fan assembly, connector, or controller)
+is identified by its location code relative to the enclosure.
+For example, if an enclosure has a location code of
+U5888.001.G123789,
+and one of its fan assemblies has a full location code of
+U5888.001.G123789-P1-C2-A1,
+then on the
+.B encl_led
+command line, the fan assembly would be specified as P1-C2-A1.
+.P
+Some LEDs have independent fault and identify settings;
+that is, a single LED may be in fault mode and identify mode at the same time
+(in which case both the fault setting and the identify setting bubble up
+to the enclosure, which may have separate fault and identify LEDs).
+So
+.B encl_led
+reports the fault and identify settings separately, and enables you
+to turn the fault and identify settings on and off independently.
+.P
+.B encl_led
+currently supports a limited number of enclosure types
+and reports an error if asked to diagnose an unrecognized type.
+Some components' LED(s) may not be accessible to Linux.
+.P
+.B NOTE:
+Ensure that there are no outstanding service actions to be taken on the
+specified SCSI enclosure before turning off the enclosure fault indicator.
+.SH OPTIONS
+The
+.I settings
+options are
+.BR \-f
+and
+.BR \-i .
+.TP
+\fB\-f on|off\fR or \fB\-\-fault=on|off\fR
+Turn the indicator's fault setting on or off.
+.TP
+\fB\-i on|off\fR or \fB\-\-ident=on|off\fR
+Turn the indicator's identify setting on or off.
+.TP
+\fB\-l\fR or \fB\-\-list\fR
+Report the indicator setting(s) of the enclosure's component(s).
+.TP
+\fB\-v\fR or \fB\-\-verbose\fR
+Produce more verbose output.
+.TP
+\fB\-V\fR or \fB\-\-version\fR
+Display the version of the command and exit.
+.TP
+\fB\-h\fR or \fB\-\-help\fR
+Print a usage message and exit.

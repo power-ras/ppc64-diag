@@ -9,11 +9,12 @@ DIAG_ENCL_OBJS = diag_encl.o 7031_D24_T24.o bluehawk.o encl_util.o
 DIAG_ENCL_LIBS = -lservicelog -lsqlite3 -lrtasevent
 ENCL_LED_OBJS = encl_led.o encl_util.o bluehawk_led.o
 
-SUBDIRS = doc
+SUBDIRS = man
 
 DOXYGEN_CFG = doxygen.config
 
 all: $(PROGS)
+	@$(foreach d,$(SUBDIRS), $(MAKE) -C $d;)
 
 diag_encl: $(DIAG_ENCL_OBJS)
 	@echo "LD $(WORK_DIR)/$@"

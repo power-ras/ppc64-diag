@@ -6,13 +6,13 @@ include ../../rules.mk
 
 MANPAGES = diag_encl.8.gz encl_led.8.gz
 
-DOXYGEN_CFG = doxygen.config
+all: $(MANPAGES)
 
-all:
+%.8.gz: %.8
+	gzip -c $< > $@
 
 install: all
 	@$(call install_man,$(MANPAGES),$(DESTDIR))
 
 uninstall:
 	@$(call uninstall_man,$(MANPAGES),$(DESTDIR))
-

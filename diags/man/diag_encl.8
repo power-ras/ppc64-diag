@@ -1,0 +1,68 @@
+.\"
+.\" Copyright (C) 2012 IBM Corporation
+.\"
+.TH DIAG_ENCL 8 "July 2012" Linux "PowerLinux Diagnostic Tools"
+.SH NAME
+diag_encl - diagnose SCSI enclosures
+.SH SYNOPSIS
+.nf
+\fBdiag_encl \fR[\fB\-s\fR [\fB\-c\fR][\fB\-l\fR]] [\fB\-v\fR] [\fB\-f\fR <\fIpath\fB.pg2\fR>] [\fBsg\fIn\fR ...]
+\fBdiag_encl --version\fR
+\fBdiag_encl --help\fR
+.fi
+.SH DESCRIPTION
+The
+.B diag_encl
+command reports the status of the various components of the SCSI
+enclosure(s) specified by the
+.BI sg n
+device name(s).
+If no enclosure is specified, all SCSI enclosures known to the system
+are reported.
+.P
+.B diag_encl
+currently supports a limited number of enclosure types
+and reports an error if asked to diagnose an unrecognized type.
+.SH OPTIONS
+.TP
+\fB\-s\fR or \fB\-\-serv_event\fR
+Report any faults to the servicelog database.
+.TP
+\fB\-c\fR or \fB\-\-cmp_prev\fR
+Report only faults that are new (or have become more critical)
+since the last time
+.B diag_encl
+was run with the
+.B \-s
+option.
+.TP
+\fB\-l\fR or \fB\-\-leds\fR
+Try to turn on the fault indicator (typically an amber LED) for any
+failing component.
+Some components' LED(s) may not be accessible to Linux.
+Some LEDs have independent fault and identify settings;
+that is, the LED may be in fault mode and identify mode at the same time
+(in which case both the fault setting and the identify setting bubble up
+to the enclosure, which may have separate fault and identify LEDs).
+.B diag_encl
+doesn't affect the LED's identify setting.
+.TP
+\fB\-v\fR or \fB\-\-verbose\fR
+Produce more verbose output.
+.TP
+\fB\-V\fR or \fB\-\-version\fR
+Display the version of the command and exit.
+.TP
+\fB\-f\fR or \fB\-\-fake\fR \fIpath\fB.pg2\fR
+A testing option.
+Instead of querying the device,
+read diagnostic information from the file whose pathname is
+.IR path .pg2,
+and read vital product data from the file whose pathname is
+.IR path .vpd.
+.TP
+\fB\-h\fR or \fB\-\-help\fR
+Print a usage message and exit.
+.SH "SEE ALSO"
+.BR servicelog (8),
+.BR encl_led (8)

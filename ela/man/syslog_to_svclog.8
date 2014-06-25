@@ -1,0 +1,166 @@
+.\"
+.\" (C) Copyright IBM Corporation 2010
+.\"
+.TH SYSLOG_TO_SVCLOG 8 "March 2010" Linux "Diagnostic Tools"
+.SH NAME
+syslog_to_svclog - log syslog messages to servicelog
+.SH SYNOPSIS
+.B syslog_to_svclog
+[
+.B \-b
+.I begin_time
+] [
+.B \-e
+.I end_time
+|
+.B \-F
+]
+.br
+[
+.B \-m
+.I message_file
+|
+.B \-M
+] [
+.B \-C
+.I catalog_dir
+] [
+.B \-h
+] [
+.B \-d
+]
+.SH DESCRIPTION
+The
+.B syslog_to_svclog
+command reads the specified message file (defaults to stdin),
+which should be in the format produced by the
+.B syslogd
+daemon.
+For each line that matches a message documented in the message catalog,
+.B syslog_to_svclog
+logs an event to the
+.B servicelog
+database, as appropriate.
+Typically,
+.B syslog_to_svclog
+logs only warning and error messages to
+.BR servicelog ,
+not debug or informational messages.
+.P
+When
+.I /var/log/messages
+is the message file,
+.B syslog_to_svclog
+maintains a little "last-message" file that contains a copy of the
+last line read from
+.I /var/log/messages
+that matched a message from the message catalog.
+When a subsequent instance of
+.B syslog_to_svclog
+begins reading from
+.IR /var/log/messages ,
+and no
+.B \-b
+option is specified,
+.B syslog_to_svclog
+begins with the next message after the one in the "last message" file.
+The intent is to avoid logging the same event to
+.B servicelog
+multiple times.
+.SH OPTIONS
+.TP
+\fB\-b\fP \fIbegin_time\fP
+Ignore messages with timestamps prior to
+.IR begin_time .
+See "Timestamps."
+.TP
+\fB\-C\fP \fIcatalog_dir\fP
+Use the message catalog in
+.IR catalog_dir .
+The default is
+.IR /etc/ppc64-diag/message_catalog .
+.TP
+\fB\-d\fP
+Print debugging output on stderr.
+.TP
+\fB\-e\fP \fIend_time\fP
+Ignore messages with timestamps after
+.IR end_time .
+See "Timestamps."
+.TP
+\fB\-F\fP
+Do not terminate upon reaching the end of the message file.
+Continue watching for, and processing, new messages as they arrive,
+as with "\fBtail \-F\fP".
+To terminate
+.BR syslog_to_svclog ,
+send it a termination signal, as with CTRL-C.
+.TP
+\fB\-h\fP
+Print help text and exit.
+.TP
+\fB\-m\fP \fImessage_file\fP
+Read syslog messages from the specified file instead of stdin.
+.TP
+\fB\-M\fP
+Read syslog messages from
+.IR /var/log/messages .
+.B \-M
+implies
+.BR \-F .
+.SH TIMESTAMPS
+The following timestamp formats are recognized by
+.BR syslog_to_svclog :
+.br
+.I month
+.I day
+[
+.I year
+] [\fIhh\fP:\fImm\fP[:\fIss\fP]]
+\(em e.g., Feb 12 2010 14:30
+.br
+.I month
+.I day
+\fIhh\fP:\fImm\fP[:\fIss\fP] [
+.I year
+]
+.br
+.I day
+.I month
+[
+.I year
+] [\fIhh\fP:\fImm\fP[:\fIss\fP]]
+\(em e.g., 12 Feb 14:30
+.br
+.I day
+.I month
+\fIhh\fP:\fImm\fP[:\fIss\fP] [
+.I year
+]
+.br
+\fIyear\fP-\fImonth\fP-\fIday\fP
+[\fIhh\fP:\fImm\fP[:\fIss\fP]]
+\(em e.g., 2010-2-12 14:30:00
+.P
+If no year is specified,
+.B syslog_to_svclog
+assumes that the timestamp is from the prior 12 months.  If no
+\fIhh\fP:\fImm\fP
+is specified,
+.B syslog_to_svclog
+assumes 00:00:00.
+.SH AUTHOR
+Written by Jim Keniston (jkenisto@us.ibm.com).
+Conversion of format strings to regular expressions
+(for matching syslog messages to catalog entries)
+written by Jesse Larrew (jlarrew@us.ibm.com).
+.SH FILES
+.I /etc/ppc64-diag/message_catalog/*
+\(em message catalog
+.br
+.I /var/log/ppc64-diag/last_syslog_event
+\(em last message matched from /var/log/messages
+.SH "SEE ALSO"
+.IR explain_syslog (8),
+.IR servicelog (8),
+.IR syslog (3)

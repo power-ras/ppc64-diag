@@ -4,6 +4,8 @@
 
 include ../rules.mk
 
+SUBDIRS = man
+
 CMDS = explain_syslog add_regex syslog_to_svclog
 CATALOG = message_catalog/cxgb3 message_catalog/e1000e \
 	  message_catalog/exceptions message_catalog/reporters \
@@ -11,8 +13,7 @@ CATALOG = message_catalog/cxgb3 message_catalog/e1000e \
 CATALOG_REGEX = message_catalog/with_regex/cxgb3 \
 	        message_catalog/with_regex/e1000e \
 		message_catalog/with_regex/gpfs
-MANPAGES = doc/explain_syslog.8.gz doc/syslog_to_svclog.8.gz	
- 
+
 COMMON_OBJS = rr.tab.o lex.rr.o ev.tab.o lex.ev.o date.o
 ES_OBJS = explain_syslog.o catalogs.o $(COMMON_OBJS)
 SS_OBJS = syslog_to_svclog.o catalogs.o $(COMMON_OBJS)
@@ -20,6 +21,7 @@ AR_OBJS = add_regex.o catalogs.o $(COMMON_OBJS)
 SS_LIBS = -lservicelog -lvpd -lvpd_cxx -lsqlite3 -lrtasevent
 
 all: $(CMDS) $(CATALOG) $(CATALOG_REGEX)
+	@$(foreach d,$(SUBDIRS), $(MAKE) -C $d;)
 
 explain_syslog: $(ES_OBJS)
 	@echo "LD $(WORK_DIR)/$@"
@@ -67,15 +69,15 @@ install: all
 	@$(call install_sbin,$(CMDS),$(DESTDIR))        
 	@$(call install_files,$(CATALOG),744,$(DESTDIR)/etc/ppc64-diag/message_catalog)
 	@$(call install_files,$(CATALOG_REGEX),744,$(DESTDIR)/etc/ppc64-diag/message_catalog/with_regex)
-	@$(call install_man,$(MANPAGES),$(DESTDIR))
 	$(INSTALL) -d -m 755 $(DESTDIR)/var/log/ppc64-diag
+	@$(foreach d,$(SUBDIRS), $(MAKE) -C $d install;)
 
 clean:
 	@rm -rf $(CMDS) *.o lex.*.c *.tab.c *.tab.h
+	@$(foreach d,$(SUBDIRS), $(MAKE) -C $d clean;)
 
 uninstall:
 	@$(call uninstall_sbin,$(CMDS),$(DESTDIR))        
 	@$(call uninstall_files,$(CATALOG),$(DESTDIR)/etc/ppc64-diag/)
 	@$(call uninstall_files,$(CATALOG_REGEX),$(DESTDIR)/etc/ppc64-diag/)
-	@$(call uninstall_man,$(MANPAGES),$(DESTDIR)/usr/share/man/man8)
- 
+	@$(foreach d,$(SUBDIRS), $(MAKE) -C $d uninstall;)

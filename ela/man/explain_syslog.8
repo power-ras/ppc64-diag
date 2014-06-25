@@ -1,0 +1,121 @@
+.\"
+.\" (C) Copyright IBM Corporation 2010
+.\"
+.TH EXPLAIN_SYSLOG 8 "March 2010" Linux "Diagnostic Tools"
+.SH NAME
+explain_syslog - explain syslog messages
+.SH SYNOPSIS
+.B explain_syslog
+[
+.B \-b
+.I begin_time
+] [
+.B \-e
+.I end_time
+]
+.br
+[
+.B \-m
+.I message_file
+|
+.B \-M
+] [
+.B \-C
+.I catalog_dir
+] [
+.B \-h
+] [
+.B \-d
+]
+.SH DESCRIPTION
+The
+.B explain_syslog
+command reads the specified message file (defaults to stdin),
+which should be in the format produced by the
+.B syslogd
+daemon.
+For each line that matches a message documented in the message catalog,
+.B explain_syslog
+prints an explanation, including probable cause and recommended action.
+.SH OPTIONS
+.TP
+\fB\-b\fP \fIbegin_time\fP
+Ignore messages with timestamps prior to
+.IR begin_time .
+See "Timestamps."
+.TP
+\fB\-C\fP \fIcatalog_dir\fP
+Use the message catalog in
+.IR catalog_dir .
+The default is
+.IR /etc/ppc64-diag/message_catalog .
+.TP
+\fB\-d\fP
+Print debugging output on stderr.
+.TP
+\fB\-e\fP \fIend_time\fP
+Ignore messages with timestamps after
+.IR end_time .
+See "Timestamps."
+.TP
+\fB\-h\fP
+Print help text and exit.
+.TP
+\fB\-m\fP \fImessage_file\fP
+Read syslog messages from the specified file instead of stdin.
+.TP
+\fB\-M\fP
+Read syslog messages from
+.IR /var/log/messages .
+.SH TIMESTAMPS
+The following timestamp formats are recognized by
+.BR explain_syslog :
+.br
+.I month
+.I day
+[
+.I year
+] [\fIhh\fP:\fImm\fP[:\fIss\fP]]
+\(em e.g., Feb 12 2010 14:30
+.br
+.I month
+.I day
+\fIhh\fP:\fImm\fP[:\fIss\fP] [
+.I year
+]
+.br
+.I day
+.I month
+[
+.I year
+] [\fIhh\fP:\fImm\fP[:\fIss\fP]]
+\(em e.g., 12 Feb 14:30
+.br
+.I day
+.I month
+\fIhh\fP:\fImm\fP[:\fIss\fP] [
+.I year
+]
+.br
+\fIyear\fP-\fImonth\fP-\fIday\fP
+[\fIhh\fP:\fImm\fP[:\fIss\fP]]
+\(em e.g., 2010-2-12 14:30:00
+.P
+If no year is specified,
+.B explain_syslog
+assumes that the timestamp is from the prior 12 months.  If no
+\fIhh\fP:\fImm\fP
+is specified,
+.B explain_syslog
+assumes 00:00:00.
+.SH AUTHOR
+Written by Jim Keniston (jkenisto@us.ibm.com).
+Conversion of format strings to regular expressions
+(for matching syslog messages to catalog entries)
+written by Jesse Larrew (jlarrew@us.ibm.com).
+.SH FILES
+.I /etc/ppc64-diag/message_catalog/*
+\(em message catalog
+.SH "SEE ALSO"
+.IR syslog_to_servicelog (8),
+.IR syslog (3)

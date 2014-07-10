@@ -36,14 +36,14 @@ int parse_eh_scn(struct opal_eh_scn **r_eh,
 
 	eh->opal_symid_len = bufeh->opal_symid_len;
 	/* Best to have strlen walk random memory rather than overflow eh->opalsymid */
-	if (hdr->length < sizeof(struct opal_eh_scn) + strlen(bufeh->opalsymid)) {
+	if (eh->opal_symid_len && hdr->length < sizeof(struct opal_eh_scn) + strlen(bufeh->opalsymid)) {
 		fprintf(stderr, "%s: corrupted EH section, opalsymid is larger than header"
 		        " specified length %lu > %u", __func__,
 		        sizeof(struct opal_eh_scn) + strlen(bufeh->opalsymid), hdr->length);
 		free(eh);
 		return -EINVAL;
 	}
-	strcpy(eh->opalsymid, bufeh->opalsymid);
+	strncpy(eh->opalsymid, bufeh->opalsymid, eh->opal_symid_len);
 
 	return 0;
 }

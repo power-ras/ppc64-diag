@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#WARNING: DO NOT RUN THIS FILE DIRECTLY
+#  This file expects to be a part of ppc64-diag test suite
+#  Run this file with ../run_tests -t test-opal-elog-parse-011 -q
+
+check_suite
+copy_sysfs
+
+$VALGRIND ./opal-elog-parse/opal-elog-parse -d 7 -f $SYSFS/firmware/opal/elog/0x07/raw &>> $LOG 1>&2
+
+diff_with_result $LOG
+
+register_success

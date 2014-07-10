@@ -1,0 +1,75 @@
+|------------------------------------------------------------------------------|
+|                                Private Header                                |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x30                                              |
+| Component ID             : 5355                                              |
+| Created at               : 2014-07-09 | 23:58:54                             |
+| Committed at             : 2014-07-09 | 23:58:54                             |
+| Created by               : OPAL                                              |
+| Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
+| Platform Log Id          : 0xb0000008                                        |
+| Entry ID                 : 0x7                                               |
+| Section Count            : 6                                                 |
+|------------------------------------------------------------------------------|
+|                                 User Header                                  |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (UH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x18                                              |
+| Component ID             : 5355                                              |
+| Subsystem                : Connection Monitoring - Hypervisor lost communicat|
+|                          : ion with service processor                        |
+| Event Scope              : Unknown                                           |
+| Event Severity           : Predictive Error                                  |
+| Event Type               : Miscellaneous, informational only.                |
+| Action Flags             : Report to Operating System                        |
+|------------------------------------------------------------------------------|
+|                        Primary System Reference Code                         |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PS)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x50                                              |
+| Component ID             : 5355                                              |
+| SRC Format               : 0x0                                               |
+| SRC Version              : 0x2                                               |
+| Valid Word Count         : 0x8                                               |
+| SRC Length               : 48                                                |
+| Primary Reference Code   : BB828010                                          |
+| Hex Words 2 - 5          : 00000080 00000000 00000000 00000000               |
+| Hex Words 6 - 9          : 00000000 00000000 00000000 00000000               |
+|                                                                              |
+|------------------------------------------------------------------------------|
+|                             Extended User Header                             |
+|------------------------------------------------------------------------------|
+| Version                  : 1 (EH)                                            |
+| Sub-section type         : 0                                                 |
+| Component ID             : 5355                                              |
+| Machine Type Model       : 8247-22L                                          |
+| Serial Number            : 100DA7A                                           |
+| FW Released Ver          : SV810_058                                         |
+| FW SubSys Version        : b0614a_1423.810                                   |
+| Common Ref Time (UTC)    : 2014-07-09 | 23:58:54                             |
+| Symptom Id Len           : 0                                                 |
+|------------------------------------------------------------------------------|
+|                      Machine Type/Model & Serial Number                      |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (MT)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x1c                                              |
+| Component ID             : 5355                                              |
+| Machine Type Model       : 8247-22L                                          |
+| Serial Number            : 100DA7A                                           |
+|------------------------------------------------------------------------------|
+|                              User Defined Data                               |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (UD)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x44                                              |
+| Component ID             : 5355                                              |
+| User data hex            : length 60                                         |
+|   00000000    44455343  003c0000  53555256  3a204572       DESC.<..SURV: Er  |
+|   00000010    726f7220  20202020  20203335  34646431       ror       354dd1  |
+|   00000020    30393661  20717565  7565696e  67207061       096a queueing pa  |
+|   00000030    72616d20  72657175  6573740a                 ram request.      |

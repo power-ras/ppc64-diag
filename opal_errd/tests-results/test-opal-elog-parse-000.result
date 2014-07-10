@@ -2,6 +2,7 @@ ELOG[XXXX]: LID[1]::SRC[TESTSRC1]::Not Applicable::Informational Event::No servi
 ELOG[XXXX]: LID[2]::SRC[TESTSRC2]::Processor subsystem::Recoverable Error::Service action and call home required
 ELOG[XXXX]: LID[3]::SRC[TESTSRC3]::Platform Firmware::Predictive Error::Service action and call home required
 ELOG[XXXX]: LID[5]::SRC[TESTSRC5]::Unknown::Informational Event::Service action and call home required
+ELOG[XXXX]: LID[7]::SRC[BB828010]::Other Subsystems::Predictive Error::No service action required
 ELOG[XXXX]: LID[50000004]::SRC[TESTSRC4]::Software::Unrecoverable Error::Service action and call home required
 ELOG[XXXX]: LID[50000006]::SRC[CALLHOME]::Power/Cooling System::Error on diag test::No service action required
 ELOG[XXXX]: LID[5034a000]::SRC[11007201]::External Environment::Predictive Error::Service action required
@@ -15,6 +16,7 @@ ELOG[XXXX]: Terminating
 |00000002 0000-00-00 00:00:00 TESTSRC2 + Unknown           Recoverable Error   |
 |00000003 2014-03-13 13:01:56 TESTSRC3 + Unknown           Predictive Error    |
 |00000005 0000-00-00 00:00:00 TESTSRC5 + Unknown           Informational Event |
+|00000007 2014-07-09 23:58:54 BB828010   OPAL              Predictive Error    |
 |50000004 2000-12-31 10:14:44 TESTSRC4 + OPAL              Unrecoverable Error |
 |50000006 2014-03-14 14:37:00 CALLHOME   OPAL              Error on diag test  |
 |5034A000 2014-03-13 08:15:55 11007201 + Service Processor Predictive Error    |

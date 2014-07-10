@@ -2,6 +2,7 @@ ELOG[XXXX]: LID[1]::SRC[TESTSRC1]::Not Applicable::Informational Event::No servi
 ELOG[XXXX]: LID[2]::SRC[TESTSRC2]::Processor subsystem::Recoverable Error::Service action and call home required
 ELOG[XXXX]: LID[3]::SRC[TESTSRC3]::Platform Firmware::Predictive Error::Service action and call home required
 ELOG[XXXX]: LID[5]::SRC[TESTSRC5]::Unknown::Informational Event::Service action and call home required
+ELOG[XXXX]: LID[7]::SRC[BB828010]::Other Subsystems::Predictive Error::No service action required
 ELOG[XXXX]: LID[50000004]::SRC[TESTSRC4]::Software::Unrecoverable Error::Service action and call home required
 ELOG[XXXX]: LID[50000006]::SRC[CALLHOME]::Power/Cooling System::Error on diag test::No service action required
 ELOG[XXXX]: LID[5034a000]::SRC[11007201]::External Environment::Predictive Error::Service action required
@@ -9,12 +10,12 @@ ELOG[XXXX]: Run 'opal-elog-parse -d 0x5034a000' for the details.
 ELOG[XXXX]: LID[5055ed2e]::SRC[B182950C]::Platform Firmware::Informational Event::No service action required
 ELOG[XXXX]: Terminating
 platform
-d41d8cd98f00b204e9800998ecf8427e  5days
 d41d8cd98f00b204e9800998ecf8427e  1days
 46901d3615145c3a6e99ee68660837de  0x01
 a621b9b23cf209554d66aceb35863c54  0x02
 488000e67e18bfe5393a75ab2b1bba3b  0x03
 a637e5da3d1517084f9a816b8e90f843  0x05
+a26ed3819bc51ac97c7933e8733067cf  0x07
 a3e429377e35d7ce9ab7f23a72091574  0x50000004
 dcf9614c2460060c4e12785b55f30b6b  0x50000006
 32305675efdc2c871027a76b03df82d5  0x5034a000

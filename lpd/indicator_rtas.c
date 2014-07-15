@@ -36,7 +36,7 @@ static struct loc_code *
 parse_rtas_workarea(struct loc_code *loc, const char *buf)
 {
 	int	i;
-	int	num = *(int *)buf;
+	uint32_t num = be32toh(*(uint32_t *)buf);
 	struct	loc_code *curr = loc;
 
 	if (curr)
@@ -62,14 +62,23 @@ parse_rtas_workarea(struct loc_code *loc, const char *buf)
 		}
 		memset(curr, 0, sizeof(struct loc_code));
 
-		curr->index = *(uint32_t *)buf;
+		/*
+		 * NOTE: Location code length and location code string combined
+		 * is given as the input to LED indicator related rtas calls. So
+		 * the buffer representation of the location code length and
+		 * location code string must be PAPR compliant and big endian at
+		 * all times. Convert the location code length to host format when
+		 * ever required on the need basis.
+		 */
+		curr->index = be32toh(*(uint32_t *)buf);
 		buf += sizeof(uint32_t);
-		curr->length = *(uint32_t *)buf;
+		curr->length = be32toh(*(uint32_t *)buf);
 		buf += sizeof(uint32_t);
 		strncpy(curr->code, buf, curr->length);
 		buf += curr->length;
 		curr->code[curr->length] = '\0';
 		curr->length = strlen(curr->code) + 1;
+		curr->length = htobe32(curr->length);
 		curr->type = TYPE_RTAS;
 		curr->next = NULL;
 	}

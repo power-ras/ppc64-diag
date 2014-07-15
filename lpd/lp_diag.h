@@ -7,6 +7,7 @@
 #define LP_DIAG_H
 
 #include <servicelog-1/servicelog.h>
+#include <linux/types.h>
 
 /* Definations for indicator operating mode */
 #define GUIDING_LIGHT_MODE	0x01
@@ -75,10 +76,12 @@ struct dev_vpd {
  *	The order of the fields in loc_code is important!
  *	First three fields must be first, and in this order.
  *	These fields are used for RTAS-controlled indicators.
- *	Fields after this point can be reordered.
+ *	Fields after this point can be reordered. The 'length'
+ *	field must be big endian at all times irrespective of
+ *	the native platform.
  */
 struct loc_code {
-	uint32_t	length;	/* includes null terminator (RTAS) */
+	__be32		length;	/* includes null terminator (RTAS) */
 	char		code[LOCATION_LENGTH];	/* location code */
 	uint32_t	index;	/* RTAS index, if RTAS indicator */
 

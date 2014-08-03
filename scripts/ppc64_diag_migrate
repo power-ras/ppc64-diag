@@ -12,10 +12,19 @@
 #
  
 # Update the VPD database with the dynamic VPD of the new system
-system("vpdupdate >/dev/null 2>&1");
+$rc = system("which vpdupdate > /dev/null 2>&1");
+if ($rc == 0) {
+	system("vpdupdate >/dev/null 2>&1");
+} else {
+	print STDERR "ppc64_diag_migrate: vpdupdate not found.\n";
+}
 
 # Force RMC to detect new management servers (HMCs, etc.)
-system("/usr/sbin/rsct/bin/refrsrc IBM.ManagementServer >/dev/null 2>&1");
+if (-x "/usr/sbin/rsct/bin/refrsrc") {
+	system("/usr/sbin/rsct/bin/refrsrc IBM.ManagementServer >/dev/null 2>&1");
+} else {
+	print STDERR "ppc64_diag_migrate: /usr/sbin/rsct/bin/refrsrc not found.\n";
+}
 
 # We should consider having this script go through and close
 # any open serviceable events that are only applicable to the

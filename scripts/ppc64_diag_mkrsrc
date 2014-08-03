@@ -17,10 +17,20 @@
 require "/etc/ppc64-diag/servevent_parse.pl";
 
 # Check to make sure that devices.chrp.base.ServiceRM is installed
-$check = `/bin/rpm -q devices.chrp.base.ServiceRM 2>/dev/null`;
-if (index($check, "ServiceRM-") == -1) {
-	print "ServiceRM is not installed.\n";
-#	exit 1;
+$rc = system("which rpm >/dev/null 2>&1");
+if ($rc != 0) {
+	# assume debian based distro
+	$rc = system("dpkg -l | grep devices.chrp.base.ServiceRM 1>/dev/null 2>&1");
+	if ($rc != 0) {
+		print "ServiceRM is not installed.\n";
+		exit 1;
+	}
+} else {
+	$check = `rpm -q devices.chrp.base.ServiceRM 2>/dev/null`;
+	if (index($check, "ServiceRM-") == -1) {
+		print "ServiceRM is not installed.\n";
+		exit 1;
+	}
 }
 
 # Wait for rmcd to start
@@ -115,6 +125,9 @@ if (-e "/etc/SuSE-release") {
 elsif (-e "/etc/redhat-release") {
 	$os .= " (RedHat)";
 }
+elsif (-e "/etc/debian_version") {
+	$os .= " (Debian/Ubuntu)";
+}
 
 # Determine if ibm,converged-loc-code property applies
 $level = "";
@@ -204,7 +217,13 @@ foreach $fru (@$frus) {
 }
 $fru_list .= "}\"";
 
-$command = "/usr/bin/mkrsrc IBM.ServiceEvent $level".
+$rc = system("which mkrsrc > /dev/null 2>&1");
+if ($rc != 0) {
+	print "mkrsrc not found.\n";
+	exit 1;
+}
+
+$command = "mkrsrc IBM.ServiceEvent $level".
 	"CallHomeCandidate=\"$call_home_candidate\" $nodes $sysrefcode";
 
 if ($first_fru == 0) {

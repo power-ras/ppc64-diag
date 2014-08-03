@@ -38,7 +38,7 @@ fi
 RE_BIN=/usr/sbin/rtas_errd
 test -x $RE_BIN || exit 5
 
-if [[ -f /etc/rc.status ]]; then
+if [ -f /etc/rc.status ]; then
     . /etc/rc.status
     rc_reset
     INSSERV=1
@@ -56,13 +56,13 @@ case "$1" in
 		/etc/ppc64-diag/ppc64_diag_setup --register
 	fi
 	echo -n "Starting rtas_errd (platform error handling) daemon: "
-	if [[ $INSSERV -eq 1 ]]; then
+	if [ $INSSERV -eq 1 ]; then
 	    startproc $RE_BIN
 	    rc_status -v
 	else
 	    daemon $RE_BIN
 	    pid=`pidof rtas_errd`
-	    if [[ -n "$pid" ]]; then
+	    if [ -n "$pid" ]; then
 	        echo $pid > /var/run/rtas_errd.pid
 	        touch /var/lock/subsys/rtas_errd
 	    fi
@@ -72,7 +72,7 @@ case "$1" in
     
     stop)
 	echo -n "Stopping rtas_errd (platform error handling) daemon: "
-	if [[ $INSSERV -eq 1 ]]; then
+	if [ $INSSERV -eq 1 ]; then
 	    killproc -TERM $RE_BIN
 	    rc_status -v
 	else
@@ -86,7 +86,7 @@ case "$1" in
     try-restart)
 	# Restart only if the service was active before.
 	$0 status >/dev/null &&  $0 restart
-	if [[ $INSSERV -eq 1 ]]; then
+	if [ $INSSERV -eq 1 ]; then
 	    rc_status
 	fi
 	;;
@@ -95,7 +95,7 @@ case "$1" in
 	# Stop and restart the service
 	$0 stop
 	$0 start
-	if [[ $INSSERV -eq 1 ]]; then
+	if [ $INSSERV -eq 1 ]; then
 	    rc_status
 	fi
 	;;
@@ -103,7 +103,7 @@ case "$1" in
     force-reload)
 	# Reload the config
 	pid=`pidof rtas_errd`
-	if [[ -n "$pid" ]]; then
+	if [ -n "$pid" ]; then
 	    kill -HUP $pid
 	fi
 	;;
@@ -111,13 +111,13 @@ case "$1" in
     reload)
 	# Reload the config
 	pid=`pidof rtas_errd`
-	if [[ -n "$pid" ]]; then
+	if [ -n "$pid" ]; then
 	    kill -HUP $pid
 	fi
 	;;
     
     status)
-	if [[ $INSSERV -eq 1 ]]; then
+	if [ $INSSERV -eq 1 ]; then
 	    checkproc $RE_BIN
 	    rc_status -v
 	else
@@ -135,7 +135,7 @@ case "$1" in
 	;;
 esac
 
-if [[ $INSSERV -eq 1 ]]; then
+if [ $INSSERV -eq 1 ]; then
     rc_exit
 else
     exit 0

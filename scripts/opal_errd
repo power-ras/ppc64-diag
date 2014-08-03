@@ -40,7 +40,7 @@ if [ ! -e "/sys/firmware/opal/elog" ]; then
 	exit 0
 fi
 
-if [[ -f /etc/rc.status ]]; then
+if [ -f /etc/rc.status ]; then
 	. /etc/rc.status
 	rc_reset
 	INSSERV=1
@@ -51,13 +51,13 @@ fi
 
 opal_errd_start()
 {
-	if [[ $INSSERV -eq 1 ]]; then
+	if [ $INSSERV -eq 1 ]; then
 		startproc $OE_BIN
 		rc_status -v
 	else
 		daemon $OE_BIN
 		pid=`pidof opal_errd`
-		if [[ -n "$pid" ]]; then
+		if [ -n "$pid" ]; then
 			echo $pid > /var/run/opal_errd.pid
 			touch /var/lock/subsys/opal_errd
 		fi
@@ -66,7 +66,7 @@ opal_errd_start()
 
 opal_errd_stop()
 {
-	if [[ $INSSERV -eq 1 ]]; then
+	if [ $INSSERV -eq 1 ]; then
 		killproc -TERM $OE_BIN
 		rc_status -v
 	else
@@ -79,7 +79,7 @@ opal_errd_stop()
 
 opal_errd_status()
 {
-	if [[ $INSSERV -eq 1 ]]; then
+	if [ $INSSERV -eq 1 ]; then
 		checkproc $OE_BIN
 		rc_status -v
 	else
@@ -90,7 +90,7 @@ opal_errd_status()
 opal_errd_reload()
 {
 	pid=`pidof opal_errd`
-	if [[ -n "$pid" ]]; then
+	if [ -n "$pid" ]; then
 		kill -HUP $pid
 	fi
 }
@@ -111,7 +111,7 @@ case "$1" in
 		echo -n "Restarting opal_errd daemon: "
 		opal_errd_stop
 		opal_errd_start
-		if [[ $INSSERV -eq 1 ]]; then
+		if [ $INSSERV -eq 1 ]; then
 			rc_status
 		fi
 		;;
@@ -132,7 +132,7 @@ case "$1" in
 		;;
 esac
 
-if [[ $INSSERV -eq 1 ]]; then
+if [ $INSSERV -eq 1 ]; then
 	rc_exit
 else
 	exit 0

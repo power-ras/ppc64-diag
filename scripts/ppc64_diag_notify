@@ -16,7 +16,7 @@ sub usage {
 	print "    --email:   send notification to the specified addresses\n";
 	print "               (comma-separated)\n";
 	print "    --quiet:   do not print notification to stdout\n";
-	print "    --syslog:  print notification to /var/log/messages\n";
+	print "    --syslog:  print notification to syslog\n";
 	print "    --log:     print notification to specified log file\n";
 	exit(0);
 }

@@ -2,14 +2,14 @@
  * @file update.c
  * @brief Routines to update RTAS evetns to the platform log
  *
- * In certian cases we may need to get RTAS events from /var/log/messages
- * and process them to /var/log/platform. (i.e. an EPOW event that allows
- * enough time for the RTAS event(s) to be written to /var/log/messages but
- * not enough time for rtas_errd to run.
+ * In certain cases, we may need to get RTAS events from syslog
+ * and process them to /var/log/platform (i.e. an EPOW event that
+ * allows enough time for the RTAS event(s) to be written to syslog
+ * but not enough time for rtas_errd to run).
  *
  * The search implemeted here checks the last RTAS event number in 
- * /var/log/messages and /var/log/platform. If they are not equal we process
- * RTAS events from /var/log/messages until they are equal.
+ * syslog and /var/log/platform. If they are not equal, we process
+ * RTAS events from syslog until they are equal.
  *
  * Copyright (C) 2004 IBM Corporation
  */
@@ -51,7 +51,7 @@ int bad_char_end[BM_ARRAY_SIZE] = {-1};
  * Used by update_rtas_msgs() to bring the platform log 
  * up to date with current RTAS events.  
  */
-char *messages_log = "/var/log/messages";
+char *messages_log = NULL;
 
 /**
  * @var msgs_log_fd
@@ -187,8 +187,7 @@ get_rtas_no(char *ptr)
  * @brief Update RTAS messages in the platfrom log
  *
  * Update the file /var/log/platform with any RTAS events
- * found in /var/log/messages that have not been handled by
- * rtas_errd.
+ * found in syslog that have not been handled by rtas_errd.
  */
 void
 update_rtas_msgs(void)
@@ -201,7 +200,14 @@ update_rtas_msgs(void)
 	char		*last_p;
 	int		last_rtas_log_no, last_rtas_msgs_no, cur_rtas_no;
 
-	/* open and map /var/log/messages */
+	messages_log = "/var/log/messages";
+	if (access(messages_log, R_OK)) {
+		/* try /var/log/syslog */
+		if (!access("/var/log/syslog", R_OK)) {
+			messages_log = "/var/log/syslog";
+		}
+	}
+
 	if ((msgs_log_fd = open(messages_log, O_RDONLY)) < 0) {
 		log_msg(NULL, "Could not open %s to update RTAS events, %s",
 			messages_log, strerror(errno));
@@ -269,7 +275,7 @@ update_rtas_msgs(void)
 	munmap(log_mmap, log_sbuf.st_size);
 	log_mmap = NULL;
 
-	/* find the last RTAS event in /var/log/messages */
+	/* find the last RTAS event in syslog */
 	last_p = NULL;
 	msgs_p = find_rtas_start(msgs_p, msgs_mmap_end);
 	while (msgs_p != NULL) {
@@ -310,7 +316,7 @@ update_rtas_msgs(void)
 
 	rtas_msgs_end = find_rtas_end(rtas_msgs_start, msgs_mmap_end);
 	
-	/* Retrieve RTAS events from /var/log/messages */
+	/* Retrieve RTAS events from syslog */
 	while (rtas_msgs_start != NULL) {
 		struct event event;
 		unsigned long	*out_buf;

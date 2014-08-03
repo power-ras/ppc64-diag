@@ -49,16 +49,22 @@ not debug or informational messages.
 .P
 When
 .I /var/log/messages
+or
+.I /var/log/syslog
 is the message file,
 .B syslog_to_svclog
 maintains a little "last-message" file that contains a copy of the
 last line read from
 .I /var/log/messages
+or
+.I /var/log/syslog
 that matched a message from the message catalog.
 When a subsequent instance of
 .B syslog_to_svclog
 begins reading from
-.IR /var/log/messages ,
+.I /var/log/messages
+or
+.IR /var/log/syslog ,
 and no
 .B \-b
 option is specified,
@@ -103,8 +109,10 @@ Print help text and exit.
 Read syslog messages from the specified file instead of stdin.
 .TP
 \fB\-M\fP
-Read syslog messages from
-.IR /var/log/messages .
+Read syslog messages from system default location
+.I /var/log/messages
+or
+.IR /var/log/syslog .
 .B \-M
 implies
 .BR \-F .

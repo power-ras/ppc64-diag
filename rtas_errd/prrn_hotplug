@@ -7,6 +7,12 @@ PRRN_LOG=/var/log/prrn_log
 DRMGR=/usr/sbin/drmgr
 TMPFILE=`mktemp -p /tmp`
 DATE=`date`
+MESSAGE_LOG=/var/log/messages
+
+# Default to /var/log/messages, but use /var/log/syslog if that is the system default
+if [ ! -e /var/log/messages -a -e /var/log/syslog ]; then
+	MESSAGE_LOG=/var/log/syslog
+fi
 
 while read line; do
 	# skip comments
@@ -20,7 +26,7 @@ while read line; do
 
 	$DRMGR -c $type -r -q 1 -s 0x$drc >/dev/null 2>&1
 	if [[ "$?" != "0" ]]; then
-		echo "PRRN Update: Could not update $type at drc index $drc" >> /var/log/messages
+		echo "PRRN Update: Could not update $type at drc index $drc" >> $MESSAGE_LOG
 		echo "$type $drc" >> $TMPFILE
 		continue
 	fi
@@ -29,7 +35,7 @@ while read line; do
 
 	$DRMGR -c $type -a -q 1 -s 0x$drc >/dev/null 2>&1
 	if [[ "$?" != "0" ]]; then
-		echo "PRRN Update: Could not add $type at drc index $drc after PRRN Event" >> /var/log/messages
+		echo "PRRN Update: Could not add $type at drc index $drc after PRRN Event" >> $MESSAGE_LOG
 		echo "$type $drc" >> $TMPFILE
 	fi
 

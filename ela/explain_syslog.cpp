@@ -102,7 +102,7 @@ print_help(void)
 "-e end_time\tStop upon reading message with timestamp after end_time.\n"
 "-h\t\tPrint this help text and exit.\n"
 "-m message_file\tRead syslog messages from message_file, not stdin.\n"
-"-M\t\tRead syslog messages from /var/log/messages.\n"
+"-M\t\tRead syslog messages from system default location.\n"
 	);
 }
 
@@ -149,6 +149,14 @@ int main(int argc, char **argv)
 			break;
 		case 'M':
 			msg_path = "/var/log/messages";
+			if (access(msg_path, R_OK)) {
+				/* check /var/log/syslog too */
+				msg_path = "/var/log/syslog";
+				if (access(msg_path, R_OK)) {
+					perror("syslog file");
+					exit(2);
+				}
+			}
 			break;
 		case '?':
 			usage();

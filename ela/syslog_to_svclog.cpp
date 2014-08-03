@@ -37,7 +37,6 @@ extern "C" {
 #include "platform.c"
 }
 
-#define SYSLOG_PATH "/var/log/messages"
 #define LAST_EVENT_PATH "/var/log/ppc64-diag/last_syslog_event"
 #define LAST_EVENT_PATH_BAK LAST_EVENT_PATH ".bak"
 
@@ -45,6 +44,7 @@ static const char *progname;
 static bool debug = 0;
 static time_t begin_date = 0, end_date = 0;
 static const char *catalog_dir = ELA_CATALOG_DIR;
+static const char *syslog_path = NULL;
 static const char *msg_path = NULL;
 static FILE *msg_file = stdin;
 static bool follow = false, follow_default = false;
@@ -553,14 +553,14 @@ recover:
 static void
 remember_matched_event(const string& msg)
 {
-	if (msg_path && !strcmp(msg_path, SYSLOG_PATH))
+	if (msg_path && !strcmp(msg_path, syslog_path))
 		safe_overwrite(msg, LAST_EVENT_PATH, LAST_EVENT_PATH_BAK);
 }
 
 static void
 compute_begin_date(void)
 {
-	if (msg_path && !strcmp(msg_path, SYSLOG_PATH)) {
+	if (msg_path && !strcmp(msg_path, syslog_path)) {
 		/*
 		 * Read the saved copy of the last syslog message we matched.
 		 * Use that message's date as the begin date, and don't
@@ -663,7 +663,7 @@ print_help(void)
 "-F\t\tDon't stop at EOF; process newly logged messages as they occur.\n"
 "-h\t\tPrint this help text and exit.\n"
 "-m message_file\tRead syslog messages from message_file, not stdin.\n"
-"-M\t\tRead syslog messages from /var/log/messages.\n"
+"-M\t\tRead syslog messages from system default location.\n"
 	);
 }
 
@@ -681,6 +681,14 @@ int main(int argc, char **argv)
 		<< __power_platform_name(platform) << " platform" << endl;
 
 		exit(1);
+	}
+
+	syslog_path = "/var/log/messages";
+	if (access(syslog_path, R_OK)) {
+		/* use /var/log/syslog if that exists */
+		if (!access("/var/log/syslog", R_OK)) {
+			syslog_path = "/var/log/syslog";
+		}
 	}
 
 	opterr = 0;
@@ -710,7 +718,7 @@ int main(int argc, char **argv)
 			msg_path = optarg;
 			break;
 		case 'M':
-			msg_path = SYSLOG_PATH;
+			msg_path = syslog_path;
 			follow_default = true;
 			break;
 		case '?':
@@ -745,7 +753,7 @@ int main(int argc, char **argv)
 			<< endl;
 		exit(1);
 	}
-	/* follow defaults to true for /var/log/messages, false for others. */
+	/* follow defaults to true for syslog messages, false for others. */
 	if (!end_date && !follow)
 		follow = follow_default;
 

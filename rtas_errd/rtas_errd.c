@@ -508,7 +508,7 @@ main(int argc, char *argv[])
 		slog = NULL;
 	}
 
-	/* update the RTAS events from /var/log/messages */
+	/* update RTAS events from syslog */
 	update_rtas_msgs();
 
 #if 0

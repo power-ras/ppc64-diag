@@ -30,13 +30,13 @@ extern int no_drmgr;
  * @def RTAS_ERRD_ARGS 
  * @brief DEBUG args for rtas_errd
  */
-#define RTAS_ERRD_ARGS		"c:de:f:l:m:p:s:"
+#define RTAS_ERRD_ARGS		"c:de:f:hl:m:p:Rs:"
 #else
 /**
  * @def RTAS_ERRD_ARGS
  * @brief standard args for rtas_errd
  */
-#define RTAS_ERRD_ARGS		"d"
+#define RTAS_ERRD_ARGS		"dh"
 #endif
 
 extern int platform_log_fd;

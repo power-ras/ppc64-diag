@@ -302,6 +302,31 @@ read_rtas_events()
 	return 0;
 }
 
+static void print_usage(char *argv0)
+{
+	fprintf(stderr, "Usage: %s [OPTION]\n\n", argv0);
+#ifdef DEBUG
+	fprintf(stderr, "  -c, --config=FILE         path to config file (default %s)\n",
+		config_file);
+#endif
+	fprintf(stderr, "  -d, --debug               don't daemonize, increase librtas debug level\n");
+#ifdef DEBUG
+	fprintf(stderr, "  -e, --epowfile=FILE       path to epow status file (default %s)\n",
+		epow_status_file);
+	fprintf(stderr, "  -f, --file=FILE           path to RTAS test file\n");
+#endif
+	fprintf(stderr, "  -h, --help                help (this message)\n");
+#ifdef DEBUG
+	fprintf(stderr, "  -l, --logfile=FILE        path to rtas_errd debug logfile (default %s)\n",
+		rtas_errd_log);
+	fprintf(stderr, "  -m, --msgsfile=FILE       path to syslog\n");
+	fprintf(stderr, "  -p, --platformfile=FILE   path to platform_log (default %s)\n",
+		platform_log);
+	fprintf(stderr, "  -R, --nodrmgr             no drmgr\n");
+	fprintf(stderr, "  -s, --scenario=FILE       path to RTAS scenario file\n");
+#endif
+}
+
 static struct option longopts[] = {
 {
 	.name = "debug",
@@ -309,7 +334,19 @@ static struct option longopts[] = {
 	.flag = NULL,
 	.val = 'd'
 },
+{
+	.name = "help",
+	.has_arg = 0,
+	.flag = NULL,
+	.val = 'h'
+},
 #ifdef DEBUG
+{
+	.name = "config",
+	.has_arg = 1,
+	.flag = NULL,
+	.val = 'c'
+},
 {
 	.name = "epowfile",
 	.has_arg = 1,
@@ -395,6 +432,9 @@ main(int argc, char *argv[])
 			case 'd':
 				debug++;
 				break;
+			case 'h':
+				print_usage(argv[0]);
+				return 0;
 #ifdef DEBUG 
 			case 'c': /* ppc64-diag config file */
 				config_file = optarg;

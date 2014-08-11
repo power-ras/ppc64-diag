@@ -61,6 +61,8 @@ LIB_DIR = /usr/lib
 INC_DIR = /usr/include
 DOC_DIR = /usr/share/doc/packages/$(PROJECT)
 MAN_DIR = /usr/share/man/man8
+SYSTEMD_DIR = /usr/lib/systemd/system
+LIBEXEC_DIR = /usr/libexec/$(PROJECT)
 
 # Shipdir is where we put all the files to build an rpm
 SHIPDIR = /tmp/$(PROJECT)-buildroot

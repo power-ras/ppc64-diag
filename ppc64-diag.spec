@@ -56,9 +56,11 @@ ln -sfv /usr/sbin/usysattn $RPM_BUILD_ROOT/usr/sbin/usysfault
 %dir /var/log/opal-elog
 %config /etc/ppc64-diag/*
 %config /etc/rc.powerfail
-%config %attr(755,root,root) /etc/init.d/rtas_errd
-%config %attr(755,root,root) /etc/init.d/opal_errd
 %config %attr(744,root,root) /etc/ppc64-diag/prrn_hotplug
+%attr(755,root,root) %{_libexecdir}/%{name}/rtas_errd
+%attr(755,root,root) %{_libexecdir}/%{name}/opal_errd
+%attr(644,root,root) %{_unitdir}/rtas_errd.service
+%attr(644,root,root) %{_unitdir}/opal_errd.service
 
 %post
 # Post-install script --------------------------------------------------
@@ -67,19 +69,18 @@ ln -sfv /usr/sbin/usysattn $RPM_BUILD_ROOT/usr/sbin/usysfault
 /etc/ppc64-diag/ppc64_diag_setup --register >/dev/null 2>&1
 /etc/ppc64-diag/lp_diag_setup --register >/dev/null 2>&1
 if [ "$1" = "1" ]; then # first install
-    /sbin/chkconfig --add rtas_errd
-    /sbin/chkconfig --add opal_errd
-    /etc/init.d/opal_errd start >/dev/null || /etc/init.d/rtas_errd start >/dev/null
+    systemctl -q enable opal_errd.service >/dev/null || systemctl -q enable rtas_errd.service >/dev/null
+    systemctl start opal_errd.service >/dev/null || systemctl start rtas_errd.service >/dev/null
 elif [ "$1" = "2" ]; then # upgrade
-    /etc/init.d/rtas_errd restart >/dev/null || /etc/init.d/opal_errd restart >/dev/null
+    systemctl restart opal_errd.service >/dev/null || systemctl restart rtas_errd.service >/dev/null
 fi
 
 %preun
 # Pre-uninstall script -------------------------------------------------
 if [ "$1" = "0" ]; then # last uninstall
-    /etc/init.d/opal_errd stop >/dev/null || /etc/init.d/rtas_errd stop >/dev/null
-    /sbin/chkconfig --del opal_errd
-    /sbin/chkconfig --del rtas_errd
+    systemctl stop opal_errd.service >/dev/null || systemctl stop rtas_errd.service >/dev/null
+    systemctl -q disable opal_errd.service
+    systemctl -q disable rtas_errd.service
     /etc/ppc64-diag/ppc64_diag_setup --unregister >/dev/null
     /etc/ppc64-diag/lp_diag_setup --unregister >/dev/null
 fi
@@ -87,7 +88,7 @@ fi
 %triggerin -- librtas
 # trigger on librtas upgrades ------------------------------------------
 if [ "$2" = "2" ]; then
-    /etc/init.d/opal_errd restart >/dev/null || /etc/init.d/rtas_errd restart >/dev/null
+    systemctl restart opal_errd.service >/dev/null || systemctl restart rtas_errd.service >/dev/null
 fi
 
 %changelog

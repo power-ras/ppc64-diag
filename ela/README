@@ -45,8 +45,8 @@ This C++ program uses the aforementioned C++ classes to read the
 message catalog, then reads lines from syslog, and for each error or
 warning message matching one in the message catalog, logs an event
 to servicelog.  This works only on powerpc, and only if you have the
-needed dependencies installed (libservicelog, libvpd, libvpd_cxx,
-and libsqlite).  See the man page.
+needed dependencies installed (libservicelog, libvpd, and libvpd_cxx).
+See the man page.
 
 doc/
 man pages for explain_syslog and syslog_to_svclog

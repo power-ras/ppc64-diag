@@ -6,7 +6,7 @@ include ../rules.mk
 
 PROGS = diag_encl encl_led
 DIAG_ENCL_OBJS = diag_encl.o 7031_D24_T24.o bluehawk.o encl_util.o
-DIAG_ENCL_LIBS = -lservicelog -lsqlite3 -lrtasevent
+DIAG_ENCL_LIBS = -lservicelog -lrtasevent
 ENCL_LED_OBJS = encl_led.o encl_util.o bluehawk_led.o
 
 SUBDIRS = man

@@ -18,7 +18,7 @@ COMMON_OBJS = rr.tab.o lex.rr.o ev.tab.o lex.ev.o date.o
 ES_OBJS = explain_syslog.o catalogs.o $(COMMON_OBJS)
 SS_OBJS = syslog_to_svclog.o catalogs.o $(COMMON_OBJS)
 AR_OBJS = add_regex.o catalogs.o $(COMMON_OBJS)
-SS_LIBS = -lservicelog -lvpd -lvpd_cxx -lsqlite3 -lrtasevent
+SS_LIBS = -lservicelog -lvpd -lvpd_cxx -lrtasevent
 
 all: $(CMDS) $(CATALOG) $(CATALOG_REGEX)
 	@$(foreach d,$(SUBDIRS), $(MAKE) -C $d;)

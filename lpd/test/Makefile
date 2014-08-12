@@ -19,7 +19,7 @@ COMMON_OBJS = ../files.o ../lp_util.o ../indicator_ses.o \
 LED_TOOL_OBJS =  ledtool.o
 SES_TOOL_OBJS = sesdevices.o
 
-LED_TOOL_LIBS = -lrtas -lrtasevent -lservicelog -lsqlite3
+LED_TOOL_LIBS = -lrtas -lrtasevent -lservicelog
 
 LICENSE = COPYRIGHT
 

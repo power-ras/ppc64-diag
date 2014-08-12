@@ -10,7 +10,7 @@ COMMON_OBJS = files.o lp_util.o indicator_ses.o indicator_rtas.o indicator.o
 LP_DIAG_OBJS =  servicelog.o lp_diag.o
 USYSIDENT_OBJS = usysident.o
 
-COMMON_LIBS = -lrtas -lrtasevent -lservicelog -lsqlite3
+COMMON_LIBS = -lrtas -lrtasevent -lservicelog
 LP_DIAG_LIBS = -lncurses -lmenu
 
 LICENSE = COPYRIGHT

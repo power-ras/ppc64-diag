@@ -11,13 +11,9 @@
 #include "parse-opal-event.h"
 #include "parse_helpers.h"
 
-struct header_id elog_hdr_id[] = {
-			HEADER_ORDER
-};
-
-int header_id_lookup(char *id) {
+int header_id_lookup(struct header_id *elog_hdr_id, int size, char *id) {
 	int i;
-	for (i = 0; i < HEADER_ORDER_MAX; i++)
+	for (i = 0; i < size; i++)
 		if (strncmp(id,elog_hdr_id[i].id,2) == 0)
 			return i;
 	return -1;
@@ -25,6 +21,10 @@ int header_id_lookup(char *id) {
 
 int parse_opal_event_log(char *buf, int buflen, struct opal_event_log_scn **r_log)
 {
+	struct header_id elog_hdr_id[] = {
+				HEADER_ORDER
+	};
+
 	int rc;
 	struct opal_v6_hdr hdr;
 	struct opal_priv_hdr_scn *ph;
@@ -44,7 +44,7 @@ int parse_opal_event_log(char *buf, int buflen, struct opal_event_log_scn **r_lo
 			break;
 		}
 
-		header_pos = header_id_lookup(hdr.id);
+		header_pos = header_id_lookup(elog_hdr_id, HEADER_ORDER_MAX, hdr.id);
 		if (header_pos == -1) {
 				printf("Unknown section header: %c%c at %lu:\n",
 						hdr.id[0], hdr.id[1], buf-start);

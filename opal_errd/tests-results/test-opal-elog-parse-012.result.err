@@ -1,0 +1,29 @@
+ELOG[XXXX]: LID[1]::SRC[TESTSRC1]::Not Applicable::Informational Event::No service action required
+ELOG[XXXX]: LID[2]::SRC[TESTSRC2]::Processor subsystem::Recoverable Error::Service action and call home required
+ELOG[XXXX]: LID[3]::SRC[TESTSRC3]::Platform Firmware::Predictive Error::Service action and call home required
+ELOG[XXXX]: LID[5]::SRC[TESTSRC5]::Unknown::Informational Event::Service action and call home required
+ELOG[XXXX]: LID[7]::SRC[BB828010]::Other Subsystems::Predictive Error::No service action required
+ELOG[XXXX]: LID[50000004]::SRC[TESTSRC4]::Software::Unrecoverable Error::Service action and call home required
+ELOG[XXXX]: LID[50000006]::SRC[CALLHOME]::Power/Cooling System::Error on diag test::No service action required
+ELOG[XXXX]: LID[5034a000]::SRC[11007201]::External Environment::Predictive Error::Service action required
+ELOG[XXXX]: Run 'opal-elog-parse -d 0x5034a000' for the details.
+ELOG[XXXX]: LID[5055ed2e]::SRC[B182950C]::Platform Firmware::Informational Event::No service action required
+ELOG[XXXX]: Terminating
+ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
+ERROR parse_opal_event_log: Truncated error log, expected section PH not found
+ERROR parse_opal_event_log: Truncated error log, expected section UH not found
+ERROR parse_opal_event_log: Truncated error log, expected section EH not found
+parse_priv_hdr_scn: section header has an invalid section count 0, should be greater than 0, setting section count to 1 to attempt recovery
+ERROR parse_opal_event_log: Truncated error log, expected section UH not found
+ERROR parse_opal_event_log: Truncated error log, expected section EH not found
+parse_priv_hdr_scn: section header has an invalid section count 0, should be greater than 0, setting section count to 1 to attempt recovery
+ERROR parse_opal_event_log: Truncated error log, expected section UH not found
+ERROR parse_opal_event_log: Truncated error log, expected section EH not found
+ERROR parse_section_header: section header is corrupt. Length < 8 bytes and must be at least 8 bytes to include the length of itself. Id 0x00 Length 0 Version 0 Subtype 0 Component ID: 0
+ERROR parse_opal_event_log: Truncated error log, expected section PH not found
+ERROR parse_opal_event_log: Truncated error log, expected section UH not found
+ERROR parse_opal_event_log: Truncated error log, expected section EH not found
+ERROR parse_opal_event_log: Truncated error log, expected section UH not found
+ERROR parse_opal_event_log: Truncated error log, expected section EH not found
+ERROR parse_opal_event_log: Truncated error log, expected section UH not found
+ERROR parse_opal_event_log: Truncated error log, expected section EH not found

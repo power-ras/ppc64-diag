@@ -1,0 +1,358 @@
+|------------------------------------------------------------------------------|
+|                                Private Header                                |
+|------------------------------------------------------------------------------|
+| Section Version          : 0 (PH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x30                                              |
+| Component ID             : 0                                                 |
+| Created at               :    0-00-00 | 00:00:00                             |
+| Committed at             :    0-00-00 | 00:00:00                             |
+| Created by               : Unknown                                           |
+| Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
+| Platform Log Id          : 0x0                                               |
+| Entry ID                 : 0x2                                               |
+| Section Count            : 1                                                 |
+|------------------------------------------------------------------------------|
+|                                Private Header                                |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x30                                              |
+| Component ID             : 0                                                 |
+| Created at               : 2014-03-12 | 14:24:12                             |
+| Committed at             : 2014-03-13 | 13:01:56                             |
+| Created by               : Unknown                                           |
+| Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
+| Platform Log Id          : 0x0                                               |
+| Entry ID                 : 0x3                                               |
+| Section Count            : 1                                                 |
+|------------------------------------------------------------------------------|
+|                                Private Header                                |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x30                                              |
+| Component ID             : 5355                                              |
+| Created at               : 2014-07-09 | 23:58:54                             |
+| Committed at             : 2014-07-09 | 23:58:54                             |
+| Created by               : OPAL                                              |
+| Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
+| Platform Log Id          : 0xb0000008                                        |
+| Entry ID                 : 0x7                                               |
+| Section Count            : 6                                                 |
+|------------------------------------------------------------------------------|
+|                                 User Header                                  |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (UH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x18                                              |
+| Component ID             : 5355                                              |
+| Subsystem                : Connection Monitoring - Hypervisor lost communicat|
+|                          : ion with service processor                        |
+| Event Scope              : Unknown                                           |
+| Event Severity           : Predictive Error                                  |
+| Event Type               : Miscellaneous, informational only.                |
+| Action Flags             : Report to Operating System                        |
+|------------------------------------------------------------------------------|
+|                        Primary System Reference Code                         |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PS)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x50                                              |
+| Component ID             : 5355                                              |
+| SRC Format               : 0x0                                               |
+| SRC Version              : 0x2                                               |
+| Valid Word Count         : 0x8                                               |
+| SRC Length               : 48                                                |
+| Primary Reference Code   : BB828010                                          |
+| Hex Words 2 - 5          : 00000080 00000000 00000000 00000000               |
+| Hex Words 6 - 9          : 00000000 00000000 00000000 00000000               |
+|                                                                              |
+|------------------------------------------------------------------------------|
+|                             Extended User Header                             |
+|------------------------------------------------------------------------------|
+| Version                  : 1 (EH)                                            |
+| Sub-section type         : 0                                                 |
+| Component ID             : 5355                                              |
+| Machine Type Model       : 8247-22L                                          |
+| Serial Number            : 100DA7A                                           |
+| FW Released Ver          : SV810_058                                         |
+| FW SubSys Version        : b0614a_1423.810                                   |
+| Common Ref Time (UTC)    : 2014-07-09 | 23:58:54                             |
+| Symptom Id Len           : 0                                                 |
+|------------------------------------------------------------------------------|
+|                      Machine Type/Model & Serial Number                      |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (MT)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x1c                                              |
+| Component ID             : 5355                                              |
+| Machine Type Model       : 8247-22L                                          |
+| Serial Number            : 100DA7A                                           |
+|------------------------------------------------------------------------------|
+|                              User Defined Data                               |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (UD)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x44                                              |
+| Component ID             : 5355                                              |
+| User data hex            : length 60                                         |
+|   00000000    44455343  003c0000  53555256  3a204572       DESC.<..SURV: Er  |
+|   00000010    726f7220  20202020  20203335  34646431       ror       354dd1  |
+|   00000020    30393661  20717565  7565696e  67207061       096a queueing pa  |
+|   00000030    72616d20  72657175  6573740a                 ram request.      |
+|------------------------------------------------------------------------------|
+|                                Private Header                                |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x30                                              |
+| Component ID             : 0                                                 |
+| Created at               : 1994-01-01 | 01:02:03                             |
+| Committed at             : 2000-12-31 | 10:14:44                             |
+| Created by               : OPAL                                              |
+| Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
+| Platform Log Id          : 0xb0010203                                        |
+| Entry ID                 : 0x50000004                                        |
+| Section Count            : 1                                                 |
+|------------------------------------------------------------------------------|
+|                                Private Header                                |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x30                                              |
+| Component ID             : 0                                                 |
+| Created at               : 2014-03-14 | 14:36:66                             |
+| Committed at             : 2014-03-14 | 14:37:00                             |
+| Created by               : OPAL                                              |
+| Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
+| Platform Log Id          : 0xb0040506                                        |
+| Entry ID                 : 0x50000006                                        |
+| Section Count            : 2                                                 |
+|------------------------------------------------------------------------------|
+|                            Call Home Log Comment                             |
+|------------------------------------------------------------------------------|
+| Section Version          : 0 (CH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x24                                              |
+| Component ID             : 0                                                 |
+| Call Home Comment        : call home comment goes here                       |
+|------------------------------------------------------------------------------|
+|                                Private Header                                |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x30                                              |
+| Component ID             : 2700                                              |
+| Created at               : 2014-03-13 | 08:15:55                             |
+| Committed at             : 2014-03-13 | 08:15:55                             |
+| Created by               : Service Processor                                 |
+| Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
+| Platform Log Id          : 0x5034a000                                        |
+| Entry ID                 : 0x5034a000                                        |
+| Section Count            : 4                                                 |
+|------------------------------------------------------------------------------|
+|                                 User Header                                  |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (UH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x18                                              |
+| Component ID             : 2700                                              |
+| Subsystem                : Room ambient temperature                          |
+| Event Scope              : Single platform                                   |
+| Event Severity           : Predictive Error                                  |
+| Event Type               : Not applicable.                                   |
+| Action Flags             : Report to Operating System                        |
+|                          : Service Action Required                           |
+|------------------------------------------------------------------------------|
+|                        Primary System Reference Code                         |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PS)                                            |
+| Sub-section type         : 0x1                                               |
+| Section Length           : 0xa0                                              |
+| Component ID             : 2700                                              |
+| SRC Format               : 0x1                                               |
+| SRC Version              : 0x2                                               |
+| Valid Word Count         : 0x9                                               |
+| SRC Length               : 98                                                |
+| Primary Reference Code   : 11007201                                          |
+| Hex Words 2 - 5          : 003C0001 00007201 00000000 00000000               |
+| Hex Words 6 - 9          : 00000000 00000000 00000000 00000000               |
+|                                                                              |
+|                               Callout Section                                |
+|                                                                              |
+| Additional Sections      : Disabled                                          |
+| Callout Count            : 1                                                 |
+|                                                                              |
+|                                 Symbolic FRU                                 |
+| Priority                 : Mandatory, replace all with this type as a unit   |
+| Location Code            : U78AB.001.WZSGBJ6                                 |
+| Part Number              : AMBTEMP                                           |
+| CCIN                     :                                                   |
+| Serial Number            :                                                   |
+| Machine Type Model       : 8246-L2C                                          |
+| Serial Number            : 10008FA                                           |
+| PCE                      :                                                   |
+|                                                                              |
+|------------------------------------------------------------------------------|
+|                             Extended User Header                             |
+|------------------------------------------------------------------------------|
+| Version                  : 1 (EH)                                            |
+| Sub-section type         : 0                                                 |
+| Component ID             : 3100                                              |
+| Machine Type Model       : 8246-L2C                                          |
+| Serial Number            : 10008FA                                           |
+| FW Released Ver          : ZL770_060                                         |
+| FW SubSys Version        : b1212p_1320.770                                   |
+| Common Ref Time (UTC)    :    0-00-00 | 00:00:00                             |
+| Symptom Id Len           : 28                                                |
+| Symptom Id               : 11007201_003C0001_00007201                        |
+|------------------------------------------------------------------------------|
+|                                Private Header                                |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x30                                              |
+| Component ID             : 9500                                              |
+| Created at               : 2014-02-18 | 06:43:54                             |
+| Committed at             : 2014-02-18 | 06:43:54                             |
+| Created by               : Service Processor                                 |
+| Creator Sub Id           : 0x0 (0), 0x0 (0)                                  |
+| Platform Log Id          : 0x5055ed2e                                        |
+| Entry ID                 : 0x5055ed2e                                        |
+| Section Count            : 12                                                |
+|------------------------------------------------------------------------------|
+|                                 User Header                                  |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (UH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x18                                              |
+| Component ID             : 9500                                              |
+| Subsystem                : Hypervisor firmware                               |
+| Event Scope              : Single platform                                   |
+| Event Severity           : Informational Event                               |
+| Event Type               : Miscellaneous, informational only.                |
+| Action Flags             : Healthy System Event                              |
+|                          : No Service Action Required                        |
+|------------------------------------------------------------------------------|
+|                        Primary System Reference Code                         |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (PS)                                            |
+| Sub-section type         : 0x1                                               |
+| Section Length           : 0x50                                              |
+| Component ID             : 9500                                              |
+| SRC Format               : 0x0                                               |
+| SRC Version              : 0x2                                               |
+| Valid Word Count         : 0x9                                               |
+| SRC Length               : 48                                                |
+| Primary Reference Code   : B182950C                                          |
+| Hex Words 2 - 5          : 020000F0 2B2C0E10 C103A401 000000FF               |
+| Hex Words 6 - 9          : 00000042 E8CA2C00 00000000 00000000               |
+|                                                                              |
+|------------------------------------------------------------------------------|
+|                             Extended User Header                             |
+|------------------------------------------------------------------------------|
+| Version                  : 1 (EH)                                            |
+| Sub-section type         : 0                                                 |
+| Component ID             : 3100                                              |
+| Machine Type Model       : 8246-L2D                                          |
+| Serial Number            : 060E8EA                                           |
+| FW Released Ver          : ZL770_057                                         |
+| FW SubSys Version        : b1126p_1320.770                                   |
+| Common Ref Time (UTC)    :    0-00-00 | 00:00:00                             |
+| Symptom Id Len           : 20                                                |
+| Symptom Id               : B182950C_2B2C0E10                                 |
+|------------------------------------------------------------------------------|
+|                              User Defined Data                               |
+|------------------------------------------------------------------------------|
+| Section Version          : 2 (UD)                                            |
+| Sub-section type         : 0x4                                               |
+| Section Length           : 0x9c                                              |
+| Component ID             : 3100                                              |
+| User data hex            : length 148                                        |
+|   00000000    00000b90  2f6f7074  2f666970  732f6269       ..../opt/fips/bi  |
+|   00000010    6e2f6d62  6f786d61  696e7072  6f636573       n/mboxmainproces  |
+|   00000020    73000000  00000000  00000000  00000000       s...............  |
+|   00000030    00000000  00000000  00000000  00000000       ................  |
+|   00000040    00000000  00000000  00000000  00000000       ................  |
+|   00000050    00000000  00000000  66697073  3737302f       ........fips770/  |
+|   00000060    62313132  36705f31  3332302e  37373000       b1126p_1320.770.  |
+|   00000070    00000000  00000000  00000001  00000002       ................  |
+|   00000080    00000804  00000004  00000006  00e51f64       ...............d  |
+|   00000090    00000000                                     ....              |
+|------------------------------------------------------------------------------|
+|                      Machine Type/Model & Serial Number                      |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (MT)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x1c                                              |
+| Component ID             : 3100                                              |
+| Machine Type Model       : 8246-L2D                                          |
+| Serial Number            : 060E8EA                                           |
+|------------------------------------------------------------------------------|
+|                              User Defined Data                               |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (UD)                                            |
+| Sub-section type         : 0xc                                               |
+| Section Length           : 0x6c                                              |
+| Component ID             : 3100                                              |
+| User data hex            : length 100                                        |
+|   00000000    01280342  4d424f58  4a000000  00000000       .(.BMBOXJ.......  |
+|   00000010    00000000  00000064  00000000  00000064       .......d.......d  |
+|   00000020    0000039c  00000018  00000026  973f3ab2       ...........&.?:.  |
+|   00000030    00000bc7  0020434f  c3e6e01c  00000155       ..... CO.......U  |
+|   00000040    0000000e  0000950c  00000042  e8ca2c00       ...........B..,.  |
+|   00000050    00000000  00000000  00009510  5055ed2e       ............PU..  |
+|   00000060    0000003c                                     ...<              |
+|------------------------------------------------------------------------------|
+|                              User Defined Data                               |
+|------------------------------------------------------------------------------|
+| Section Version          : 5 (UD)                                            |
+| Sub-section type         : 0x1                                               |
+| Section Length           : 0x24                                              |
+| Component ID             : 9500                                              |
+| User data hex            : length 28                                         |
+|   00000000    00000017  0000004a  0000000c  00000042       .......J.......B  |
+|   00000010    00000001  43413034  30303031                 ....CA040001      |
+|------------------------------------------------------------------------------|
+|                              User Defined Data                               |
+|------------------------------------------------------------------------------|
+| Section Version          : 5 (UD)                                            |
+| Sub-section type         : 0x2                                               |
+| Section Length           : 0x18                                              |
+| Component ID             : 9500                                              |
+| User data hex            : length 16                                         |
+|   00000000    000000e8  000000ca  00000000  0000002c       ...............,  |
+|------------------------------------------------------------------------------|
+|                              User Defined Data                               |
+|------------------------------------------------------------------------------|
+| Section Version          : 12 (UD)                                           |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0xc                                               |
+| Component ID             : 9500                                              |
+| User data hex            : length 4                                          |
+|   00000000    00000023                                     ...#              |
+|------------------------------------------------------------------------------|
+|                              User Defined Data                               |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (UD)                                            |
+| Sub-section type         : 0xc                                               |
+| Section Length           : 0x50                                              |
+| Component ID             : 3100                                              |
+| User data hex            : length 72                                         |
+|   00000000    01280342  4d424f58  00000000  00000000       .(.BMBOX........  |
+|   00000010    00000000  00000048  00000000  00000048       .......H.......H  |
+|   00000020    00000640  0000002b  00000026  9730e378       ...@...+...&.0.x  |
+|   00000030    00000bc8  0004434f  8dbf4c7f  000000ed       ......CO..L.....  |
+|   00000040    5055ed2f  00000020                           PU./...           |
+|------------------------------------------------------------------------------|
+|                              User Defined Data                               |
+|------------------------------------------------------------------------------|
+| Section Version          : 1 (UD)                                            |
+| Sub-section type         : 0xc                                               |
+| Section Length           : 0x30                                              |
+| Component ID             : 3100                                              |
+| User data hex            : length 40                                         |
+|   00000000    01280342  4d424f58  56000000  00000000       .(.BMBOXV.......  |
+|   00000010    00000000  00000028  00000000  00000028       .......(.......(  |
+|   00000020    000001d8  00000009                           ........          |

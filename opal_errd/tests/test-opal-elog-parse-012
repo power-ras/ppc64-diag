@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#WARNING: DO NOT RUN THIS FILE DIRECTLY
+#  This file expects to be a part of ppc64-diag test suite
+#  Run this file with ../run_tests -t test-opal-elog-parse-012 -q
+
+check_suite
+copy_sysfs
+
+run_binary "./opal_errd" "-s $SYSFS -o $OUT/platform -D -e /bin/true"
+sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' -i $OUTSTDERR
+
+run_binary "./opal-elog-parse/opal-elog-parse" "-a -p $OUT/platform"
+
+diff_with_result
+
+register_success

@@ -2,7 +2,7 @@
 
 #WARNING: DO NOT RUN THIS FILE DIRECTLY
 #  This file expects to be a part of ppc64-diag test suite
-#  Run this file with ../run_tests -t test-extract_opal_dump -q
+#  Run this file with ../run_tests -t test-extract_opal_dump-000 -q
 
 check_suite
 copy_sysfs

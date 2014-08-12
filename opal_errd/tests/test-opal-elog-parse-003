@@ -2,7 +2,7 @@
 
 #WARNING: DO NOT RUN THIS FILE DIRECTLY
 #  This file expects to be a part of ppc64-diag test suite
-#  Run this file with ../run_tests -t 003-test-opal-elog-parse -q
+#  Run this file with ../run_tests -t test-opal-elog-parse-003 -q
 
 check_suite
 copy_sysfs

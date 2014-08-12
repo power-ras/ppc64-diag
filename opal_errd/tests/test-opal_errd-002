@@ -8,10 +8,9 @@ check_suite
 copy_sysfs
 
 
--./opal_errd -s /not/a/sysfs -o $OUT/platform -D -e /bin/true 2>&1 \
-	| sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' >> $LOG
+./opal_errd -s /not/a/sysfs -o $OUT/platform -D -e /bin/true > /dev/null 2>&1
 
-RC=${PIPESTATUS[0]}
+RC=$?
 if [ "$RC" -ne 255 ] ; then
 	register_success $RC;
 fi

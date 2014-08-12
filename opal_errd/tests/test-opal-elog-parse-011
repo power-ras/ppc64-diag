@@ -7,8 +7,8 @@
 check_suite
 copy_sysfs
 
-$VALGRIND ./opal-elog-parse/opal-elog-parse -d 7 -f $SYSFS/firmware/opal/elog/0x07/raw &>> $LOG 1>&2
+run_binary "./opal-elog-parse/opal-elog-parse" "-d 7 -f $SYSFS/firmware/opal/elog/0x07/raw"
 
-diff_with_result $LOG
+diff_with_result
 
 register_success

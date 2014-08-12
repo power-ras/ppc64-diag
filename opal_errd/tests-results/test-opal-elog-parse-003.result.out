@@ -1,6 +1,3 @@
-parse_priv_hdr_scn: section header has an invalid section count 0, should be greater than 0, setting section count to 1 to attempt recovery
-ERROR parse_opal_event_log: Truncated error log, expected section UH not found
-ERROR parse_opal_event_log: Truncated error log, expected section EH not found
 |------------------------------------------------------------------------------|
 |                                Private Header                                |
 |------------------------------------------------------------------------------|

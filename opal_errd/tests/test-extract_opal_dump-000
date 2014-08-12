@@ -7,12 +7,12 @@
 check_suite
 copy_sysfs
 
-./extract_opal_dump -s $SYSFS -o $OUT 2> $OUTSTDERR
+run_binary "./extract_opal_dump" "-s $SYSFS -o $OUT"
+sed -e 's%/tmp/.*/%%;s/OPAL_DUMP\[[0-9]*\]/OPAL_DUMP[XXXX]/' -i $OUTSTDERR
 
-cat $OUTSTDERR | sed -e 's%/tmp/.*/%%;s/OPAL_DUMP\[[0-9]*\]/OPAL_DUMP[XXXX]/' >> $LOG
-ls -1 $OUT >> $LOG
-(cd $OUT; md5sum *) >> $LOG
+ls -1 $OUT >> $OUTSTDOUT
+(cd $OUT; md5sum *) >> $OUTSTDOUT
 
-diff_with_result $LOG;
+diff_with_result;
 
 register_success

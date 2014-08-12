@@ -7,12 +7,12 @@
 check_suite
 copy_sysfs
 
-$VALGRIND ./opal-elog-parse/opal-elog-parse -d 3 -f $SYSFS/firmware/opal/elog/0x03/raw &>> $LOG 1>&2
+run_binary "./opal-elog-parse/opal-elog-parse" "-d 3 -f $SYSFS/firmware/opal/elog/0x03/raw"
 R=$?
 if [ $R -ne 234 ]; then
 	register_fail $R;
 fi
 
-diff_with_result $LOG
+diff_with_result
 
 register_success

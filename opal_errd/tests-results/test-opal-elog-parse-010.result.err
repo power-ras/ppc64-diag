@@ -9,13 +9,3 @@ ELOG[XXXX]: LID[5034a000]::SRC[11007201]::External Environment::Predictive Error
 ELOG[XXXX]: Run 'opal-elog-parse -d 0x5034a000' for the details.
 ELOG[XXXX]: LID[5055ed2e]::SRC[B182950C]::Platform Firmware::Informational Event::No service action required
 ELOG[XXXX]: Terminating
-platform
-46901d3615145c3a6e99ee68660837de  0x01
-a621b9b23cf209554d66aceb35863c54  0x02
-488000e67e18bfe5393a75ab2b1bba3b  0x03
-a637e5da3d1517084f9a816b8e90f843  0x05
-a26ed3819bc51ac97c7933e8733067cf  0x07
-a3e429377e35d7ce9ab7f23a72091574  0x50000004
-dcf9614c2460060c4e12785b55f30b6b  0x50000006
-32305675efdc2c871027a76b03df82d5  0x5034a000
-82e35e5abde42d14769e1f3ac6683361  0x5055ed2e

@@ -11,10 +11,6 @@ export OUTSTDERR=`mktemp --tmpdir ppc64-diag-run_tests.stderr.XXXXXXXXXX`
 export OUTSTDOUT=`mktemp --tmpdir ppc64-diag-run_tests.stdout.XXXXXXXXXX`
 
 function check_suite {
-	#WARNING: DO NOT RUN THIS FILE DIRECTLY
-	#  This file expects to be a part of ppc64-diag test suite
-	#  Run this file with ../run_tests -t test-opal-elog-parse -q
-
 	#Do some basic checks that the user isn't trying to run this directly
 	if [[ -z "${SYSFS:+x}" ]] ; then
 		echo "Fatal error, you do not appear to be running this script in
@@ -27,12 +23,32 @@ function copy_sysfs {
 	cp -pr sysfs-test/* $SYSFS/
 }
 
-function diff_with_result {
-	if diff -u $RESULT $1; then
-		register_success;
+function run_binary {
+	if [[ -x $1 ]] ; then
+		$VALGRIND $1 $2 2>> $OUTSTDERR 1>> $OUTSTDOUT
 	else
-		register_fail;
+		echo "Fatal error, cannot execute binary '$1'. Did you make?";
+		exit 1;
 	fi
+}
+
+function diff_with_result {
+	# Explicitly diff a file with an arbitary result file
+	if [[ $# -eq 1 ]] ; then
+		if ! diff -u $RESULT $1 ; then
+			register_fail;
+		fi
+	# Otherwise just diff result.out with stdout and result.err with stderr
+	else
+		if ! diff -u ${RESULT}.out $OUTSTDOUT ; then
+			register_fail;
+		fi
+		if ! diff -u ${RESULT}.err $OUTSTDERR ; then
+			register_fail;
+		fi
+	fi
+	register_success;
+
 }
 
 function register_success {

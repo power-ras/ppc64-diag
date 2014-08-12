@@ -7,9 +7,8 @@
 check_suite
 copy_sysfs
 
-./opal_errd -s $SYSFS -o $OUT/platform -D -e /not/a/valid/path 2>&1 \
-	| sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' >> $LOG
-RC=${PIPESTATUS[0]}
+./opal_errd -s $SYSFS -o $OUT/platform -D -e /not/a/valid/path > /dev/null 2>&1
+RC=$?
 if [ "$RC" -ne 0 ] ; then
 	register_failure $RC;
 fi

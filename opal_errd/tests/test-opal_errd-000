@@ -7,12 +7,12 @@
 check_suite
 copy_sysfs
 
-./opal_errd -s $SYSFS -o $OUT/platform -D -e /bin/true 2>&1 \
-    | sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' > $LOG
+run_binary "./opal_errd" "-s $SYSFS -o $OUT/platform -D -e /bin/true"
+sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' -i $OUTSTDERR
 
-ls -1 $OUT >> $LOG
-(cd $OUT/platform; md5sum *) | sort  -t ' ' -k 2 | sed 's/ .*-/  /g'  >> $LOG
+ls -1 $OUT >> $OUTSTDOUT
+(cd $OUT/platform; md5sum *) | sort  -t ' ' -k 2 | sed 's/ .*-/  /g'  >> $OUTSTDOUT
 
-diff_with_result $LOG
+diff_with_result
 
 register_success

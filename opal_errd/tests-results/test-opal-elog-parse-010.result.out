@@ -1,0 +1,9 @@
+|------------------------------------------------------------------------------|
+|ID       Date       Time     SRC        Creator           Event Severity      |
+|------------------------------------------------------------------------------|
+|00000002 0000-00-00 00:00:00 TESTSRC2   Unknown           Recoverable Error   |
+|00000003 2014-03-13 13:01:56 TESTSRC3   Unknown           Predictive Error    |
+|00000005 0000-00-00 00:00:00 TESTSRC5   Unknown           Informational Event |
+|50000004 2000-12-31 10:14:44 TESTSRC4   OPAL              Unrecoverable Error |
+|5034A000 2014-03-13 08:15:55 11007201   Service Processor Predictive Error    |
+|------------------------------------------------------------------------------|

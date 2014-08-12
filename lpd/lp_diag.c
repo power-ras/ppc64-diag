@@ -973,10 +973,16 @@ create_menu(struct loc_code *ident_list, struct loc_code *attn_list)
 	mvprintw(2, 0, "Make selection(s), use Commit to continue");
 	mvprintw(LINES - 3, 0, "F1=Help\t\t\tF4=List\t\t\tF7=Commit\t\t\t"
 					"F10=Exit\nF3=Previous Menu");
+	refresh();
+
 	my_menu = new_menu((ITEM **)my_items);
 	menu_opts_off(my_menu, O_SHOWDESC);
 	menu_opts_off(my_menu, O_ONEVALUE);
+
+	/* Set main window and sub window */
 	my_menu_win = newwin(nlines, 70, BEGIN_Y , 1);
+	set_menu_sub(my_menu, derwin(my_menu_win, nlines, 70, 0, 0));
+
 	keypad(my_menu_win, TRUE);
 	set_menu_win(my_menu, my_menu_win);
 	set_menu_format(my_menu, nlines, 1);

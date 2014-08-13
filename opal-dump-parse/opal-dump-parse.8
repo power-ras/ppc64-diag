@@ -1,0 +1,58 @@
+.\"
+.\" Copyright (C) 2014- International Business Machines
+.\"
+.\" Author : Aruna Balakrishnaiah  <arunabal@linux.vnet.ibm.com>
+.\"
+.TH OPAL-DUMP-PARSE 8 "8 May 2014" Linux
+.SH NAME
+opal-dump-parse \- Parse OPAL System dump
+.SH SYNOPSIS
+.B opal-dump-parse
+[ \fB\-l\fR | \fB\-h\fR | \fB\-s\fR \f id\fR | \fB\-o\fR \f file\R ] <SYSDUMP>
+.SH DESCRIPTION
+On Power Systems service processor (FSP) generates System dump (SYSDUMP) during
+system crash. On PowerKVM machine SYSDUMP contains OPAL logs. This tool helps to
+extract OPAL log from System dump.
+.SH OPTIONS
+.TP
+.BR \-l \fR
+List all the sections
+.TP
+.BR \-s " " \fIid\fR
+Capture log with specific section id
+.TP
+.BR \-o " " \fIfile\fR
+Output file to capture the log with specified section id
+.TP
+.BR \-h \fR
+Display help message
+
+.SH EXAMPLES
+.P
+1. Capture Skiboot log
+
+opal-dump-parse SYSDUMP.10665FT.00000003.20140513071107
+
+By default the log is captured to Skiboot-log.<serial no>.<dump ID>.<time stamp>
+
+.P
+2. List the sections of SYSDUMP
+
+opal-dump-parse -l SYSDUMP.10665FT.00000003.20140513071107
+
+.P
+3. Capture the log with particular section id
+
+opal-dump-parse -s 1 SYSDUMP.10665FT.00000003.20140513071107
+
+By default the log is captured to Opal-log.<serial no>.<dump ID>.<time stamp>
+
+.P
+4. Capture the log to a particular file
+
+opal-dump-parse -o temp SYSDUMP.10665FT.00000003.20140513071107
+
+Captures the log to file temp
+
+.SH SEE ALSO
+.BR opal_errd(8)

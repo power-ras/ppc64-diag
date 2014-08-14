@@ -1,25 +1,27 @@
 Name:	ppc64-diag
 Version:	2.6.6
 Release:	1
-Summary: 	PowerLinux Platform Diagnostics
-Group: 		System Environment/Base
-License: 	Eclipse Public License (EPL) v1.0
-Packager: 	IBM Corp. 
-Vendor: 	IBM Corp.
+Summary:	PowerLinux Platform Diagnostics
+Group:		System Environment/Base
+License:	Eclipse Public License (EPL) v1.0
+URL:		http://sourceforge.net/projects/linux-diag/files/ppc64-diag/
+Packager:	IBM Corp.
+Vendor:		IBM Corp.
 ExclusiveArch:  ppc ppc64
 BuildRequires:  libservicelog-devel, flex, perl, /usr/bin/yacc
 BuildRequires:  libvpd-devel
 BuildRequires:  librtas-devel >= 1.3.9
 BuildRequires:	ncurses-devel
 
-Requires: 	servicelog, /sbin/chkconfig
+Requires:	servicelog
+Requires:	systemd
 # PCI hotplug support on PowerKVM guest depends on below
 # powerpc-utils version.
 Requires:	powerpc-utils >= 1.2.19
 # Light Path Diagnostics depends on below lsvpd version.
 Requires:	lsvpd >= 1.7.1
 BuildRoot:	%{_tmppath}/%{name}-%{version}-build
-Source0: 	ppc64-diag-%{version}.tar.gz
+Source0:	ppc64-diag-%{version}.tar.gz
 
 %description
 This package contains various diagnostic tools for PowerLinux.
@@ -40,9 +42,11 @@ make
 %install
 make install DESTDIR=$RPM_BUILD_ROOT
 chmod 644 $RPM_BUILD_ROOT/etc/ppc64-diag/servevent_parse.pl
-mkdir $RPM_BUILD_ROOT/etc/ppc64-diag/ses_pages
-mkdir $RPM_BUILD_ROOT/var/log/dump
-mkdir $RPM_BUILD_ROOT/var/log/opal-elog
+mkdir -p $RPM_BUILD_ROOT/etc/ppc64-diag/ses_pages
+mkdir -p $RPM_BUILD_ROOT/%{_libexecdir}/%{name}
+mkdir -p $RPM_BUILD_ROOT/%{_unitdir}
+mkdir -p $RPM_BUILD_ROOT/var/log/dump
+mkdir -p $RPM_BUILD_ROOT/var/log/opal-elog
 ln -sfv /usr/sbin/usysattn $RPM_BUILD_ROOT/usr/sbin/usysfault
 
 %files
@@ -69,16 +73,20 @@ ln -sfv /usr/sbin/usysattn $RPM_BUILD_ROOT/usr/sbin/usysfault
 /etc/ppc64-diag/ppc64_diag_setup --register >/dev/null 2>&1
 /etc/ppc64-diag/lp_diag_setup --register >/dev/null 2>&1
 if [ "$1" = "1" ]; then # first install
-    systemctl -q enable opal_errd.service >/dev/null || systemctl -q enable rtas_errd.service >/dev/null
-    systemctl start opal_errd.service >/dev/null || systemctl start rtas_errd.service >/dev/null
+    systemctl -q enable opal_errd.service >/dev/null
+    systemctl -q enable rtas_errd.service >/dev/null
+    systemctl start opal_errd.service >/dev/null
+    systemctl start rtas_errd.service >/dev/null
 elif [ "$1" = "2" ]; then # upgrade
-    systemctl restart opal_errd.service >/dev/null || systemctl restart rtas_errd.service >/dev/null
+    systemctl restart opal_errd.service >/dev/null
+    systemctl restart rtas_errd.service >/dev/null
 fi
 
 %preun
 # Pre-uninstall script -------------------------------------------------
 if [ "$1" = "0" ]; then # last uninstall
-    systemctl stop opal_errd.service >/dev/null || systemctl stop rtas_errd.service >/dev/null
+    systemctl stop opal_errd.service >/dev/null
+    systemctl stop rtas_errd.service >/dev/null
     systemctl -q disable opal_errd.service
     systemctl -q disable rtas_errd.service
     /etc/ppc64-diag/ppc64_diag_setup --unregister >/dev/null
@@ -88,7 +96,8 @@ fi
 %triggerin -- librtas
 # trigger on librtas upgrades ------------------------------------------
 if [ "$2" = "2" ]; then
-    systemctl restart opal_errd.service >/dev/null || systemctl restart rtas_errd.service >/dev/null
+    systemctl restart opal_errd.service >/dev/null
+    systemctl restart rtas_errd.service >/dev/null
 fi
 
 %changelog
@@ -160,8 +169,8 @@ fi
   rather than -m32.
 
 * Tue Feb 22 2011 - Anithra P Janakiraman <janithra@in.ibm.com> - 2.4.0-0
-- Added ELA code to the package, made changes to the rules.mk and minor changes 
-  to the spec file.	
+- Added ELA code to the package, made changes to the rules.mk and minor changes
+  to the spec file.
 
 * Fri Nov 19 2010 - Brad Peters <bpeters@us.ibm.com> - 2.3.5-0
 - Bug fix adding in support for -e and -l, so that root users can

@@ -21,6 +21,7 @@
 
 struct pmap_struct {
 	struct pmap_struct	*next;
+	/* The fields below are stored in host endian */
 	uint32_t 		phandle;
 	uint32_t		drc_index;
 	char			*name;
@@ -91,7 +92,7 @@ uint32_t get_drc_index(const char *path)
 		drc_index = 0;
 
 	fclose(fp);
-	return drc_index;
+	return be32toh(drc_index);
 }
 
 /**
@@ -181,7 +182,7 @@ static int add_std_phandles(char *parent, char *p)
 		*pend = '\0';
 
 		drc_index = get_drc_index(path);
-		add_phandle_to_list(path + strlen(OFDT_BASE), phandle,
+		add_phandle_to_list(path + strlen(OFDT_BASE), be32toh(phandle),
 				    drc_index);
 		fclose(fd);
 	}
@@ -231,7 +232,7 @@ static int add_drconf_phandles()
 
 	for (i = 0; i < entries; i++) {
 		/* See comment above about rtas reporting drc_indexes. */
-		add_phandle_to_list("LMB", mem->drc_index, mem->drc_index);
+		add_phandle_to_list("LMB", be32toh(mem->drc_index), be32toh(mem->drc_index));
 		mem++; /* trust your compiler */
 	}
 
@@ -325,7 +326,7 @@ static int update_properties(uint32_t phandle)
 	 * [ 0x0 (8bytes) ]	- Reserved
 	 */
 	memset(wa, 0x00, 16);
-	wa[0] = phandle;
+	wa[0] = htobe32(phandle);
 
 	do {
 		dbg("about to call rtas_update_properties.\nphandle: %8.8x,"
@@ -373,7 +374,7 @@ static int update_properties(uint32_t phandle)
 				dbg("%s - delete property %s", pms->name,
 				    pname);
 				sprintf(cmd,"remove_property %u %s",
-					phandle, pname);
+					htobe32(phandle), pname);
 				do_update(cmd, strlen(cmd));
 				break;
 
@@ -411,7 +412,7 @@ static int update_properties(uint32_t phandle)
 					 */
 					lenpos = sprintf(longcmd,
 							 "update_property %u "
-							 "%s ", phandle,
+							 "%s ", htobe32(phandle),
 							 pname);
 					strcat(longcmd, "000000 ");
 					cmdlen = strlen(longcmd);
@@ -486,7 +487,7 @@ static void update_nodes(unsigned int *op, unsigned int n)
 	struct pmap_struct *pms;
 
 	for (i = 0; i < n; i++) {
-		phandle = *op++;
+		phandle = be32toh(*op++);
 		dbg("Updating node with phandle %08x", phandle);
 
 		pms = phandle_to_pms(phandle);

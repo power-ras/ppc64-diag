@@ -517,31 +517,34 @@ static void devtree_update(uint scope)
 		}
 
 		op = wa+4;
+		/*
+		 * The o/p buffer has the following format.
+		 *  Operation - 1 byte
+		 *  Number of operands(N) - 3bytes
+		 *  Operand_1, Operand_2, ... Operand_N - 4bytes each
+		 */
 
-		while (*op & 0xFF000000) {
-			switch (*op & 0xFF000000) {
-			    case 0x01000000:
+		while (*(char *)op) {
+			unsigned int n = be32toh(*op) & 0x0FFFFFF;
+			switch (*(char *)op) {
+			    case 0x01:
 				dbg("Received unsupported node deletion "
 				    "request, trying to continue");
 				break;
 
-			    case 0x02000000:
-				update_nodes(op+1, *op & 0x00FFFFFF);
+			    case 0x02:
+				update_nodes(op+1, n);
 				break;
 
-			    case 0x03000000:
+			    case 0x03:
 				dbg("Received unsupported node addition "
 				    "request, trying to continue");
 				break;
 
-			    case 0x00000000:
-				/* End */
-				break;
-
 			    default:
-				dbg("Unknown update_nodes op %8.8x", *op);
+				dbg("Unknown update_nodes op %8.8x", *(char *)op);
 			}
-			op += 1 + (*op & 0x00FFFFFF);
+			op += 1 + n;
 		}
 	} while (rc == 1);
 

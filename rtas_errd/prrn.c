@@ -318,6 +318,12 @@ static int update_properties(uint32_t phandle)
 	int more = 0;
 	struct pmap_struct *pms = phandle_to_pms(phandle);
 
+	/*
+	 * First call to the udpate-properties call, expects the following :
+	 * [phandle (4bytes)]
+	 * [ 0x0 (4bytes) ]	- Indicates the first call for the phandle
+	 * [ 0x0 (8bytes) ]	- Reserved
+	 */
 	memset(wa, 0x00, 16);
 	wa[0] = phandle;
 
@@ -355,7 +361,7 @@ static int update_properties(uint32_t phandle)
 		for (i = 0; i < nprop; i++) {
 			pname = (char *)op;
 			op = (unsigned int *)(pname + strlen(pname) + 1);
-			vd = *op++;
+			vd = be32toh(*op++);
 
 			switch (vd) {
 			    case 0x00000000:
@@ -372,6 +378,12 @@ static int update_properties(uint32_t phandle)
 				break;
 
 			    default:
+				/*
+				 * A negative value indicates incomplete property
+				 * and requires one or more followup calls to read
+				 * completely. The current length of the data is the
+				 * 2's complement of the value.
+				 */
 				if (vd & 0x80000000) {
 					dbg("partial property!");
 					/* twos compliment of length */

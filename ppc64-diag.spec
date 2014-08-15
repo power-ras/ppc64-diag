@@ -1,5 +1,5 @@
 Name:	ppc64-diag
-Version:	2.6.6
+Version:	2.6.7
 Release:	1
 Summary:	PowerLinux Platform Diagnostics
 Group:		System Environment/Base
@@ -101,6 +101,13 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Fri Aug 15 2014 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.6.7
+- Bug fixes in opal_errd and opal-elog-parse
+- Added opal-dump-parse tool
+- LE support for light path code (usysident, usysattn and lp_diag)
+- Switch to systemd based daemon management
+- Fixed bashism issues
+
 * Tue Apr 15 2014 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.6.6
 - Log rotator for opal_errd
 - Dump retention policy for extract_opal_dump

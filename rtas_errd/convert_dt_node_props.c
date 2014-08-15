@@ -71,7 +71,7 @@ mem_drcindex_to_drcname(uint32_t drc_idx, char *drc_name, int buf_size)
 	read(fd, &index, 4);
 
 	while ((read(fd, &index, 4)) != 0) {
-		if (index == drc_idx) {
+		if (be32toh(index) == drc_idx) {
 			found = 1;
 			break;
 		}
@@ -347,7 +347,7 @@ cpu_interruptserver_to_drcindex(uint32_t int_serv, uint32_t *drc_idx) {
 
 	dir = opendir("/proc/device-tree/cpus");
 
-	while ((entry = readdir(dir)) != NULL) {
+	while (!found && (entry = readdir(dir)) != NULL) {
 		if (!strncmp(entry->d_name, "PowerPC,POWER", 13)) {
 			snprintf(buffer, 1024, "/proc/device-tree/cpus/%s/"
 				"ibm,ppc-interrupt-server#s", entry->d_name);
@@ -356,7 +356,7 @@ cpu_interruptserver_to_drcindex(uint32_t int_serv, uint32_t *drc_idx) {
 				goto cleanup;
 			}
 			while ((read(fd, &temp, 4)) != 0) {
-				if (temp == int_serv) {
+				if (be32toh(temp) == int_serv) {
 					close(fd);
 					snprintf(buffer, 1024, "/proc/device-"
 						"tree/cpus/%s/ibm,my-drc-index",
@@ -366,8 +366,10 @@ cpu_interruptserver_to_drcindex(uint32_t int_serv, uint32_t *drc_idx) {
 							" %s\n", buffer);
 						goto cleanup;
 					}
-					if ((read(fd, drc_idx, 4)) == 4)
+					if ((read(fd, &temp, 4)) == 4)  {
+						*drc_idx = be32toh(temp);
 						found = 1;
+					}
 					close(fd);
 					break;
 				}
@@ -398,7 +400,7 @@ cpu_drcindex_to_drcname(uint32_t drc_idx, char *drc_name, int buf_size) {
 	read(fd, &index, 4);
 
 	while ((read(fd, &index, 4)) != 0) {
-		if (index == drc_idx) {
+		if (be32toh(index) == drc_idx) {
 			found = 1;
 			break;
 		}
@@ -450,43 +452,41 @@ cpu_drcindex_to_interruptserver(uint32_t drc_idx, uint32_t *int_servs,
 		int array_elements) {
 	DIR *dir;
 	struct dirent *entry;
-	int fd, found=0;
+	int intr_fd, drc_fd, found=0;
 	char buffer[1024];
 	uint32_t temp;
 
 	dir = opendir("/proc/device-tree/cpus");
 
-	while ((entry = readdir(dir)) != NULL) {
+	while (!found && (entry = readdir(dir)) != NULL) {
 		if (!strncmp(entry->d_name, "PowerPC,POWER", 13)) {
 			snprintf(buffer, 1024, "/proc/device-tree/cpus/%s/"
 				"ibm,my-drc-index", entry->d_name);
-			if ((fd = open(buffer, O_RDONLY)) < 0) {
+			if ((drc_fd = open(buffer, O_RDONLY)) < 0) {
 				fprintf(stderr, "error opening %s\n", buffer);
 				closedir(dir);
 				return 0;
 			}
-			while ((read(fd, &temp, 4)) != 0) {
-				if (temp == drc_idx) {
-					close(fd);
+			while ((read(drc_fd, &temp, 4)) != 0) {
+				if (be32toh(temp) == drc_idx) {
 					snprintf(buffer, 1024, "/proc/device-"
 						"tree/cpus/%s/"
 						"ibm,ppc-interrupt-server#s",
 						entry->d_name);
-					if ((fd = open(buffer, O_RDONLY)) < 0) {
+					if ((intr_fd = open(buffer, O_RDONLY)) < 0) {
 						fprintf(stderr, "error opening"
 							" %s\n", buffer);
 						closedir(dir);
 						return 0;
 					}
-					while ((read(fd, &temp, 4)) == 4) {
-						if (found <= array_elements)
-							int_servs[found] = temp;
-						found++;
-					}
+					while (found < array_elements &&
+						(read(intr_fd, &temp, 4)) == 4)
+							int_servs[found++] = temp;
+					close(intr_fd);
 					break;
 				}
 			}
-			close(fd);
+			close(drc_fd);
 		}
 	}
 
@@ -533,21 +533,22 @@ cpu_drcname_to_drcindex(char *drc_name, uint32_t *drc_idx) {
 			return 0;
 		}
 
-		/* skip the first one; it indicates how many are in the file */
-		read(fd, &index, 4);
-
-		while (offset > 0) {
-			if ((read(fd, &index, 4)) != 4) {
-				close(fd);
-				return 0;
-			}
-			offset--;
+		/*
+		 * skip the first one (indicating the number of entries)
+		 * + offset number of indices
+		 */
+		if (lseek(fd, (1 + offset) * 4, SEEK_SET) !=
+				(1 + offset ) * 4) {
+			close(fd);
+			return 0;
 		}
 
-		if ((read(fd, drc_idx, 4)) != 4)
+		if ((read(fd, &index, 4)) == 4)
+			*drc_idx = be32toh(index);
+		else
 			found = 0;
+		close(fd);
 	}
-	close(fd);
 
 	return found;
 }

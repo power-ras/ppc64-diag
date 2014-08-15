@@ -328,7 +328,7 @@ config_restart_policy(char *start, char *end, int *line_no, int update_param)
 		return cur;
 
 	/* Try to set the system parameter with the ibm,set-sysparm RTAS call */
-	*(uint16_t *)param = 1;
+	*(uint16_t *)param = htobe16(1);
 	param[2] = (uint8_t)d_cfg.restart_policy;
 	rc = rtas_set_sysparm(RTAS_PARAM_AUTO_RESTART, param);
 	switch (rc) {

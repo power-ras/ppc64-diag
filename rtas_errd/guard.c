@@ -232,22 +232,17 @@ retrieve_drc_name(enum event_type type, struct event *event, unsigned int id,
 
 	rc = fread(buffer, 1, bufsize, fp);
 	if (rc == bufsize) {
-		if (type == CPUTYPE) {
-			log_msg(event, "Cannot obtain the drc-name for the "
-				       "CPU with ID %u; Buffer overflow in "
-				       "retrieve_drc_name", id);
-		}
-		else {
-			log_msg(event, "Cannot obtain the drc-name for the "
-				       "MEMORY with ID %u; Buffer overflow "
-				       "in retrieve_drc_name", id);
-		}
+		log_msg(event, "Cannot obtain the drc-name for the "
+			       "%s with ID %u; Buffer overflow in "
+			       "retrieve_drc_name",
+				(type == CPUTYPE) ? "CPU" : "MEMORY",
+				id);
 		buffer[bufsize-1] = '\0';
 		ret = 0;
-	}
-	else {
+	} else if (rc > 0) {
 		buffer[rc-1] = '\0';	/* overwrite the newline at the end */
-	}
+	} else
+		buffer[0] = '\0';
 
 	rc = pclose(fp);
 	status = (int8_t)WEXITSTATUS(rc);
@@ -255,15 +250,10 @@ retrieve_drc_name(enum event_type type, struct event *event, unsigned int id,
 	setup_sigchld_handler();
 
 	if (status != 0) {
-		if (type == CPUTYPE) {
-			log_msg(event, "Cannot obtain the drc-name for the "
-				       "CPU with ID %u; %s returned %d",
-					id, CONVERT_DT_PROPS_PROGRAM, rc);
-		}
-		else {
-			log_msg(event, "Cannot obtain the drc-name for the "
-					"Memory with ID %u; %s returned %d", 						id, CONVERT_DT_PROPS_PROGRAM, rc);
-		}
+		log_msg(event, "Cannot obtain the drc-name for the "
+			       "%s with ID %u; %s returned %d",
+				(type == CPUTYPE) ? "CPU" : "MEMORY",
+				id, CONVERT_DT_PROPS_PROGRAM, rc);
 		ret = 0;
 	}
 

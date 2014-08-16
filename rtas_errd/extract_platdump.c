@@ -235,6 +235,7 @@ extract_platform_dump(uint64_t dump_tag)
 	 */
 	if (bytes >= DUMP_HDR_PREFIX_OFFSET + sizeof(uint16_t)) {
 		prefix_size = *(uint16_t *)(dump_buf + DUMP_HDR_PREFIX_OFFSET);
+		prefix_size = be16toh(prefix_size);
 	}
 
 	if (bytes >= DUMP_HDR_FNAME_OFFSET + DUMP_MAX_FNAME_LEN) {

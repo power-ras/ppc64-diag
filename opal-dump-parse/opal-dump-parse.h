@@ -28,7 +28,8 @@
 #define DUMP_SECTION_DESC	\
 	{0, "Unknown"}, \
 	{1, "Opal-log"}, \
-	{2, "HostBoot-Runtime-log"}
+	{2, "HostBoot-Runtime-log"}, \
+	{128, "printk"}
 
 #define MDST_SECTION_DESC_LEN	128
 

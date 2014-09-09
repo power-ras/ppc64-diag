@@ -226,6 +226,13 @@ extract_platform_dump(uint64_t dump_tag)
 		ret = 1;
 		goto platdump_error_out;
 	}
+	/* If we didn't read enough bytes, handle it */
+	if (bytes <= 0) {
+		msg("Platform dump with id: 0x%016LX is either invalid "
+			"or empty\n", dump_tag);
+		ret = 1;
+		goto platdump_error_out;
+	}
 
 	seq = seq_next;
 

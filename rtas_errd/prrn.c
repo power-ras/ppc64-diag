@@ -342,7 +342,7 @@ static int update_properties(uint32_t phandle)
 		dbg("successful rtas_update_properties (more %d)", rc);
 
 		op = wa+4;
-		nprop = *op++;
+		nprop = be32toh(*op++);
 
 		/* Should just be on property to update, the affinity. Except
 		 * for reconfig memory, that is a single property for
@@ -374,7 +374,7 @@ static int update_properties(uint32_t phandle)
 				dbg("%s - delete property %s", pms->name,
 				    pname);
 				sprintf(cmd,"remove_property %u %s",
-					htobe32(phandle), pname);
+					phandle, pname);
 				do_update(cmd, strlen(cmd));
 				break;
 
@@ -412,7 +412,7 @@ static int update_properties(uint32_t phandle)
 					 */
 					lenpos = sprintf(longcmd,
 							 "update_property %u "
-							 "%s ", htobe32(phandle),
+							 "%s ", phandle,
 							 pname);
 					strcat(longcmd, "000000 ");
 					cmdlen = strlen(longcmd);

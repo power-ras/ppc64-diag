@@ -24,6 +24,7 @@ void handle_hotplug_event(struct event *re)
         pid_t child;
         int status, rc;
         char drc_index[11];
+	char count[4];
         char *drmgr_args[] = { DRMGR_PROGRAM_NOPATH, "-c", NULL, NULL, NULL,
                         NULL, NULL, "-d4", "-V", NULL};
 
@@ -38,6 +39,12 @@ void handle_hotplug_event(struct event *re)
                         case RTAS_HP_TYPE_PCI:
                                 drmgr_args[2] = "pci";
                                 drmgr_args[6] = "-n";
+                                break;
+			case RTAS_HP_TYPE_CPU:
+				drmgr_args[2] = "cpu";
+				break;
+			case RTAS_HP_TYPE_MEMORY:
+				drmgr_args[2] = "mem";
                                 break;
                         default:
                                 dbg("Unknown or unsupported hotplug type %d\n",
@@ -63,6 +70,11 @@ void handle_hotplug_event(struct event *re)
                                 snprintf(drc_index, 11, "%#x", hotplug->u1.drc_index);
                                 drmgr_args[5] = drc_index;
                                 break;
+			case RTAS_HP_ID_DRC_COUNT:
+				drmgr_args[4] = "-q";
+				snprintf(count, 4, "%u", hotplug->u1.count);
+				drmgr_args[5] = count;
+				break;
                         default:
                                 dbg("Unknown or unsupported hotplug identifier %d\n",
 					hotplug->identifier);
@@ -73,6 +85,10 @@ void handle_hotplug_event(struct event *re)
                         drmgr_args[1], drmgr_args[2], drmgr_args[3],
                         drmgr_args[4], drmgr_args[5], drmgr_args[6]);
 
+#ifdef DEBUG
+		if(no_drmgr)
+			return;
+#endif
                 /* invoke drmgr */
                 dbg("Invoke drmgr command\n");
 

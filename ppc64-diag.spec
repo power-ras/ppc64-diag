@@ -13,6 +13,7 @@ BuildRequires:  libvpd-devel
 BuildRequires:  librtas-devel >= 1.3.9
 BuildRequires:	ncurses-devel
 BuildRequires:	systemd-devel
+BuildRequires:	iniparser-devel
 
 Requires:	servicelog
 Requires:	systemd

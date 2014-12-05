@@ -12,12 +12,12 @@ RTAS_ERRD_OBJS = rtas_errd.o epow.o dump.o guard.o eeh.o update.o \
 		 files.o config.o diag_support.o ela.o v6ela.o servicelog.o \
 		 signal.o prrn.o hotplug.o
 
-RTAS_ERRD_LIBS = -lrtas -lrtasevent -lservicelog
+RTAS_ERRD_LIBS = -liniparser -lrtas -lrtasevent -lservicelog
 
 DT_NODE_OBJS = convert_dt_node_props.o
 
 EXTRACT_PLATDUMP_OBJS = extract_platdump.o config.o
-EXTRACT_PLATDUMP_LIBS = -lrtas
+EXTRACT_PLATDUMP_LIBS = -liniparser -lrtas
 
 DOXYGEN_CFG = doxygen.config
 

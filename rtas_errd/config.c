@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <time.h>
-#include <stdarg.h> 
+#include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
 #include <sys/stat.h>
@@ -24,7 +24,7 @@
 #define RTAS_PARAM_AUTO_RESTART		21
 
 /**
- * @var config_file 
+ * @var config_file
  * @brief default ppc64-diag configuration file
  */
 char *config_file = "/etc/ppc64-diag/ppc64-diag.config";
@@ -146,7 +146,6 @@ static void config_restart_policy(int update_param)
 
 	d_cfg.log_msg("Configuring the Auto Restart Policy to %d (in NVRAM)",
 		      d_cfg.restart_policy);
-
 }
 
 /**
@@ -299,7 +298,7 @@ diag_cfg(int update_sysconfig, void (*log_msg)(char *, ...))
 	}
 
 	/* parse the configuration entries */
-	 parse_config_entries(config_dict, update_sysconfig);
+	parse_config_entries(config_dict, update_sysconfig);
 
 	iniparser_freedict(config_dict);
 

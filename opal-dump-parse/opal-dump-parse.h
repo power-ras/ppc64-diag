@@ -59,7 +59,7 @@ typedef struct _mdsttable
 #define SKIBOOT_SIGNATURE              "SkiBoot"
 #define SKIBOOT_SIGNATURE_LENGTH        7	/* Excluding NULL */
 
-/* skiboot header size
+/* skiboot header size (size of metadata)
  * skiboot offset + SKIBOOT_HEADER_SIZE gives actual skiboot start address
  */
 #define SKIBOOT_HEADER_SIZE             0x28
@@ -156,10 +156,10 @@ typedef struct _nodalheader
 	char	reserved[12];
 } dump_node_header;
 
-/* We have assumed any size greater than 0x820 in HWDATA section
+/* We have assumed any size greater than 0x100000 in HWDATA section
  * is the size of skiboot log
  */
-#define SKIBOOT_SIZE_LIMIT              0x820
+#define SKIBOOT_SIZE_LIMIT              0x100000
 
 /* HWDAATA TOC entry foramt */
 typedef struct _hwtocentry

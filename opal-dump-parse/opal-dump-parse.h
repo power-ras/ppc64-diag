@@ -161,6 +161,11 @@ typedef struct _nodalheader
  */
 #define SKIBOOT_SIZE_LIMIT              0x100000
 
+/* Timestamp is introduced in the Skiboot header, handle
+ * it before fetching the Skiboot log.
+ */
+#define SKIBOOT_TIMESTAMP_LENGTH	0x10
+
 /* HWDAATA TOC entry foramt */
 typedef struct _hwtocentry
 {

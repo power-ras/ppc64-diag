@@ -160,8 +160,12 @@ static int get_skiboot(char *data, int hwdata_start,
 	*skiboot_start = toc_start + (toc_size * toc_cnt) + offset + SKIBOOT_HEADER_SIZE;
 
 	if (strncmp(&data[*skiboot_start], SKIBOOT_SIGNATURE, SKIBOOT_SIGNATURE_LENGTH)) {
-		fprintf(stderr, "%s signature mismatch\n", SKIBOOT_SIGNATURE);
-		return E_INVALID;
+		*skiboot_start += SKIBOOT_TIMESTAMP_LENGTH;
+
+		if (strncmp(&data[*skiboot_start], SKIBOOT_SIGNATURE, SKIBOOT_SIGNATURE_LENGTH)) {
+			fprintf(stderr, "%s signature mismatch\n", SKIBOOT_SIGNATURE);
+			return E_INVALID;
+		}
 	}
 
 	return E_SUCCESS;

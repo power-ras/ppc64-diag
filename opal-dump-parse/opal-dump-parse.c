@@ -447,18 +447,15 @@ out:
 int main(int argc, char *argv[])
 {
 	int opt = 0;
-	int argcnt = 0;
 
 	while ((opt = getopt(argc, argv, "lh:s:o:")) != -1) {
 		switch (opt) {
 		case 'l':
 			opt_mdst = 1;
-			argcnt++;
 			break;
 		case 's':
 			opt_sec_id = atoi(optarg);
 			opt_sec_file = 1;
-			argcnt++;
 			break;
 		case 'o':
 			opt_output_flag = 1;
@@ -480,9 +477,16 @@ int main(int argc, char *argv[])
 	}
 
 	/* Options l & s are mutually exclusive */
-	if (argcnt > 1) {
-		fprintf(stderr, "Only operation can be performed at a time "
-				"( -l | -s)\n\n");
+	if (opt_mdst && opt_sec_file) {
+		fprintf(stderr, "Only one operation can be performed at a time "
+				"(-l | -s)\n\n");
+		print_usage(argv[0]);
+		return E_USAGE;
+	}
+
+	if (opt_mdst && opt_output_flag) {
+		fprintf(stderr, "The -l and -o options cannot be used "
+			"together\n\n");
 		print_usage(argv[0]);
 		return E_USAGE;
 	}

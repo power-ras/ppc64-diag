@@ -29,30 +29,36 @@ Display help message
 
 .SH EXAMPLES
 .P
+.nf
 1. Capture Skiboot log
 
-opal-dump-parse SYSDUMP.10665FT.00000003.20140513071107
+    # opal-dump-parse SYSDUMP.10665FT.00000003.20140513071107
 
-By default the log is captured to Skiboot-log.<serial no>.<dump ID>.<time stamp>
-
+    By default the log is captured to Skiboot-log.<serial no>.<dump ID>.<time stamp>
+.fi
 .P
+.nf
 2. List the sections of SYSDUMP
 
-opal-dump-parse -l SYSDUMP.10665FT.00000003.20140513071107
-
+    # opal-dump-parse -l SYSDUMP.10665FT.00000003.20140513071107
+.fi
 .P
+.nf
 3. Capture the log with particular section id
 
-opal-dump-parse -s 1 SYSDUMP.10665FT.00000003.20140513071107
+    # opal-dump-parse -s 1 SYSDUMP.10665FT.00000003.20140513071107
 
-By default the log is captured to Opal-log.<serial no>.<dump ID>.<time stamp>
+    By default the log is captured to Opal-log.<serial no>.<dump ID>.<time stamp>
 
+.fi
 .P
+.nf
 4. Capture the log to a particular file
 
-opal-dump-parse -o temp SYSDUMP.10665FT.00000003.20140513071107
+    # opal-dump-parse -o temp SYSDUMP.10665FT.00000003.20140513071107
 
-Captures the log to file temp
+    Captures OPAL log to file "temp"
+.fi
 
 .SH SEE ALSO
 .BR opal_errd(8)

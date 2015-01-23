@@ -17,7 +17,7 @@
 #define FRU_PROCESSOR(x)		{ x, "procx", " ", 127}
 #define FRU_L2CACHE(x)			{ x, "L2Cache0", " ", 33}
 #define FRU_MISSING_L2(x)		{ x, "L2Cache0", " ", 33}
-#define FRU_HOST_BRIDGE(x)		{ x, "", " ", 2} 
+#define FRU_HOST_BRIDGE(x)		{ x, "", " ", 2}
 #define FRU_SYSTEM_BUS_CONNECTOR(x)	{ x, "", " ", 192}
 #define FRU_MEMORY_MODULE(x)		{ x, "Memory module", " ", 4}
 #define FRU_MEMORY_CARD(x)		{ x, "", " ", 5}
@@ -64,22 +64,22 @@
  * Some of the io??? failures have three entries.
  */
 
-struct event_description_pre_v6 cpu610[] = 	/* CPU internal error */
-{	
-	{ "", ERRD1, 0x651, 0x610, MSGCPUB12b0, 
+struct event_description_pre_v6 cpu610[] =	/* CPU internal error */
+{
+	{ "", ERRD1, 0x651, 0x610, MSGCPUB12b0,
 	    {
 		FRU_PROCESSOR(100)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x610, DEFER_MSGCPUB12b0, 
+	{ "", ERRD1, 0x652, 0x610, DEFER_MSGCPUB12b0,
 	    {
 		FRU_PROCESSOR(100)
 	    }
 	}
 };
 
-struct event_description_pre_v6 cpu611[] =  	/* CPU internal cache error */
-{	
+struct event_description_pre_v6 cpu611[] =	/* CPU internal cache error */
+{
 	{ "", ERRD1, 0x651, 0x611, MSGCPUB12b1,
 	    {
 		FRU_PROCESSOR(100)
@@ -94,13 +94,13 @@ struct event_description_pre_v6 cpu611[] =  	/* CPU internal cache error */
 
 struct event_description_pre_v6 cpu612[] =
 				/* L2 cache parity or mult-bit ecc error */
-{	
-	{ "", ERRD1, 0x651, 0x612, MSGCPUB12b2, 
+{
+	{ "", ERRD1, 0x651, 0x612, MSGCPUB12b2,
 	    {
 		FRU_L2CACHE(100)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x612, DEFER_MSGCPUB12b2, 
+	{ "", ERRD1, 0x652, 0x612, DEFER_MSGCPUB12b2,
 	    {
 		FRU_L2CACHE(100)
 	    }
@@ -124,7 +124,7 @@ struct event_description_pre_v6 cpu613[] = /* L2 cache ECC single-bit error */
 struct event_description_pre_v6 cpu614[] =
 				/* Time-out error waiting for mem controller */
 {
-	{ "", ERRD1, 0x651, 0x614, MSGCPUB12b4, 
+	{ "", ERRD1, 0x651, 0x614, MSGCPUB12b4,
 	    {
 		FRU_MEMORY_CONTROLLER(100)
 	    }
@@ -133,16 +133,16 @@ struct event_description_pre_v6 cpu614[] =
 
 struct event_description_pre_v6 cpu615[] = /* Time-out error waiting for I/O */
 {
-	{ "", ERRD1, 0x651, 0x615, MSGCPUB12b5, 
+	{ "", ERRD1, 0x651, 0x615, MSGCPUB12b5,
 	    {
-		FRU_HOST_BRIDGE(100)	
+		FRU_HOST_BRIDGE(100)
 	    }
 	}
 };
 
 struct event_description_pre_v6 cpu619[] = /* Unknown error in CPU Error log */
 {
-	{ "", ERRD1, 0x651, 0x619, MSGCPUALLZERO, 
+	{ "", ERRD1, 0x651, 0x619, MSGCPUALLZERO,
 	    {
 		{ 0, "", "", 36},
 		{ 0, "", "", 36},
@@ -155,10 +155,10 @@ struct event_description_pre_v6 cpu619[] = /* Unknown error in CPU Error log */
 struct event_description_pre_v6 cpu710[] =
 				/* Address/Data parity error on Processor bus */
 {
-	{ "", ERRD1, 0x651, 0x710, MSGCPUB12b6, 
+	{ "", ERRD1, 0x651, 0x710, MSGCPUB12b6,
 	    {
-		FRU_RTASFRU(60), 
-		FRU_SYSTEM_BUS_CONNECTOR(40) 	
+		FRU_RTASFRU(60),
+		FRU_SYSTEM_BUS_CONNECTOR(40)
 	    }
 	}
 };
@@ -166,23 +166,23 @@ struct event_description_pre_v6 cpu710[] =
 struct event_description_pre_v6 cpu711[] =
 				/* Address/Data parity error on Processor bus */
 {
-	{ "", ERRD1, 0x651, 0x711, MSGCPUB12b6, 
+	{ "", ERRD1, 0x651, 0x711, MSGCPUB12b6,
 	    {
-		FRU_RTASFRU(40), 
-		FRU_RTASFRU(35), 
+		FRU_RTASFRU(40),
+		FRU_RTASFRU(35),
 		FRU_SYSTEM_BUS_CONNECTOR(25)
-	    } 
+	    }
 	}
 };
 
 struct event_description_pre_v6 cpu712[] =
 				/* Address/Data parity error on Processor bus */
 {
-	{ "", ERRD1, 0x651, 0x712, MSGCPUB12b6, 
+	{ "", ERRD1, 0x651, 0x712, MSGCPUB12b6,
 	    {
-		FRU_RTASFRU(40), 
-		FRU_RTASFRU(25), 
-		FRU_RTASFRU(25), 
+		FRU_RTASFRU(40),
+		FRU_RTASFRU(25),
+		FRU_RTASFRU(25),
 		FRU_SYSTEM_BUS_CONNECTOR(10)
 	    }
 	}
@@ -190,20 +190,20 @@ struct event_description_pre_v6 cpu712[] =
 
 struct event_description_pre_v6 cpu713[] = /* Transfer error on Processor bus */
 {
-	{ "", ERRD1, 0x651, 0x713, MSGCPUB12b7, 
+	{ "", ERRD1, 0x651, 0x713, MSGCPUB12b7,
 	    {
-		FRU_RTASFRU(60), 
-		FRU_SYSTEM_BUS_CONNECTOR(40) 	
+		FRU_RTASFRU(60),
+		FRU_SYSTEM_BUS_CONNECTOR(40)
 	    }
 	}
 };
 
 struct event_description_pre_v6 cpu714[] = /* Transfer error on Processor bus */
 {
-	{ "", ERRD1, 0x651, 0x714, MSGCPUB12b7, 
+	{ "", ERRD1, 0x651, 0x714, MSGCPUB12b7,
 	    {
-		FRU_RTASFRU(40), 
-		FRU_RTASFRU(35), 
+		FRU_RTASFRU(40),
+		FRU_RTASFRU(35),
 		FRU_SYSTEM_BUS_CONNECTOR(25)
 	    }
 	}
@@ -211,19 +211,19 @@ struct event_description_pre_v6 cpu714[] = /* Transfer error on Processor bus */
 
 struct event_description_pre_v6 cpu715[] = /* Transfer error on Processor bus */
 {
-	{ "", ERRD1, 0x651, 0x715, MSGCPUB12b7, 
+	{ "", ERRD1, 0x651, 0x715, MSGCPUB12b7,
 	    {
-		FRU_RTASFRU(40), 
-		FRU_RTASFRU(25), 
-		FRU_RTASFRU(25), 
+		FRU_RTASFRU(40),
+		FRU_RTASFRU(25),
+		FRU_RTASFRU(25),
 		FRU_SYSTEM_BUS_CONNECTOR(10)
 	    }
 	}
 };
 
-struct event_description_pre_v6 mem720[] = 	/* Uncorrectable Memory Error */
+struct event_description_pre_v6 mem720[] =	/* Uncorrectable Memory Error */
 {
-	{ "", ERRD1, 0x651, 0x720, MSGMEMB12b0, 
+	{ "", ERRD1, 0x651, 0x720, MSGMEMB12b0,
 	    {
 		FRU_MEMORY_MODULE(85),
 		FRU_MEMORY_CARD(10),
@@ -232,9 +232,9 @@ struct event_description_pre_v6 mem720[] = 	/* Uncorrectable Memory Error */
 	}
 };
 
-struct event_description_pre_v6 mem721[] = 	/* Uncorrectable Memory Error */
+struct event_description_pre_v6 mem721[] =	/* Uncorrectable Memory Error */
 {
-	{ "", ERRD1, 0x651, 0x721, MSGMEMB12b0, 
+	{ "", ERRD1, 0x651, 0x721, MSGMEMB12b0,
 	    {
 		FRU_MEMORY_MODULE(85),
 		FRU_MEMORY_CARD(10),
@@ -243,9 +243,9 @@ struct event_description_pre_v6 mem721[] = 	/* Uncorrectable Memory Error */
 	}
 };
 
-struct event_description_pre_v6 mem780[] = 	/* Uncorrectable Memory Error */
+struct event_description_pre_v6 mem780[] =	/* Uncorrectable Memory Error */
 {
-	{ "", ERRD1, 0x651, 0x780, MSGMEMB12b0, 
+	{ "", ERRD1, 0x651, 0x780, MSGMEMB12b0,
 	    {
 		FRU_MEMORY_MODULE(85),
 		FRU_MEMORY_CARD(10),
@@ -254,9 +254,9 @@ struct event_description_pre_v6 mem780[] = 	/* Uncorrectable Memory Error */
 	}
 };
 
-struct event_description_pre_v6 mem781[] = 	/* Uncorrectable Memory Error */
+struct event_description_pre_v6 mem781[] =	/* Uncorrectable Memory Error */
 {
-	{ "", ERRD1, 0x651, 0x781, MSGMEMB12b0, 
+	{ "", ERRD1, 0x651, 0x781, MSGMEMB12b0,
 	    {
 		FRU_MEMORY_MODULE(85),
 		FRU_MEMORY_CARD(10),
@@ -265,9 +265,9 @@ struct event_description_pre_v6 mem781[] = 	/* Uncorrectable Memory Error */
 	}
 };
 
-struct event_description_pre_v6 mem782[] = 	/* Uncorrectable Memory Error */
+struct event_description_pre_v6 mem782[] =	/* Uncorrectable Memory Error */
 {
-	{ "", ERRD1, 0x651, 0x782, MSGMEMB12b0, 
+	{ "", ERRD1, 0x651, 0x782, MSGMEMB12b0,
 	    {
 		FRU_MEMORY_CARD(90),
 		FRU_MEMORY_CONTROLLER(10)
@@ -275,9 +275,9 @@ struct event_description_pre_v6 mem782[] = 	/* Uncorrectable Memory Error */
 	}
 };
 
-struct event_description_pre_v6 mem783[] = 	/* Uncorrectable Memory Error */
+struct event_description_pre_v6 mem783[] =	/* Uncorrectable Memory Error */
 {
-	{ "", ERRD1, 0x651, 0x783, MSGMEMB12b0, 
+	{ "", ERRD1, 0x651, 0x783, MSGMEMB12b0,
 	    {
 		FRU_MEMORY_CARD(90),
 		FRU_MEMORY_CONTROLLER(10)
@@ -285,9 +285,9 @@ struct event_description_pre_v6 mem783[] = 	/* Uncorrectable Memory Error */
 	}
 };
 
-struct event_description_pre_v6 mem784[] = 	/* Uncorrectable Memory Error */
+struct event_description_pre_v6 mem784[] =	/* Uncorrectable Memory Error */
 {
-	{ "", ERRD1, 0x651, 0x784, MSGMEMB12b0, 
+	{ "", ERRD1, 0x651, 0x784, MSGMEMB12b0,
 	    {
 		FRU_MEMORY_CARD(90),
 		FRU_MEMORY_CONTROLLER(10)
@@ -295,9 +295,9 @@ struct event_description_pre_v6 mem784[] = 	/* Uncorrectable Memory Error */
 	}
 };
 
-struct event_description_pre_v6 mem785[] = 	/* Uncorrectable Memory Error */
+struct event_description_pre_v6 mem785[] =	/* Uncorrectable Memory Error */
 {
-	{ "", ERRD1, 0x651, 0x785, MSGMEMB12b0, 
+	{ "", ERRD1, 0x651, 0x785, MSGMEMB12b0,
 	    {
 		FRU_MEMORY_CARD(90),
 		FRU_MEMORY_CONTROLLER(10)
@@ -305,9 +305,9 @@ struct event_description_pre_v6 mem785[] = 	/* Uncorrectable Memory Error */
 	}
 };
 
-struct event_description_pre_v6 mem786[] = 	/* Uncorrectable Memory Error */
+struct event_description_pre_v6 mem786[] =	/* Uncorrectable Memory Error */
 {
-	{ "", ERRD1, 0x651, 0x786, MSGMEMB12b0, 
+	{ "", ERRD1, 0x651, 0x786, MSGMEMB12b0,
 	    {
 		FRU_MEMORY_CARD(90),
 		FRU_MEMORY_CONTROLLER(10)
@@ -315,9 +315,9 @@ struct event_description_pre_v6 mem786[] = 	/* Uncorrectable Memory Error */
 	}
 };
 
-struct event_description_pre_v6 mem787[] = 	/* Uncorrectable Memory Error */
+struct event_description_pre_v6 mem787[] =	/* Uncorrectable Memory Error */
 {
-	{ "", ERRD1, 0x651, 0x787, MSGMEMB12b0, 
+	{ "", ERRD1, 0x651, 0x787, MSGMEMB12b0,
 	    {
 		FRU_MEMORY_CARD(90),
 		FRU_MEMORY_CONTROLLER(10)
@@ -325,9 +325,9 @@ struct event_description_pre_v6 mem787[] = 	/* Uncorrectable Memory Error */
 	}
 };
 
-struct event_description_pre_v6 mem788[] = 	/* Uncorrectable Memory Error */
+struct event_description_pre_v6 mem788[] =	/* Uncorrectable Memory Error */
 {
-	{ "", ERRD1, 0x651, 0x788, MSGMEMB12b0, 
+	{ "", ERRD1, 0x651, 0x788, MSGMEMB12b0,
 	    {
 		FRU_MEMORY_CARD(90),
 		FRU_MEMORY_CONTROLLER(10)
@@ -335,9 +335,9 @@ struct event_description_pre_v6 mem788[] = 	/* Uncorrectable Memory Error */
 	}
 };
 
-struct event_description_pre_v6 mem789[] = 	/* Uncorrectable Memory Error */
+struct event_description_pre_v6 mem789[] =	/* Uncorrectable Memory Error */
 {
-	{ "", ERRD1, 0x651, 0x789, MSGMEMB12b0, 
+	{ "", ERRD1, 0x651, 0x789, MSGMEMB12b0,
 	    {
 		FRU_MEMORY_CARD(90),
 		FRU_MEMORY_CONTROLLER(10)
@@ -345,9 +345,9 @@ struct event_description_pre_v6 mem789[] = 	/* Uncorrectable Memory Error */
 	}
 };
 
-struct event_description_pre_v6 mem78A[] = 	/* Uncorrectable Memory Error */
+struct event_description_pre_v6 mem78A[] =	/* Uncorrectable Memory Error */
 {
-	{ "", ERRD1, 0x651, 0x78A, MSGMEMB12b0, 
+	{ "", ERRD1, 0x651, 0x78A, MSGMEMB12b0,
 	    {
 		FRU_MEMORY_CARD(90),
 		FRU_MEMORY_CONTROLLER(10)
@@ -377,7 +377,7 @@ struct event_description_pre_v6 mem78C[] =    /* Uncorrectable Memory Error */
 
 struct event_description_pre_v6 mem620[] =	/* ECC correctable error */
 {
-	{ "", ERRD1, 0x651, 0x620, MSGMEMB12b1, 
+	{ "", ERRD1, 0x651, 0x620, MSGMEMB12b1,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -389,7 +389,7 @@ struct event_description_pre_v6 mem620[] =	/* ECC correctable error */
 
 struct event_description_pre_v6 mem621[] = /* ECC correctable error */
 {
-	{ "", ERRD1, 0x651, 0x621, MSGMEMB12b1, 
+	{ "", ERRD1, 0x651, 0x621, MSGMEMB12b1,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -402,7 +402,7 @@ struct event_description_pre_v6 mem621[] = /* ECC correctable error */
 struct event_description_pre_v6 mem622[] =
 				/* Correctable error threshold exceeded */
 {
-	{ "", ERRD1, 0x651, 0x622, MSGMEMB12b2, 
+	{ "", ERRD1, 0x651, 0x622, MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -410,7 +410,7 @@ struct event_description_pre_v6 mem622[] =
 		FRU_MEMORY_MODULE(0)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x622, DEFER_MSGMEMB12b2, 
+	{ "", ERRD1, 0x652, 0x622, DEFER_MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -423,7 +423,7 @@ struct event_description_pre_v6 mem622[] =
 struct event_description_pre_v6 mem623[] =
 				/* Correctable error threshold exceeded */
 {
-	{ "", ERRD1, 0x651, 0x623, MSGMEMB12b2, 
+	{ "", ERRD1, 0x651, 0x623, MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -431,7 +431,7 @@ struct event_description_pre_v6 mem623[] =
 		FRU_MEMORY_MODULE(0)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x623, DEFER_MSGMEMB12b2, 
+	{ "", ERRD1, 0x652, 0x623, DEFER_MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -444,9 +444,9 @@ struct event_description_pre_v6 mem623[] =
 struct event_description_pre_v6 mem624[] =
 				/* Memory Controller internal error */
 {
-	{ "", ERRD1, 0x651, 0x624, MSGMEMB12b3, 
+	{ "", ERRD1, 0x651, 0x624, MSGMEMB12b3,
 	    {
-		FRU_MEMORY_CONTROLLER(100) 
+		FRU_MEMORY_CONTROLLER(100)
 	    }
 	}
 };
@@ -454,9 +454,9 @@ struct event_description_pre_v6 mem624[] =
 struct event_description_pre_v6 mem625[] =
 				/* Memory Address (Bad address to memory) */
 {
-	{ "", ERRD1, 0x651, 0x625, MSGMEMB12b4, 
+	{ "", ERRD1, 0x651, 0x625, MSGMEMB12b4,
 	    {
-		FRU_MEMORY_CONTROLLER(100) 
+		FRU_MEMORY_CONTROLLER(100)
 	    }
 	}
 };
@@ -464,27 +464,27 @@ struct event_description_pre_v6 mem625[] =
 struct event_description_pre_v6 mem626[] =
 				/* Memory Data error (Bad data to memory) */
 {
-	{ "", ERRD1, 0x651, 0x626, MSGMEMB12b5, 
+	{ "", ERRD1, 0x651, 0x626, MSGMEMB12b5,
 	    {
-		FRU_MEMORY_CONTROLLER(100) 
+		FRU_MEMORY_CONTROLLER(100)
 	    }
 	}
 };
 
-struct event_description_pre_v6 mem627[] = 	/* Memory time-out error */
+struct event_description_pre_v6 mem627[] =	/* Memory time-out error */
 {
-	{ "", ERRD1, 0x651, 0x627, MSGMEMB12b7, 
+	{ "", ERRD1, 0x651, 0x627, MSGMEMB12b7,
 	    {
-		FRU_MEMORY_CONTROLLER(100) 
+		FRU_MEMORY_CONTROLLER(100)
 	    }
 	}
 };
 
-struct event_description_pre_v6 mem628[] = 	/* Processor time-out error */
+struct event_description_pre_v6 mem628[] =	/* Processor time-out error */
 {
-	{ "", ERRD1, 0x651, 0x628, MSGMEMB13b1, 
+	{ "", ERRD1, 0x651, 0x628, MSGMEMB13b1,
 	    {
-		FRU_PROCESSOR(100) 
+		FRU_PROCESSOR(100)
 	    }
 	}
 };
@@ -492,7 +492,7 @@ struct event_description_pre_v6 mem628[] = 	/* Processor time-out error */
 struct event_description_pre_v6 mem629[] =
 				/* Unknown error detected by mem. controller */
 {
-	{ "", ERRD1, 0x651, 0x629, MSGMEMALLZERO, 
+	{ "", ERRD1, 0x651, 0x629, MSGMEMALLZERO,
 	    {
 		{ 0, "", "", 36},
 		{ 0, "", "", 36},
@@ -505,14 +505,14 @@ struct event_description_pre_v6 mem629[] =
 struct event_description_pre_v6 io630[] =
 				/* I/O Expansion Bus Parity Error */
 {
-	{ "", ERRD1, 0x651, 0x630, MSGIOB13b4, 
+	{ "", ERRD1, 0x651, 0x630, MSGIOB13b4,
 	    {
-		FRU_IO_EXPANSION_UNIT(100) 
+		FRU_IO_EXPANSION_UNIT(100)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x630, DEFER_MSGIOB13b4, 
+	{ "", ERRD1, 0x652, 0x630, DEFER_MSGIOB13b4,
 	    {
-		FRU_IO_EXPANSION_UNIT(100) 
+		FRU_IO_EXPANSION_UNIT(100)
 	    }
 	}
 };
@@ -520,32 +520,32 @@ struct event_description_pre_v6 io630[] =
 struct event_description_pre_v6 io631[] =
 				/* I/O Expansion Bus Time-out Error */
 {
-	{ "", ERRD1, 0x651, 0x631, MSGIOB13b5, 
+	{ "", ERRD1, 0x651, 0x631, MSGIOB13b5,
 	    {
-		FRU_IO_EXPANSION_UNIT(100) 
+		FRU_IO_EXPANSION_UNIT(100)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x631, DEFER_MSGIOB13b5, 
+	{ "", ERRD1, 0x652, 0x631, DEFER_MSGIOB13b5,
 	    {
-		FRU_IO_EXPANSION_UNIT(100) 
+		FRU_IO_EXPANSION_UNIT(100)
 	    }
 	}
 };
 
 struct event_description_pre_v6 io632[] =
-				/* I/O Expansion Bus Connect Failure */ 
-{ 
-	{ "", ERRD1, 0x651, 0x632, MSGIOB13b6, 
+				/* I/O Expansion Bus Connect Failure */
+{
+	{ "", ERRD1, 0x651, 0x632, MSGIOB13b6,
 	    {
-		FRU_IO_EXPANSION_BUS(70), 
-		FRU_IO_EXPANSION_UNIT(20), 
+		FRU_IO_EXPANSION_BUS(70),
+		FRU_IO_EXPANSION_UNIT(20),
 		FRU_RIO_BRIDGE(10)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x632, DEFER_MSGIOB13b6, 
+	{ "", ERRD1, 0x652, 0x632, DEFER_MSGIOB13b6,
 	    {
-		FRU_IO_EXPANSION_BUS(70), 
-		FRU_IO_EXPANSION_UNIT(20), 
+		FRU_IO_EXPANSION_BUS(70),
+		FRU_IO_EXPANSION_UNIT(20),
 		FRU_RIO_BRIDGE(10)
 	    }
 	}
@@ -554,38 +554,38 @@ struct event_description_pre_v6 io632[] =
 struct event_description_pre_v6 io633[] =
 				/* I/O Expansion Unit not in operationg state.*/
 {
-	{ "", ERRD1, 0x651, 0x633, MSGIOB13b7, 
+	{ "", ERRD1, 0x651, 0x633, MSGIOB13b7,
 	    {
-		FRU_IO_EXPANSION_UNIT(70), 
-		FRU_IO_EXPANSION_BUS(30) 
+		FRU_IO_EXPANSION_UNIT(70),
+		FRU_IO_EXPANSION_BUS(30)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x633, DEFER_MSGIOB13b7, 
+	{ "", ERRD1, 0x652, 0x633, DEFER_MSGIOB13b7,
 	    {
-		FRU_IO_EXPANSION_UNIT(70), 
-		FRU_IO_EXPANSION_BUS(30) 
+		FRU_IO_EXPANSION_UNIT(70),
+		FRU_IO_EXPANSION_BUS(30)
 	    }
 	}
 };
 
 struct event_description_pre_v6 io634[] =
-				/* Int Error, bridge conn. to i/o exp. bus */ 
+				/* Int Error, bridge conn. to i/o exp. bus */
 {
-	{ "", ERRD1, 0x651, 0x634, MSGIOB12b3, 
+	{ "", ERRD1, 0x651, 0x634, MSGIOB12b3,
 	    {
-		FRU_IO_EXPANSION_UNIT(100) 
+		FRU_IO_EXPANSION_UNIT(100)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x634, DEFER_MSGIOB12b3, 
+	{ "", ERRD1, 0x652, 0x634, DEFER_MSGIOB12b3,
 	    {
-		FRU_IO_EXPANSION_UNIT(100) 
+		FRU_IO_EXPANSION_UNIT(100)
 	    }
 	}
 };
 
 struct event_description_pre_v6 mem650[] =	/* ECC correctable error */
 {
-	{ "", ERRD1, 0x651, 0x650, MSGMEMB12b1, 
+	{ "", ERRD1, 0x651, 0x650, MSGMEMB12b1,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -597,7 +597,7 @@ struct event_description_pre_v6 mem650[] =	/* ECC correctable error */
 
 struct event_description_pre_v6 mem651[] =	/* ECC correctable error */
 {
-	{ "", ERRD1, 0x651, 0x651, MSGMEMB12b1, 
+	{ "", ERRD1, 0x651, 0x651, MSGMEMB12b1,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -609,7 +609,7 @@ struct event_description_pre_v6 mem651[] =	/* ECC correctable error */
 
 struct event_description_pre_v6 mem652[] =	/* ECC correctable error */
 {
-	{ "", ERRD1, 0x651, 0x652, MSGMEMB12b1, 
+	{ "", ERRD1, 0x651, 0x652, MSGMEMB12b1,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -621,7 +621,7 @@ struct event_description_pre_v6 mem652[] =	/* ECC correctable error */
 
 struct event_description_pre_v6 mem653[] =	/* ECC correctable error */
 {
-	{ "", ERRD1, 0x651, 0x653, MSGMEMB12b1, 
+	{ "", ERRD1, 0x651, 0x653, MSGMEMB12b1,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -633,7 +633,7 @@ struct event_description_pre_v6 mem653[] =	/* ECC correctable error */
 
 struct event_description_pre_v6 mem654[] =	/* ECC correctable error */
 {
-	{ "", ERRD1, 0x651, 0x654, MSGMEMB12b1, 
+	{ "", ERRD1, 0x651, 0x654, MSGMEMB12b1,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -645,7 +645,7 @@ struct event_description_pre_v6 mem654[] =	/* ECC correctable error */
 
 struct event_description_pre_v6 mem655[] =	/* ECC correctable error */
 {
-	{ "", ERRD1, 0x651, 0x655, MSGMEMB12b1, 
+	{ "", ERRD1, 0x651, 0x655, MSGMEMB12b1,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -657,7 +657,7 @@ struct event_description_pre_v6 mem655[] =	/* ECC correctable error */
 
 struct event_description_pre_v6 mem656[] =	/* ECC correctable error */
 {
-	{ "", ERRD1, 0x651, 0x656, MSGMEMB12b1, 
+	{ "", ERRD1, 0x651, 0x656, MSGMEMB12b1,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -669,7 +669,7 @@ struct event_description_pre_v6 mem656[] =	/* ECC correctable error */
 
 struct event_description_pre_v6 mem657[] =	/* ECC correctable error */
 {
-	{ "", ERRD1, 0x651, 0x657, MSGMEMB12b1, 
+	{ "", ERRD1, 0x651, 0x657, MSGMEMB12b1,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -681,7 +681,7 @@ struct event_description_pre_v6 mem657[] =	/* ECC correctable error */
 
 struct event_description_pre_v6 mem658[] =	/* ECC correctable error */
 {
-	{ "", ERRD1, 0x651, 0x658, MSGMEMB12b1, 
+	{ "", ERRD1, 0x651, 0x658, MSGMEMB12b1,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -693,7 +693,7 @@ struct event_description_pre_v6 mem658[] =	/* ECC correctable error */
 
 struct event_description_pre_v6 mem659[] =	/* ECC correctable error */
 {
-	{ "", ERRD1, 0x651, 0x659, MSGMEMB12b1, 
+	{ "", ERRD1, 0x651, 0x659, MSGMEMB12b1,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -705,7 +705,7 @@ struct event_description_pre_v6 mem659[] =	/* ECC correctable error */
 
 struct event_description_pre_v6 mem65A[] =	/* ECC correctable error */
 {
-	{ "", ERRD1, 0x651, 0x65A, MSGMEMB12b1, 
+	{ "", ERRD1, 0x651, 0x65A, MSGMEMB12b1,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -742,7 +742,7 @@ struct event_description_pre_v6 mem65C[] =    /* ECC correctable error */
 struct event_description_pre_v6 mem660[] =
 				/* Correctable error threshold exceeded */
 {
-	{ "", ERRD1, 0x651, 0x660, MSGMEMB12b2, 
+	{ "", ERRD1, 0x651, 0x660, MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -750,7 +750,7 @@ struct event_description_pre_v6 mem660[] =
 		FRU_MEMORY_MODULE(0)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x660, DEFER_MSGMEMB12b2, 
+	{ "", ERRD1, 0x652, 0x660, DEFER_MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -763,7 +763,7 @@ struct event_description_pre_v6 mem660[] =
 struct event_description_pre_v6 mem661[] =
 				/* Correctable error threshold exceeded */
 {
-	{ "", ERRD1, 0x651, 0x661, MSGMEMB12b2, 
+	{ "", ERRD1, 0x651, 0x661, MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -771,7 +771,7 @@ struct event_description_pre_v6 mem661[] =
 		FRU_MEMORY_MODULE(0)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x661, DEFER_MSGMEMB12b2, 
+	{ "", ERRD1, 0x652, 0x661, DEFER_MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -784,7 +784,7 @@ struct event_description_pre_v6 mem661[] =
 struct event_description_pre_v6 mem662[] =
 				/* Correctable error threshold exceeded */
 {
-	{ "", ERRD1, 0x651, 0x662, MSGMEMB12b2, 
+	{ "", ERRD1, 0x651, 0x662, MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -792,7 +792,7 @@ struct event_description_pre_v6 mem662[] =
 		FRU_MEMORY_MODULE(0)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x662, DEFER_MSGMEMB12b2, 
+	{ "", ERRD1, 0x652, 0x662, DEFER_MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -805,7 +805,7 @@ struct event_description_pre_v6 mem662[] =
 struct event_description_pre_v6 mem663[] =
 				/* Correctable error threshold exceeded */
 {
-	{ "", ERRD1, 0x651, 0x663, MSGMEMB12b2, 
+	{ "", ERRD1, 0x651, 0x663, MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -813,7 +813,7 @@ struct event_description_pre_v6 mem663[] =
 		FRU_MEMORY_MODULE(0)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x663, DEFER_MSGMEMB12b2, 
+	{ "", ERRD1, 0x652, 0x663, DEFER_MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -826,7 +826,7 @@ struct event_description_pre_v6 mem663[] =
 struct event_description_pre_v6 mem664[] =
 				/* Correctable error threshold exceeded */
 {
-	{ "", ERRD1, 0x651, 0x664, MSGMEMB12b2, 
+	{ "", ERRD1, 0x651, 0x664, MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -834,7 +834,7 @@ struct event_description_pre_v6 mem664[] =
 		FRU_MEMORY_MODULE(0)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x664, DEFER_MSGMEMB12b2, 
+	{ "", ERRD1, 0x652, 0x664, DEFER_MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -847,7 +847,7 @@ struct event_description_pre_v6 mem664[] =
 struct event_description_pre_v6 mem665[] =
 				/* Correctable error threshold exceeded */
 {
-	{ "", ERRD1, 0x651, 0x665, MSGMEMB12b2, 
+	{ "", ERRD1, 0x651, 0x665, MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -855,7 +855,7 @@ struct event_description_pre_v6 mem665[] =
 		FRU_MEMORY_MODULE(0)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x665, DEFER_MSGMEMB12b2, 
+	{ "", ERRD1, 0x652, 0x665, DEFER_MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -868,7 +868,7 @@ struct event_description_pre_v6 mem665[] =
 struct event_description_pre_v6 mem666[] =
 				/* Correctable error threshold exceeded */
 {
-	{ "", ERRD1, 0x651, 0x666, MSGMEMB12b2, 
+	{ "", ERRD1, 0x651, 0x666, MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -876,7 +876,7 @@ struct event_description_pre_v6 mem666[] =
 		FRU_MEMORY_MODULE(0)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x666, DEFER_MSGMEMB12b2, 
+	{ "", ERRD1, 0x652, 0x666, DEFER_MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -889,7 +889,7 @@ struct event_description_pre_v6 mem666[] =
 struct event_description_pre_v6 mem667[] =
 				/* Correctable error threshold exceeded */
 {
-	{ "", ERRD1, 0x651, 0x667, MSGMEMB12b2, 
+	{ "", ERRD1, 0x651, 0x667, MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -897,7 +897,7 @@ struct event_description_pre_v6 mem667[] =
 		FRU_MEMORY_MODULE(0)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x667, DEFER_MSGMEMB12b2, 
+	{ "", ERRD1, 0x652, 0x667, DEFER_MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -910,7 +910,7 @@ struct event_description_pre_v6 mem667[] =
 struct event_description_pre_v6 mem668[] =
 				/* Correctable error threshold exceeded */
 {
-	{ "", ERRD1, 0x651, 0x668, MSGMEMB12b2, 
+	{ "", ERRD1, 0x651, 0x668, MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -918,7 +918,7 @@ struct event_description_pre_v6 mem668[] =
 		FRU_MEMORY_MODULE(0)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x668, DEFER_MSGMEMB12b2, 
+	{ "", ERRD1, 0x652, 0x668, DEFER_MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -931,7 +931,7 @@ struct event_description_pre_v6 mem668[] =
 struct event_description_pre_v6 mem669[] =
 				/* Correctable error threshold exceeded */
 {
-	{ "", ERRD1, 0x651, 0x669, MSGMEMB12b2, 
+	{ "", ERRD1, 0x651, 0x669, MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -939,7 +939,7 @@ struct event_description_pre_v6 mem669[] =
 		FRU_MEMORY_MODULE(0)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x669, DEFER_MSGMEMB12b2, 
+	{ "", ERRD1, 0x652, 0x669, DEFER_MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -952,7 +952,7 @@ struct event_description_pre_v6 mem669[] =
 struct event_description_pre_v6 mem66A[] =
 				/* Correctable error threshold exceeded */
 {
-	{ "", ERRD1, 0x651, 0x66A, MSGMEMB12b2, 
+	{ "", ERRD1, 0x651, 0x66A, MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -960,7 +960,7 @@ struct event_description_pre_v6 mem66A[] =
 		FRU_MEMORY_MODULE(0)
 	    }
 	},
-	{ "", ERRD1, 0x652, 0x66A, DEFER_MSGMEMB12b2, 
+	{ "", ERRD1, 0x652, 0x66A, DEFER_MSGMEMB12b2,
 	    {
 		FRU_MEMORY_MODULE(100),	/* Pct to be adjusted later */
 		FRU_MEMORY_MODULE(0),
@@ -1014,7 +1014,7 @@ struct event_description_pre_v6 mem66C[] =
 
 struct event_description_pre_v6 memtest670[] =	/* Missing or bad memory */
 {
-	{ "", ERRD1, 0x651, 0x670, MSG_MISSING_MEM, 
+	{ "", ERRD1, 0x651, 0x670, MSG_MISSING_MEM,
 	    {
 		FRU_MEMORY_MODULE(90),
 		FRU_MEMORY_CARD(10)
@@ -1024,7 +1024,7 @@ struct event_description_pre_v6 memtest670[] =	/* Missing or bad memory */
 
 struct event_description_pre_v6 memtest671[] =	/* Missing or bad memory */
 {
-	{ "", ERRD1, 0x651, 0x671, MSG_MISSING_MEM, 
+	{ "", ERRD1, 0x651, 0x671, MSG_MISSING_MEM,
 	    {
 		FRU_MEMORY_MODULE(90),
 		FRU_MEMORY_CARD(10)
@@ -1034,7 +1034,7 @@ struct event_description_pre_v6 memtest671[] =	/* Missing or bad memory */
 
 struct event_description_pre_v6 memtest672[] =	/* Missing or bad memory */
 {
-	{ "", ERRD1, 0x651, 0x672, MSG_MISSING_MEM, 
+	{ "", ERRD1, 0x651, 0x672, MSG_MISSING_MEM,
 	    {
 		FRU_MEMORY_MODULE(100)
 	    }
@@ -1043,7 +1043,7 @@ struct event_description_pre_v6 memtest672[] =	/* Missing or bad memory */
 
 struct event_description_pre_v6 memtest673[] =	/* Missing or bad memory */
 {
-	{ "", ERRD1, 0x651, 0x673, MSG_MISSING_MEM, 
+	{ "", ERRD1, 0x651, 0x673, MSG_MISSING_MEM,
 	    {
 		FRU_MEMORY_MODULE(100)
 	    }
@@ -1052,7 +1052,7 @@ struct event_description_pre_v6 memtest673[] =	/* Missing or bad memory */
 
 struct event_description_pre_v6 memtest674[] =	/* Missing or bad memory */
 {
-	{ "", ERRD1, 0x651, 0x674, MSG_MISSING_MEM, 
+	{ "", ERRD1, 0x651, 0x674, MSG_MISSING_MEM,
 	    {
 		FRU_MEMORY_MODULE(100)
 	    }
@@ -1061,7 +1061,7 @@ struct event_description_pre_v6 memtest674[] =	/* Missing or bad memory */
 
 struct event_description_pre_v6 memtest675[] =	/* Missing or bad memory */
 {
-	{ "", ERRD1, 0x651, 0x675, MSG_MISSING_MEM, 
+	{ "", ERRD1, 0x651, 0x675, MSG_MISSING_MEM,
 	    {
 		FRU_MEMORY_MODULE(100)
 	    }
@@ -1070,34 +1070,34 @@ struct event_description_pre_v6 memtest675[] =	/* Missing or bad memory */
 
 struct event_description_pre_v6 memtest676[] =	/* Missing or bad memory */
 {
-	{ "", ERRD1, 0x651, 0x676, MSG_MISSING_MEM, 
+	{ "", ERRD1, 0x651, 0x676, MSG_MISSING_MEM,
 	    {
 		FRU_MEMORY_MODULE(100)
 	    }
 	}
 };
 
-struct event_description_pre_v6 memtest677[] =	/* Missing or bad memory */ 
+struct event_description_pre_v6 memtest677[] =	/* Missing or bad memory */
 {
-	{ "", ERRD1, 0x651, 0x677, MSG_MISSING_MEM, 
+	{ "", ERRD1, 0x651, 0x677, MSG_MISSING_MEM,
 	    {
 		FRU_MEMORY_MODULE(100)
 	    }
 	}
 };
 
-struct event_description_pre_v6 memtest678[] =	/* Missing or bad memory */ 
+struct event_description_pre_v6 memtest678[] =	/* Missing or bad memory */
 {
-	{ "", ERRD1, 0x651, 0x678, MSG_MISSING_MEM, 
+	{ "", ERRD1, 0x651, 0x678, MSG_MISSING_MEM,
 	    {
 		FRU_MEMORY_MODULE(100)
 	    }
 	}
 };
 
-struct event_description_pre_v6 memtest679[] =	/* Missing or bad memory */ 
+struct event_description_pre_v6 memtest679[] =	/* Missing or bad memory */
 {
-	{ "", ERRD1, 0x651, 0x679, MSG_MISSING_MEM, 
+	{ "", ERRD1, 0x651, 0x679, MSG_MISSING_MEM,
 	    {
 		FRU_MEMORY_MODULE(90),
 		FRU_MEMORY_CARD(10)
@@ -1105,9 +1105,9 @@ struct event_description_pre_v6 memtest679[] =	/* Missing or bad memory */
 	}
 };
 
-struct event_description_pre_v6 memtest67A[] =	/* Missing or bad memory */ 
+struct event_description_pre_v6 memtest67A[] =	/* Missing or bad memory */
 {
-	{ "", ERRD1, 0x651, 0x67A, MSG_MISSING_MEM, 
+	{ "", ERRD1, 0x651, 0x67A, MSG_MISSING_MEM,
 	    {
 		FRU_MEMORY_MODULE(90),
 		FRU_MEMORY_CARD(10)
@@ -1135,35 +1135,35 @@ struct event_description_pre_v6 mem67C[] =    /* Failed memory module */
         }
 };
 
-struct event_description_pre_v6 mem722[] = 	/* Processor Bus parity error */
+struct event_description_pre_v6 mem722[] =	/* Processor Bus parity error */
 {
-	{ "", ERRD1, 0x651, 0x722, MSGMEMB13b0, 
+	{ "", ERRD1, 0x651, 0x722, MSGMEMB13b0,
 	    {
 		FRU_PROCESSOR(40),
 		FRU_SYSTEM_BUS_CONNECTOR(35),
-		FRU_MEMORY_CONTROLLER(25) 
+		FRU_MEMORY_CONTROLLER(25)
 	    }
 	}
 };
 
 struct event_description_pre_v6 mem723[] = /* Processor bus Transfer error */
 {
-	{ "", ERRD1, 0x651, 0x723, MSGMEMB13b2, 
+	{ "", ERRD1, 0x651, 0x723, MSGMEMB13b2,
 	    {
 		FRU_PROCESSOR(40),
 		FRU_SYSTEM_BUS_CONNECTOR(35),
-		FRU_MEMORY_CONTROLLER(25) 
+		FRU_MEMORY_CONTROLLER(25)
 	    }
 	}
 };
 
 struct event_description_pre_v6 mem724[] = /* I/O Host Bridge time-out error */
 {
-	{ "", ERRD1, 0x651, 0x724, MSGMEMB13b3, 
+	{ "", ERRD1, 0x651, 0x724, MSGMEMB13b3,
 	    {
-		FRU_HOST_BRIDGE(40), 
+		FRU_HOST_BRIDGE(40),
 		FRU_MEZZANINE_BUS(35),
-		FRU_MEMORY_CONTROLLER(25) 
+		FRU_MEMORY_CONTROLLER(25)
 	    }
 	}
 };
@@ -1171,11 +1171,11 @@ struct event_description_pre_v6 mem724[] = /* I/O Host Bridge time-out error */
 struct event_description_pre_v6 mem725[] =
 				/* I/O Host Bridge address/data parity error */
 {
-	{ "", ERRD1, 0x651, 0x725, MSGMEMB13b4, 
+	{ "", ERRD1, 0x651, 0x725, MSGMEMB13b4,
 	    {
-		FRU_HOST_BRIDGE(40), 
+		FRU_HOST_BRIDGE(40),
 		FRU_MEZZANINE_BUS(35),
-		FRU_MEMORY_CONTROLLER(25) 
+		FRU_MEMORY_CONTROLLER(25)
 	    }
 	}
 };
@@ -1183,24 +1183,24 @@ struct event_description_pre_v6 mem725[] =
 struct event_description_pre_v6 mem726[] =
 				/* I/O Host Bridge and Bad Memory Address */
 {
-	{ "", ERRD1, 0x651, 0x726, MSGMEMB12b4B13b3, 
+	{ "", ERRD1, 0x651, 0x726, MSGMEMB12b4B13b3,
 	}
 };
 
-struct event_description_pre_v6 io833[] =	
+struct event_description_pre_v6 io833[] =
 {
 	{ "", ERRD1, 0x833, 0x0, MSGIOB12b0, /* I/O Bus Address Parity Error */
 	    {
-		{ 40, "", " ", 192},	
+		{ 40, "", " ", 192},
 			/* the fru name will be inserted, as will the */
 			/* reason code, which will be the led of the device */
-		FRU_PCI_DEVICE(35), 
+		FRU_PCI_DEVICE(35),
 		FRU_PCI_BUS(25)
 	    }
 	},
 	{ "", ERRD1, 0x833, 0x0, MSGIOB12b1, /* I/O Bus Data Parity Error */
 	    {
-		{ 40, "", " ", 192},	
+		{ 40, "", " ", 192},
 			/* the fru name will be inserted, as will the */
 			/* reason code, which will be the led of the device */
 		FRU_PCI_DEVICE(35),
@@ -1209,7 +1209,7 @@ struct event_description_pre_v6 io833[] =
 	},
 	{ "", ERRD1, 0x833, 0x0, MSGIOB12b2, /* I/O Time-out error */
 	    {
-		{ 40, "", " ", 192},	
+		{ 40, "", " ", 192},
 			/* the fru name will be inserted, as will the */
 			/* reason code, which will be the led of the device */
 		FRU_PCI_DEVICE(35),
@@ -1221,11 +1221,11 @@ struct event_description_pre_v6 io833[] =
 #define SN9CC	0x9aa		/* 9CC was assigned, so internally I must */
 				/* use 9AA. The DIMB should read 9CC-xxx  */
 
-struct event_description_pre_v6 io9CC[] =	
+struct event_description_pre_v6 io9CC[] =
 {
 	{ "", ERRD1, SN9CC, 0x0, MSGIOB12b0, /* I/O Bus Address Parity Error */
 	    {
-		{ 60, "", " ", 192},	
+		{ 60, "", " ", 192},
 			/* the fru name will be inserted, as will the */
 			/* reason code, which will be the led of the device */
 		FRU_PCI_BUS(40)
@@ -1233,7 +1233,7 @@ struct event_description_pre_v6 io9CC[] =
 	},
 	{ "", ERRD1, SN9CC, 0x0, MSGIOB12b1, /* I/O Bus Data Parity Error */
 	    {
-		{ 60, "", " ", 192},	
+		{ 60, "", " ", 192},
 			/* the fru name will be inserted, as will the */
 			/* reason code, which will be the led of the device */
 		FRU_PCI_BUS(40)
@@ -1241,7 +1241,7 @@ struct event_description_pre_v6 io9CC[] =
 	},
 	{ "", ERRD1, SN9CC, 0x0, MSGIOB12b2, /* I/O Time-out error */
 	    {
-		{ 60, "", " ", 192},	
+		{ 60, "", " ", 192},
 			/* the fru name will be inserted, as will the */
 			/* reason code, which will be the led of the device */
 		FRU_PCI_BUS(40)
@@ -1249,7 +1249,7 @@ struct event_description_pre_v6 io9CC[] =
 	}
 };
 
-struct event_description_pre_v6 iobusonly[] =	
+struct event_description_pre_v6 iobusonly[] =
 {
 	{ "", ERRD1, SN9CC, 0x0, MSGIOB12b0, /* I/O Bus Address Parity Error */
 	    {
@@ -1272,7 +1272,7 @@ struct event_description_pre_v6 io832[] =	/* I/O Device Internal Error */
 {
 	{ "", ERRD1, 0x832, 0x0, MSGIOB12b3,
 	    {
-		{ 100, "", " ", 192}	
+		{ 100, "", " ", 192}
 			/* the fru name will be inserted, as will the */
 			/* reason code, which will be the led of the device */
 	    }
@@ -1289,16 +1289,16 @@ struct event_description_pre_v6 io639[] =
 		{ 0, "", "", 36},
 		{ 0, "", "", 36}
 	    }
-	} 
-}; 
+	}
+};
 
-struct event_description_pre_v6 io730[] = 	/* I/O Error on non-PCI bus */
+struct event_description_pre_v6 io730[] =	/* I/O Error on non-PCI bus */
 {
 	{ "", ERRD1, 0x651, 0x730, MSGIOB12b4,
 	    {
-		FRU_ISA_BUS(100) 
+		FRU_ISA_BUS(100)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 io731[] =
@@ -1309,13 +1309,13 @@ struct event_description_pre_v6 io731[] =
 		FRU_MEZZANINE_BUS(60),
 		FRU_HOST_BRIDGE(40)
 	    }
-	}, 
+	},
 	{ "", ERRD1, 0x652, 0x731, DEFER_MSGIOB12b5,
 	    {
 		FRU_MEZZANINE_BUS(60),
 		FRU_HOST_BRIDGE(40)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 io732[] =
@@ -1326,13 +1326,13 @@ struct event_description_pre_v6 io732[] =
 		FRU_MEZZANINE_BUS(60),
 		FRU_HOST_BRIDGE(40)
 	    }
-	}, 
+	},
 	{ "", ERRD1, 0x652, 0x732, DEFER_MSGIOB12b6,
 	    {
 		FRU_MEZZANINE_BUS(60),
 		FRU_HOST_BRIDGE(40)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 io733[] =
@@ -1344,14 +1344,14 @@ struct event_description_pre_v6 io733[] =
 		FRU_MEZZANINE_BUS(35),
 		FRU_HOST_BRIDGE(25)
 	    }
-	}, 
+	},
 	{ "", ERRD1, 0x652, 0x733, DEFER_MSGIOB12b5,
 	    {
 		FRU_MEMORY_CONTROLLER(40),
 		FRU_MEZZANINE_BUS(35),
 		FRU_HOST_BRIDGE(25)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 io734[] =
@@ -1363,14 +1363,14 @@ struct event_description_pre_v6 io734[] =
 		FRU_MEZZANINE_BUS(35),
 		FRU_HOST_BRIDGE(25)
 	    }
-	}, 
+	},
 	{ "", ERRD1, 0x652, 0x734, DEFER_MSGIOB12b6,
 	    {
 		FRU_MEMORY_CONTROLLER(40),
 		FRU_MEZZANINE_BUS(35),
 		FRU_HOST_BRIDGE(25)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 io735[] =
@@ -1381,13 +1381,13 @@ struct event_description_pre_v6 io735[] =
 		FRU_MEZZANINE_BUS_ARBITER(60),
 		FRU_HOST_BRIDGE(40)
 	    }
-	}, 
+	},
 	{ "", ERRD1, 0x652, 0x735, DEFER_MSGIOB12b7,
 	    {
 		FRU_MEZZANINE_BUS_ARBITER(60),
 		FRU_HOST_BRIDGE(40)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 io736[] =
@@ -1399,14 +1399,14 @@ struct event_description_pre_v6 io736[] =
 		FRU_HOST_BRIDGE(35),
 		FRU_MEMORY_CONTROLLER(25)
 	    }
-	}, 
+	},
 	{ "", ERRD1, 0x652, 0x736, DEFER_MSGIOB12b7,
 	    {
 		FRU_MEZZANINE_BUS_ARBITER(40),
 		FRU_HOST_BRIDGE(35),
 		FRU_MEMORY_CONTROLLER(25)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp740[] =
@@ -1417,7 +1417,7 @@ struct event_description_pre_v6 sp740[] =
 		FRU_SERVICE_PROCESSOR(60),
 		FRU_SP_SYSTEM_INTERFACE(40)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp640[] = /* I/O (I2C) general bus error */
@@ -1426,7 +1426,7 @@ struct event_description_pre_v6 sp640[] = /* I/O (I2C) general bus error */
 	    {
 		FRU_SP_PRIMARY_BUS(100)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp641[] =
@@ -1434,19 +1434,19 @@ struct event_description_pre_v6 sp641[] =
 {
 	{ "", ERRD1, 0x651, 0x641, MSGSPB16b2,
 	    {
-		FRU_SP_SECONDARY_BUS(100) 
+		FRU_SP_SECONDARY_BUS(100)
 	    }
-	} 
+	}
 };
 
-struct event_description_pre_v6 sp642[] = 
+struct event_description_pre_v6 sp642[] =
 				/* Internal Service Processor memory error */
 {
 	{ "", ERRD1, 0x651, 0x642, MSGSPB16b3,
 	    {
 		FRU_SERVICE_PROCESSOR(100)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp741[] =
@@ -1457,7 +1457,7 @@ struct event_description_pre_v6 sp741[] =
 		FRU_SERVICE_PROCESSOR(60),
 		FRU_SP_SYSTEM_INTERFACE(40)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp742[] =
@@ -1468,7 +1468,7 @@ struct event_description_pre_v6 sp742[] =
 		FRU_SERVICE_PROCESSOR(60),
 		FRU_SP_SYSTEM_INTERFACE(40)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp643[] =
@@ -1478,7 +1478,7 @@ struct event_description_pre_v6 sp643[] =
 	    {
 		FRU_SERVICE_PROCESSOR(100)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp644[] = /* Other internal SP hardware error */
@@ -1487,7 +1487,7 @@ struct event_description_pre_v6 sp644[] = /* Other internal SP hardware error */
 	    {
 		FRU_SERVICE_PROCESSOR(100)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp743[] = /* SP error accessing VPD EEPROM */
@@ -1497,7 +1497,7 @@ struct event_description_pre_v6 sp743[] = /* SP error accessing VPD EEPROM */
 		FRU_VPD_MODULE(75),
 		FRU_SP_PRIMARY_BUS(25)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp744[] =
@@ -1505,10 +1505,10 @@ struct event_description_pre_v6 sp744[] =
 {
 	{ "", ERRD1, 0x651, 0x744, MSGSPB17b1,
 	    {
-		FRU_OPERATOR_PANEL(75), 
+		FRU_OPERATOR_PANEL(75),
 		FRU_SP_PRIMARY_BUS(25)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp745[] =
@@ -1516,10 +1516,10 @@ struct event_description_pre_v6 sp745[] =
 {
 	{ "", ERRD1, 0x651, 0x745, MSGSPB17b2,
 	    {
-		FRU_POWER_CONTROLLER(75), 
+		FRU_POWER_CONTROLLER(75),
 		FRU_SP_PRIMARY_BUS(25)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp746[] =
@@ -1527,10 +1527,10 @@ struct event_description_pre_v6 sp746[] =
 {
 	{ "", ERRD1, 0x651, 0x746, MSGSPB17b3,
 	    {
-		FRU_FAN_SENSOR(75), 
+		FRU_FAN_SENSOR(75),
 		FRU_SP_PRIMARY_BUS(25)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp747[] =
@@ -1538,10 +1538,10 @@ struct event_description_pre_v6 sp747[] =
 {
 	{ "", ERRD1, 0x651, 0x747, MSGSPB17b4,
 	    {
-		FRU_THERMAL_SENSOR(75), 
+		FRU_THERMAL_SENSOR(75),
 		FRU_SP_PRIMARY_BUS(25)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp748[] =
@@ -1549,40 +1549,40 @@ struct event_description_pre_v6 sp748[] =
 {
 	{ "", ERRD1, 0x651, 0x748, MSGSPB17b5,
 	    {
-		FRU_VOLTAGE_SENSOR(75), 
+		FRU_VOLTAGE_SENSOR(75),
 		FRU_SP_PRIMARY_BUS(25)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp749[] = /* SP error accessing serial port */
 {
 	{ "", ERRD1, 0x651, 0x749, MSGSPB18b0,
 	    {
-		FRU_SERIAL_PORT_CONTROLLER(75), 
+		FRU_SERIAL_PORT_CONTROLLER(75),
 		FRU_SP_SYSTEM_INTERFACE(25)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp750[] =	/* SP error accessing NVRAM */
 {
 	{ "", ERRD1, 0x651, 0x750, MSGSPB18b1,
 	    {
-		FRU_NVRAM(75), 
+		FRU_NVRAM(75),
 		FRU_SP_SYSTEM_INTERFACE(25)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp751[] = /* SP error accessing RTC/TOD clock */
 {
 	{ "", ERRD1, 0x651, 0x751, MSGSPB18b2,
 	    {
-		FRU_RTC_TOD(75), 
+		FRU_RTC_TOD(75),
 		FRU_SP_SYSTEM_INTERFACE(25)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp752[] =
@@ -1590,26 +1590,26 @@ struct event_description_pre_v6 sp752[] =
 {
 	{ "", ERRD1, 0x651, 0x752, MSGSPB18b3,
 	    {
-		FRU_JTAG(75), 
+		FRU_JTAG(75),
 		FRU_SP_SYSTEM_INTERFACE(25)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp753[] = /* SP detect error with tod battery */
 {
 	{ "", ERRD1, 0x651, 0x753, MSGSPB18b4,
 	    {
-		FRU_BATTERY(75), 
+		FRU_BATTERY(75),
 		FRU_SP_SYSTEM_INTERFACE(25)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp754[] =  /* SP detect SPCN link failure */
 {
 	{ "", ERRD1, 0x651, 0x754, MSGSPB19b0,
-	} 
+	}
 };
 
 struct event_description_pre_v6 sp760[] =
@@ -1617,10 +1617,10 @@ struct event_description_pre_v6 sp760[] =
 {
 	{ "", ERRD1, 0x651, 0x760, MSGSPB18b7,
 	    {
-		FRU_SOFTWARE(60), 
+		FRU_SOFTWARE(60),
 		FRU_HARDWARE(40)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 io770[] =
@@ -1632,14 +1632,14 @@ struct event_description_pre_v6 io770[] =
 		FRU_HOST_BRIDGE(35),
 		FRU_IO_EXPANSION_BUS(25)
 	    }
-	}, 
+	},
 	{ "", ERRD1, 0x652, 0x770, DEFER_MSGIOB12b5,
 	    {
 		FRU_MEZZANINE_BUS(40),
 		FRU_HOST_BRIDGE(35),
 		FRU_IO_EXPANSION_BUS(25)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 io771[] =
@@ -1651,14 +1651,14 @@ struct event_description_pre_v6 io771[] =
 		FRU_HOST_BRIDGE(35),
 		FRU_IO_EXPANSION_BUS(25)
 	    }
-	}, 
+	},
 	{ "", ERRD1, 0x652, 0x771, DEFER_MSGIOB12b6,
 	    {
 		FRU_MEZZANINE_BUS(40),
 		FRU_HOST_BRIDGE(35),
 		FRU_IO_EXPANSION_BUS(25)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 io772[] =
@@ -1670,14 +1670,14 @@ struct event_description_pre_v6 io772[] =
 		FRU_HOST_BRIDGE(35),
 		FRU_MEZZANINE_BUS_ARBITER(25)
 	    }
-	}, 
+	},
 	{ "", ERRD1, 0x652, 0x772, DEFER_MSGIOB12b7,
 	    {
 		FRU_MEZZANINE_BUS(40),
 		FRU_HOST_BRIDGE(35),
 		FRU_MEZZANINE_BUS_ARBITER(25)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 io773[] =
@@ -1687,12 +1687,12 @@ struct event_description_pre_v6 io773[] =
 	    {
 		FRU_RIO_BRIDGE(100)
 	    }
-	}, 
+	},
 	{ "", ERRD1, 0x652, 0x773, DEFER_MSGIOB12b6,
 	    {
 		FRU_RIO_BRIDGE(100)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow800[] =
@@ -1700,20 +1700,20 @@ struct event_description_pre_v6 epow800[] =
 {
 	{ "", ERRD1, 0x651, 0x800, MSGXEPOW1n11,
 	    {
-		FRU_FAN(60), 
-		FRU_FAN_SENSOR(40) 
+		FRU_FAN(60),
+		FRU_FAN_SENSOR(40)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow801[] =	/* Fan stop was detected */
 {
 	{ "", ERRD1, 0x651, 0x801, MSGXEPOW1n64,
 	    {
-		FRU_FAN(60), 
-		FRU_FAN_SENSOR(40) 
+		FRU_FAN(60),
+		FRU_FAN_SENSOR(40)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow802[] =	/* Fan failure */
@@ -1726,7 +1726,7 @@ struct event_description_pre_v6 epow809[] =
 				/* Power fault due to unspecified cause */
 {
 	{ "", ERRD1, 0x651, 0x809, MSGEPOWB17b0C12
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow810[] =
@@ -1734,10 +1734,10 @@ struct event_description_pre_v6 epow810[] =
 {
 	{ "", ERRD1, 0x651, 0x810, MSGXEPOW2n32,
 	    {
-		FRU_POWER_SUPPLY(60), 
-		FRU_VOLTAGE_SENSOR(40) 
+		FRU_POWER_SUPPLY(60),
+		FRU_VOLTAGE_SENSOR(40)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow811[] =
@@ -1745,10 +1745,10 @@ struct event_description_pre_v6 epow811[] =
 {
 	{ "", ERRD1, 0x651, 0x811, MSGXEPOW2n52,
 	    {
-		FRU_POWER_SUPPLY(60), 
-		FRU_VOLTAGE_SENSOR(40) 
+		FRU_POWER_SUPPLY(60),
+		FRU_VOLTAGE_SENSOR(40)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow812[] =
@@ -1756,34 +1756,34 @@ struct event_description_pre_v6 epow812[] =
 {
 	{ "", ERRD1, 0x651, 0x812, MSGEPOWB1505,
 	    {
-		FRU_POWER_SUPPLY(100) 
+		FRU_POWER_SUPPLY(100)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow813[] =
 			/* System shutdown due to loss of power to site*/
 {
 	{ "", ERRD1, 0x651, 0x813, MSGEPOWPCI111
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow814[] =
 			/* System shutdown due to loss of power to CEC */
 {
 	{ "", ERRD1, 0x651, 0x814, MSGEPOWPCI100
-	} 
+	}
 };
 
-struct event_description_pre_v6 epow815[] = 
+struct event_description_pre_v6 epow815[] =
 			  /* System shutdown due to loss of power to I/O Rack */
 {
 	{ "", ERRD1, 0x651, 0x815, MSGEPOWPCI011,
 	    {
 		FRU_34_POWER_SUPPLY(50),
-		FRU_14_POWER_SUPPLY(50) 
+		FRU_14_POWER_SUPPLY(50)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow816[] =
@@ -1791,43 +1791,43 @@ struct event_description_pre_v6 epow816[] =
 {
 	{ "", ERRD1, 0x651, 0x816, MSGEPOWPCI001,
 	    {
-		FRU_34_POWER_SUPPLY(100) 
+		FRU_34_POWER_SUPPLY(100)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow817[] =
 				/* Power fault due to internal power supply */
 {
-	{ "", ERRD1, 0x651, 0x817, MSGEPOWPCI010, 
+	{ "", ERRD1, 0x651, 0x817, MSGEPOWPCI010,
 	    {
-		FRU_14_POWER_SUPPLY(100) 
+		FRU_14_POWER_SUPPLY(100)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow818[] =
 				/* Power fault due to power-off request */
 {
 	{ "", ERRD1, 0x651, 0x818, MSGEPOWB16b1B17b3
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow819[] =
 				/* Power fault due to internal power supply */
-{ 
+{
 	{ "", ERRD1, 0x651, 0x819, MSGEPOWPCI001,
 	    {
-		FRU_RTASFRU(100) 
+		FRU_RTASFRU(100)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow819red[] =
 				/* Power fault due to internal redundant PS */
-{ 
+{
 	{ "", ERRD1, 0x652, 0x819, MSGEPOWB17b2RED
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow820[] =
@@ -1835,9 +1835,9 @@ struct event_description_pre_v6 epow820[] =
 {
 	{ "", ERRD1, 0x651, 0x820, MSGXEPOW3n21,
 	    {
-		FRU_THERMAL_SENSOR(100) 
+		FRU_THERMAL_SENSOR(100)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow821[] =
@@ -1845,43 +1845,43 @@ struct event_description_pre_v6 epow821[] =
 {
 	{ "", ERRD1, 0x651, 0x821, MSGXEPOW3n73,
 	    {
-		FRU_THERMAL_SENSOR(100) 
+		FRU_THERMAL_SENSOR(100)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow822[] =
 			/* System shutdown due to thermal and fan fail */
 {
 	{ "", ERRD1, 0x651, 0x822, MSGEPOWB16b23
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow823[] =
 				/* System shutdown due to fan failure */
 {
 	{ "", ERRD1, 0x651, 0x823, MSGEPOWB16b2C37
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow824[] =
 			/* System shutdown:Power fault-unspecified cause*/
 {
 	{ "", ERRD1, 0x651, 0x824, MSGEPOWB17b0C37
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow652810[] =
 					/* Loss of redundant power supply. */
 {
 	{ "", ERRD1, 0x652, 0x810, MSGEPOW1502B16b4
-	} 
+	}
 };
 
 struct event_description_pre_v6 epow652820[] =	/* Loss of redundant cec blower. */
 {
 	{ "", ERRD1, 0x652, 0x820, MSGEPOW1501B16b4
-	} 
+	}
 };
 
 struct event_description_pre_v6 post[] =	/* POST 8 digit code */
@@ -1912,61 +1912,61 @@ struct event_description_pre_v6 memtest600[] =
 {
 	{ "", ERRD1, 0x651, 0x600, MSG_UNSUPPORTED_MEM,
 	    {
-		FRU_MEMORY_MODULE(100) 
+		FRU_MEMORY_MODULE(100)
 	    }
-	}, 
+	},
 	{ "", ERRD1, 0x652, 0x600, DEFER_MSG_UNSUPPORTED_MEM,
 	    {
-		FRU_MEMORY_MODULE(100) 
+		FRU_MEMORY_MODULE(100)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 memtest601[] = /* Missing or bad memory */
 {
-	{ "", ERRD1, 0x651, 0x601, MSG_MISSING_MEM, 
+	{ "", ERRD1, 0x651, 0x601, MSG_MISSING_MEM,
 	    {
-		FRU_MEMORY_MODULE(100) 
+		FRU_MEMORY_MODULE(100)
 	    }
-	} 
+	}
 };
 
-struct event_description_pre_v6 memtest602[] = /* Missing or bad memory */ 
+struct event_description_pre_v6 memtest602[] = /* Missing or bad memory */
 {
-	{ "", ERRD1, 0x651, 0x602, MSG_MISSING_MEM, 
+	{ "", ERRD1, 0x651, 0x602, MSG_MISSING_MEM,
 	    {
-		FRU_MEMORY_MODULE(90), 
+		FRU_MEMORY_MODULE(90),
 		FRU_MEMORY_CARD(10)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 memtest603[] = /* Missing or bad memory */
 {
-	{ "", ERRD1, 0x651, 0x603, MSG_MISSING_MEM, 
+	{ "", ERRD1, 0x651, 0x603, MSG_MISSING_MEM,
 	    {
-		FRU_MEMORY_MODULE(90), 
+		FRU_MEMORY_MODULE(90),
 		FRU_MEMORY_CARD(10)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 l2test608[] = /* Bad L2 Cache */
 {
-	{ "", ERRD1, 0x651, 0x608, MSG_BAD_L2, 
+	{ "", ERRD1, 0x651, 0x608, MSG_BAD_L2,
 	    {
-		FRU_L2CACHE(100) 
+		FRU_L2CACHE(100)
 	    }
-	} 
+	}
 };
 
 struct event_description_pre_v6 l2test609[] = /* Missing L2 Cache */
 {
-	{ "", ERRD1, 0x651, 0x609, MSG_MISSING_L2, 
+	{ "", ERRD1, 0x651, 0x609, MSG_MISSING_L2,
 	    {
-		FRU_MISSING_L2(100) 
+		FRU_MISSING_L2(100)
 	    }
-	} 
+	}
 };
 
 /* 
@@ -1974,12 +1974,12 @@ struct event_description_pre_v6 l2test609[] = /* Missing L2 Cache */
  */
 struct event_description_pre_v6 optest140[] = /* Op panel display test failed */
 {
-	{ "", ERRD1, 0x651, 0x140, MSG_OP_PANEL_FAIL, 
+	{ "", ERRD1, 0x651, 0x140, MSG_OP_PANEL_FAIL,
 	    {
 		FRU_OPERATOR_PANEL(95),
-		FRU_IO_PLANAR(5) 
+		FRU_IO_PLANAR(5)
 	    }
-	} 
+	}
 };
 
 /*
@@ -1998,7 +1998,7 @@ struct event_description_pre_v6 cec_src[] = /* SRC and ref. codes from CEC */
 	    }
 	}
 };
- 
+
 struct event_description_pre_v6 fan_epow[] = /* SRN for fan epow */
 {
         { "", ERRD1, 0x651, 0, "",
@@ -2080,7 +2080,7 @@ struct event_description_pre_v6 v3_errdscr[] = /* SRN for V3 error logs */
 struct event_description_pre_v6 dt_errdscr[] =
 				/* SRN for deconfig resources in device tree */
 {
-        { "", ERRD1, 0xA10, 0x200, FAIL_BY_PLATFORM, 
+        { "", ERRD1, 0xA10, 0x200, FAIL_BY_PLATFORM,
 	    {
 		{ 100, "", "", 0},
             }
@@ -2090,7 +2090,7 @@ struct event_description_pre_v6 dt_errdscr[] =
 struct event_description_pre_v6 bypass_errdscr[] =
 				/* SRN for deconfig resource from error log */
 {
-        { "", ERRD1, 0xA10, 0x100, MSG_BYPASS, 
+        { "", ERRD1, 0xA10, 0x100, MSG_BYPASS,
 	    {
 		{ 100, "", "", 0},
             }

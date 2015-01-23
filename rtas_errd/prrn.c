@@ -22,17 +22,17 @@
 struct pmap_struct {
 	struct pmap_struct	*next;
 	/* The fields below are stored in host endian */
-	uint32_t 		phandle;
+	uint32_t		phandle;
 	uint32_t		drc_index;
 	char			*name;
 };
 
 struct drconf_cell {
-	uint64_t 	base_addr;
-	uint32_t 	drc_index;
-	uint32_t 	reserved;
-	uint32_t 	aa_index;
-	uint32_t 	flags;
+	uint64_t	base_addr;
+	uint32_t	drc_index;
+	uint32_t	reserved;
+	uint32_t	aa_index;
+	uint32_t	flags;
 };
 
 static struct pmap_struct *plist;

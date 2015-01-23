@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <time.h>
-#include <stdarg.h> 
+#include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
 #include <sys/stat.h>
@@ -20,7 +20,7 @@
 #include "rtas_errd.h"
 
 char *platform_log = "/var/log/platform";
-int platform_log_fd = -1;	
+int platform_log_fd = -1;
 
 /**
  * @var proc_error_log1 
@@ -126,21 +126,21 @@ event_dump(struct event *event)
 	char *bufp = (char *)event->rtas_hdr;
 	int len = event->length;
 
- 	/* Print 16 bytes/line in hex, with a space after every 4 bytes */
- 	for (i = 0; i < len; i++) {
- 		if ((i % 16) == 0) 
+	/* Print 16 bytes/line in hex, with a space after every 4 bytes */
+	for (i = 0; i < len; i++) {
+		if ((i % 16) == 0)
 			printf("RTAS %d:", i/16);
- 
- 		if ((i % 4) == 0)
+
+		if ((i % 4) == 0)
 			printf(" ");
- 
+
 		printf("%02x", bufp[i]);
- 
- 		if ((i % 16) == 15)
+
+		if ((i % 16) == 15)
 			printf("\n");
- 	}
- 	if ((i % 16) != 0)
- 		printf("\n");
+	}
+	if ((i % 16) != 0)
+		printf("\n");
 }
 
 /** 
@@ -169,14 +169,14 @@ setup_rtas_event_scenario(void)
 
 	fd = open(scenario_file, O_RDONLY);
 	if (fd == -1) {
-		log_msg(NULL, "Could not open scenario file %s, %s", 
+		log_msg(NULL, "Could not open scenario file %s, %s",
 			scenario_file, strerror(errno));
 		return -1;
 	}
 
 	if ((fstat(fd, &sbuf)) < 0) {
-		log_msg(NULL, "Could not get status of scenario file %s, %s", 
-			scenario_file, strerror(errno));	
+		log_msg(NULL, "Could not get status of scenario file %s, %s",
+			scenario_file, strerror(errno));
 		close(fd);
 		return -1;
 	}
@@ -199,7 +199,7 @@ setup_rtas_event_scenario(void)
 			scenario_count++;
 		}
 	}
-	
+
 	/* Allocate the scenario array */
 	scenario_files = malloc(scenario_count * sizeof(char *));
 	if (scenario_files == NULL) {
@@ -250,21 +250,21 @@ init_files(void)
 		fprintf(stderr, "Could not open rtas_errd log file \"%s\".\n",
 			rtas_errd_log);
 
-	
+
 	/* Next, open the /proc file */
 #ifdef DEBUG
 	rc = setup_rtas_event_scenario();
-	if (rc) 
+	if (rc)
 		return rc;
 #endif
 	proc_error_log_fd = open(proc_error_log1, O_RDONLY);
-	if (proc_error_log_fd <= 0) 
+	if (proc_error_log_fd <= 0)
 		proc_error_log_fd = open(proc_error_log2, O_RDONLY);
-	
+
 	if (proc_error_log_fd <= 0) {
 		log_msg(NULL, "Could not open error log file at either %s or "
 			"%s, %s\nThe rtas_errd daemon cannot continue and will "
-			"exit", proc_error_log1, proc_error_log2, 
+			"exit", proc_error_log1, proc_error_log2,
 			strerror(errno));
 		return -1;
 	}
@@ -329,7 +329,7 @@ int
 read_proc_error_log(char *buf, int buflen)
 {
 	int len = 0;
-	
+
 #ifdef DEBUG
 	/* If we are reading in a test file with an ascii RTAS event,
 	 * we need to convert it to binary.  proc_error_log2 should
@@ -348,11 +348,11 @@ read_proc_error_log(char *buf, int buflen)
 				proc_error_log1, strerror(errno));
 			return -1;
 		}
-				
+
 		tf_mmap = mmap(0, tf_sbuf.st_size, PROT_READ, MAP_PRIVATE,
 			       proc_error_log_fd, 0);
 		if (tf_mmap == MAP_FAILED) {
-			log_msg(NULL, "Cannot map test file %s, %s", 
+			log_msg(NULL, "Cannot map test file %s, %s",
 				proc_error_log1, strerror(errno));
 			return -1;
 		}
@@ -387,7 +387,7 @@ read_proc_error_log(char *buf, int buflen)
 				/* go past the extra space */
 				j++;
 			}
-				
+
 			if ((data[j] == '\n') || (data[j] == ' ')) {
 				j++;
 				continue;
@@ -416,17 +416,17 @@ read_proc_error_log(char *buf, int buflen)
 					log_msg(NULL, "Could not open scenario "
 						"file %s, %s", tmp,
 						strerror(errno));
-			} 
+			}
 			else {
 				testing_finished = 1;
 			}
-		} 
+		}
 		else
 			testing_finished = 1;
 
 		if (tf_mmap)
 			munmap(tf_mmap, tf_sbuf.st_size);
-	} 
+	}
 	else
 #endif
 		len = read(proc_error_log_fd, buf, buflen);
@@ -458,7 +458,7 @@ reformat_msg(char *msg)
 	}
 
 	memset(buf, 0, RTAS_ERROR_LOG_MAX);
-	
+
 	/* first copy the msg into our buffer */
 	memcpy(buf, msg, len);
 
@@ -523,7 +523,7 @@ reformat_msg(char *msg)
  * @param fmt formatted string a la printf()
  * @param ... additional args a la printf()
  */
-static void 
+static void
 _log_msg(struct event *event, const char *fmt, va_list ap)
 {
 	struct stat sbuf;
@@ -532,10 +532,10 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 
 	if (rtas_errd_log_fd == -1) {
 		dbg("rtas_errd log file is not available");
-		
+
 		vsprintf(buf, fmt, ap);
 		_dbg(buf);
-	
+
 		return;
 	}
 
@@ -558,7 +558,7 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 
 	/* Add the actual message */
 	len += vsprintf(buf + len, fmt, ap);
-	
+
 	/* Add ending punctuation */
 	len += sprintf(buf + len, ".");
 
@@ -570,11 +570,11 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 	rc = write(rtas_errd_log_fd, buf, len);
 	if (rc == -1)
 		dbg("rtas_errd: write to rtas_errd log failed");
-	
+
 	/* After each write check to see if we need to to do log rotation */
 	rc = fstat(rtas_errd_log_fd, &sbuf);
 	if (rc == -1) {
-		dbg("rtas_errd: Cannot stat rtas_errd log file " 
+		dbg("rtas_errd: Cannot stat rtas_errd log file "
 		    "to rotate logs");
 		return;
 	}
@@ -588,7 +588,7 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 
 		memset(cmd_buf, 0, 1024);
 		sprintf(cmd_buf, "rm -f %s; mv %s %s", rtas_errd_log0,
-			rtas_errd_log, rtas_errd_log0); 
+			rtas_errd_log, rtas_errd_log0);
 		rc = system(cmd_buf);
 		if (rc == -1) {
 			status = WEXITSTATUS(rc);
@@ -597,7 +597,7 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 				"%d)", cmd_buf, status);
 		}
 
-		rtas_errd_log_fd = open(rtas_errd_log, 
+		rtas_errd_log_fd = open(rtas_errd_log,
 					O_RDWR | O_CREAT | O_TRUNC,
 					S_IRUSR | S_IWUSR | S_IRGRP);
 		if (rtas_errd_log_fd == -1)
@@ -652,7 +652,7 @@ log_msg(struct event *event, char *fmt, ...)
  * @param fmt format string a la printf()
  * @param ... args a la printf()
  */
-void 
+void
 _dbg(const char *fmt, ...)
 {
 	va_list ap;
@@ -684,7 +684,7 @@ _dbg(const char *fmt, ...)
  * @param event pointer to the struct event to print
  * @return 0 on success, !0 on failure
  */
-int 
+int
 print_rtas_event(struct event *event)
 {
 	char	*out_buf;
@@ -692,7 +692,7 @@ print_rtas_event(struct event *event)
 	int	i, rc, nlines;
 
 	/* Determine the length of the log */
- 	len = event->length;
+	len = event->length;
 
 	/* Some RTAS events (i.e. shortened epow events) only consist
 	 * of the rtas header and an extended length of zero.  For these
@@ -720,18 +720,18 @@ print_rtas_event(struct event *event)
 	buf_size = (len * 2) + (nlines * 0x10) + (2 * 0x40);
 	/* event_dump(event); */
 
-	out_buf = malloc(buf_size); 
+	out_buf = malloc(buf_size);
 	if (out_buf == NULL) {
 		log_msg(NULL, "Could not allocate buffer to print RTAS event "
-			"%d, %s.  The event will not copied to %s", 
+			"%d, %s.  The event will not copied to %s",
 			event->seq_num, strerror(errno),
 			platform_log);
 		return -1;
 	}
 	memset(out_buf, 0, buf_size);
-	       
-	offset = sprintf(out_buf, 
-			 "RTAS: %d -------- RTAS event begin --------\n", 
+
+	offset = sprintf(out_buf,
+			 "RTAS: %d -------- RTAS event begin --------\n",
 			 event->seq_num);
 
 	if (event->flags & RE_SCANLOG_AVAIL) {
@@ -739,26 +739,26 @@ print_rtas_event(struct event *event)
 		free(scanlog);
 		scanlog = NULL;
 	}
-	
- 	/* Print 16 bytes/line in hex, with a space after every 4 bytes */
- 	for (i = 0; i < len; i++) {
- 		if ((i % 16) == 0)
- 			offset += sprintf(out_buf + offset, "RTAS %d:", i/16);
- 
- 		if ((i % 4) == 0)
- 			offset += sprintf(out_buf + offset, " ");
- 
- 		offset += sprintf(out_buf + offset, "%02x", 
-				  event->event_buf[i]); 
- 
- 		if ((i % 16) == 15) 
+
+	/* Print 16 bytes/line in hex, with a space after every 4 bytes */
+	for (i = 0; i < len; i++) {
+		if ((i % 16) == 0)
+			offset += sprintf(out_buf + offset, "RTAS %d:", i/16);
+
+		if ((i % 4) == 0)
+			offset += sprintf(out_buf + offset, " ");
+
+		offset += sprintf(out_buf + offset, "%02x",
+				  event->event_buf[i]);
+
+		if ((i % 16) == 15)
 			offset += sprintf(out_buf + offset, "\n");
- 	}
- 	if ((i % 16) != 0)
- 		offset += sprintf(out_buf + offset, "\n");
-	 
- 	offset += sprintf(out_buf + offset,
-			  "RTAS: %d -------- RTAS event end ----------\n", 
+	}
+	if ((i % 16) != 0)
+		offset += sprintf(out_buf + offset, "\n");
+
+	offset += sprintf(out_buf + offset,
+			  "RTAS: %d -------- RTAS event end ----------\n",
 			  event->seq_num);
 
 	dbg("Writing RTAS event %d to %s", event->seq_num, platform_log);
@@ -766,8 +766,8 @@ print_rtas_event(struct event *event)
 	rc = write(platform_log_fd, out_buf, offset);
 	if (rc != offset) {
 		log_msg(NULL, "Writing RTAS event %d to %s failed."
-			"expected to write %d, only wrote %d. %s", 
-			event->seq_num, platform_log, offset, rc, 
+			"expected to write %d, only wrote %d. %s",
+			event->seq_num, platform_log, offset, rc,
 			strerror(errno));
 	}
 

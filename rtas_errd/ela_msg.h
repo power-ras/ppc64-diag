@@ -43,13 +43,13 @@
     "log indicates the following physical FRU location(s) as the probable " \
     "cause(s)."
 
-#define MSGSPB16b0 "Time-out on communication response from Service Processor" 
+#define MSGSPB16b0 "Time-out on communication response from Service Processor"
 #define MSGSPB16b1 "I/O general bus error"
 #define MSGSPB16b2 "Secondary I/O general bus error"
 
 #define MSGSPB16b3 "Internal Service Processor memory error"
 #define MSGSPB16b4 "Service Processor error accessing special registers"
-#define MSGSPB16b5 "Service Processor reports unknown communication error" 
+#define MSGSPB16b5 "Service Processor reports unknown communication error"
 #define MSGSPB16b7 "Other internal Service Processor hardware error"
 #define MSGSPB17b0 "Service Processor error accessing Vital Product Data EEPROM"
 #define MSGSPB17b1 "Service Processor error accessing Operator Panel"
@@ -72,12 +72,12 @@
 
 #define MSGEPOWB1505 "System shutdown due to: 1) Loss of AC power,\n "    \
      "2) Power button was pushed without proper system\n" \
-     "shutdown, 3) Power supply failure." 
+     "shutdown, 3) Power supply failure."
 
 #define MSG_UNSUPPORTED_MEM "Uncorrectable memory or unsupported memory"
-#define MSG_MISSING_MEM "Missing or bad memory" 
+#define MSG_MISSING_MEM "Missing or bad memory"
 #define MSG_BAD_L2 "Bad L2 Cache"
-#define MSG_MISSING_L2 "Missing L2 cache" 
+#define MSG_MISSING_L2 "Missing L2 cache"
 
 #define MSGMENUG102 "651102 "\
      "A non-critical system cooling problem has been detected.\n" \
@@ -421,7 +421,7 @@
 #define MSGEPOWALLZERO "An environmental and power warning has been detected. "\
     "The error log indicates the following physical FRU location(s) as the " \
     "probable cause(s)."
-    
+
 #define MSGEPOWB16b2 "Fan failure"
 
 #define MSGEPOWB17b2C12 "Internal power supply failure"
@@ -473,7 +473,7 @@
     "Service Processor error accessing Thermal Sensor"
 
 #define DEFER_MSGSPB17b5 "A non-critical error has been detected: " \
-    "Service Processor error accessing Voltage Sensor" 
+    "Service Processor error accessing Voltage Sensor"
 
 #define DEFER_MSGSPB18b0 "A non-critical error has been detected: " \
     "Service Processor error accessing serial port"
@@ -551,7 +551,7 @@
     "system hardware"
 
 #define MSGSPB28b1 "Wire Test Error"
-    
+
 #define DEFER_MSGSPB28b1 "A non-critical error has been detected: "\
     "Wire Test Error"
 
@@ -581,7 +581,7 @@
     "Chip ID Verification Error"
 
 #define MSGSPB28b7 "FRU Presence/Detect Error (Mis-Plugged)"
-    
+
 #define DEFER_MSGSPB28b7 "A non-critical error has been detected: " \
     "FRU Presence/Detect Error (Mis-Plugged)"
 
@@ -607,7 +607,7 @@
     "     between enclosures."
 
 #define MSGSPB28b0 "Array or Logic Built in Self Test Error"
-    
+
 #define DEFER_MSGSPB28b0 "A non-critical error has been detected: " \
     "Array or Logic Built in Self Test Error"
 
@@ -644,7 +644,7 @@
     "The system shutdown because the battery backup\n" \
     "lost power. The system was running on battery\n" \
     "backup because of loss of input power."
-    
+
 #define MSGMENUGPEL_ERROR "651300 ANALYZING SYSTEM ERROR LOG\n" \
     "\nThe platform reports the following error:\n\n"
 
@@ -658,12 +658,12 @@
 #define MSGMENUG_EXT_CODEFRU  "External Code FRU Procedure: %s"
 #define MSGMENUG_TOOL_FRU "Tool FRU: %s"
 #define MSGMENUG_SYM_FRU  "Symbolic FRU Id: %s"
-#define MSGMENUG_CFG  	  "Configuration Procedure Id: %s"
+#define MSGMENUG_CFG	  "Configuration Procedure Id: %s"
 #define MSGMENUG_MAINT	  "Maintenance Procedure Id: %s"
 #define MSGMENUG_RESERVED "Reserved FRU Type: %s"
 
 #define MSGMENUG_SERIAL	  " Serial Number: %s"
-#define MSGMENUG_CCIN  	  " CCIN: %s"
+#define MSGMENUG_CCIN	  " CCIN: %s"
 
 #define MSGMENUG_LOCATION "\nLocation: %s\n"
 
@@ -676,11 +676,11 @@
 #define V6_ER_10_00 "Processor subsystem including internal cache " \
     "Informational (non-error) Event. Refer to the system service " \
     "documentation for more information."
-    
+
 #define V6_ER_10_10 "Processor subsystem including internal cache " \
     "Recovered Error, general. Refer to the system service documentation " \
     "for more information."
-    
+
 #define V6_ER_10_20 "Processor subsystem including internal cache " \
     "Predictive Error, general. Refer to the system service documentation " \
     "for more information."
@@ -692,7 +692,7 @@
 #define V6_ER_10_22 "Processor subsystem including internal cache " \
     "Predictive Error, fault may be corrected after platform re-IPL. "\
     "Refer to the system service documentation for more information."
-    
+
 #define V6_ER_10_23 "Processor subsystem including internal cache " \
     "Predictive Error, fault may be corrected after IPL, degraded " \
     "performance. Refer to the system service documentation for more " \
@@ -705,7 +705,7 @@
 #define V6_ER_10_40 "Processor subsystem including internal cache " \
     "Unrecovered Error, general. Refer to the system service documentation " \
     "for more information."
-    
+
 #define V6_ER_10_41 "Processor subsystem including internal cache " \
     "Unrecovered Error, bypassed with degraded performance. " \
     "Refer to the system service documentation for more information."
@@ -741,7 +741,7 @@
 #define V6_ER_20_20 "Memory subsystem including external cache " \
     "Predictive Error, general. " \
     "Refer to the system service documentation for more information."
-    
+
 #define V6_ER_20_21 "Memory subsystem including external cache " \
     "Predictive Error, degraded performance. "\
     "Refer to the system service documentation for more information."
@@ -770,11 +770,11 @@
 #define V6_ER_20_44 "Memory subsystem including external cache " \
     "Unrecovered Error, bypassed with loss of redundancy. " \
     "Refer to the system service documentation for more information."
-    
+
 #define V6_ER_20_45 "Memory subsystem including external cache " \
     "Unrecovered Error, bypassed with loss of redundancy and performance. " \
     "Refer to the system service documentation for more information."
-    
+
 #define V6_ER_20_48 "Memory subsystem including external cache " \
     "Unrecovered Error, bypassed with loss of function. " \
     "Refer to the system service documentation for more information."
@@ -782,11 +782,11 @@
 #define V6_ER_20_60 "Memory subsystem including external cache " \
     "Error on diagnostic test, general. " \
     "Refer to the system service documentation for more information."
-    
+
 #define V6_ER_20_61 "Memory subsystem including external cache Error on " \
     "diagnostic test, resource may produce incorrect result. "\
     "Refer to the system service documentation for more information."
-    
+
 #define V6_ER_30_00 "I/O subsystem (hub, bridge, bus) Informational " \
     "(non-error) Event. " \
     "Refer to the system service documentation for more information."
@@ -798,7 +798,7 @@
 #define V6_ER_30_20 "I/O subsystem (hub, bridge, bus) Predictive " \
     "Error, general. " \
     "Refer to the system service documentation for more information."
-    
+
 #define V6_ER_30_21 "I/O subsystem (hub, bridge, bus) Predictive Error, " \
     "degraded performance. " \
     "Refer to the system service documentation for more information."
@@ -806,7 +806,7 @@
 #define V6_ER_30_22 "I/O subsystem (hub, bridge, bus) Predictive Error, " \
     "fault may be corrected after platform re-IPL. " \
     "Refer to the system service documentation for more information."
-    
+
 #define V6_ER_30_23 "I/O subsystem (hub, bridge, bus) Predictive Error, " \
     "fault may be corrected after IPL, degraded performance. "\
     "Refer to the system service documentation for more information."
@@ -834,7 +834,7 @@
 #define V6_ER_30_48 "I/O subsystem (hub, bridge, bus) Unrecovered Error, " \
     "bypassed with loss of function. " \
     "Refer to the system service documentation for more information."
-    
+
 #define V6_ER_30_60 "I/O subsystem (hub, bridge, bus) Error on " \
     "diagnostic test, general. " \
     "Refer to the system service documentation for more information."
@@ -1126,7 +1126,7 @@
 
 #define V6_ER_80_40 "Platform Firmware Unrecovered Error, general. " \
     "Refer to the system service documentation for more information."
-    
+
 #define V6_ER_80_41 "Platform Firmware Unrecovered Error, " \
     "bypassed with degraded performance. " \
     "Refer to the system service documentation for more information."
@@ -1283,7 +1283,7 @@
 #define V6_ER_B0_44 "Reserved Unrecovered Error, " \
     "bypassed with loss of redundancy. " \
     "Refer to the system service documentation for more information."
-    
+
 #define V6_ER_B0_45 "Reserved Unrecovered Error, " \
     "bypassed with loss of redundancy and performance. " \
     "Refer to the system service documentation for more information."
@@ -1464,7 +1464,7 @@
     "Platform powered off by user with normal shutdown."
 
 #define V6_EV_50_00  "CEC hardware Not applicable."
-    
+
 #define V6_EV_50_01  "CEC hardware Miscellaneous, Information Only."
 
 #define V6_EV_50_08  "CEC hardware Dump Notification."

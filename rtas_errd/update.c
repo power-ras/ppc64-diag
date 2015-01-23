@@ -104,7 +104,7 @@ find_event(char *str, int strlen, char *text, int textlen, int bad_char[])
                 while ((i >= 0) && (str[i] == text[i+j])) {
                     i--;
                 }
-		if (i < 0) 
+		if (i < 0)
 			return &text[j];
 		else
 			/* Since we're not using the good suffix rule
@@ -125,7 +125,7 @@ find_event(char *str, int strlen, char *text, int textlen, int bad_char[])
  * @return pointer to RTAS event start on success, NULL on failure.
  */
 char *
-find_rtas_start(char *textstart, char *textend) 
+find_rtas_start(char *textstart, char *textend)
 {
 	if (textstart == NULL)
 		return NULL;
@@ -153,7 +153,7 @@ find_rtas_end(char *textstart, char *textend)
 
 	if (bad_char_end[0] == -1)
 		setup_bc(RTAS_END, strlen(RTAS_END), bad_char_end);
-	
+
 	return find_event(RTAS_END, strlen(RTAS_END), textstart,
 			  textend - textstart, bad_char_end);
 }
@@ -224,10 +224,10 @@ update_rtas_msgs(void)
 	if (msgs_sbuf.st_size == 0) {
 		goto cleanup;
 	}
-		
-	if ((msgs_mmap = mmap(0, msgs_sbuf.st_size, PROT_READ, MAP_PRIVATE, 
+
+	if ((msgs_mmap = mmap(0, msgs_sbuf.st_size, PROT_READ, MAP_PRIVATE,
 			      msgs_log_fd, 0)) == (char *)-1) {
-		log_msg(NULL, "Cannot map %s to update RTAS events", 
+		log_msg(NULL, "Cannot map %s to update RTAS events",
 			messages_log);
 		msgs_mmap = NULL;
 		goto cleanup;
@@ -246,9 +246,9 @@ update_rtas_msgs(void)
 	if (log_sbuf.st_size == 0)
 		goto cleanup;
 
-	if ((log_mmap = mmap(0, log_sbuf.st_size, PROT_READ, MAP_PRIVATE, 
+	if ((log_mmap = mmap(0, log_sbuf.st_size, PROT_READ, MAP_PRIVATE,
 			     platform_log_fd, 0)) == (char *)-1) {
-		log_msg(NULL, "Cannot map %s to update RTAS events, %s", 
+		log_msg(NULL, "Cannot map %s to update RTAS events, %s",
 			platform_log, strerror(errno));
 		log_mmap = NULL;
 		goto cleanup;
@@ -262,10 +262,10 @@ update_rtas_msgs(void)
 	log_p = find_rtas_start(log_p, log_mmap_end);
 	while (log_p != NULL) {
 		last_p = log_p;
-		log_p = find_rtas_start(log_p + sizeof(RTAS_START), 
+		log_p = find_rtas_start(log_p + sizeof(RTAS_START),
 					log_mmap_end);
 	}
-	
+
 	if (last_p == NULL)
 		last_rtas_log_no = 0;
 	else
@@ -301,21 +301,21 @@ update_rtas_msgs(void)
 	 *  already been processed.  There is not much we can do about
 	 *  this, just accept it and move along.
 	 */
-	
+
 	/* Move to the first event that has not been handled so we
 	 * can process them in order.
 	 */
 	cur_rtas_no = 0;
 	rtas_msgs_start = msgs_mmap;
 	while (cur_rtas_no <= last_rtas_log_no) {
-		rtas_msgs_start = 
-			find_rtas_start(rtas_msgs_start + strlen(RTAS_START), 
+		rtas_msgs_start =
+			find_rtas_start(rtas_msgs_start + strlen(RTAS_START),
 					msgs_mmap_end);
 		cur_rtas_no = get_rtas_no(rtas_msgs_start);
 	}
 
 	rtas_msgs_end = find_rtas_end(rtas_msgs_start, msgs_mmap_end);
-	
+
 	/* Retrieve RTAS events from syslog */
 	while (rtas_msgs_start != NULL) {
 		struct event event;
@@ -325,14 +325,14 @@ update_rtas_msgs(void)
 		memset(&event, 0, sizeof(event));
 
 		out_buf = (unsigned long *)event.event_buf;
-			
+
 		/* put event number in first */
 		cur_rtas_no = get_rtas_no(rtas_msgs_start);
-		
+
 
                 /* skip past the "RTAS event begin" message */
                 tmp += strlen(RTAS_START);
-	
+
 		while (tmp < rtas_msgs_end) {
                         int i;
 
@@ -357,27 +357,27 @@ update_rtas_msgs(void)
 
 		/* Initializethe fields of the rtas event */
 		event.seq_num = cur_rtas_no;
-		
-		event.rtas_event = parse_rtas_event(event.event_buf, 
+
+		event.rtas_event = parse_rtas_event(event.event_buf,
 						    RTAS_ERROR_LOG_MAX);
 		if (event.rtas_event == NULL) {
-			log_msg(NULL, "Could not update RTAS Event %d to %s", 
+			log_msg(NULL, "Could not update RTAS Event %d to %s",
 				cur_rtas_no, platform_log);
 		} else {
-			log_msg(NULL, "Updating RTAS event %d to %s", 
+			log_msg(NULL, "Updating RTAS event %d to %s",
 				cur_rtas_no, platform_log);
 
-			event.rtas_hdr = 
+			event.rtas_hdr =
 				rtas_get_event_hdr_scn(event.rtas_event);
 			event.length = event.rtas_hdr->ext_log_length + 8;
 
 			handle_rtas_event(&event);
 		}
-			
+
 		rtas_msgs_start = find_rtas_start(rtas_msgs_end, msgs_mmap_end);
 		rtas_msgs_end = find_rtas_end(rtas_msgs_start, msgs_mmap_end);
 	}
-		
+
 cleanup:
 	if (msgs_mmap)
 		munmap(msgs_mmap, msgs_sbuf.st_size);

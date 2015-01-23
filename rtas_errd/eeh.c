@@ -50,7 +50,7 @@ check_eeh(struct event *event)
 	struct rtas_priv_hdr_scn *privhdr;
 	struct rtas_src_scn *src;
 	int index = 0;
-	
+
 	if (rtas_hdr->version != 6) {
 		return;
 	}
@@ -67,7 +67,7 @@ check_eeh(struct event *event)
 	 * events description array.
 	 */
 	while (event_descs[index].src_code != NULL) {
-		if (strncmp((char *)src->primary_refcode, 
+		if (strncmp((char *)src->primary_refcode,
 			    event_descs[index].src_code, 8) == 0)
 			break;
 		index++;
@@ -81,32 +81,32 @@ check_eeh(struct event *event)
 	 * Please trust the compiler to get this right 
 	 */
 	platform_log_write("EEH Event Notification\n");
-	
+
 	privhdr = rtas_get_priv_hdr_scn(event->rtas_event);
 	if (privhdr == NULL) {
 		log_msg(event, "Could not retrieve the RTAS Event information "
 			"to report EEH failure date/time");
 		platform_log_write("Could not retrieve RTAS Event Date/Time\n");
 	} else {
-		platform_log_write("%02x/%02x/%04x  %02x:%02x:%02x\n", 
-				   privhdr->date.month, privhdr->date.day, 
-				   privhdr->date.year, privhdr->time.hour, 
-				   privhdr->time.minutes, 
+		platform_log_write("%02x/%02x/%04x  %02x:%02x:%02x\n",
+				   privhdr->date.month, privhdr->date.day,
+				   privhdr->date.year, privhdr->time.hour,
+				   privhdr->time.minutes,
 				   privhdr->time.seconds);
 	}
 
-	platform_log_write("Event SRC Code: %s\n", 
+	platform_log_write("Event SRC Code: %s\n",
 			   event_descs[index].src_code);
 	platform_log_write("    %s\n", event_descs[index].desc);
 
 	if (src->fru_scns != NULL) {
 		struct rtas_fru_scn *fru = src->fru_scns;
 
-		platform_log_write("    Device Location Code: %s\n", 
-				   fru->loc_code); 
+		platform_log_write("    Device Location Code: %s\n",
+				   fru->loc_code);
 
-		snprintf(event->addl_text, ADDL_TEXT_MAX, 
-			 "%s, Location %s", event_descs[index].desc, 
+		snprintf(event->addl_text, ADDL_TEXT_MAX,
+			 "%s, Location %s", event_descs[index].desc,
 			 fru->loc_code);
 	} else {
 		platform_log_write("    No Device Location Code provided.\n");

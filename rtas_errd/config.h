@@ -8,7 +8,7 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-extern char *config_file; 
+extern char *config_file;
 
 /**
  * struct ppc64_diag_config

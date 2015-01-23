@@ -61,7 +61,7 @@ msg(char *fmt, ...)
  * @brief Print the usage message for this command
  *
  * @param name the name of this executable
- */ 
+ */
 static void
 print_usage(const char *name) {
 	printf("Usage: %s [-h] [-v] <dump_tag>\n"
@@ -82,8 +82,8 @@ print_usage(const char *name) {
  * @param err_buf buffer to write librtas message to
  * @param sz size of the err_buf parameter
  */
-static void 
-handle_platform_dump_error(int e, char *err_buf, int sz) 
+static void
+handle_platform_dump_error(int e, char *err_buf, int sz)
 {
 	char *err = "Library error during ibm,platform-dump call: ";
 
@@ -98,7 +98,7 @@ handle_platform_dump_error(int e, char *err_buf, int sz)
 			 "No kernel implementation of function");
 		break;
 
-	    case RTAS_PERM: 	 /* non-root caller */
+	    case RTAS_PERM:	 /* non-root caller */
 		snprintf(err_buf, sz, "%s%s", err,
 			 "Permission denied (non-root caller)");
 		break;
@@ -120,7 +120,7 @@ handle_platform_dump_error(int e, char *err_buf, int sz)
 		snprintf(err_buf, sz, "%s%s", err, "Unexpected I/O error");
 		break;
 
- 	    case RTAS_UNKNOWN_OP: /* no firmware implementation of function */
+	    case RTAS_UNKNOWN_OP: /* no firmware implementation of function */
 		snprintf(err_buf, sz, "%s%s", err,
 			 "No firmware implementation of function");
 		break;
@@ -158,7 +158,7 @@ remove_old_dumpfiles(char *dumpname, int prefix_size)
 	struct dirent	*entry;
 	DIR		*dir;
 	char		pathname[DUMP_MAX_FNAME_LEN + 40];
-	
+
 	dir = opendir(d_cfg.platform_dump_path);
 	while ((entry = readdir(dir)) != NULL) {
 		if (strcmp(entry->d_name, "..") == 0)
@@ -167,7 +167,7 @@ remove_old_dumpfiles(char *dumpname, int prefix_size)
 			continue;
 
 		if (strncmp(dumpname, entry->d_name, prefix_size) == 0) {
-			sprintf(pathname, "%s%s", d_cfg.platform_dump_path, 
+			sprintf(pathname, "%s%s", d_cfg.platform_dump_path,
 				entry->d_name);
 
 			msg("Deleting file %s", pathname);
@@ -214,7 +214,7 @@ extract_platform_dump(uint64_t dump_tag)
 	}
 
 	msg("Calling rtas_platform_dump, seq 0x%016LX", seq);
-	librtas_rc = rtas_platform_dump(dump_tag, 0, dump_buf, DUMP_BUF_SZ, 
+	librtas_rc = rtas_platform_dump(dump_tag, 0, dump_buf, DUMP_BUF_SZ,
 					&seq_next, &bytes);
 	if (librtas_rc == 0) {
 		dump_complete = 1;
@@ -248,7 +248,7 @@ extract_platform_dump(uint64_t dump_tag)
 	if (bytes >= DUMP_HDR_FNAME_OFFSET + DUMP_MAX_FNAME_LEN) {
 		strncpy(filename, dump_buf + DUMP_HDR_FNAME_OFFSET,
 			DUMP_MAX_FNAME_LEN);
-	} 
+	}
 	else {
 		strcpy(filename, "dumpid.");
 		strcat(filename, dumpid);
@@ -258,7 +258,7 @@ extract_platform_dump(uint64_t dump_tag)
 	msg("Suggested filename: %s, prefix size: %d", filename, prefix_size);
 
 	/* Create the platform dump directory if necessary */
-	if (mkdir(d_cfg.platform_dump_path, 
+	if (mkdir(d_cfg.platform_dump_path,
 		  S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP) < 0) {
 		if (errno != EEXIST) {
 			msg("Could not create %s: %s.\nThe platform dump "
@@ -329,7 +329,7 @@ extract_platform_dump(uint64_t dump_tag)
 	 * them to delete/invalidate their copy 
 	 */
 	msg("Sigalling that the dump has been retrieved, seq 0x%016LX", seq);
-	librtas_rc = rtas_platform_dump(dump_tag, seq, NULL, 0, 
+	librtas_rc = rtas_platform_dump(dump_tag, seq, NULL, 0,
 					&seq_next, &bytes);
 	if (librtas_rc < 0) {
 		handle_platform_dump_error(librtas_rc, dump_err, 1024);

@@ -60,7 +60,7 @@ daemonize(void)
 
 	/* Fork a child process to be the real daemon */
 	pid = fork();
-	if (pid < 0) 
+	if (pid < 0)
 		goto daemonize_error;
 	else if (pid != 0)
 		exit(0); /* bye-bye parent */
@@ -79,7 +79,7 @@ daemonize(void)
 	/* Close all file descriptors we have open and reopen descriptors
 	 * 0-2 to redirect to /dev/null
 	 */
-	for (i = getdtablesize(); i >= 0; --i) 
+	for (i = getdtablesize(); i >= 0; --i)
 		close(i);
 
 	i = open("/dev/null", O_RDWR);
@@ -108,7 +108,7 @@ handle_rtas_event(struct event *event)
 	struct rtas_event_exthdr *exthdr;
 
 	dbg("Handling RTAS event %d", event->seq_num);
-		
+
 	/*
 	 * check to determine if this is a platform dump notification,
 	 * which requires the dump to be copied to the OS;  this must
@@ -121,12 +121,12 @@ handle_rtas_event(struct event *event)
 	/* write the event to the platform file */
 	rc = print_rtas_event(event);
 	if (rc <= 0) {
-		log_msg(event, "Could not write RTAS event %d to log file %s", 
+		log_msg(event, "Could not write RTAS event %d to log file %s",
 			event->seq_num, platform_log);
 		log_msg(event, "Rtas_errd is exiting to preserve the current "
 			"RTAS event in nvram due to a failed write to %s",
 			platform_log);
-		return -1;	
+		return -1;
 	}
 
 	switch (event->rtas_hdr->type) {
@@ -135,7 +135,7 @@ handle_rtas_event(struct event *event)
 		dbg("Entering handle_resource_dealloc()");
 		handle_resource_dealloc(event);
 		break;
-			    
+
 	    case RTAS_HDR_TYPE_EPOW:
 		dbg("Entering check_epow()");
 		if (check_epow(event) <= 0) {
@@ -246,7 +246,7 @@ read_rtas_events()
 			}
 			continue;
 		}
-		
+
 		retries = 0;
 
 		event.rtas_event = parse_rtas_event(event.event_buf, len);
@@ -294,7 +294,7 @@ read_rtas_events()
 		 * If we are reading a fake rtas event from a test file
 		 * we only want to read it once
 		 */
-		if (testing_finished) 
+		if (testing_finished)
 			break;
 #endif
 	}
@@ -397,8 +397,8 @@ static struct option longopts[] = {
 	.val = 0
 }
 };
-		
-	
+
+
 /**
  * main
  * 
@@ -406,7 +406,7 @@ static struct option longopts[] = {
  * any command line options to the daemon, setup any signal handlers
  * and initialize all files needed for operation.
  */
-int 
+int
 main(int argc, char *argv[])
 {
 	struct sigaction sigact;
@@ -426,7 +426,7 @@ main(int argc, char *argv[])
 		return -1;
 	}
 
-	while ((c = getopt_long(argc, argv, RTAS_ERRD_ARGS, 
+	while ((c = getopt_long(argc, argv, RTAS_ERRD_ARGS,
 				longopts, NULL)) != EOF) {
 		switch(c) {
 			case 'd':
@@ -454,19 +454,19 @@ main(int argc, char *argv[])
 				proc_error_log1 = optarg;
 				proc_error_log2 = NULL;
 				break;
-				
+
 			case 'l': /* debug rtas_errd.log file */
 				rtas_errd_log = optarg;
 				break;
-				
+
 			case 'm': /* debug messages file */
 				messages_log = optarg;
 				break;
-				
+
 			case 'p': /* debug platform file */
 				platform_log = optarg;
 				break;
-				
+
 			case 's': /* RTAS test scenario */
 				if (f_flag) {
 					dbg("Only use the -f or -s flag");
@@ -498,7 +498,7 @@ main(int argc, char *argv[])
 	if (! debug)
 		daemonize();
 
-	/* Initialize all the files used by rtas_errd */ 
+	/* Initialize all the files used by rtas_errd */
 	rc = init_files();
 	if (rc)
 		goto error_out;

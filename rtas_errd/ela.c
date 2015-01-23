@@ -20,7 +20,7 @@
 #include <sys/ioctl.h>
 #include <sys/errno.h>
 
-#include "fru_prev6.h"            
+#include "fru_prev6.h"
 #include "dchrp.h"
 #include "dchrp_frus.h"
 
@@ -34,11 +34,11 @@ static int report_srn(struct event *, int, struct event_description_pre_v6 *);
 static char *get_loc_code(struct event *, int, int *);
 static int report_menugoal(struct event *, char *, ...);
 static int report_io_error_frus(struct event *, int,
-				struct event_description_pre_v6 *, 
+				struct event_description_pre_v6 *,
 				struct device_ela *, struct device_ela *);
 static int get_cpu_frus(struct event *);
 
-static int process_v1_epow(struct event *, int); 
+static int process_v1_epow(struct event *, int);
 static int process_v2_epow(struct event *, int);
 static int process_v3_epow(struct event *, int, int);
 static int sensor_epow(struct event *, int, int);
@@ -52,7 +52,7 @@ static int process_refcodes(struct event *, short *, int);
 extern	char *optarg;
 
 /* Macro to determine if there location codes in the buffer */
-#define LOC_CODES_OK ((event->loc_codes != NULL) && strlen(event->loc_codes)) 
+#define LOC_CODES_OK ((event->loc_codes != NULL) && strlen(event->loc_codes))
 
 /* Global saved io error type with Bridge Connection bits. */
 int io_error_type = 0;
@@ -88,7 +88,7 @@ char *
 get_tod()
 {
 	time_t	t;
-	
+
 	time(&t);
 	return (asctime(localtime(&t)));
 }
@@ -104,14 +104,14 @@ get_tod()
  * @param num decimal number to convert
  * @returns converted number
  */
-static int 
+static int
 convert_bcd(int num)
 {
 	char tempnum[10];
 
 	sprintf(tempnum, "%d", num);
 	num = strtol(tempnum, NULL, 16);
-	
+
 	return num;
 }
 
@@ -128,7 +128,7 @@ get_refcode(struct event_description_pre_v6 *event, int index)
 		sprintf(rfc, "%04hX%04hX", event->frus[index].fmsg,
 			event->frus[index].conf);
 		dbg("reference code \"%s\"", rfc);
-        	return rfc;
+		return rfc;
 	}
 
 	return NULL;
@@ -244,12 +244,12 @@ set_srn_and_callouts(struct event *event, struct event_description_pre_v6 *ptr,
  * @returns 0 if valid cpuid was added to the event data
  * @returns 1 if invalid cpuid was input, so event data changed to proc0
  */
-int 
+int
 add_cpu_id(struct event_description_pre_v6 *ptr, int fru_num, int cpuid)
 {
 	int rc = 0;
 
-	if (cpuid > 0) 
+	if (cpuid > 0)
 		cpuid--;	/* physical cpu id indexed from 1 */
 	else {
 		cpuid = 0;
@@ -273,16 +273,16 @@ add_cpu_id(struct event_description_pre_v6 *ptr, int fru_num, int cpuid)
  * and post errors when want to report the physical location codes
  * from RTAS.
  */
-void 
+void
 set_fru_percentages(struct event_description_pre_v6 *event, int nfrus)
 {
 	int *percent;
 	int i;
 
-	if (nfrus > MAXFRUS) 
+	if (nfrus > MAXFRUS)
 		nfrus = MAXFRUS;
 
-	if (nfrus < PTABLE_SIZE) 
+	if (nfrus < PTABLE_SIZE)
 		percent = percent_table[pct_index][nfrus];
 	else
 		percent = percent_table[pct_index][PTABLE_SIZE];
@@ -293,7 +293,7 @@ set_fru_percentages(struct event_description_pre_v6 *event, int nfrus)
 		i++;
 	}
 
-	while (i < MAXFRUS) { 
+	while (i < MAXFRUS) {
 		event->frus[i].conf = 0;
 		i++;
 	}
@@ -342,44 +342,44 @@ get_register_data(struct event *event, int rid, int *rlen)
 		 * The location codes are padded to end on 4 byte
 		 * boundary. So look for NULL as last byte of 4 bytes.
 		 */
-		while ((*(int *)q & 0xFF && q < end)) 
-			q += 4;			
+		while ((*(int *)q & 0xFF && q < end))
+			q += 4;
 
 		p = q + 4;	/* points to 1st register data field */
 		/* Make sure pointing to meaningful data */
 		if (p >= end)
 			return NULL;
-	} 
+	}
 	else
 		/* There is no register data */
-		return NULL;	
-	
+		return NULL;
+
 	/* Look at each register data field until 
 	 * the requested id is found.  
 	 * */
 	do {
 		length_id = *(int *)p; /* 2 bytes length, 2 bytes id */
 		length = length_id >> 16;
-		
+
 		dbg("found register data in log, length = 0x%x", length);
 
 		/* Make sure pointing can reach meaningful data */
 		if (length <= 0)
 			return NULL;
-		
+
 		id = length_id & 0xFFFF;
 		dbg("id = 0x%x", id);
-		
-		p += sizeof(int);	/* next 4 bytes after length_id */ 
+
+		p += sizeof(int);	/* next 4 bytes after length_id */
 		length -= 2;		/* subtract the length of the length */
-		if (length > 0) {		/* is there data to inspect? */ 
+		if (length > 0) {		/* is there data to inspect? */
 			length -= 2;	/* subtract the length of the id */
 			if (id == rid) {
 				/* This is the requested register */
 				*rlen = length;
 				rdata = (int *)p;
 				break;	/* found, so out of loop */
-			} 
+			}
 			else {
 				/* Not it, so ignore this register data */
 				p = p + length;
@@ -418,7 +418,7 @@ static struct epow_reset *epow_reset_list = NULL;
  *	otherwise 0, unless an error, then -1.
  *      
  */
-int 
+int
 save_epow_reset(struct event *event, int error_type)
 {
 	struct epow_reset *new_reset;
@@ -426,12 +426,12 @@ save_epow_reset(struct event *event, int error_type)
 	new_reset = (struct epow_reset *)malloc(sizeof(*new_reset));
 	if (new_reset == NULL)
 		return -1;
-	
+
 	new_reset->err_type = error_type;
 	new_reset->valid_reset = 1;
 	new_reset->err_sequence = event->errdata.sequence;
 	new_reset->err_id = event->errdata.err_id;
-	
+
 	/* Add to the front of the list */
 	new_reset->next = epow_reset_list;
 	epow_reset_list = new_reset;
@@ -449,7 +449,7 @@ save_epow_reset(struct event *event, int error_type)
  *	1 if diagnostic conclusion,
  *	otherwise 0. unless an error, then -1.
  */
-int 
+int
 has_epow_reset(struct event *event, int error_type)
 {
 	struct epow_reset *erptr;
@@ -462,11 +462,11 @@ has_epow_reset(struct event *event, int error_type)
 		if (erptr->err_type == (error_type & 0xFFFFFF00)) {
 			/* found a match */
 			erptr->valid_reset = 0;	/* don't report again */
-			
+
 			/* Store the sequence number of the EPOW_SUS_CHRP.
 			   This sequence number is used in the menugoal text. */
 			corrected_seq = event->errdata.sequence;
-			
+
 			/* Link the menugoal with the sequence number and error
 			   ID of the EPOW_RES_CHRP. */
 			event->errdata.sequence = erptr->err_sequence;
@@ -475,7 +475,7 @@ has_epow_reset(struct event *event, int error_type)
 			return 1;
 		}
 		erptr = erptr->next;
-	}	
+	}
 
 	return 0;
 }
@@ -485,25 +485,25 @@ has_epow_reset(struct event *event, int error_type)
  * @brief Determine the version of the EPOW error log and process accordingly.
  *
  */
-int 
+int
 process_epow(struct event *event, int error_type)
 {
 	int rc = 0;
-	
+
 	if ((error_type & 0xFF000000) == EPOWLOG) {
 		if ((error_type & 0x0F) == 0) {
 			/* This is an EPOW reset, so save it */
 			/* and go to the next (older) error  */
 			rc = save_epow_reset(event, error_type);
-		} 
+		}
 		else if ((rc = has_epow_reset(event, error_type))) {
 			/* this error has been reset */
 			/* continue */
-		} 
-		else if (event->event_buf[0] == 0x01) { 
+		}
+		else if (event->event_buf[0] == 0x01) {
 			/* Version 1 EPOW Log */
 			rc = process_v1_epow(event, error_type);
-		} 
+		}
 		else
 			/* Version 2 EPOW Log */
 			rc = process_v2_epow(event, error_type);
@@ -518,7 +518,7 @@ process_epow(struct event *event, int error_type)
  * @param event the event to be parsed
  * @return always returns 0
  */
-int 
+int
 process_pre_v6(struct event *event)
 {
 	int error_fmt;
@@ -628,7 +628,7 @@ process_pre_v6(struct event *event)
 	 * Any predictive, unrecoverable error-degraded mode error will be
 	 * reported in V3 style SRN, regardless	of error log format, so
 	 * check for it here.
-	 */   
+	 */
 	if (deconfig_error && predictive_error) {
 		/* 
 		 * Make sure the FRUs in this log have not already been
@@ -637,20 +637,20 @@ process_pre_v6(struct event *event)
 		 * Should only be one FRU, but will handle multiple FRUs. Only
 		 * if all FRUs are deconfigured, is this error log ignored.
 		 */
-		loc_mode = FIRST_LOC; 
-		ignore_fru = FALSE; 
+		loc_mode = FIRST_LOC;
+		ignore_fru = FALSE;
 		while ((loc = get_loc_code(event, loc_mode, NULL)) != NULL) {
-			loc_mode = NEXT_LOC; 
+			loc_mode = NEXT_LOC;
 			if (devtree == NULL)
-				devtree = get_dt_status(NULL); 
+				devtree = get_dt_status(NULL);
 			if (devtree) {
-				sprintf(target, "%s fail-offline", loc); 
+				sprintf(target, "%s fail-offline", loc);
 				if (strstr(devtree, target)) {
-			    		/* found FRU and status in devtree */
+					/* found FRU and status in devtree */
 					/* can ignore this fru */
 					ignore_fru = TRUE;
 					continue;
-				} 
+				}
 				else {
 					/* fru not disabled */
 					/* can not ignore this error log */
@@ -668,9 +668,9 @@ process_pre_v6(struct event *event)
 		v3_errdscr[0].rcode = 0x500;
 		v3_errdscr[0].rmsg = PREDICT_UNRECOV;
 
-		if (error_fmt == RTAS_EXTHDR_FMT_CPU) { 
+		if (error_fmt == RTAS_EXTHDR_FMT_CPU) {
 			/* check if the "repair pending an IPL" bit is set */
-			repair_pending = event->event_buf[I_BYTE24] & 0x80; 
+			repair_pending = event->event_buf[I_BYTE24] & 0x80;
 			if (repair_pending) {
 				v3_errdscr[0].rcode = 0x560;
 				v3_errdscr[0].rmsg = PREDICT_REPAIR_PENDING;
@@ -679,8 +679,8 @@ process_pre_v6(struct event *event)
 
 		report_srn(event, 0, v3_errdscr);
 		return 0;
-	} 
-	else if (deconfig_error && error_fmt == RTAS_EXTHDR_FMT_IBM_SP 
+	}
+	else if (deconfig_error && error_fmt == RTAS_EXTHDR_FMT_IBM_SP
 		   && event->loc_codes != NULL) {
 		/* 
 		 * An error was found and the resource has been 
@@ -694,46 +694,46 @@ process_pre_v6(struct event *event)
 	     ! process_epow(event, error_type) &&	/* v1 and v2 EPOWs */
 	     ! process_v2_sp(event, error_type)) {
 
-		if (predictive_error) 
+		if (predictive_error)
 			fru_index = 1;
 		else
 			fru_index = 0;
 
 	    /* all POST and version 1 non-EPOW error logs */
 	    switch (error_type) {
-	    	case CPUB12b0: 	/* CPU internal error */
+		case CPUB12b0:	/* CPU internal error */
 			cpuid = event->event_buf[I_CPU];
 			e_desc = &cpu610[fru_index];
 			add_cpu_id(e_desc, 0, cpuid);
 			report_srn(event, 0, e_desc);
 			break;
 
-		case CPUB12b1: 	/* CPU internal cache error */
+		case CPUB12b1:	/* CPU internal cache error */
 			cpuid = event->event_buf[I_CPU];
 			e_desc = &cpu611[fru_index];
 			add_cpu_id(e_desc, 0, cpuid);
 			report_srn(event, 0, e_desc);
 			break;
 
-		case CPUB12b2: 	/* L2 cache parity or multi-bit ECC error */
+		case CPUB12b2:	/* L2 cache parity or multi-bit ECC error */
 			e_desc = &cpu612[fru_index];
 			report_srn(event, 0, e_desc);
 			break;
 
-		case CPUB12b3: 	/* L2 cache ECC single-bit error */
+		case CPUB12b3:	/* L2 cache ECC single-bit error */
 			report_srn(event, 0, &cpu613[fru_index]);
 			break;
 
-	    	case CPUB12b4: 	/* TO error waiting for memory controller */
+		case CPUB12b4:	/* TO error waiting for memory controller */
 			report_srn(event, 0, &cpu614[0]);
 			break;
 
-	    	case CPUB12b5: 	/* Time-out error waiting for I/O */
+		case CPUB12b5:	/* Time-out error waiting for I/O */
 			report_srn(event, 0, &cpu615[0]);
 			break;
 
-	    	case CPUB12b6: 	/* Address/Data parity error on Processor bus */
-		case CPUB12b7: 	/* Transfer error on Processor bus */
+		case CPUB12b6:	/* Address/Data parity error on Processor bus */
+		case CPUB12b7:	/* Transfer error on Processor bus */
 			/*
 			 * The RTAS frus can be planar,cpu,[cpu] in any order.
 			 * The err descriptions require planar,cpu,[cpu], so
@@ -743,90 +743,90 @@ process_pre_v6(struct event *event)
 			 */
 			rc = get_cpu_frus(event);
 			if (rc == RC_PLANAR) {
-				if (error_type == CPUB12b6) 
+				if (error_type == CPUB12b6)
 					e_desc = &cpu710[0];
-				else    
+				else
 					e_desc = &cpu713[0];
 				report_srn(event, 0, e_desc);
-			} 
+			}
 			else if (rc == RC_PLANAR_CPU) {
-				if (error_type == CPUB12b6) 
+				if (error_type == CPUB12b6)
 					e_desc = &cpu711[0];
-				else    
+				else
 					e_desc = &cpu714[0];
 				report_srn(event, 0, e_desc);
-			} 
+			}
 			else if (rc == RC_PLANAR_2CPU) {
-				if (error_type == CPUB12b6) 
+				if (error_type == CPUB12b6)
 					e_desc = &cpu712[0];
-				else    
+				else
 					e_desc = &cpu715[0];
 				report_srn(event, 0, e_desc);
-			} 
+			}
 			else {
 				report_srn(event, 0, &cpu619[0]);
 			}
 			break;
 
-	    	case CPUALLZERO:/* Unknown error detected by CPU Error log */ 
+		case CPUALLZERO:/* Unknown error detected by CPU Error log */
 		case MEMALLZERO:/* Unknown error detected by mem. controller */
 		case IOALLZERO: /* Unknown error detected by I/O device */
-			if (error_type == CPUALLZERO) 
+			if (error_type == CPUALLZERO)
 				e_desc = &cpu619[0];
-			else if (error_type == MEMALLZERO) 
+			else if (error_type == MEMALLZERO)
 				e_desc = &mem629[0];
 			else
 				e_desc = &io639[0];
 
 			report_srn(event, 0, e_desc);
-			
+
 			break;
 
-	    	case MEMB12b0: 	/* Uncorrectable Memory Error */ 
+		case MEMB12b0:	/* Uncorrectable Memory Error */
 			/* log didn't contain dimm element # */
 			/* or dimm type is unknown, then */
-			/* check memory status  */ 
+			/* check memory status  */
 			report_srn(event, 0, &memtest600[0]);
 			break;
 
-		case MEMB12b1: 	/* ECC correctable error */
-	    	case MEMB12b2: 	/* Correctable error threshold exceeded */
+		case MEMB12b1:	/* ECC correctable error */
+		case MEMB12b2:	/* Correctable error threshold exceeded */
 			pct_index = 1;
 			/*
 			 * log didn't contain dimm element # or dimm type is
 			 * unknown, then check memory status
-			 */ 
+			 */
 			report_srn(event, 0, &memtest600[0]);
 
 			pct_index = 0;
 			break;
 
-	    	case MEMB12b3: 	/* Memory Controller internal error */
+		case MEMB12b3:	/* Memory Controller internal error */
 			report_srn(event, 0, &mem624[0]);
 			break;
 
-	    	case MEMB12b4: 	/* Memory Address (Bad addr going to memory) */
+		case MEMB12b4:	/* Memory Address (Bad addr going to memory) */
 			report_srn(event, 0, &mem625[0]);
 			break;
 
-	    	case MEMB12b4B13b3: /* I/O Bridge T/O and Bad Memory Address */
-			report_menugoal(event, MSGMENUG174); 
+		case MEMB12b4B13b3: /* I/O Bridge T/O and Bad Memory Address */
+			report_menugoal(event, MSGMENUG174);
 			return 0;
 			break;
 
-	    	case MEMB12b5: 	/* Memory Data    (Bad data going to memory) */
+		case MEMB12b5:	/* Memory Data    (Bad data going to memory) */
 			report_srn(event, 0, &mem626[0]);
 			break;
 
-	    	case MEMB12b6: 	/* Memory bus/switch internal error */
+		case MEMB12b6:	/* Memory bus/switch internal error */
 				/* memory bus/switch not yet implemented. */
 			break;
 
-	    	case MEMB12b7: 	/* Memory time-out error */
+		case MEMB12b7:	/* Memory time-out error */
 			report_srn(event, 0, &mem627[0]);
 			break;
 
-	    	case MEMB13b0: 	/* Processor Bus parity error */
+		case MEMB13b0:	/* Processor Bus parity error */
 			add_cpu_id(&mem722[0], 0, 0);
 				/*
 				 * calling out processor, but don't know which
@@ -836,7 +836,7 @@ process_pre_v6(struct event *event)
 			report_srn(event, 0, &mem722[0]);
 			break;
 
-	    	case MEMB13b1: 	/* Processor time-out error */
+		case MEMB13b1:	/* Processor time-out error */
 			add_cpu_id(&mem628[0], 0, 0);
 				/*
 				 * calling out processor, but don't know which
@@ -846,7 +846,7 @@ process_pre_v6(struct event *event)
 			report_srn(event, 0, &mem628[0]);
 			break;
 
-	    	case MEMB13b2: 	/* Processor bus Transfer error */
+		case MEMB13b2:	/* Processor bus Transfer error */
 			add_cpu_id(&mem723[0], 0, 0);
 				/*
 				 * calling out processor, but don't know which
@@ -856,22 +856,22 @@ process_pre_v6(struct event *event)
 			report_srn(event, 0, &mem723[0]);
 			break;
 
-	    	case MEMB13b3: 	/* I/O Host Bridge time-out error */
+		case MEMB13b3:	/* I/O Host Bridge time-out error */
 			report_srn(event, 0, &mem724[0]);
 			break;
 
-	    	case MEMB13b4: 	/* I/O Host Bridge address/data parity error */
+		case MEMB13b4:	/* I/O Host Bridge address/data parity error */
 			report_srn(event, 0, &mem725[0]);
 			break;
 
-		case IOB12b0: 	/* I/O Bus Address Parity Error */ 
-		case IOB12b1: 	/* I/O Bus Data Parity Error */ 
-		case IOB12b2: 	/* I/O Time-out error */ 
+		case IOB12b0:	/* I/O Bus Address Parity Error */
+		case IOB12b1:	/* I/O Bus Data Parity Error */
+		case IOB12b2:	/* I/O Time-out error */
 			/* Version 1 and 2 look the same here. */
 			analyze_io_bus_error(event, 1, error_type);
 			break;
- 
-		case IOB12b3: 	/* I/O Device Internal Error */
+
+		case IOB12b3:	/* I/O Device Internal Error */
 			if (io_error_type == IOB12b3B13b2) {
 			    /* Int Err, bridge conn. to i/o exp. bus */
 			    report_srn(event, 0, &io634[fru_index]);
@@ -882,31 +882,31 @@ process_pre_v6(struct event *event)
 
 			sid = 0;
 			sed = 0;
-			
+
 			if (sid == 0) {
 				e_desc->rcode = sigdev.led;
-			} 
+			}
 			else if (sed == 0) {
 				e_desc->rcode = sendev.led;
-			} 
+			}
 			else {
 				/* isolated only to pci bus */
 				e_desc->rcode = 0x2C9;
 			}
 			report_srn(event, 0, e_desc);
 			break;
-				
-		case IOB12b4: 	/* I/O Error on non-PCI bus */
+
+		case IOB12b4:	/* I/O Error on non-PCI bus */
 			report_srn(event, 0, &io730[0]);
 			break;
 
-		case IOB12b5: 	/* Mezzanine/Processor Bus Addr. Parity Error */
-			if (io_error_type == IOB12b5B13b1) { 
+		case IOB12b5:	/* Mezzanine/Processor Bus Addr. Parity Error */
+			if (io_error_type == IOB12b5B13b1) {
 			    /* Mezzanine/Proc. Bus Addr. Parity Error */
 			    report_srn(event, 0, &io733[fru_index]);
 			    break;
 			}
-			if (io_error_type == IOB12b5B13b2) { 
+			if (io_error_type == IOB12b5B13b2) {
 			    /* Mezzanine/Proc. Bus Addr. Parity Error */
 			    report_srn(event, 0, &io770[fru_index]);
 			    break;
@@ -916,18 +916,18 @@ process_pre_v6(struct event *event)
 			break;
 
 
-		case IOB12b6: 	/* Mezzanine/Processor Bus Data Parity Error */
-			if (io_error_type == IOB12b6B13b1) {  
+		case IOB12b6:	/* Mezzanine/Processor Bus Data Parity Error */
+			if (io_error_type == IOB12b6B13b1) {
 			    /* Mezzanine/Proc. Bus Data Parity Error */
 			    report_srn(event, 0, &io734[fru_index]);
 			    break;
 			}
-			if (io_error_type == IOB12b6B13b2) { 
+			if (io_error_type == IOB12b6B13b2) {
 			    /* Mezzanine/Proc. Bus Addr. Parity Error */
 			    report_srn(event, 0, &io771[fru_index]);
 			    break;
 			}
-			if (io_error_type == IOB12b6B13b3) { 
+			if (io_error_type == IOB12b6B13b3) {
 			    /* Err detected by i/o exp. bus controller */
 			    report_srn(event, 0, &io773[fru_index]);
 			    break;
@@ -936,7 +936,7 @@ process_pre_v6(struct event *event)
 			report_srn(event, 0, &io732[fru_index]);
 			break;
 
-		case IOB12b7: 	/* Mezzanine/Processor Bus Time-out Error */
+		case IOB12b7:	/* Mezzanine/Processor Bus Time-out Error */
 			if (io_error_type == IOB12b7B13b1)  {
 		            /* Mezzanine/Processor Bus Time-out Error */
 			    report_srn(event, 0, &io736[fru_index]);
@@ -967,39 +967,39 @@ process_pre_v6(struct event *event)
 			report_srn(event, 0, &io633[fru_index]);
 			break;
 
-		case SPB16b0: 	/* T.O. communication response from SP */ 
+		case SPB16b0:	/* T.O. communication response from SP */
 			report_srn(event, 0, &sp740[0]);
 			break;
 
-		case SPB16b1: 	/* I/O (I2C) general bus error */
+		case SPB16b1:	/* I/O (I2C) general bus error */
 			report_srn(event, 0, &sp640[0]);
 			break;
 
-		case SPB16b2: 	/* Secondary I/O (I2C) general bus error */
+		case SPB16b2:	/* Secondary I/O (I2C) general bus error */
 			report_srn(event, 0, &sp641[0]);
 			break;
 
-		case SPB16b3: 	/* Internal Service Processor memory error */
+		case SPB16b3:	/* Internal Service Processor memory error */
 			report_srn(event, 0, &sp642[0]);
 			break;
 
-		case SPB16b4: 	/* SP error accessing special registers */
+		case SPB16b4:	/* SP error accessing special registers */
 			report_srn(event, 0, &sp741[0]);
 			break;
 
-		case SPB16b5: 	/* SP reports unknown communication error */
+		case SPB16b5:	/* SP reports unknown communication error */
 			report_srn(event, 0, &sp742[0]);
 			break;
 
-		case SPB16b6: 	/* Internal Service Processor firmware error */
+		case SPB16b6:	/* Internal Service Processor firmware error */
 			report_srn(event, 0, &sp643[0]);
 			break;
 
-		case SPB16b7: 	/* Other internal SP hardware error */
+		case SPB16b7:	/* Other internal SP hardware error */
 			report_srn(event, 0, &sp644[0]);
 			break;
 
-		case SPB17b0: 	/* SP error accessing VPD EEPROM */
+		case SPB17b0:	/* SP error accessing VPD EEPROM */
 			report_srn(event, 0, &sp743[0]);
 			break;
 
@@ -1007,39 +1007,39 @@ process_pre_v6(struct event *event)
 			report_srn(event, 0, &sp744[0]);
 			break;
 
-		case SPB17b2: 	/* SP error accessing Power Controller */
+		case SPB17b2:	/* SP error accessing Power Controller */
 			report_srn(event, 0, &sp745[0]);
 			break;
 
-		case SPB17b3: 	/* SP error accessing Fan Sensor */
+		case SPB17b3:	/* SP error accessing Fan Sensor */
 			report_srn(event, 0, &sp746[0]);
 			break;
 
-		case SPB17b4: 	/* SP error accessing Thermal Sensor */
+		case SPB17b4:	/* SP error accessing Thermal Sensor */
 			report_srn(event, 0, &sp747[0]);
 			break;
 
-		case SPB17b5: 	/* SP error accessing Voltage Sensor */
+		case SPB17b5:	/* SP error accessing Voltage Sensor */
 			report_srn(event, 0, &sp748[0]);
 			break;
 
-		case SPB18b0: 	/* SP error accessing serial port */ 
+		case SPB18b0:	/* SP error accessing serial port */
 			report_srn(event, 0, &sp749[0]);
 			break;
 
-		case SPB18b1: 	/* SP error accessing NVRAM */
+		case SPB18b1:	/* SP error accessing NVRAM */
 			report_srn(event, 0, &sp750[0]);
 			break;
 
-		case SPB18b2: 	/* SP error accessing RTC/TOD */
+		case SPB18b2:	/* SP error accessing RTC/TOD */
 			report_srn(event, 0, &sp751[0]);
 			break;
 
-		case SPB18b3: 	/* SP error accessing JTAG/COP controller */
+		case SPB18b3:	/* SP error accessing JTAG/COP controller */
 			report_srn(event, 0, &sp752[0]);
 			break;
 
-		case SPB18b4: 	/* SP detect error with tod battery */
+		case SPB18b4:	/* SP detect error with tod battery */
 			report_srn(event, 0, &sp753[0]);
 			break;
 
@@ -1094,7 +1094,7 @@ process_pre_v6(struct event *event)
  * analyze_io_bus_error
  * @brief Analyze the io bus errors, i.e. IOB12b0, IOB12b1, or IOB12b2. 
  */
-static int 
+static int
 analyze_io_bus_error(struct event *event, int version, int error_type)
 {
 	struct event_description_pre_v6 *e_desc;
@@ -1108,7 +1108,7 @@ analyze_io_bus_error(struct event *event, int version, int error_type)
 	 * if this is version 3 or beyond, and there is a physical location
 	 * code in the log, then just return for SRN encoding
 	 */
-	if (version >= 3 && LOC_CODES_OK) 
+	if (version >= 3 && LOC_CODES_OK)
 		return 0;
 
 	if (error_type == IOB12b0)
@@ -1119,7 +1119,7 @@ analyze_io_bus_error(struct event *event, int version, int error_type)
 		fru_index = 2;
 	else
 		return 0;	/* can't analyze this error type */
-				
+
 	sid = 0;
 	sed = 0;
 
@@ -1128,24 +1128,24 @@ analyze_io_bus_error(struct event *event, int version, int error_type)
 		if ( ! strcmp(sigdev.busname, sendev.name)||
 		     ! strcmp(sendev.busname, sigdev.name)  ) {
 			e_desc = &io9CC[fru_index];
-			report_io_error_frus(event, SN9CC, e_desc, &sigdev, 
-					     &sendev);
-			rc = 1;
-		} 
-		else {
-			/* 2 devices from error log */
-			e_desc = &io833[fru_index];
-			report_io_error_frus(event, 0x833, e_desc, &sigdev, 
+			report_io_error_frus(event, SN9CC, e_desc, &sigdev,
 					     &sendev);
 			rc = 1;
 		}
-	} 
+		else {
+			/* 2 devices from error log */
+			e_desc = &io833[fru_index];
+			report_io_error_frus(event, 0x833, e_desc, &sigdev,
+					     &sendev);
+			rc = 1;
+		}
+	}
 	else if (sid == 0 || sed == 0) {
 		/* 1 device only */
 		e_desc = &io9CC[fru_index];
 		report_io_error_frus(event, SN9CC, e_desc, &sigdev, &sendev);
 		rc = 1;
-	} 
+	}
 	else {
 		/* bus  only */
 		e_desc = &iobusonly[fru_index];
@@ -1163,10 +1163,10 @@ analyze_io_bus_error(struct event *event, int version, int error_type)
  *
  * @return An integer that is the error log format indicator.
  */
-int 
+int
 get_error_fmt(struct event *event)
 {
-	return (event->event_buf[I_FORMAT] & 0x0F); 
+	return (event->event_buf[I_FORMAT] & 0x0F);
 }
 
 /**
@@ -1177,31 +1177,31 @@ get_error_fmt(struct event *event)
  *
  * @return The error format and error bits as an unique integer.
  */
-static int 
+static int
 get_error_type(struct event *event, int fmt)
 {
 	int error_type;
 
 	switch (fmt) {
 	    case RTAS_EXTHDR_FMT_IBM_SP:
-		error_type = 	fmt << 24 | 
-				event->event_buf[I_BYTE18] << 16 | 
-		             	event->event_buf[I_BYTE17] << 8  | 
+		error_type =	fmt << 24 |
+				event->event_buf[I_BYTE18] << 16 |
+				event->event_buf[I_BYTE17] << 8  |
 				event->event_buf[I_BYTE16];
 		break;
 
 	    case RTAS_EXTHDR_FMT_EPOW:
-		error_type = 	fmt << 24 | 
-				event->event_buf[I_BYTE17] << 16 | 
-		             	event->event_buf[I_BYTE16] << 8  | 
+		error_type =	fmt << 24 |
+				event->event_buf[I_BYTE17] << 16 |
+				event->event_buf[I_BYTE16] << 8  |
 				(event->event_buf[I_BYTE15] & 0x0F);
 		break;
 
 	    case RTAS_EXTHDR_FMT_CPU:
-		error_type = 	fmt << 24 | event->event_buf[I_BYTE12];
+		error_type =	fmt << 24 | event->event_buf[I_BYTE12];
 		break;
-	
-	    case RTAS_EXTHDR_FMT_IO: 
+
+	    case RTAS_EXTHDR_FMT_IO:
 		/*
 		 * First, get the complete io error type, which 
 		 * includes some info bits. 
@@ -1242,12 +1242,12 @@ report_srn(struct event *event, int nlocs,
 
 	/* Add the chrp location codes if nlocs != 0 */
 	for (i = 0; i < nlocs; i++) {
-		if (i == 0) 
-			loc = get_loc_code(event, FIRST_LOC, NULL); 
-		else 
-			loc = get_loc_code(event, NEXT_LOC, NULL); 
-		
-		if (loc) 
+		if (i == 0)
+			loc = get_loc_code(event, FIRST_LOC, NULL);
+		else
+			loc = get_loc_code(event, NEXT_LOC, NULL);
+
+		if (loc)
 			strcpy(e_desc->frus[i].floc, loc);
 		else
 			break;
@@ -1273,7 +1273,7 @@ report_srn(struct event *event, int nlocs,
 
 	e_desc->sn = save_sn;
 
-	if (set_srn_and_callouts(event, e_desc, 0)) 
+	if (set_srn_and_callouts(event, e_desc, 0))
 		return -1;
 
         /* if loc is not null, then there are more FRUs than MAXFRUS */
@@ -1298,7 +1298,7 @@ report_srn(struct event *event, int nlocs,
 				strcpy(temp_event->frus[i].floc, loc);
 				loc = get_loc_code(event, NEXT_LOC, NULL);
 			}
- 
+
 			temp_event->frus[i].fmsg = 36;
 			i++;
 		}
@@ -1345,7 +1345,7 @@ report_srn(struct event *event, int nlocs,
  */
 char *
 get_loc_code(struct event *event, int mode, int *nlocs)
-{ 
+{
 	char *loc;
 	int prev_space = 0;
 	static char *copyLCB = NULL;
@@ -1353,7 +1353,7 @@ get_loc_code(struct event *event, int mode, int *nlocs)
 	static char *start_loc = NULL;	/* start or next pointer for loc code */
 	static char *end_loc = NULL;	/* end of location code buffer */
 
-	if (! LOC_CODES_OK) { 
+	if (! LOC_CODES_OK) {
 		if (nlocs)
 			*nlocs = 0;
 		return NULL;
@@ -1377,7 +1377,7 @@ get_loc_code(struct event *event, int mode, int *nlocs)
 
 		/* Force processing to stop at special "Hide" character */
 		loc = strchr(copyLCB, LOC_HIDE_CHAR);
-		if (loc != NULL) 
+		if (loc != NULL)
 			*loc = 0;
 		end_loc = copyLCB + strlen(copyLCB);
 
@@ -1386,7 +1386,7 @@ get_loc_code(struct event *event, int mode, int *nlocs)
 		 * of (non-consecutive) spaces in the log, i.e.
 		 * 1 space = 2 location codes
 		 */
-		if (nlocs != NULL) {	
+		if (nlocs != NULL) {
 			loc = copyLCB;
 			if (*loc) {
 				*nlocs = 0;     /* nothing found until !space */
@@ -1396,7 +1396,7 @@ get_loc_code(struct event *event, int mode, int *nlocs)
 						if (! prev_space)
 							*nlocs = *nlocs + 1;
 						prev_space = 1;
-					} 
+					}
 					else
 						prev_space = 0;
 					loc++;
@@ -1404,7 +1404,7 @@ get_loc_code(struct event *event, int mode, int *nlocs)
 				if (! prev_space)
 					/* count last location code */
 					*nlocs = *nlocs + 1;
-			} 
+			}
 			else
 				*nlocs = 0;	/* null means no loc. codes */
 		}
@@ -1416,17 +1416,17 @@ get_loc_code(struct event *event, int mode, int *nlocs)
 		/* loc is the start of a location code */
 		/* use start_loc to find end of location code string */
 		/* find 1st occurance of null or blank, the loc. code delimit */
-		while (*loc == ' ') 
+		while (*loc == ' ')
 			loc++;	/* skip leading blanks */
 
 		start_loc = loc;
-		while (*start_loc && *start_loc != ' ') 
+		while (*start_loc && *start_loc != ' ')
 			start_loc++;
 
 		*start_loc = 0x0;		/* terminate loc string */
 		start_loc++;			/* ready for next call */
 		return loc;			/* return loc */
-	} 
+	}
 	else {
 		return NULL;
 	}
@@ -1440,7 +1440,7 @@ get_loc_code(struct event *event, int mode, int *nlocs)
  *
  * @return the extended epow register from the vendor specific area.
  */
-int 
+int
 get_ext_epow(struct event *event)
 {
 	int *extepow;
@@ -1459,7 +1459,7 @@ get_ext_epow(struct event *event)
 /**
  * get_fan_number
  */
-int 
+int
 get_fan_number(int ext_epow)
 {
 	int fan;
@@ -1478,7 +1478,7 @@ get_fan_number(int ext_epow)
  *
  * @returns Always returns 0
  */
-int 
+int
 report_menugoal(struct event *event, char *fmt, ...)
 {
 	va_list argp;
@@ -1500,18 +1500,18 @@ report_menugoal(struct event *event, char *fmt, ...)
 		 * check if a ref. code exists in the error log.
 		 */
 		if (event->errdata.sequence) {
-			refc = (short *)get_register_data(event, SRC_REG_ID_04, 
+			refc = (short *)get_register_data(event, SRC_REG_ID_04,
 							  &rlen);
 			if (refc) {
 				int msglen;
 				/* There is a refcode; append to the menugoal */
 				refcode = *(uint *)refc;
-				msglen = strlen(MSGMENUG_REFC) + 
+				msglen = strlen(MSGMENUG_REFC) +
 					2 * sizeof(refcode) + 1;
 
-				if (strlen(buffer) + msglen 
+				if (strlen(buffer) + msglen
 						< MAX_MENUGOAL_SIZE) {
-					offset += sprintf(buffer + offset, 
+					offset += sprintf(buffer + offset,
 							  MSGMENUG_REFC,
 							  refcode);
 				}
@@ -1528,11 +1528,11 @@ report_menugoal(struct event *event, char *fmt, ...)
 					msglen = strlen(MSGMENUG_LOC) +
 						strlen(event->loc_codes) + 1;
 
-					if (strlen(buffer) + msglen 
-							< MAX_MENUGOAL_SIZE) { 
+					if (strlen(buffer) + msglen
+							< MAX_MENUGOAL_SIZE) {
 						offset += sprintf(
-							buffer + offset, 
-							MSGMENUG_LOC, 
+							buffer + offset,
+							MSGMENUG_LOC,
 							event->loc_codes);
 					}
 				}
@@ -1561,11 +1561,11 @@ report_menugoal(struct event *event, char *fmt, ...)
  * 	Build error description for i/o detected errors. The number of frus is
  *	determined by the number of devices returned in the error log.
  */
-int 
+int
 report_io_error_frus(struct event *event, int sn,
-		     struct event_description_pre_v6 *e_desc, 
+		     struct event_description_pre_v6 *e_desc,
 		     struct device_ela *sig, struct device_ela *sen)
-{ 
+{
 	char *loc;
 	int i;
 	char *p;
@@ -1614,7 +1614,7 @@ report_io_error_frus(struct event *event, int sn,
 		strcpy(e_desc->frus[0].fname, sen->name);
 		strcpy(e_desc->frus[1].fname, sen->busname);
 	} else {
-		if (sig->status == DEVICE_BUS) { 
+		if (sig->status == DEVICE_BUS) {
 			strcpy(e_desc->frus[0].fname, sig->busname);
 			p = sig->busname;
 			swap_locs = 1;	/* f/w list the sender 1st in log */
@@ -1626,7 +1626,7 @@ report_io_error_frus(struct event *event, int sn,
 		/* Convert number in busname, i.e. pcixx, */
 		/* where xx is 0 to 99, */
 		/* to integer 1xx for the reason code. */
-		while (! isdigit (*p) && *p != 0) 
+		while (! isdigit (*p) && *p != 0)
 			p++;
 
 		e_desc->rcode = atoi(p) + 0x100;
@@ -1637,19 +1637,19 @@ report_io_error_frus(struct event *event, int sn,
 	 */
 	loc = get_loc_code(event, FIRST_LOC, NULL);
 	i = 0;
-	while (loc && i < 2) {	/* this error description is for 2 frus */ 
+	while (loc && i < 2) {	/* this error description is for 2 frus */
 		/* 
 		 * For the case when the signaling device is non-integrated,
 		 * the location codes must be swapped. 
 		 */
 		if (swap_locs) {
-			if (i == 0) {	
+			if (i == 0) {
 				/* 1st loc code goes in 2nd fru */
 				/* but also puting loc in 1st fru */
 				/* in case  there is only 1 loc. */
 				strcpy(e_desc->frus[0].floc, loc);
 				strcpy(e_desc->frus[1].floc, loc);
-			} else if ( i == 1 ) { 
+			} else if ( i == 1 ) {
 				/* 2nd loc code goes in 1st fru */
 				strcpy(e_desc->frus[0].floc, loc);
 			}
@@ -1746,22 +1746,22 @@ get_cpu_frus(struct event *event)
 
 				sprintf(event->loc_codes, "%s %s", loc2, loc1);
 				rc = RC_PLANAR_CPU;
-			} 
+			}
 			else if (is_cpu(loc3)) {
 				/* Rearrange loc as loc2, loc1, loc3 */
 				if (event->loc_codes != NULL)
 					free(event->loc_codes);
 				event->loc_codes = (char *)
-					malloc(strlen(loc1) + 
+					malloc(strlen(loc1) +
 						     strlen(loc2) +
 						     strlen(loc3) + 3);
 				if (event->loc_codes == NULL)
 					return 0;
 
-				sprintf(event->loc_codes, "%s %s %s", 
+				sprintf(event->loc_codes, "%s %s %s",
 					loc2, loc1, loc3);
 				rc = RC_PLANAR_2CPU;
-			} 
+			}
 		}
 	}
 
@@ -1780,8 +1780,8 @@ get_cpu_frus(struct event *event)
  *	1 if diagnostic conclusion,
  *	otherwise 0.
  */
-int 
-process_v1_epow(struct event *event, int error_type) 
+int
+process_v1_epow(struct event *event, int error_type)
 {
 	int rc = 1;
 	int class;
@@ -1835,7 +1835,7 @@ process_v1_epow(struct event *event, int error_type)
 			report_srn(event, 0, epow821);
 			break;
 
-		default: 	/* This error log is unknow to ELA */
+		default:	/* This error log is unknow to ELA */
 			unknown_epow_ela(event, class);
 			rc = -1;
 	}
@@ -2015,7 +2015,7 @@ sensor_epow(struct event *event, int error_type, int version)
 				e_desc = v3_errdscr;
 				e_desc->rcode = 0x10;
 			} else {
-        			e_desc = fan_epow;
+				e_desc = fan_epow;
 				e_desc->rcode = 0x830;
 			}
                         break;
@@ -2029,29 +2029,29 @@ sensor_epow(struct event *event, int error_type, int version)
 				e_desc = v3_errdscr;
 				e_desc->rcode = 0x30;
 			} else {
-                       		e_desc = volt_epow;
+				e_desc = volt_epow;
 				strcpy(e_desc->frus[0].fname, fru_name);
 				strcpy(e_desc->frus[1].fname, sensor_name);
-                       		e_desc->rcode = 0x831;
+				e_desc->rcode = 0x831;
 			}
                         break;
 
                 case THERM:
-                       	sprintf(sensor_name, F_EPOW_ONE, F_THERM_SEN,
+			sprintf(sensor_name, F_EPOW_ONE, F_THERM_SEN,
 				index + 1);
 
 			if (version == 3) {
 				e_desc = v3_errdscr;
 				e_desc->rcode = 0x50;
 			} else {
-                        	e_desc = therm_epow;
-                        	strcpy(e_desc->frus[0].fname, sensor_name);
-                        	e_desc->rcode = 0x832;
+				e_desc = therm_epow;
+				strcpy(e_desc->frus[0].fname, sensor_name);
+				e_desc->rcode = 0x832;
 			}
 			break;
 
                 case POWER:
-                       	sprintf(fru_name, F_EPOW_ONE, F_POWER_SUPPLY,
+			sprintf(fru_name, F_EPOW_ONE, F_POWER_SUPPLY,
 				index + 1);
 
 			sprintf(sensor_name, "%s", F_POW_SEN);
@@ -2060,10 +2060,10 @@ sensor_epow(struct event *event, int error_type, int version)
 				e_desc = v3_errdscr;
 				e_desc->rcode = 0x70;
 			} else {
-                        	e_desc = pow_epow;
-                        	strcpy(e_desc->frus[0].fname, fru_name);
+				e_desc = pow_epow;
+				strcpy(e_desc->frus[0].fname, fru_name);
 				strcpy(e_desc->frus[1].fname, sensor_name);
-       		        	e_desc->rcode = 0x833;
+				e_desc->rcode = 0x833;
 			}
                         break;
 
@@ -2072,7 +2072,7 @@ sensor_epow(struct event *event, int error_type, int version)
 				e_desc = v3_errdscr;
 				e_desc->rcode = 0x90;
 			} else {
-                        	e_desc = unknown_epow;
+				e_desc = unknown_epow;
 				e_desc->rcode += 0x839;
 			}
                         break;
@@ -2088,23 +2088,23 @@ sensor_epow(struct event *event, int error_type, int version)
 			e_desc->sn = 0x652;
 
 		switch (token) {
-		    	case FAN:
+			case FAN:
 				if (version == 3)
 					e_desc->rcode = 0x110;
 				e_desc->rmsg = MSGRED_FAN;
 				break;
 
-		    	case POWER:
+			case POWER:
 				if (version == 3)
 					e_desc->rcode = 0x120;
-                        	e_desc->rmsg = MSGRED_POWER;
-                        	break;
+				e_desc->rmsg = MSGRED_POWER;
+				break;
 
 		    	default:
 				if (version == 3)
 					e_desc->rcode = 0x130;
-                        	e_desc->rmsg = MSGRED_UNK;
-                        	break;
+				e_desc->rmsg = MSGRED_UNK;
+				break;
 		}
 	} else {
 		switch (status) {
@@ -2123,7 +2123,7 @@ sensor_epow(struct event *event, int error_type, int version)
 						break;
 
 					case VOLT:
-                                        	e_desc->rmsg = MSGCRIT_VOLT;
+						e_desc->rmsg = MSGCRIT_VOLT;
 						if (version == 3) {
 						    if (class > 2) {
 							e_desc->rcode = 0x40;
@@ -2138,7 +2138,7 @@ sensor_epow(struct event *event, int error_type, int version)
 						if (version == 3) {
 						    if (class > 2) {
 							e_desc->rcode = 0x60;
-							e_desc->rmsg = 
+							e_desc->rmsg =
 							    MSGCRIT_THERM_SHUT;
 						    }
 						}
@@ -2153,10 +2153,10 @@ sensor_epow(struct event *event, int error_type, int version)
 							    MSGCRIT_POWER_SHUT;
 						    }
 						}
-                                        	break;
+						break;
 
 					default:
-                                        	e_desc->rmsg = MSGCRIT_UNK;
+						e_desc->rmsg = MSGCRIT_UNK;
 						if (version == 3) {
 						    if (class > 2) {
 							e_desc->rcode = 0x100;
@@ -2165,8 +2165,8 @@ sensor_epow(struct event *event, int error_type, int version)
 						    }
 						}
 						break;
-			    	}
-			    	break;
+				}
+				break;
 
 			case WARNHI:
 			case WARNLO:
@@ -2175,22 +2175,22 @@ sensor_epow(struct event *event, int error_type, int version)
 				else
 					e_desc->rcode += 0x10;
 
-                        	switch (token) {
-                                    	case FAN:
-                                        	e_desc->rmsg = MSGWARN_FAN;
-                                        	break;
-                                    	case VOLT:
-                                        	e_desc->rmsg = MSGCRIT_VOLT;
-                                        	break;
-                                    	case THERM:
-                                        	e_desc->rmsg = MSGCRIT_THERM;
-                                        	break;
-                                    	case POWER:
-                                        	e_desc->rmsg = MSGCRIT_POWER;
-                                        	break;
-                                    	default:
-                                        	e_desc->rmsg = MSGCRIT_UNK;
-                                 	       	break;
+				switch (token) {
+					case FAN:
+						e_desc->rmsg = MSGWARN_FAN;
+						break;
+					case VOLT:
+						e_desc->rmsg = MSGCRIT_VOLT;
+						break;
+					case THERM:
+						e_desc->rmsg = MSGCRIT_THERM;
+						break;
+					case POWER:
+						e_desc->rmsg = MSGCRIT_POWER;
+						break;
+					default:
+						e_desc->rmsg = MSGCRIT_UNK;
+						break;
                                 }
 
                                 break;
@@ -2298,7 +2298,7 @@ process_v2_sp(struct event *event, int error_type)
  *
  * @returns 1 if diagnostic conclusion,	otherwise 0.
  */
-int 
+int
 process_v3_logs(struct event *event, int error_type)
 {
 	int version;
@@ -2339,12 +2339,12 @@ process_v3_logs(struct event *event, int error_type)
 	v3_errdscr[0].sn = SN_V3ELA + format_type;
 
 	/* If predictive error, then modify source number */
-	predictive = event->event_buf[I_BYTE0] & 0x08; 
+	predictive = event->event_buf[I_BYTE0] & 0x08;
 
 	if (format_type == RTAS_EXTHDR_FMT_EPOW) {
 		/* if ok, errdscr needs only modifier bits */
 		errdscr_ready = process_v3_epow(event, error_type, version);
-		if (errdscr_ready == 2) 
+		if (errdscr_ready == 2)
 			return 1;	/* refcode, so skip the rest */
 	} else {
 		/* Convert symptom bits to sequence number. */
@@ -2659,15 +2659,15 @@ convert_symptom(struct event *event, int format_type, int predictive,
 						break;
 					seqn++;
 				  }
-				  
+
 				  if (seqn >= NSPSYMPTOMS_ADDITIONAL) {
 					seqn = 0;
-				  	*msg =
+					*msg =
 					    sp_log_additional[seqn][msg_index];
 				  } else {
-				  	*msg =
+					*msg =
 					    sp_log_additional[seqn][msg_index];
-				  	seqn += (NSPSYMPTOMS - 1);
+					seqn += (NSPSYMPTOMS - 1);
 					/* after original symptom bits */
 				  }
 				}
@@ -2729,7 +2729,7 @@ convert_symptom(struct event *event, int format_type, int predictive,
 	{ \
 		process_refcodes(event, refc, rlen); \
 		return 2; \
-	} 
+	}
 
 int
 process_v3_epow(struct event *event, int error_type, int version)
@@ -2750,7 +2750,7 @@ process_v3_epow(struct event *event, int error_type, int version)
 		return 0;
 	} else if (has_epow_reset(event, error_type)) {
 		/* this error has been reset */
-		return 0; 	 /* continue */
+		return 0;	 /* continue */
 	}
 
 	v3_errdscr[0].rcode = 0;
@@ -2892,7 +2892,7 @@ process_v3_epow(struct event *event, int error_type, int version)
  *	Clear the frus out of the event description. This allows the caller to
  *	recycle the same event to report more than 4 frus.
  */
-void 
+void
 clear_edesc_struct(struct event_description_pre_v6 *event)
 {
 	int k;
@@ -2927,7 +2927,7 @@ clear_edesc_struct(struct event_description_pre_v6 *event)
  *	0 if the errdscr information was added successfully.
  *	-1 if adderrdscr or add_more_descrs failed.
  */
-int 
+int
 make_refcode_errdscr(struct event *event,
 		  struct event_description_pre_v6 *e_desc,
 		  int *adderrdscr_called)
@@ -3013,7 +3013,7 @@ process_refcodes(struct event *event, short *refc, int rlen)
 	dbg("SRC: type = 0x%x, ref code = 0x%x", src_type, *refc);
 
 	if (! one2one) {
-		rctabloc[0] = 0;    /* not used */ 
+		rctabloc[0] = 0;    /* not used */
 		rctabloc[1] = *lcc; /* num of loc codes for first ref code */
 		dbg("number of loc codes = 0x%x", *lcc);
 		lcc++;		       /* next loc code count */
@@ -3086,7 +3086,7 @@ process_refcodes(struct event *event, short *refc, int rlen)
 		 * And the src type into the fru's fmsg, and lastly,
 		 * flag the controller by setting fname to a "special"
 		 * string, i.e. "REF-CODE".
-		 */ 
+		 */
 		e_desc->frus[j].conf = rctab[i+1];
 		e_desc->frus[j].fmsg = src_type;
 		strcpy(e_desc->frus[j].fname, REFCODE_FNAME);
@@ -3136,7 +3136,7 @@ process_refcodes(struct event *event, short *refc, int rlen)
 
 	if (make_refcode_errdscr(event, e_desc, &adderrdscr_called))
 		return -1;
-	
+
 	/* End of processing SRC data */
 	return 1;
 }

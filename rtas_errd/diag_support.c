@@ -19,44 +19,44 @@
 
 char target_status[80];
 
-void 
+void
 free_diag_vpd(struct event *event)
 {
 	if (event->diag_vpd.ds != NULL) {
 		free(event->diag_vpd.ds);
-		event->diag_vpd.ds = NULL; 
+		event->diag_vpd.ds = NULL;
 	}
 
 	if (event->diag_vpd.yl != NULL) {
 		free(event->diag_vpd.yl);
-		event->diag_vpd.yl = NULL; 
+		event->diag_vpd.yl = NULL;
 	}
 
 	if (event->diag_vpd.fn != NULL) {
 		free(event->diag_vpd.fn);
-		event->diag_vpd.fn = NULL; 
+		event->diag_vpd.fn = NULL;
 	}
 
 	if (event->diag_vpd.sn != NULL) {
 		free(event->diag_vpd.sn);
-		event->diag_vpd.sn = NULL; 
+		event->diag_vpd.sn = NULL;
 	}
 
 	if (event->diag_vpd.se != NULL) {
 		free(event->diag_vpd.se);
-		event->diag_vpd.se = NULL; 
+		event->diag_vpd.se = NULL;
 	}
 
 	if (event->diag_vpd.tm != NULL) {
 		free(event->diag_vpd.tm);
-		event->diag_vpd.tm = NULL; 
+		event->diag_vpd.tm = NULL;
 	}
 }
 
 /*
  * Execute the 'lsvpd' command and open a pipe to read the data
  */
-static int 
+static int
 lsvpd_init(FILE **fp)
 {
 	char	cmd[128];
@@ -79,7 +79,7 @@ lsvpd_init(FILE **fp)
 /*
  * Close the open a pipe on 'lsvpd'.
  */
-static int 
+static int
 lsvpd_term(FILE *fp)
 {
 	int rc = 0;
@@ -100,7 +100,7 @@ lsvpd_term(FILE *fp)
 /*
  * Read the next lsvpd keyword, value pair
  */
-static int 
+static int
 lsvpd_read(struct event *event, FILE *fp)
 {
 	int rc = 1;
@@ -123,56 +123,56 @@ lsvpd_read(struct event *event, FILE *fp)
 			if (event->diag_vpd.ds == NULL)
 				return rc;
 
-			strcpy(event->diag_vpd.ds, &line[4]);		
+			strcpy(event->diag_vpd.ds, &line[4]);
 			dbg("found DS: \"%s\"", event->diag_vpd.ds);
 		}
 
-		if (! strncmp(line, "*YL", 3)) { 
+		if (! strncmp(line, "*YL", 3)) {
 			event->diag_vpd.yl = (char *)malloc(strlen (line) + 1);
 			if (event->diag_vpd.yl == NULL)
 				return rc;
 
-			strcpy(event->diag_vpd.yl, &line[4]);		
-			dbg("found YL: \"%s\"", event->diag_vpd.yl); 
+			strcpy(event->diag_vpd.yl, &line[4]);
+			dbg("found YL: \"%s\"", event->diag_vpd.yl);
 		}
 
-		if (! strncmp(line, "*FN", 3)) { 
-			event->diag_vpd.fn = (char *)malloc(strlen (line) + 1); 
+		if (! strncmp(line, "*FN", 3)) {
+			event->diag_vpd.fn = (char *)malloc(strlen (line) + 1);
 			if (event->diag_vpd.fn == NULL)
 				return rc;
 
 			strcpy(event->diag_vpd.fn, &line[4]);
-			dbg("found FN: \"%s\"", event->diag_vpd.fn); 
+			dbg("found FN: \"%s\"", event->diag_vpd.fn);
 		}
 
-		if (! strncmp(line, "*SN", 3)) { 
-			event->diag_vpd.sn = (char *)malloc(strlen (line) + 1); 
+		if (! strncmp(line, "*SN", 3)) {
+			event->diag_vpd.sn = (char *)malloc(strlen (line) + 1);
 			if (event->diag_vpd.sn == NULL)
 				return rc;
 
-			strcpy(event->diag_vpd.sn, &line[4]); 
-			dbg("found SN: \"%s\"", event->diag_vpd.sn); 
+			strcpy(event->diag_vpd.sn, &line[4]);
+			dbg("found SN: \"%s\"", event->diag_vpd.sn);
 		}
 
-		if (! strncmp(line, "*SE", 3)) { 
-			event->diag_vpd.se = (char *)malloc(strlen (line) + 1); 
+		if (! strncmp(line, "*SE", 3)) {
+			event->diag_vpd.se = (char *)malloc(strlen (line) + 1);
 			if (event->diag_vpd.se == NULL)
 				return rc;
 
 			strcpy(event->diag_vpd.se, &line[4]);
-			dbg("found SE: \"%s\"", event->diag_vpd.se); 
+			dbg("found SE: \"%s\"", event->diag_vpd.se);
 		}
 
-		if (! strncmp(line, "*TM", 3)) { 
-			event->diag_vpd.tm = (char *)malloc(strlen (line) + 1); 
+		if (! strncmp(line, "*TM", 3)) {
+			event->diag_vpd.tm = (char *)malloc(strlen (line) + 1);
 			if (event->diag_vpd.tm == NULL)
 				return rc;
 
 			strcpy(event->diag_vpd.tm, &line[4]);
-			dbg("found TM: \"%s\"", event->diag_vpd.tm); 
+			dbg("found TM: \"%s\"", event->diag_vpd.tm);
 		}
 
-		if (! strncmp(line, "*FC", 3)) { 
+		if (! strncmp(line, "*FC", 3)) {
 			/* start of next record */
 			dbg("found FC - start next record");
 			return 0;
@@ -184,7 +184,7 @@ lsvpd_read(struct event *event, FILE *fp)
 }
 
 
-int 
+int
 get_diag_vpd(struct event *event, char *phyloc)
 {
 	int rc = 0;
@@ -256,7 +256,7 @@ get_dt_status(char *dev)
 		if (fscanf(fp2, "%s", target_status)) {
 			dbg("target_status = \"%s\", loc_file = \"%s\"",
 			    target_status, loc_file);
-		} 
+		}
 		else {
 			fprintf(stderr, "read failed on %s\n", loc_file);
 			return NULL;
@@ -278,11 +278,11 @@ get_dt_status(char *dev)
 			    target, loc_file);
 			if (strcmp(dev, target) == 0) {
 				dbg("status = \"%s\"", target_status);
-				return target_status; 
-			} 
+				return target_status;
+			}
 
 			fclose (fp2);
-		} 
+		}
 		else {
 			fprintf(stderr, "read failed on %s\n", loc_file);
 			return NULL;
@@ -304,7 +304,7 @@ get_dt_status(char *dev)
  *	-1 - System error obtaining data
  *
  */
-int 
+int
 is_integrated(char *phy_loc)
 {
 	int	rc;
@@ -330,7 +330,7 @@ is_integrated(char *phy_loc)
 				if (phy_loc[index] == 'P') {
 					rc = 1;
 					break;
-				} 
+				}
 				else if (phy_loc[index] == '.')
 					index--;
 				else if (phy_loc[index] >= '0' &&
@@ -345,7 +345,7 @@ is_integrated(char *phy_loc)
 		}
 
 		if (phy_loc[index] == '-') {
- 		    	dbg("found dash, so resource is not integrated");
+			dbg("found dash, so resource is not integrated");
 			rc = 0;
 			break;
 		}
@@ -364,7 +364,7 @@ is_integrated(char *phy_loc)
  *	     this works for CHRP physical location codes, but will need to 
  *	     updated for converged location codes.
  */
-void 
+void
 get_base_loc(char *phyloc, char *base)
 {
 	/* Char by char copy until reaching a slash ('/) or the end */
@@ -373,7 +373,7 @@ get_base_loc(char *phyloc, char *base)
 		base++;
 		phyloc++;
 	}
-	/* Now the terminating null */ 
+	/* Now the terminating null */
 	*base = 0;
 }
 
@@ -399,17 +399,17 @@ diag_get_fru_pn(struct event *event, char *phyloc)
 		get_base_loc(phyloc, baseloc);
 		if (get_diag_vpd(event, baseloc))
 			return NULL;
-		if (event->diag_vpd.fn == NULL) 
+		if (event->diag_vpd.fn == NULL)
 			/* not found for base loc. code */
 			return NULL;
-	} 
+	}
 	else {
 		/* not integrated */
 		if (get_diag_vpd(event, phyloc))
 			return NULL;
-		if (event->diag_vpd.fn == NULL) 
+		if (event->diag_vpd.fn == NULL)
 			/* not found */
-	    		return NULL;
+			return NULL;
 	}
 
 	/* found for given location code */

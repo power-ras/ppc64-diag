@@ -38,7 +38,7 @@
  * @return pointer to (allocated) string, NULL on failure
  */
 static char *
-get_machine_serial() 
+get_machine_serial()
 {
 	FILE *fp;
 	char buf[20], *ret;
@@ -68,8 +68,8 @@ get_machine_serial()
  * @param load directive to load/unload module
  * @return 0 on success, !0 on failure.
  */
-static int 
-load_scanlog_module(int load) 
+static int
+load_scanlog_module(int load)
 {
 	int rc;
 	char system_arg[80];
@@ -84,14 +84,14 @@ load_scanlog_module(int load)
 	if ((strlen(MODPROBE_PROGRAM) + strlen(SCANLOG_MODULE)
 			+ (load ? 2 : 4)) > 79) {
 		log_msg(NULL, "%s module could not be %s, buffer is not long "
-			"enough to run %s", SCANLOG_MODULE, 
+			"enough to run %s", SCANLOG_MODULE,
 			(load ? "loaded" : "unloaded"), MODPROBE_PROGRAM);
 
 		return 1;
 	}
 
 	sprintf(system_arg, "%s %s %s 2>/dev/null", MODPROBE_PROGRAM,
-		(load ? "" : "-r"), SCANLOG_MODULE); 
+		(load ? "" : "-r"), SCANLOG_MODULE);
 	rc = system(system_arg);
 	if (rc) {
 		if (errno == ENOENT)
@@ -119,7 +119,7 @@ load_scanlog_module(int load)
  * This routine should be invoked once when the daemon is started.
  */
 void
-check_scanlog_dump(void) 
+check_scanlog_dump(void)
 {
 	int rc, in = -1, out = -1, bytes;
 	char *temp;
@@ -135,7 +135,7 @@ check_scanlog_dump(void)
 		sprintf(scanlog_filename, "%sscanoutlog.%s",
 			d_cfg.scanlog_dump_path, temp);
 		free(temp);
-	} 
+	}
 	else {
 		sprintf(scanlog_filename, "%sscanoutlog.NOSERIAL",
 			d_cfg.scanlog_dump_path);
@@ -156,14 +156,14 @@ check_scanlog_dump(void)
 
 	in = open(SCANLOG_DUMP_FILE, O_RDONLY);
 	if (in <= 0) {
-		log_msg(NULL, "Could not open %s for reading, %s", 
+		log_msg(NULL, "Could not open %s for reading, %s",
 			SCANLOG_DUMP_FILE, strerror(errno));
 		goto scanlog_error;
 	}
 
 	out = open(scanlog_filename, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
 	if (out <= 0) {
-		log_msg(NULL, "Could not open %s for writing, %s", 
+		log_msg(NULL, "Could not open %s for writing, %s",
 			scanlog_filename, strerror(errno));
 		goto scanlog_error;
 	}
@@ -178,7 +178,7 @@ check_scanlog_dump(void)
 	while ((bytes = read(in, dump_buf, DUMP_BUF_SZ)) > 0) {
 		rc = write(out, dump_buf, bytes);
 		if (rc < bytes) {
-			log_msg(NULL, "Could not write to %s, %s", 
+			log_msg(NULL, "Could not write to %s, %s",
 				scanlog_filename, strerror(errno));
 			goto scanlog_error;
 		}
@@ -197,7 +197,7 @@ check_scanlog_dump(void)
 	else {
 		log_msg(NULL, "Could not allocate space for scanlog filename, "
 			"%s. A scanlog dump could not be copied to the "
-			"filesystem", strerror(errno)); 
+			"filesystem", strerror(errno));
 		scanlog = NULL;
 	}
 
@@ -208,7 +208,7 @@ scanlog_out:
 		close(out);
 	if (dump_buf != NULL)
 		free(dump_buf);
-	
+
 	load_scanlog_module(0);
 
 	return;
@@ -245,7 +245,7 @@ check_platform_dump(struct event *event)
 	int	rc, bytes;
 
 	dump_scn = rtas_get_dump_scn(event->rtas_event);
-	if (dump_scn == NULL) 
+	if (dump_scn == NULL)
 		return;
 
 	dbg("platform dump found");
@@ -262,7 +262,7 @@ check_platform_dump(struct event *event)
 	dump_tag |= ((uint64_t)dump_scn->v6hdr.subtype << 32);
 	dbg("Dump ID: 0x%016LX", dump_tag);
 
-	snprintf(cmd_buf, 60, "%s 0x%016LX", EXTRACT_PLATDUMP_CMD, 
+	snprintf(cmd_buf, 60, "%s 0x%016LX", EXTRACT_PLATDUMP_CMD,
 		(long long unsigned int)dump_tag);
 
 	/* sigchld_handler() messes up pclose(). */

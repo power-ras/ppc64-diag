@@ -30,7 +30,7 @@ struct fru_callout_pre_v6{
 	int	conf;			/* probability of failure */
 	char	fname[NAMESIZE];	/* FRU name */
 	char	floc[LOCSIZE];		/* location of fname */
-	short   fmsg; 			/* text message number for fname */
+	short   fmsg;			/* text message number for fname */
 };
 
 /* 

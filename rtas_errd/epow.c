@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h> 
+#include <unistd.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <string.h>
@@ -45,7 +45,7 @@ static int time_remaining = 0;
  * @param siginfo unused
  * @param context unused
  */
-void 
+void
 epow_timer_handler(int sig, siginfo_t siginfo, void *context)
 {
 	int rc, state;
@@ -70,7 +70,7 @@ epow_timer_handler(int sig, siginfo_t siginfo, void *context)
 		/* 
 		 * Problem resolved; disable the interval timer and
 		 * update the epow status file.
-		 */ 
+		 */
 		tv.it_interval.tv_sec = 0;
 		tv.it_interval.tv_usec = 0;
 		tv.it_value = tv.it_interval;
@@ -142,7 +142,7 @@ log_epow(struct event *event, char *fmt, ...)
  * </pre>
  *
  */
-static int 
+static int
 parse_epow(struct event *event)
 {
 	struct rtas_event_hdr *rtas_hdr = event->rtas_hdr;
@@ -165,7 +165,7 @@ parse_epow(struct event *event)
 			log_epow(event, "Recieved shortened EPOW event, "
 				 "assuming power failure");
 			return 10;
-		} 
+		}
 		else {
 			log_epow(event, "Received shortened EPOW event, EPOW "
 				"sensor not in shutdown mode");
@@ -185,19 +185,19 @@ parse_epow(struct event *event)
 		log_epow(event, "Received EPOW action code reset (no action)");
 		return 0;
 		break;
-		
+
 	    case RTAS_EPOW_ACTION_WARN_COOLING:
 		log_epow(event, "Received non-critical cooling EPOW action "
 			 "code (8)");
 		return 8;
 		break;
-		
+
 	    case RTAS_EPOW_ACTION_WARN_POWER:
 		log_epow(event, "Received non-critical power EPOW action "
 			 "code (9)");
 		return 9;
 		break;
-		
+
 	    case RTAS_EPOW_ACTION_SYSTEM_SHUTDOWN:
 		if (state != RTAS_EPOW_ACTION_SYSTEM_SHUTDOWN) {
 			log_epow(event, "EPOW event: system shutdown "
@@ -226,32 +226,32 @@ parse_epow(struct event *event)
 
 		if (epow->fan) {
 			log_epow(event, "EPOW event: system shutdown will "
-				 "begin in %d seconds due to a fan failure", 
+				 "begin in %d seconds due to a fan failure",
 				 time_remaining);
 			return 6;
 		}
-		
+
 		if (epow->power_fault) {
 			log_epow(event, "EPOW event: system shutdown will "
-				 "begin in %d seconds due to a power fault", 
+				 "begin in %d seconds due to a power fault",
 				 time_remaining);
 			return 7;
 		}
-			
+
 		if (epow->event_modifier == RTAS_EPOW_MOD_NORMAL_SHUTDOWN) {
 			log_epow(event, "EPOW event: system shutdown will "
 				 "begin in %d seconds due to a normal "
 				 "shutdown request", time_remaining);
 			return 10;
 		}
-		
+
 		if (epow->event_modifier == RTAS_EPOW_MOD_UTILITY_POWER_LOSS) {
 			log_epow(event, "EPOW event: system shutdown will "
 				 "begin in %d seconds due to a battery "
 				 "failure", time_remaining);
 			return 7;
 		}
-		
+
 		if (epow->event_modifier == RTAS_EPOW_MOD_CRIT_FUNC_LOSS) {
 			log_epow(event, "EPOW event: system shutdown will "
 				 "begin in %d seconds due to a loss of system "
@@ -270,10 +270,10 @@ parse_epow(struct event *event)
 
 		log_epow(event, "EPOW event: system shutdown will begin in %d "
 			 "seconds due to an unknown cause", time_remaining);
-		
+
 		return 7;
 		break;
-		
+
 	    case RTAS_EPOW_ACTION_SYSTEM_HALT:
 		if (state != RTAS_EPOW_ACTION_SYSTEM_HALT) {
 			log_epow(event, "EPOW event: system halt requested, "
@@ -297,7 +297,7 @@ parse_epow(struct event *event)
 			log_epow(event, "EPOW event: system halting due to "
 				 "an unknown condition");
 			return 4;
-		} 
+		}
 		else {
 			log_epow(event, "EPOW event: system halting due to "
 				 "an unspecified condition");
@@ -311,7 +311,7 @@ parse_epow(struct event *event)
 		/* fall through */
 	    case RTAS_EPOW_ACTION_POWER_OFF:
 		event_type = "power off";
-		if (state != RTAS_EPOW_ACTION_MAIN_ENCLOSURE && 
+		if (state != RTAS_EPOW_ACTION_MAIN_ENCLOSURE &&
 		    state != RTAS_EPOW_ACTION_POWER_OFF) {
 			log_epow(event, "EPOW event: %s requested, but the "
 				 "sensor state indicates the problem was "
@@ -336,7 +336,7 @@ parse_epow(struct event *event)
 					 "to a power switch fault");
 				return 3;
 			}
-		} 
+		}
 		else {
 			log_epow(event, "EPOW event: power loss due to a %s "
 				 "event", event_type);
@@ -349,7 +349,7 @@ parse_epow(struct event *event)
 		else
 			log_epow(event, "EPOW event: power loss due to an "
 				 "unknown poer supply condition");
-		 
+
 		return 2;
 		break;
 
@@ -387,7 +387,7 @@ check_epow(struct event *event)
 	 * if the error is serious enough to warrant further action,
 	 * fork and exec the script to handle it
 	 */
-	current_status = parse_epow(event); 
+	current_status = parse_epow(event);
 	update_epow_status_file(current_status);
 
 	if (current_status > 0) {
@@ -398,7 +398,7 @@ check_epow(struct event *event)
 			log_msg(event, "Fork error, %s cannot be run to handle"
 				"an incoming EPOW event, %s", EPOW_PROGRAM,
 				strerror(errno));
-		} 
+		}
 		else if (child == 0) {
 			/* child process */
 			rc = execv(EPOW_PROGRAM, childargs);

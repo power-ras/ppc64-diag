@@ -45,7 +45,7 @@ extern char *scanlog;
 
 extern struct servicelog *slog;
 
-#define RTAS_ERROR_LOG_MAX 	4096
+#define RTAS_ERROR_LOG_MAX	4096
 #define ADDL_TEXT_MAX		256
 
 #ifndef MAX
@@ -57,9 +57,9 @@ extern struct servicelog *slog;
 
 /* Structure containing error log entries for a device. */
 struct errdata  {
-	unsigned 	sequence;	/* sequence # of entry */
-	unsigned 	time_stamp;	/* entry timestamp */
-	unsigned 	err_id;    	/* error id code */
+	unsigned	sequence;	/* sequence # of entry */
+	unsigned	time_stamp;	/* entry timestamp */
+	unsigned	err_id;		/* error id code */
 };
 
 struct diag_vpd {

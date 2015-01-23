@@ -22,7 +22,7 @@
 			  ((((x) & 0xf))))
 #define bcd_2b_toint(x)	( ((((x) & 0xf0) >> 4) * 10) +      \
 			  ((((x) & 0xf))))
- 
+
 /**
  * get_event_date
  * @brief Retrieve the timestamp from an event
@@ -62,7 +62,7 @@ get_event_date(struct event *event)
 
 	if (time != NULL) {
 		struct tm tm = {0};
-	
+
 		tm.tm_year = bcd_4b_toint(date->year) - 1900;
 		tm.tm_mon = bcd_2b_toint(date->month) - 1;
 		tm.tm_mday = bcd_2b_toint(date->day);
@@ -72,7 +72,7 @@ get_event_date(struct event *event)
 		tm.tm_isdst = -1;
 
 		return mktime(&tm);
-	} 
+	}
 
 	return 0;
 }
@@ -203,7 +203,7 @@ log_event(struct event *event)
 			dump_size |= scn_dump->size_lo;
 			snprintf(event->addl_text, ADDL_TEXT_MAX, "A platform "
 				 "dump was generated and downloaded to the "
-				 "filesystem (%llu bytes):\n%s%s", 
+				 "filesystem (%llu bytes):\n%s%s",
 				 (long long unsigned int)dump_size,
 				 d_cfg.platform_dump_path, filename);
 		}

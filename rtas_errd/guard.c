@@ -284,7 +284,7 @@ parse_lparcfg(char *param) {
 		if (!strncmp(param, buffer, len)) {
 			if ((pos = strchr(buffer, '=')) == NULL) {
 				log_msg(NULL, "Could not retrieve the value "
-					"for %s from /proc/ppc64/lparcfg", 
+					"for %s from /proc/ppc64/lparcfg",
 					param);
 			}
 			pos++;

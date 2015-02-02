@@ -146,7 +146,7 @@ void
 trim_location_code(struct dev_vpd *vpd)
 {
 	char *hyphen;
-	
+
 	strcpy(vpd->location, vpd->full_loc);
 	hyphen = strchr(vpd->location, '-');
 	if (hyphen && (!strcmp(hyphen, "-P1-C1") || !strcmp(hyphen, "-P1-C2")))

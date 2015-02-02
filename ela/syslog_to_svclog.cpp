@@ -137,7 +137,7 @@ collect_vpd(void)
 }
 
 /*
- * Recursive search for the Component with the specificed location code,
+ * Recursive search for the Component with the specified location code,
  * among the specified list of Components, which are the children of the
  * System root or of a Component.  Recursion is a bit weird because a
  * System is not a Component.

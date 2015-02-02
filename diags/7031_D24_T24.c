@@ -52,7 +52,7 @@ struct pearl_diag_page2 {
  *
  * @param dp the diagnostic page from the enclosure
  * @return the SCSI ID of the enclosure
- */ 
+ */
 static int
 get_enclosure_scsi_id(struct pearl_diag_page2 *dp)
 {
@@ -65,7 +65,7 @@ get_enclosure_scsi_id(struct pearl_diag_page2 *dp)
  *
  * @param status the status of the drive from the diagnostic page
  * @return OK, EMPTY, FAULT_NONCRITICAL, or FAULT_CRITICAL
- */ 
+ */
 static int
 print_drive_status(uint32_t status)
 {
@@ -124,7 +124,7 @@ print_drive_status(uint32_t status)
  *
  * @param status the status of the part from the diagnostic page
  * @return OK, EMPTY, FAULT_NONCRITICAL, or FAULT_CRITICAL
- */ 
+ */
 static int
 print_ps_fan_status(uint32_t status)
 {
@@ -163,7 +163,7 @@ print_ps_fan_status(uint32_t status)
  *
  * @param status the status of the repeater from the diagnostic page
  * @return OK or FAULT_CRITICAL
- */ 
+ */
 static int
 print_repeater_status(uint32_t status)
 {
@@ -226,7 +226,7 @@ print_repeater_status(uint32_t status)
  *
  * @param status the status of the VPD card from the diagnostic page
  * @return OK or FAULT_CRITICAL
- */ 
+ */
 static int
 print_vpd_card_status(uint32_t status)
 {
@@ -258,7 +258,7 @@ print_vpd_card_status(uint32_t status)
  * @param devnum the number of the failed devices (e.g. 2 for the 2nd fan)
  * @param interface the SCSI ID of the enclosure
  * @param vpd structure containing the VPD of the enclosure
- */ 
+ */
 static void
 pearl_servevent(int failtype, int devnum, int interface, struct dev_vpd *vpd)
 {
@@ -346,7 +346,7 @@ pearl_servevent(int failtype, int devnum, int interface, struct dev_vpd *vpd)
  * @param fd a file descriptor to the SCSI generic file (e.g. /dev/sg7)
  * @param vpd structure containing the VPD of the enclosure
  * @return 0 if no faults were found, or 1 if faults were found
- */ 
+ */
 int
 diag_7031_D24_T24(int fd, struct dev_vpd *vpd)
 {

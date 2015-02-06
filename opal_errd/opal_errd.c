@@ -154,7 +154,7 @@ static int find_extract_opal_dump_cmd(char **r_dump_path)
 	if (!errd_path)
 		return -1;
 
-	/* Look in whereever errd was executed from */
+	/* Look in where ever errd was executed from */
 	dump_path = malloc(strlen(errd_path) + strlen(DEFAULT_EXTRACT_DUMP_FNAME) + 1);
 	if (!dump_path) {
 		free(errd_path);
@@ -257,7 +257,7 @@ static int parse_log(char *buffer, size_t bufsz)
 	const char *failingsubsys = "Not Applicable";
 
 	if (bufsz < ELOG_MIN_READ_OFFSET) {
-		syslog(LOG_NOTICE, "Insufficent data, cannot parse elog.\n");
+		syslog(LOG_NOTICE, "Insufficient data, cannot parse elog.\n");
 		return -1;
 	}
 
@@ -539,7 +539,7 @@ static int find_and_read_elog_events(const char *elog_dir, const char *output_pa
 static char *validate_extract_opal_dump(const char *cmd)
 {
 	char *extract_opal_dump_cmd = NULL;
-	/* User didn't specifiy an extract_opal_dump command */
+	/* User didn't specify an extract_opal_dump command */
 	if (!cmd) {
 		if (find_extract_opal_dump_cmd(&extract_opal_dump_cmd) != 0)
 			syslog(LOG_WARNING, "Could not find an opal dump extractor tool\n");
@@ -593,7 +593,7 @@ static int opal_init_udev(struct udev **r_udev,
 
 	rc = udev_monitor_enable_receiving(udev_mon);
 	if (rc < 0) {
-		syslog(LOG_ERR, "Error (%d) enabling recieving on udev", rc);
+		syslog(LOG_ERR, "Error (%d) enabling receiving on udev", rc);
 		goto init_udev_exit;
 	}
 

@@ -384,7 +384,6 @@ static int process_elog(const char *elog_path, const char *output)
 	int out_fd = -1;
 	int dir_fd = -1;
 	char elog_raw_path[PATH_MAX];
-	char *buf;
 	char *name;
 	size_t bufsz;
 	struct stat sbuf;
@@ -392,24 +391,25 @@ static int process_elog(const char *elog_path, const char *output)
 	ssize_t sz = 0;
 	ssize_t readsz = 0;
 	int rc;
-	char *output_dir = strdup(output);
+	char *output_dir = NULL;
+	char *buf = NULL;
 	char output_file[PATH_MAX];
 
 	rc = snprintf(elog_raw_path, sizeof(elog_raw_path),
 		      "%s/raw", elog_path);
 	if (rc >= PATH_MAX) {
 		syslog(LOG_ERR, "Path to elog file is too big\n");
-		return -1;
+		goto err;
 	}
 
 	if (stat(elog_raw_path, &sbuf) == -1)
-		return -1;
+		goto err;
 
 	bufsz = sbuf.st_size;
 	buf = (char*)malloc(bufsz);
 	if (!buf) {
 		syslog(LOG_ERR, "Failed to allocate memory\n");
-		return -1;
+		goto err;
 	}
 
 	in_fd = open(elog_raw_path, O_RDONLY);
@@ -436,7 +436,7 @@ static int process_elog(const char *elog_path, const char *output)
 			output, (int)time(NULL), name);
 	if (rc >= PATH_MAX) {
 		syslog(LOG_ERR, "Path to elog output file is too big\n");
-		return -1;
+		goto err;
 	}
 
 	out_fd = open(output_file, O_WRONLY  | O_CREAT,
@@ -461,6 +461,10 @@ static int process_elog(const char *elog_path, const char *output)
 		       output_file, errno, strerror(errno));
 		goto err;
 	}
+
+	output_dir = strdup(output);
+	if (!output_dir)
+		goto err;
 
 	dir_fd = open(dirname(output_dir), O_RDONLY|O_DIRECTORY);
 	rc = fsync(dir_fd);

@@ -308,9 +308,7 @@ static void check_platform_dump(const char *extract_opal_dump_cmd,
 {
 	if (!extract_opal_dump_cmd || !sysfs_path)
 		return;
-	int rc;
-	int length = PATH_MAX + strlen(extract_opal_dump_cmd);
-	char dump_cmd[length];
+	pid_t fork_pid;
 
 	if (access(extract_opal_dump_cmd, X_OK) != 0) {
 		syslog(LOG_NOTICE, "The command \"%s\" is not executable.\n",
@@ -318,28 +316,25 @@ static void check_platform_dump(const char *extract_opal_dump_cmd,
 		return;
 	}
 
-	rc = snprintf(dump_cmd, length, "%s -s %s",
-			extract_opal_dump_cmd, sysfs_path);
-	if (rc >= length) {
-		syslog(LOG_NOTICE, "Failed to execute platform dump extractor"
-		       " (%s) as command options were truncated.\n", dump_cmd);
-		return;
-	}
-
-	if (max_dump)	/* Append -m flag */
-		rc += snprintf(dump_cmd + rc, length - rc, " -m %s", max_dump);
-
-	if (rc >= length) {
-		syslog(LOG_NOTICE, "Failed to execute platform dump extractor"
-		       " (%s) as command options were truncated.\n", dump_cmd);
-		return;
-	}
-
-	rc = system(dump_cmd);
-	if (rc) {
-		syslog(LOG_NOTICE, "Failed to execute platform dump "
-		       "extractor (%s).\n", dump_cmd);
-		return;
+	fork_pid = fork();
+	if (fork_pid == -1) {
+		syslog(LOG_NOTICE, "Couldn't fork() (%d:%s)\n",
+		       errno, strerror(errno));
+	} else if (fork_pid == 0) {
+		/* Child */
+		char *args[] = { (char *)extract_opal_dump_cmd, "-s", (char *)sysfs_path,
+			/* space for -m */(char *) NULL, /* space for max_dump */(char *) NULL,
+			(char *) NULL
+		};
+		char *envs[] = { NULL };
+		if (max_dump) {
+			args[3] = "-m";
+			args[4] = (char *)max_dump;
+		}
+		execve(extract_opal_dump_cmd, args, envs);
+		syslog(LOG_ERR, "Couldn't execv() into: %s (%d:%s)\n",
+		       extract_opal_dump_cmd, errno, strerror(errno));
+		exit(EXIT_FAILURE);
 	}
 }
 

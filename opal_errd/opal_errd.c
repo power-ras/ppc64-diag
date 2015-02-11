@@ -126,15 +126,20 @@ static char *find_opal_errd_dir(void)
 
 	r = readlink ("/proc/self/exe", errd_path, sb.st_size);
 	if (r <= 0 || r > sb.st_size)
-		return NULL;
+		goto out;
 
 	/* Just interested in the path, trim fname  */
 	path_end = strrchr (errd_path, '/');
 	if (path_end == NULL)
-		return NULL;
+		goto out;
+
 	/* + 1 to ensure the trailing / stays in */
 	*(path_end + 1) = '\0';
 	return errd_path;
+
+out:
+	free(errd_path);
+	return NULL;
 }
 
 /* Your job to free the returned path */

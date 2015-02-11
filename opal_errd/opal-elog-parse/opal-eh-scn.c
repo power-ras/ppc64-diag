@@ -14,7 +14,7 @@ int parse_eh_scn(struct opal_eh_scn **r_eh,
 	struct opal_eh_scn *eh;
 	struct opal_eh_scn *bufeh = (struct opal_eh_scn*)buf;
 
-	*r_eh = (struct opal_eh_scn*) malloc(hdr->length);
+	*r_eh = malloc(hdr->length);
 	if (!*r_eh)
 		return -ENOMEM;
 	eh = *r_eh;

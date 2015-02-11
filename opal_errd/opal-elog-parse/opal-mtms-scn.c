@@ -24,7 +24,7 @@ int parse_mtms_scn(struct opal_mtms_scn **r_mtms, const struct opal_v6_hdr *hdr,
 		return -EINVAL;
 	}
 
-	*r_mtms = (struct opal_mtms_scn*) malloc(sizeof(struct opal_mtms_scn));
+	*r_mtms = malloc(sizeof(struct opal_mtms_scn));
 	if(!*r_mtms)
 		return -ENOMEM;
 	mtms = *r_mtms;

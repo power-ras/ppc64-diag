@@ -18,7 +18,7 @@ int parse_mi_scn(struct opal_mi_scn **r_mi,
 		return -EINVAL;
 	}
 
-	*r_mi = (struct opal_mi_scn *) malloc(sizeof(struct opal_mi_scn));
+	*r_mi = malloc(sizeof(struct opal_mi_scn));
 	if (!*r_mi)
 		return -ENOMEM;
 	mi = *r_mi;

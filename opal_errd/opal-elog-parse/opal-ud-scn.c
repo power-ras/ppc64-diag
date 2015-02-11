@@ -19,7 +19,7 @@ int parse_ud_scn(struct opal_ud_scn **r_ud,
 		return -EINVAL;
 	}
 
-	*r_ud = (struct opal_ud_scn *) malloc(hdr->length);
+	*r_ud = malloc(hdr->length);
 	if (!*r_ud)
 		return -ENOMEM;
 	ud = *r_ud;

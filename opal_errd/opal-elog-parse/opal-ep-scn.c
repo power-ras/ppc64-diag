@@ -20,7 +20,7 @@ int parse_ep_scn(struct opal_ep_scn **r_ep,
 		return -EINVAL;
 	}
 
-	*r_ep = (struct opal_ep_scn *) malloc(sizeof(struct opal_ep_scn));
+	*r_ep = malloc(sizeof(struct opal_ep_scn));
 	if(!*r_ep)
 		return -ENOMEM;
 	ep = *r_ep;

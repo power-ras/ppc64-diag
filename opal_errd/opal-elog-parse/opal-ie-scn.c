@@ -20,7 +20,7 @@ int parse_ie_scn(struct opal_ie_scn **r_ie,
 		return -EINVAL;
 	}
 
-	*r_ie = (struct opal_ie_scn *) malloc(sizeof(struct opal_ie_scn));
+	*r_ie = malloc(sizeof(struct opal_ie_scn));
 	if (!*r_ie)
 		return -ENOMEM;
 	ie = *r_ie;

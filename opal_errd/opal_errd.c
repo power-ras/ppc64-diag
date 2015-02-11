@@ -406,7 +406,7 @@ static int process_elog(const char *elog_path, const char *output)
 		goto err;
 
 	bufsz = sbuf.st_size;
-	buf = (char*)malloc(bufsz);
+	buf = malloc(bufsz);
 	if (!buf) {
 		syslog(LOG_ERR, "Failed to allocate memory\n");
 		goto err;

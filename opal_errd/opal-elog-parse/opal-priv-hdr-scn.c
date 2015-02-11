@@ -30,7 +30,7 @@ int parse_priv_hdr_scn(struct opal_priv_hdr_scn **r_privhdr,
 		return -EINVAL;
 	}
 
-	*r_privhdr = (struct opal_priv_hdr_scn*) malloc(sizeof(struct opal_priv_hdr_scn));
+	*r_privhdr = malloc(sizeof(struct opal_priv_hdr_scn));
 	if (!*r_privhdr)
 		return -ENOMEM;
 	privhdr = *r_privhdr;

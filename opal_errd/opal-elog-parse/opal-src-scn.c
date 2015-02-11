@@ -30,7 +30,7 @@ int parse_src_scn(struct opal_src_scn **r_src,
 		return -EINVAL;
 	}
 
-	*r_src = (struct opal_src_scn*) malloc(sizeof(struct opal_src_scn));
+	*r_src = malloc(sizeof(struct opal_src_scn));
 	if(!*r_src)
 		return -ENOMEM;
 	src = *r_src;

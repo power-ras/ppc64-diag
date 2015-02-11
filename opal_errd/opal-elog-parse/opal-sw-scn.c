@@ -66,7 +66,7 @@ int parse_sw_scn(struct opal_sw_scn **r_sw,
 	struct opal_sw_scn *sw;
 	int rc = 0;
 
-	*r_sw = (struct opal_sw_scn *)malloc(hdr->length);
+	*r_sw = malloc(hdr->length);
 	if(!*r_sw)
 		return -ENOMEM;
 	sw = *r_sw;

@@ -222,7 +222,7 @@ static int process_dump(const char* dump_dir_path, const char *output_dir)
 		return -1;
 
 	bufsz = sbuf.st_size;
-	buf = (char*)malloc(bufsz);
+	buf = malloc(bufsz);
 	if (!buf) {
 		syslog(LOG_ERR, "Failed to allocate memory for dump\n");
 		return -1;

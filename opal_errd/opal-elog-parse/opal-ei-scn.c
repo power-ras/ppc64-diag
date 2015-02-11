@@ -17,7 +17,7 @@ int parse_ei_scn(struct opal_ei_scn **r_ei,
 		 check_buflen(hdr->length, sizeof(struct opal_ei_scn), __func__) < 0)
 		return -EINVAL;
 
-	*r_ei = (struct opal_ei_scn *) malloc(hdr->length);
+	*r_ei = malloc(hdr->length);
 	if (!*r_ei)
 		return -ENOMEM;
 

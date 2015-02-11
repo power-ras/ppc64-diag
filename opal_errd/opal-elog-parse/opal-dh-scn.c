@@ -19,7 +19,7 @@ int parse_dh_scn(struct opal_dh_scn **r_dh,
 	    __func__) < 0)
 		return -EINVAL;
 
-	*r_dh = (struct opal_dh_scn *) malloc(sizeof(struct opal_dh_scn));
+	*r_dh = malloc(sizeof(struct opal_dh_scn));
 	if(!*r_dh)
 		return -ENOMEM;
 	dh = *r_dh;

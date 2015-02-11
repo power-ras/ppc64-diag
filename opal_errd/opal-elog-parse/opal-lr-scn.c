@@ -18,7 +18,7 @@ int parse_lr_scn(struct opal_lr_scn **r_lr,
 		return -EINVAL;
 	}
 
-	*r_lr = (struct opal_lr_scn *) malloc(sizeof(struct opal_lr_scn));
+	*r_lr = malloc(sizeof(struct opal_lr_scn));
 	if (!*r_lr)
 		return -ENOMEM;
 	lr = *r_lr;

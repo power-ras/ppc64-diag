@@ -4,8 +4,7 @@
 #include "opal-event-log.h"
 
 opal_event_log *create_opal_event_log(int n) {
-	opal_event_log *log = (struct opal_event_log_scn *)
-		malloc(sizeof(struct opal_event_log_scn) * (n + 1));
+	opal_event_log *log = malloc(sizeof(struct opal_event_log_scn) * (n + 1));
 	if (!log)
 		return NULL;
 

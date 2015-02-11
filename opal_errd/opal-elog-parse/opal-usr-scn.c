@@ -26,7 +26,7 @@ int parse_usr_hdr_scn(struct opal_usr_hdr_scn **r_usrhdr,
 		return -EINVAL;
 	}
 
-	*r_usrhdr = (struct opal_usr_hdr_scn*) malloc(sizeof(struct opal_usr_hdr_scn));
+	*r_usrhdr = malloc(sizeof(struct opal_usr_hdr_scn));
 	if(!*r_usrhdr)
 		return -ENOMEM;
 	usrhdr = *r_usrhdr;

@@ -19,7 +19,7 @@ int parse_ed_scn(struct opal_ed_scn **r_ed,
 	    check_buflen(buflen, hdr->length, __func__) < 0 ||
 	    check_buflen(hdr->length, sizeof(struct opal_ed_scn), __func__) < 0)
 		return -EINVAL;
-	*r_ed = (struct opal_ed_scn *) malloc(hdr->length);
+	*r_ed = malloc(hdr->length);
 	if (!*r_ed)
 		return -ENOMEM;
 	ed = *r_ed;

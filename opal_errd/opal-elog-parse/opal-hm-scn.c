@@ -19,7 +19,7 @@ int parse_hm_scn(struct opal_hm_scn **r_hm,
 		return -EINVAL;
 	}
 
-	*r_hm = (struct opal_hm_scn *) malloc(sizeof(struct opal_hm_scn));
+	*r_hm = malloc(sizeof(struct opal_hm_scn));
 	if(!*r_hm)
 		return -ENOMEM;
 	hm = *r_hm;

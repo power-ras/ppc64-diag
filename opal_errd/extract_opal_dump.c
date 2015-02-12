@@ -376,6 +376,10 @@ int main(int argc, char *argv[])
 	fd_set exceptfds;
 	struct stat s;
 
+	setlogmask(LOG_UPTO(LOG_NOTICE));
+	openlog("OPAL_DUMP", LOG_CONS | LOG_PID | LOG_NDELAY | LOG_PERROR,
+		LOG_LOCAL1);
+
 	while ((opt = getopt(argc, argv, "As:o:m:wh")) != -1) {
 		switch (opt) {
 		case 'A':
@@ -401,16 +405,14 @@ int main(int argc, char *argv[])
 			break;
 		case 'h':
 			help(argv[0]);
+			closelog();
 			exit(EXIT_SUCCESS);
 		default:
 			help(argv[0]);
+			closelog();
 			exit(EXIT_FAILURE);
 		}
 	}
-
-	setlogmask(LOG_UPTO(LOG_NOTICE));
-	openlog("OPAL_DUMP", LOG_CONS | LOG_PID | LOG_NDELAY | LOG_PERROR,
-		LOG_LOCAL1);
 
 	snprintf(sysfs_path, sizeof(sysfs_path), "%s/firmware/opal/dump",
 		 opt_sysfs);
@@ -419,33 +421,36 @@ int main(int argc, char *argv[])
 	if (rc != 0) {
 		syslog(LOG_ERR, "Error accessing sysfs: %s (%d: %s)\n",
 		       sysfs_path, errno, strerror(errno));
-		exit(EXIT_FAILURE);
+		goto err_out;
 	}
 
 	rc = stat(opt_output_dir, &s);
 	if (rc != 0) {
 		syslog(LOG_ERR, "Error accessing output dir: %s (%d: %s)\n",
 		       opt_output_dir, errno, strerror(errno));
-		exit(EXIT_FAILURE);
+		goto err_out;
 	}
 
 start:
 	rc = find_and_process_dumps(sysfs_path, opt_output_dir);
 	if (rc == 0 && opt_wait) {
 		fd = open(sysfs_path, O_RDONLY|O_DIRECTORY);
-		if (fd < 0)
-			exit(EXIT_FAILURE);
+		if (fd < 0) {
+			rc = -1;
+			goto err_out;
+		}
 		FD_ZERO(&exceptfds);
 		FD_SET(fd, &exceptfds);
 		rc = select(fd+1, NULL, NULL, &exceptfds, NULL);
 		close(fd);
 
 		if (rc == -1)
-			exit(EXIT_FAILURE);
+			goto err_out;
 
 		goto start;
 	}
 
+err_out:
 	closelog();
 
 	if (rc < 0)

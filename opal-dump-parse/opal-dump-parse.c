@@ -181,15 +181,23 @@ static int write_log(char path[], int flag,
 	int fd;
 	int rc = E_FILE, sz, ret;
 	char dump_path[PATH_MAX];
-	char dump_suffix[DUMP_FILE_SUFFIX_SIZE];
+	char dump_suffix[DUMP_FILE_SUFFIX_SIZE + 1];
 
-	strcpy(dump_path, path);
+	sz = strlen(path);
+	if (sz >= PATH_MAX)
+		return rc;
+
+	dump_path[PATH_MAX - 1] = '\0';
+	strncpy(dump_path, path, PATH_MAX - 1);
 
 	if (!flag) {
 		strncpy(dump_suffix,
 			&data[offsetof(dump_file_hdr, fname) + DUMP_FILE_PREFIX_SIZE],
 			DUMP_FILE_SUFFIX_SIZE);
-		strcat(dump_path, dump_suffix);
+		dump_suffix[DUMP_FILE_SUFFIX_SIZE] = '\0';
+		if ((sz + strlen(dump_suffix)) >= PATH_MAX)
+			return rc;
+		strncat(dump_path, dump_suffix, strlen(dump_suffix));
 	}
 
 	fd = open(dump_path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP);

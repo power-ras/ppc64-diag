@@ -152,6 +152,8 @@ static int find_extract_opal_dump_cmd(char **r_dump_path)
 	if (access(DEFAULT_EXTRACT_DUMP_CMD, X_OK) == 0) {
 		/* Exists */
 		*r_dump_path = strdup(DEFAULT_EXTRACT_DUMP_CMD);
+		if (*r_dump_path == NULL)
+			return -1;
 		return 0;
 	}
 

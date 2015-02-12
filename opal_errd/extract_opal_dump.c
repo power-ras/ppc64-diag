@@ -54,19 +54,18 @@ static void help(const char* argv0)
 #define DUMP_HDR_FNAME_OFFSET  0x18    /* Suggested filename in dump header */
 #define DUMP_MAX_FNAME_LEN     48      /* Including .PARTIAL */
 
-static void dump_get_file_name(char *buf, int bsize,
-			       char *dfile, uint16_t *prefix_size)
+static void dump_get_file_name(char *buf, int bsize, char *dfile,
+			       int dfile_size, uint16_t *prefix_size)
 {
 	if (bsize >= DUMP_HDR_PREFIX_OFFSET + sizeof(uint16_t))
 		*prefix_size = be16toh(*(uint16_t *)(buf + DUMP_HDR_PREFIX_OFFSET));
 
 	if (bsize >= DUMP_HDR_FNAME_OFFSET + DUMP_MAX_FNAME_LEN)
-		strncpy(dfile, buf + DUMP_HDR_FNAME_OFFSET,
-			DUMP_MAX_FNAME_LEN);
+		strncpy(dfile, buf + DUMP_HDR_FNAME_OFFSET, dfile_size);
 	else
-		strcpy(dfile, "platform.dumpid.PARTIAL");
+		strncpy(dfile, "platform.dumpid.PARTIAL", dfile_size);
 
-	dfile[DUMP_MAX_FNAME_LEN - 1] = '\0';
+	dfile[dfile_size - 1] = '\0';
 }
 
 static void ack_dump(const char* dump_dir_path)
@@ -248,7 +247,8 @@ static int process_dump(const char* dump_dir_path, const char *output_dir)
 		sz += readsz;
 	} while(sz != bufsz);
 
-	dump_get_file_name(buf, bufsz, outfname, &prefix_size);
+	dump_get_file_name(buf, bufsz, outfname,
+			   DUMP_MAX_FNAME_LEN, &prefix_size);
 
 	snprintf(dump_path, sizeof(dump_path), "%s/%s.tmp", output_dir, outfname);
 	snprintf(final_dump_path, sizeof(dump_path), "%s/%s", output_dir, outfname);

@@ -462,10 +462,15 @@ static int process_elog(const char *elog_path, const char *output)
 		goto err;
 
 	dir_fd = open(dirname(output_dir), O_RDONLY|O_DIRECTORY);
-	rc = fsync(dir_fd);
-	if (rc == -1) {
-		syslog(LOG_ERR, "Failed to sync platform elog directory: %s"
+	if (dir_fd == -1) {
+		syslog(LOG_ERR, "Failed to open platform elog directory: %s"
 		       " (%d:%s)\n", output_dir, errno, strerror(errno));
+	} else {
+		rc = fsync(dir_fd);
+		if (rc == -1)
+			syslog(LOG_ERR, "Failed to sync platform elog "
+			       "directory: %s (%d:%s)\n",
+			       output_dir, errno, strerror(errno));
 	}
 
 	parse_log(buf, bufsz);

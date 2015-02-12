@@ -438,10 +438,10 @@ start:
 		FD_ZERO(&exceptfds);
 		FD_SET(fd, &exceptfds);
 		rc = select(fd+1, NULL, NULL, &exceptfds, NULL);
+		close(fd);
+
 		if (rc == -1)
 			exit(EXIT_FAILURE);
-
-		close(fd);
 
 		goto start;
 	}

@@ -271,8 +271,6 @@ static int process_dump(const char* dump_dir_path, const char *output_dir)
 		goto err;
 	}
 
-	dir_fd = open(output_dir, O_RDONLY|O_DIRECTORY);
-
 	rc = fsync(out_fd);
 	if (rc == -1) {
 		syslog(LOG_ERR, "Failed to sync platform dump: %s (%d:%s)\n",
@@ -286,6 +284,13 @@ static int process_dump(const char* dump_dir_path, const char *output_dir)
 		syslog(LOG_ERR, "Failed to rename platform dump %s to %s"
 		       "(%d: %s)\n",
 		       dump_path, final_dump_path, errno, strerror(errno));
+		goto err;
+	}
+
+	dir_fd = open(output_dir, O_RDONLY|O_DIRECTORY);
+	if (dir_fd == -1) {
+		syslog(LOG_ERR, "Failed to open platform dump directory: %s"
+		       " (%d:%s)\n", output_dir, errno, strerror(errno));
 		goto err;
 	}
 

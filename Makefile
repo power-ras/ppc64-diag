@@ -5,6 +5,7 @@
 include rules.mk
 
 .SILENT:
+BUILD_DIR=$(CURDIR)
 
 SUBDIRS = rtas_errd diags scripts ela lpd opal_errd opal-dump-parse
 
@@ -52,3 +53,14 @@ doc: $(DOXYGEN_CFG)
 clean:
 	@$(foreach d,$(SUBDIRS), $(MAKE) -C $d clean;)
 	@$(CLEAN) $(SHIPDIR) $(TARBALL) doc
+	rm -rf TAGS cscope.*
+
+.PHONY: TAGS
+TAGS:
+	rm -f $@
+	find "$(BUILD_DIR)" -name '*.[hc]' -exec etags --append {} +
+
+cscope:
+	rm -f ./cscope.*
+	find "$(BUILD_DIR)" -name "*.[chsS]" -print | sed 's,^\./,,' > ./cscope.files
+	cscope -b

@@ -43,8 +43,9 @@
 |------------------------------------------------------------------------------|
 |                             Extended User Header                             |
 |------------------------------------------------------------------------------|
-| Version                  : 1 (EH)                                            |
-| Sub-section type         : 0                                                 |
+| Section Version          : 1 (EH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x4c                                              |
 | Component ID             : 5355                                              |
 | Machine Type Model       : 8247-22L                                          |
 | Serial Number            : 100DA7A                                           |

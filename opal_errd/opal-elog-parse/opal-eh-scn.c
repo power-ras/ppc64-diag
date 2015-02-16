@@ -57,10 +57,7 @@ int parse_eh_scn(struct opal_eh_scn **r_eh,
 int print_eh_scn(const struct opal_eh_scn *eh)
 {
 	print_header("Extended User Header");
-	print_line("Version", "%d (%c%c)", eh->v6hdr.version,
-	           eh->v6hdr.id[0], eh->v6hdr.id[1]);
-	print_line("Sub-section type", "%d", eh->v6hdr.subtype);
-	print_line("Component ID", "%x", eh->v6hdr.component_id);
+	print_opal_v6_hdr(eh->v6hdr);
 	print_mtms_struct(eh->mtms);
 	print_line("FW Released Ver", "%s",
 	          eh->opal_release_version);

@@ -58,8 +58,9 @@
 |------------------------------------------------------------------------------|
 |                             Extended User Header                             |
 |------------------------------------------------------------------------------|
-| Version                  : 1 (EH)                                            |
-| Sub-section type         : 0                                                 |
+| Section Version          : 1 (EH)                                            |
+| Sub-section type         : 0x0                                               |
+| Section Length           : 0x68                                              |
 | Component ID             : 3100                                              |
 | Machine Type Model       : 8246-L2C                                          |
 | Serial Number            : 10008FA                                           |

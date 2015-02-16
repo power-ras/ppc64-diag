@@ -70,5 +70,7 @@ int free_opal_event_log(opal_event_log *log) {
 		i++;
 	}
 
+	free(log);
+
 	return 0;
 }

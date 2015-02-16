@@ -14,14 +14,19 @@ int parse_eh_scn(struct opal_eh_scn **r_eh,
 	struct opal_eh_scn *eh;
 	struct opal_eh_scn *bufeh = (struct opal_eh_scn*)buf;
 
-	*r_eh = malloc(hdr->length);
-	if (!*r_eh)
+	if (hdr->length < sizeof(*eh)) {
+		fprintf(stderr, "%s: corruped input data, expected length >= %lu, "
+				"got %u", __func__, sizeof(*eh), hdr->length);
+		return -EINVAL;
+	}
+
+	eh = malloc(hdr->length);
+	if (!eh)
 		return -ENOMEM;
-	eh = *r_eh;
 
 	if (buflen < sizeof(struct opal_eh_scn)) {
-		fprintf(stderr, "%s: corrupted, expected length >= %lu, got %u\n",
-		        __func__,  sizeof(struct opal_eh_scn), buflen);
+		fprintf(stderr, "%s: corrupted input buffer, expected length >= %lu, "
+				"got %u\n", __func__,  sizeof(struct opal_eh_scn), buflen);
 		free(eh);
 		return -EINVAL;
 	}
@@ -45,6 +50,7 @@ int parse_eh_scn(struct opal_eh_scn **r_eh,
 	}
 	strncpy(eh->opalsymid, bufeh->opalsymid, eh->opal_symid_len);
 
+	*r_eh = eh;
 	return 0;
 }
 

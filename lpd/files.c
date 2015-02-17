@@ -16,6 +16,8 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <libgen.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -263,10 +265,11 @@ indicator_log_write(const char *fmt, ...)
  *	nothing
  */
 static void
-rotate_log_file(const char *lp_log_file)
+rotate_log_file(char *lp_log_file)
 {
 	int	rc;
-	char	cmd_buf[128];
+	int	dir_fd;
+	char	*dir_name;
 	char	lp_log_file0[PATH_MAX];
 	struct	stat sbuf;
 
@@ -276,19 +279,42 @@ rotate_log_file(const char *lp_log_file)
 		return;
 	}
 
-	if (sbuf.st_size > LP_ERRD_LOGSZ) {
-		_dbg("Rotating log file : %s", lp_log_file);
-		snprintf(lp_log_file0, PATH_MAX, "%s0",
-			 lp_log_file);
-		snprintf(cmd_buf, sizeof(cmd_buf), "rm -f %s; mv %s %s",
-			 lp_log_file0, lp_log_file, lp_log_file0);
-		rc = system(cmd_buf);
-		if (rc == -1) {
-			dbg("An error occured during the rotation of log "
-			    "file:\n cmd = %s", cmd_buf);
-			_dbg("Exit status : %d", WEXITSTATUS(rc));
+	if (sbuf.st_size <= LP_ERRD_LOGSZ)
+		return;
+
+	_dbg("Rotating log file : %s", lp_log_file);
+	snprintf(lp_log_file0, PATH_MAX, "%s0", lp_log_file);
+
+	/* Remove old files */
+	rc = stat(lp_log_file0, &sbuf);
+	if (rc == 0) {
+		if (unlink(lp_log_file0)) {
+			dbg("Could not delete archive file %s "
+			    "(%d: %s) to make a room for new archive."
+			    " The new logs will be logged anyway.",
+			    lp_log_file0, errno, strerror(errno));
+			return;
 		}
 	}
+
+	rc = rename(lp_log_file, lp_log_file0);
+	if (rc == -1) {
+		dbg("Could not archive log file %s to %s (%d: %s)",
+		    lp_log_file, lp_log_file0, errno, strerror(errno));
+		return;
+	}
+
+	dir_name = dirname(lp_log_file);
+	dir_fd = open(dir_name, O_RDONLY | O_DIRECTORY);
+	if (dir_fd == -1) {
+		dbg("Could not open log directory %s (%d: %s)",
+		    dir_name, errno, strerror(errno));
+		return;
+	}
+
+	/* sync log directory */
+	rc = fsync(dir_fd);
+	close(dir_fd);
 }
 
 /**

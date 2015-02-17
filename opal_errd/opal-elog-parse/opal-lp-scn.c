@@ -81,5 +81,6 @@ int print_lp_scn(const struct opal_lp_scn *lp)
 			print_line("Target LP", "0x%04X", lps[i]);
 	}
 
+	print_bar();
 	return 0;
 }

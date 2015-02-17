@@ -47,5 +47,6 @@ int print_mtms_scn(const struct opal_mtms_scn *mtms)
 	print_header("Machine Type/Model & Serial Number");
 	print_opal_v6_hdr(mtms->v6hdr);
 	print_mtms_struct(tmp);
+	print_bar();
 	return 0;
 }

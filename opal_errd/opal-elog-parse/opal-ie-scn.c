@@ -74,6 +74,7 @@ int print_ie_scn(const struct opal_ie_scn *ie)
 			print_line("Change platform size to", "0x%016lx", ie->data.max);
 	}
 
+	print_bar();
 	return 0;
 }
 

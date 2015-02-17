@@ -37,5 +37,6 @@ int print_ed_scn(const struct opal_ed_scn *ed)
 	print_opal_v6_hdr(ed->v6hdr);
 	print_line("Created by", "%s", get_creator_name(ed->creator_id));
 	print_hex(ed->user_data, ed->v6hdr.length - 12);
+	print_bar();
 	return 0;
 }

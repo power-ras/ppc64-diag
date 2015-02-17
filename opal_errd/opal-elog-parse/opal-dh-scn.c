@@ -61,5 +61,6 @@ int print_dh_scn(const struct opal_dh_scn *dh)
 	else /* therefore ascii */
 		print_line("OS Assigned Dump File", "%s", dh->shared.dump_str);
 
+	print_bar();
 	return 0;
 }

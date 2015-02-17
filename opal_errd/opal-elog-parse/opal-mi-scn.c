@@ -36,6 +36,7 @@ int print_mi_scn(const struct opal_mi_scn *mi)
 	print_opal_v6_hdr(mi->v6hdr);
 	print_line("Policy Flags", "0x%08x", mi->flags);
 
+	print_bar();
 	return 0;
 }
 

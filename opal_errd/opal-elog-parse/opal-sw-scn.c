@@ -128,5 +128,6 @@ int print_sw_scn(const struct opal_sw_scn *sw)
 		print_line("Parse error", "Incompatible version - 0x%x", sw->v6hdr.version);
 	}
 
+	print_bar();
 	return 0;
 }

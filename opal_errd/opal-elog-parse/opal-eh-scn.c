@@ -75,5 +75,6 @@ int print_eh_scn(const struct opal_eh_scn *eh)
 	if (eh->opal_symid_len)
 		print_line("Symptom Id", "%s", eh->opalsymid);
 
+	print_bar();
 	return 0;
 }

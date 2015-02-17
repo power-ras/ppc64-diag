@@ -37,5 +37,6 @@ int print_hm_scn(const struct opal_hm_scn *hm)
 	print_opal_v6_hdr(hm->v6hdr);
 	print_mtms_struct(hm->mtms);
 
+	print_bar();
 	return 0;
 }

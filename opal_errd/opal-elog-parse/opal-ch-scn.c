@@ -50,5 +50,6 @@ int print_ch_scn(const struct opal_ch_scn *ch)
 	print_opal_v6_hdr(ch->v6hdr);
 	print_line("Call Home Comment", "%s", ch->comment);
 
+	print_bar();
 	return 0;
 }

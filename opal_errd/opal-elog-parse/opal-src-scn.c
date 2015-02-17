@@ -128,6 +128,7 @@ int print_opal_src_scn(const struct opal_src_scn *src)
 			print_fru_scn(src->fru[i]);
 	}
 	print_center(" ");
+	print_bar();
 	return 0;
 }
 

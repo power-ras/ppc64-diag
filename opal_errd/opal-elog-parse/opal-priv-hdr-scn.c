@@ -59,6 +59,7 @@ int parse_priv_hdr_scn(struct opal_priv_hdr_scn **r_privhdr,
 
 int print_opal_priv_hdr_scn(const struct opal_priv_hdr_scn *privhdr)
 {
+	print_bar();
 	print_header("Private Header");
 	print_opal_v6_hdr(privhdr->v6hdr);
 	print_line("Created at", "%4u-%02u-%02u | %02u:%02u:%02u",
@@ -84,5 +85,6 @@ int print_opal_priv_hdr_scn(const struct opal_priv_hdr_scn *privhdr)
 	print_line("Platform Log Id", "0x%x", privhdr->plid);
 	print_line("Entry ID", "0x%x", privhdr->log_entry_id);
 	print_line("Section Count","%u",privhdr->scn_count);
+	print_bar();
 	return 0;
 }

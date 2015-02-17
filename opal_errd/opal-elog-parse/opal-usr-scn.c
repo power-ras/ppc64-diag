@@ -92,5 +92,6 @@ int print_opal_usr_hdr_scn(const struct opal_usr_hdr_scn *usrhdr)
 		print_line(entry, "Unknown action flag (0x%08x)", usrhdr->action);
 	}
 
+	print_bar();
 	return 0;
 }

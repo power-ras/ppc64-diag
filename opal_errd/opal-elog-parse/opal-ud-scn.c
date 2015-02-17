@@ -39,5 +39,6 @@ int print_ud_scn(const struct opal_ud_scn *ud)
 	 */
 	print_line("User data hex","length %d",ud->v6hdr.length - 8);
 	print_hex(ud->data, ud->v6hdr.length - 8);
+	print_bar();
 	return 0;
 }

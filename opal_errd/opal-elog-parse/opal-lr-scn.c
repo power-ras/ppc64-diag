@@ -48,5 +48,6 @@ int print_lr_scn(const struct opal_lr_scn *lr)
 		print_line("Memory Logical Address 32-63", "0x%08x", lr->memory_addr);
 	}
 
+	print_bar();
 	return 0;
 }

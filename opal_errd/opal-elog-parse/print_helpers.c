@@ -47,8 +47,6 @@ int print_center(const char *output)
 
 int print_header(const char *header)
 {
-   print_bar();
-
    print_center(header);
 
    print_bar();

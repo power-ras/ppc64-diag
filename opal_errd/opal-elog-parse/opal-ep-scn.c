@@ -54,5 +54,6 @@ int print_ep_scn(const struct opal_ep_scn *ep)
 	}
 	print_line("Platform reason code", "0x%x", ep->reason);
 
+	print_bar();
 	return 0;
 }

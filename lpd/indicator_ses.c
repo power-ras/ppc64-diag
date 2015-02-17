@@ -12,6 +12,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <dirent.h>
+#include <limits.h>
 #include <sys/types.h>
 
 #include "lp_diag.h"
@@ -51,7 +52,7 @@ trim_location_code(struct dev_vpd *vpd)
 static struct dev_vpd *
 read_ses_vpd(void)
 {
-	char	path[128];
+	char	path[PATH_MAX];
 	DIR	*dir;
 	struct	dirent *dirent;
 	struct	dev_vpd *vpd = NULL;
@@ -68,8 +69,8 @@ read_ses_vpd(void)
 		trim_location_code(v1);
 
 		/* read sg name */
-		snprintf(path, 128, "%s/%s/device/scsi_generic",
-						SCSI_SES_PATH, v1->dev);
+		snprintf(path, PATH_MAX, "%s/%s/device/scsi_generic",
+			 SCSI_SES_PATH, v1->dev);
 		dir = opendir(path);
 		if (!dir) {
 			log_msg("Unable to open directory : %s", path);

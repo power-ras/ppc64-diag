@@ -6,6 +6,7 @@
 #ifndef LP_DIAG_H
 #define LP_DIAG_H
 
+#include <limits.h>
 #include <servicelog-1/servicelog.h>
 #include <linux/types.h>
 
@@ -53,7 +54,7 @@ extern int		lp_event_log_fd;
 extern char		*lp_error_log_file;
 extern int		lp_error_log_fd;
 
-#define	DEV_LENGTH		64
+#define	DEV_LENGTH		PATH_MAX
 #define	VPD_LENGTH		128
 #define	LOCATION_LENGTH		128
 

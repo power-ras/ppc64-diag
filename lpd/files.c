@@ -15,6 +15,7 @@
 #include <fcntl.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -55,7 +56,7 @@ reformat_msg(char *msg, int size)
 	char	temp2;
 	int     len = strlen(msg);
 
-	if (len > LP_ERROR_LOG_MAX) /* Insufficient temporary buffer size */
+	if (len >= LP_ERROR_LOG_MAX) /* Insufficient temporary buffer size */
 		return len;
 
 	if (len > (size - size / 80 + 1)) /* Worst case target size */
@@ -266,7 +267,7 @@ rotate_log_file(const char *lp_log_file)
 {
 	int	rc;
 	char	cmd_buf[128];
-	char	lp_log_file0[64];
+	char	lp_log_file0[PATH_MAX];
 	struct	stat sbuf;
 
 	rc = stat(lp_log_file, &sbuf);
@@ -277,7 +278,7 @@ rotate_log_file(const char *lp_log_file)
 
 	if (sbuf.st_size > LP_ERRD_LOGSZ) {
 		_dbg("Rotating log file : %s", lp_log_file);
-		snprintf(lp_log_file0, sizeof(lp_log_file0), "%s0",
+		snprintf(lp_log_file0, PATH_MAX, "%s0",
 			 lp_log_file);
 		snprintf(cmd_buf, sizeof(cmd_buf), "rm -f %s; mv %s %s",
 			 lp_log_file0, lp_log_file, lp_log_file0);

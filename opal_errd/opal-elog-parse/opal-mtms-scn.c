@@ -37,8 +37,15 @@ int parse_mtms_scn(struct opal_mtms_scn **r_mtms, const struct opal_v6_hdr *hdr,
 
 int print_mtms_scn(const struct opal_mtms_scn *mtms)
 {
+	/*
+	 * This is a workaround for a known gcc bug where passing packed structs by
+	 * value to functions requires an intermediate otherwise gcc will read past
+	 * the end of the struct during the copy.
+	 */
+	struct opal_mtms_struct tmp = mtms->mtms;
+
 	print_header("Machine Type/Model & Serial Number");
 	print_opal_v6_hdr(mtms->v6hdr);
-	print_mtms_struct(mtms->mtms);
+	print_mtms_struct(tmp);
 	return 0;
 }

@@ -56,7 +56,7 @@ extern int		lp_error_log_fd;
 
 #define	DEV_LENGTH		PATH_MAX
 #define	VPD_LENGTH		128
-#define	LOCATION_LENGTH		128
+#define	LOCATION_LENGTH		80
 
 /* device vpd data */
 struct dev_vpd {

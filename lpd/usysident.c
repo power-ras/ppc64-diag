@@ -121,6 +121,12 @@ main(int argc, char **argv)
 		case 'l':
 			/* Location code */
 			lvalue = optarg;
+			if (strlen(lvalue) >= LOCATION_LENGTH) {
+				fprintf(stderr, "\nLocation code length cannot"
+					" be > %d (including NULL char).\n\n",
+					LOCATION_LENGTH);
+				return 1;
+			}
 			break;
 		case 's':
 			/* Enable/disable */
@@ -331,6 +337,7 @@ main(int argc, char **argv)
 	/* Turn on/off indicator based on location code */
 	if (lvalue) {
 		strncpy(temp, lvalue, LOCATION_LENGTH);
+		temp[LOCATION_LENGTH - 1] = '\0';
 
 retry:
 		current = get_indicator_for_loc_code(list, lvalue);

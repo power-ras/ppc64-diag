@@ -82,7 +82,7 @@ read_ses_vpd(void)
 			if (!strcmp(dirent->d_name, ".") ||
 			    !strcmp(dirent->d_name, ".."))
 				continue;
-			strncpy(v1->dev, dirent->d_name, DEV_LENGTH);
+			strncpy(v1->dev, dirent->d_name, DEV_LENGTH - 1);
 		}
 		closedir(dir);
 	}

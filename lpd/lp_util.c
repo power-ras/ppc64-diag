@@ -75,27 +75,27 @@ read_vpd_from_lsvpd(struct dev_vpd *vpd, const char *device)
 		if ((pos = strstr(buf, "*TM")) != NULL) {
 			if (!(pos = skip_space(pos)))
 				continue;
-			strncpy(vpd->mtm, pos, VPD_LENGTH);
+			strncpy(vpd->mtm, pos, VPD_LENGTH - 1);
 		} else if ((pos = strstr(buf, "*YL")) != NULL) {
 			if (!(pos = skip_space(pos)))
 				continue;
-			strncpy(vpd->location, pos, LOCATION_LENGTH);
+			strncpy(vpd->location, pos, LOCATION_LENGTH - 1);
 		} else if ((pos = strstr(buf, "*DS")) != NULL) {
 			if (!(pos = skip_space(pos)))
 				continue;
-			strncpy(vpd->ds, pos, VPD_LENGTH);
+			strncpy(vpd->ds, pos, VPD_LENGTH - 1);
 		} else if ((pos = strstr(buf, "*SN")) != NULL) {
 			if (!(pos = skip_space(pos)))
 				continue;
-			strncpy(vpd->sn, pos, VPD_LENGTH);
+			strncpy(vpd->sn, pos, VPD_LENGTH - 1);
 		} else if ((pos = strstr(buf, "PN")) != NULL) {
 			if (!(pos = skip_space(pos)))
 				continue;
-			strncpy(vpd->pn, pos, VPD_LENGTH);
+			strncpy(vpd->pn, pos, VPD_LENGTH - 1);
 		} else if ((pos = strstr(buf, "*FN")) != NULL) {
 			if (!(pos = skip_space(pos)))
 				continue;
-			strncpy(vpd->fru, pos, VPD_LENGTH);
+			strncpy(vpd->fru, pos, VPD_LENGTH - 1);
 		}
 	}
 	pclose(fp);
@@ -163,7 +163,7 @@ read_device_vpd(const char *path)
 		memset(curr, 0, sizeof(struct dev_vpd));
 
 		/* device name */
-		strncpy(curr->dev, dirent->d_name, DEV_LENGTH);
+		strncpy(curr->dev, dirent->d_name, DEV_LENGTH - 1);
 
 		if (read_vpd_from_lsvpd(curr, dirent->d_name)) {
 			free_device_vpd(vpd);

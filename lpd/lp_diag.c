@@ -252,6 +252,7 @@ build_callout_loc_code(struct sl_event *event, struct loc_code *list,
 
 		/* get FRUs nearest fault indicator */
 		strncpy(location, callout->location, LOCATION_LENGTH);
+		location[LOCATION_LENGTH - 1] = '\0';
 		loc_led = get_fru_indicator(list, location, &truncated);
 		if (!loc_led) { /* No indicator found for the given loc code */
 			*attn_state = 1;
@@ -329,6 +330,7 @@ event_fru_callout(struct sl_callout *callouts, struct loc_code *list,
 
 		/* get FRUs nearest fault indicator */
 		strncpy(location, callout->location, LOCATION_LENGTH);
+		location[LOCATION_LENGTH - 1] = '\0';
 		loc_led = get_fru_indicator(list, location, &truncated);
 		if (!loc_led) { /* No indicator found for the given loc code */
 			*attn_on = 1;

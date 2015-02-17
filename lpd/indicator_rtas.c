@@ -70,8 +70,14 @@ parse_rtas_workarea(struct loc_code *loc, const char *buf)
 		 */
 		curr->index = be32toh(*(uint32_t *)buf);
 		buf += sizeof(uint32_t);
+		/* Includes NULL char */
 		curr->length = be32toh(*(uint32_t *)buf);
 		buf += sizeof(uint32_t);
+		/* Corrupted work area */
+		if (curr->length > LOCATION_LENGTH) {
+			free_indicator_list(loc);
+			return NULL;
+		}
 		strncpy(curr->code, buf, curr->length);
 		buf += curr->length;
 		curr->code[curr->length] = '\0';

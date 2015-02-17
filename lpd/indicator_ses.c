@@ -8,12 +8,15 @@
  * @author	Vasant Hegde <hegdevasant@linux.vnet.ibm.com>
  */
 
+#include <unistd.h>
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <dirent.h>
 #include <limits.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 #include "lp_diag.h"
 #include "lp_util.h"
@@ -400,8 +403,9 @@ get_ses_indicator(int indicator, struct loc_code *loc, int *state)
 int
 set_ses_indicator(int indicator, struct loc_code *loc, int new_value)
 {
-	char	cmd[128];
 	char	*fru_loc;
+	pid_t	fork_pid;
+	int	status;
 
 	fru_loc = get_relative_fru_location(loc->code);
 	if (!fru_loc) /* Enclosure location code */
@@ -410,11 +414,45 @@ set_ses_indicator(int indicator, struct loc_code *loc, int new_value)
 	if (loc->dev[0] == '\0')
 		return -1;
 
-	snprintf(cmd, 128, "%s %s %s %s %s 2>&1 > /dev/null",
-		 SCSI_INDICATOR_CMD,
-		 indicator == IDENT_INDICATOR ? "-i" : "-f",
-		 new_value == INDICATOR_ON ? "on" : "off",
-		 loc->dev,
-		 fru_loc);
-	return system(cmd);
+	if (access(SCSI_INDICATOR_CMD, X_OK) != 0) {
+		log_msg("The command \"%s\" is not executable.\n",
+			SCSI_INDICATOR_CMD);
+		return -1;
+	}
+
+	fork_pid = fork();
+	if (fork_pid == -1) {
+		log_msg("Couldn't fork() (%d:%s)\n", errno, strerror(errno));
+		return -1;
+	} else if (fork_pid == 0) {
+		/* Child */
+		char *args[6];
+
+		args[0] = (char *)SCSI_INDICATOR_CMD;
+		args[1] = indicator == IDENT_INDICATOR ? "-i" : "-f";
+		args[2] = new_value == INDICATOR_ON ? "on" : "off";
+		args[3] = loc->dev;
+		args[4] = fru_loc;
+		args[5] = NULL;
+
+		execv(SCSI_INDICATOR_CMD, args);
+		log_msg("Couldn't execv() into: %s (%d:%s)\n",
+			SCSI_INDICATOR_CMD, errno, strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	/* Wait for set SES indicator command to complete */
+	if (waitpid(fork_pid, &status, 0) == -1) {
+		log_msg("Wait failed, while running set SES indicator "
+			"command\n");
+		return -1;
+	}
+
+	status = (int8_t)WEXITSTATUS(status);
+	if (status) {
+		log_msg("%s command execution failed\n", SCSI_INDICATOR_CMD);
+		return -1;
+	}
+
+	return 0;
 }

@@ -146,12 +146,10 @@ read_device_vpd(const char *path)
 			continue;
 
 		if (!curr) {
-			curr = (struct dev_vpd *)malloc(sizeof
-							(struct dev_vpd));
+			curr = malloc(sizeof(struct dev_vpd));
 			vpd = curr;
 		} else {
-			curr->next = (struct dev_vpd *)malloc(sizeof
-							      (struct dev_vpd));
+			curr->next = malloc(sizeof(struct dev_vpd));
 			curr = curr->next;
 		}
 		if (!curr) {

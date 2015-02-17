@@ -273,12 +273,10 @@ build_callout_loc_code(struct sl_event *event, struct loc_code *list,
 					fru = fru->next;
 
 			if (!fru) {
-				fru = (struct fru *)malloc(sizeof
-							   (struct fru));
+				fru = malloc(sizeof(struct fru));
 				frus = fru;
 			} else {
-				fru->next = (struct fru *)malloc(sizeof
-							       (struct fru));
+				fru->next = malloc(sizeof(struct fru));
 				fru = fru->next;
 			}
 			if (!fru) {
@@ -918,8 +916,8 @@ create_menu(struct loc_code *ident_list, struct loc_code *attn_list)
 	else
 		length += 2;
 
-	cur_state = (char *)malloc(length);
-	prev_state = (char *)malloc(length);
+	cur_state = malloc(length);
+	prev_state = malloc(length);
 
 	my_items = (ITEM **)calloc(length, sizeof(ITEM *));
 

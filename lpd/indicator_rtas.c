@@ -46,12 +46,10 @@ parse_rtas_workarea(struct loc_code *loc, const char *buf)
 	buf += sizeof(uint32_t);
 	for (i = 0; i < num; i++) {
 		if (!curr) {
-			curr =
-			  (struct loc_code *)malloc(sizeof(struct loc_code));
+			curr = malloc(sizeof(struct loc_code));
 			loc = curr;
 		} else {
-			curr->next =
-			  (struct loc_code *)malloc(sizeof(struct loc_code));
+			curr->next = malloc(sizeof(struct loc_code));
 			curr = curr->next;
 		}
 		if (!curr) {

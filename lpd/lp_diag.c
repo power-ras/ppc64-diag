@@ -666,7 +666,7 @@ UI_make_selection(WINDOW *my_menu_win, MENU *my_menu)
 {
 	int	index;
 	int	i;
-	int	x, y;
+	int	__attribute__((__unused__)) x, y;
 	ITEM	*cur;
 	const	char *desc = NULL;
 
@@ -822,7 +822,7 @@ UI_update_indicator(WINDOW *my_menu_win, MENU *my_menu)
 {
 	int	index;
 	int	i, j;
-	int	x, y;
+	int	__attribute__((__unused__)) x, y;
 	int	count;
 	ITEM	*cur;
 
@@ -894,7 +894,7 @@ void resize_handler(int sig)
 static int
 create_menu(struct loc_code *ident_list, struct loc_code *attn_list)
 {
-	int	x, y;
+	int	__attribute__((__unused__)) x, y;
 	int	i = 0;
 	int	c;
 	int	rc;

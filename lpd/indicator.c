@@ -347,6 +347,7 @@ get_loc_code_for_dev(const char *device, char *location, int locsize)
 	if (device && !read_vpd_from_lsvpd(&vpd, device)) {
 		if (location && vpd.location[0] != '\0') {
 			strncpy(location, vpd.location, locsize);
+			location[locsize - 1] = '\0';
 			return 0;
 		}
 	}

@@ -76,26 +76,32 @@ read_vpd_from_lsvpd(struct dev_vpd *vpd, const char *device)
 			if (!(pos = skip_space(pos)))
 				continue;
 			strncpy(vpd->mtm, pos, VPD_LENGTH - 1);
+			vpd->mtm[VPD_LENGTH - 1] = '\0';
 		} else if ((pos = strstr(buf, "*YL")) != NULL) {
 			if (!(pos = skip_space(pos)))
 				continue;
 			strncpy(vpd->location, pos, LOCATION_LENGTH - 1);
+			vpd->location[LOCATION_LENGTH - 1] = '\0';
 		} else if ((pos = strstr(buf, "*DS")) != NULL) {
 			if (!(pos = skip_space(pos)))
 				continue;
 			strncpy(vpd->ds, pos, VPD_LENGTH - 1);
+			vpd->ds[VPD_LENGTH - 1] = '\0';
 		} else if ((pos = strstr(buf, "*SN")) != NULL) {
 			if (!(pos = skip_space(pos)))
 				continue;
 			strncpy(vpd->sn, pos, VPD_LENGTH - 1);
+			vpd->sn[VPD_LENGTH - 1] = '\0';
 		} else if ((pos = strstr(buf, "PN")) != NULL) {
 			if (!(pos = skip_space(pos)))
 				continue;
 			strncpy(vpd->pn, pos, VPD_LENGTH - 1);
+			vpd->pn[VPD_LENGTH - 1] = '\0';
 		} else if ((pos = strstr(buf, "*FN")) != NULL) {
 			if (!(pos = skip_space(pos)))
 				continue;
 			strncpy(vpd->fru, pos, VPD_LENGTH - 1);
+			vpd->fru[VPD_LENGTH - 1] = '\0';
 		}
 	}
 	pclose(fp);
@@ -164,6 +170,7 @@ read_device_vpd(const char *path)
 
 		/* device name */
 		strncpy(curr->dev, dirent->d_name, DEV_LENGTH - 1);
+		curr->dev[DEV_LENGTH - 1] = '\0';
 
 		if (read_vpd_from_lsvpd(curr, dirent->d_name)) {
 			free_device_vpd(vpd);

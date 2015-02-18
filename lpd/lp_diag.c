@@ -287,7 +287,7 @@ build_callout_loc_code(struct sl_event *event, struct loc_code *list,
 			}
 
 			memset(fru, 0, sizeof(struct fru));
-			strncpy(fru->location, location, LOCATION_LENGTH);
+			strncpy(fru->location, location, LOCATION_LENGTH - 1);
 		}
 	}
 

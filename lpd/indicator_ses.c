@@ -83,6 +83,7 @@ read_ses_vpd(void)
 			    !strcmp(dirent->d_name, ".."))
 				continue;
 			strncpy(v1->dev, dirent->d_name, DEV_LENGTH - 1);
+			v1->dev[DEV_LENGTH - 1] = '\0';
 		}
 		closedir(dir);
 	}
@@ -266,7 +267,7 @@ ses_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 		memset(curr, 0, sizeof(struct loc_code));
 
 		/* fill loc_code structure */
-		strncpy(curr->code, vpd->location, LOCATION_LENGTH);
+		strncpy(curr->code, vpd->location, LOCATION_LENGTH -1);
 		if (strcmp(fru_loc, "-")) {	/* Components */
 			strncat(curr->code, "-",
 				LOCATION_LENGTH - strlen(curr->code) - 1);
@@ -277,7 +278,7 @@ ses_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 		curr->type = TYPE_SES;
 
 		/* We need to keep track of the sg device. */
-		strncpy(curr->dev, vpd->dev, DEV_LENGTH);
+		strncpy(curr->dev, vpd->dev, DEV_LENGTH - 1);
 
 		/* lsvpd does not provide vpd data for components like power
 		 * supply inside enclosure. Lets keep the display name.

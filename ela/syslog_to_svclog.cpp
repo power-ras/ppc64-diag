@@ -548,6 +548,9 @@ recover:
 		string msg = "Can't recover " + path + " from " + path_bak;
 		perror(msg.c_str());
 	}
+
+	fclose(f);
+	return;
 }
 
 static void

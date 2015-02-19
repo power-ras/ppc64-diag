@@ -221,10 +221,16 @@ static int add_drconf_phandles()
 	}
 
 	membuf = malloc(sbuf.st_size);
-	if (!membuf)
+	if (!membuf) {
+		fclose(fd);
 		return -1;
+	}
 
 	fread(membuf, sbuf.st_size, 1, fd);
+	if (ferror(fd)) {
+		fclose(fd);
+		return -1;
+	}
 	fclose(fd);
 
 	entries = membuf[0];

@@ -14,6 +14,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
+#include <libgen.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <sys/wait.h>
@@ -580,21 +581,45 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 	}
 
 	if (sbuf.st_size >= RTAS_ERRD_LOGSZ) {
-		char	cmd_buf[1024];
-		int	rc;
-		int8_t	status;
+		int rc;			/* return code */
+		struct stat log_file;	/* file stat   */
+		int dir_fd;		/* fsync       */
 
 		close(rtas_errd_log_fd);
 
-		memset(cmd_buf, 0, 1024);
-		sprintf(cmd_buf, "rm -f %s; mv %s %s", rtas_errd_log0,
-			rtas_errd_log, rtas_errd_log0);
-		rc = system(cmd_buf);
+		/*
+		 * Remove log file /var/log/rtas_errd.log0
+		 */
+		rc = stat(rtas_errd_log0, &log_file);
+		if (rc == 0) {
+			rc = unlink(rtas_errd_log0);
+			if (rc == -1) {
+				log_msg(NULL, "An error occured during the "
+					"rotation of the rtas_errd logs:\n "
+					"cmd = rm %s\nexit status: %d)",
+					rtas_errd_log0, errno);
+			}
+		} /* stat */
+
+		/*
+		 * rotate /var/log/rtas_errd.log to /var/log/rtas_errd.log0
+		 */
+		rc = rename(rtas_errd_log, rtas_errd_log0);
 		if (rc == -1) {
-			status = WEXITSTATUS(rc);
-			log_msg(NULL, "An error occured during the rotation of "
-				"the rtas_errd logs:\n cmd = %s\nexit status: "
-				"%d)", cmd_buf, status);
+			log_msg(NULL, "An error occured during rotation of "
+				"rtas_errd logs (logger alive):\n cmd = rename"
+				" %s %s\nexit status: %d)", rtas_errd_log,
+				rtas_errd_log0, errno);
+		}
+
+		/*
+		 * fsync /var/log/ to be  on safer side.
+		 */
+		dir_fd = open(dirname(rtas_errd_log), O_RDONLY|O_DIRECTORY);
+		rc = fsync(dir_fd);
+		if (rc == -1) {
+			log_msg(NULL, "fsync failed, on %s\nexit status: %d",
+					dirname(rtas_errd_log), errno);
 		}
 
 		rtas_errd_log_fd = open(rtas_errd_log,

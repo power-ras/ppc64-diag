@@ -598,13 +598,13 @@ process_pre_v6(struct event *event)
 	if ((loc = strstr((char *)&event->event_buf[I_IBM], "IBM")) != NULL) {
 		/* loc code is a null terminated string beginning at loc + 4 */
 		if (strlen(loc + 4)) {
-			event->loc_codes = (char *)malloc(strlen(loc+4)+1);
-			if (event->loc_codes == NULL)
+			event->loc_codes = strdup(loc+4);
+			if (!event->loc_codes) {
+				log_msg(event, "Memory allocation failed, at event->loc_codes");
 				return 0;
-
-			strcpy(event->loc_codes, (loc + 4));
+			} /* strdup (event->loc_codes) */
 		}
-	}
+	} /* vendor tag */
 
 	/*
  	 * First, see if there is any SRC data with the "02" id. 

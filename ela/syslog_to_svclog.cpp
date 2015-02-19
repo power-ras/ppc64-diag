@@ -600,9 +600,13 @@ tail_message_file(void)
 	 * Avoid stuff like popen("tail -F ... file; rm -rf /", "r")
 	 * when nasty msg_path = 'file; rm -rf /'.  To be extra safe,
 	 * we enclose the pathname in quotes.
+	 *
+	 * Meta characters are . & ; ` ' \ " | * ? ~ < > ^ ( ) [ ] { } $ \n \r
 	 */
-	const char *bad_chars = ";|'";
-	if (strpbrk(msg_path, bad_chars)) {
+	const char *bad_chars = ".&;`'|*?~<>^()[]{}$";
+	if (strpbrk(msg_path, bad_chars) ||
+	    strchr(msg_path, '"') || strchr(msg_path, '\n') ||
+	    strchr(msg_path, '\r'))  {
 		fprintf(stderr, "message pathname must not contain any of"
 			" these characters: %s\n", bad_chars);
 		return NULL;

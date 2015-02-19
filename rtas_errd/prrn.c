@@ -36,7 +36,7 @@ struct drconf_cell {
 };
 
 static struct pmap_struct *plist;
-static int prrn_log_fd = -1;
+static int prrn_log_fd;
 
 #define OFDT_BASE	"/proc/device-tree"
 #define OFDTPATH	"/proc/ppc64/ofdt"
@@ -60,6 +60,7 @@ static void open_prrn_log(void)
 	prrn_log_fd = open("/var/log/prrn_log", O_CREAT | O_WRONLY | O_TRUNC,
 			   S_IRUSR | S_IWUSR);
 	if (prrn_log_fd == -1) {
+		prrn_log_fd = 0;
 		dbg("Could not open PRRN log file");
 		return;
 	}

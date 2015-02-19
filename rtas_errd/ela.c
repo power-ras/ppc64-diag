@@ -204,8 +204,13 @@ set_srn_and_callouts(struct event *event, struct event_description_pre_v6 *ptr,
 	else
 		snprintf(srn, 80, "%0X", post_error);
 
-	event->sl_entry->refcode = (char *)malloc(strlen(srn)+1);
-	strncpy(event->sl_entry->refcode, srn, strlen(srn)+1);
+	event->sl_entry->refcode = strdup(srn);
+	if (!event->sl_entry->refcode) {
+		log_msg(event, "Memory allocation failed, at "
+				"event->l_entry->refcode");
+		return -1;
+	} /* strdup(sl_entry->refcode) */
+
 	dbg("SRN: \"%s\"", event->sl_entry->refcode);
 
 	i = 0;

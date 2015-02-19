@@ -822,7 +822,7 @@ platform_log_write(char *fmt, ...)
 	len = sprintf(buf, "%s ", "ppc64-diag:");
 
 	va_start(ap, fmt);
-	len += vsprintf(buf + len, fmt, ap);
+	len += vsnprintf(buf + len, (1024 - len), fmt, ap);
 	va_end(ap);
 
 	rc = write(platform_log_fd, &buf, len);

@@ -67,7 +67,8 @@ Parser::parse_file(const string& path)
 	result = parse();
 	if (semantic_errors > 0)
 		result = semantic_errors;
-		fclose(file);
+
+	fclose(file);
 	return result;
 }
 
@@ -335,12 +336,13 @@ Parser::get_text_block(void)
 			return NULL;
 	}
 	if (last_non_space < 0)
-	return strdup("");
+		return strdup("");
+
 	strbuf[last_non_space+1] = '\0';
 	return strdup(strbuf);
-	}
+}
 
-	ReporterCtlgParser::ReporterCtlgParser() : Parser() {
+ReporterCtlgParser::ReporterCtlgParser() : Parser() {
 	parse = rrparse;
 	error = rrerror;
 }
@@ -354,9 +356,9 @@ void
 MemberSet::tally(void *addr, const string& name)
 {
 	if (seen.find(addr) == seen.end())
-			seen.insert(addr);
+		seen.insert(addr);
 	else
-	parser->semantic_error(name + " statement seen multiple times"
+		parser->semantic_error(name + " statement seen multiple times"
 						" in same catalog entry.");
 }
 
@@ -487,7 +489,7 @@ Reporter::set_prefix_args(vector<string> *args)
 {
 	members.tally(&prefix_args, "prefix_args");
 	if (!prefix_args)
-	prefix_args = args;
+		prefix_args = args;
 }
 
 bool
@@ -663,9 +665,9 @@ MetaReporter::validate(ReporterCatalog *catalog)
 void
 ReporterCatalog::register_reporter(Reporter* r)
 {
-	if (!r)
-	/* called as a result of a syntax error */
-	return;
+	if (!r) /* called as a result of a syntax error */
+		return;
+
 	rlist.push_back(r);
 	register_alias(r->base_alias, r);
 
@@ -683,6 +685,7 @@ ReporterCatalog::register_meta_reporter(MetaReporter *mr)
 {
 	if (!mr)
 		return;
+
 	mr->validate(this);
 	if (find(mr->name) || find_meta_reporter(mr->name)) {
 		cur_parser->semantic_error(
@@ -1127,12 +1130,12 @@ SyslogEvent::match(SyslogMessage *msg, bool get_prefix_args)
 
 	vector<MatchVariant*>::iterator it;
 	for (it = match_variants.begin(); it < match_variants.end(); it++) {
-	if ((*it)->match(msg, get_prefix_args)) {
-		matched_variant = *it;
-		break;
+		if ((*it)->match(msg, get_prefix_args)) {
+			matched_variant = *it;
+			break;
+		}
 	}
-}
-return matched_variant;
+	return matched_variant;
 }
 
 int

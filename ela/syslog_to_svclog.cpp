@@ -583,6 +583,7 @@ compute_begin_date(void)
 		if (!begin_date) {
 			fprintf(stderr, "Cannot read date from %s\n",
 							LAST_EVENT_PATH);
+			fclose(f);
 			exit(3);
 		}
 		fclose(f);

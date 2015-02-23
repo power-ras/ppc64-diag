@@ -173,8 +173,11 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (EventCatalog::parse(catalog_dir) != 0)
+	if (EventCatalog::parse(catalog_dir) != 0) {
+		if (msg_path)
+			fclose(msg_file);
 		exit(2);
+	}
 
 	if (debug) {
 		vector<Reporter*>::iterator ir;
@@ -282,5 +285,9 @@ int main(int argc, char **argv)
 	if (skipped > 0)
 		cout << endl << "[Skipped " << skipped
 				<< " unrecognized messages]" << endl;
+
+	if (msg_path)
+		fclose(msg_file);
+
 	exit(0);
 }

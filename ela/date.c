@@ -64,6 +64,9 @@ parse_date(const char *start, char **end, const char *fmt, bool yr_in_fmt)
 		return (time_t) 0;
 	}
 	date = mktime(&tm);
+	if (date == -1)
+		return (time_t) 0;
+
 	if (!yr_in_fmt && difftime(date, now) > 0) {
 		/* Date is in future.  Assume it's from last year. */
 		tm.tm_isdst = -1;

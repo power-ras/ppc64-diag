@@ -55,7 +55,7 @@ Parser::parse_file(const string& path)
 	int result;
 
 	cur_parser = this;
-	pathname = strdup(path.c_str());
+	pathname = path.c_str();
 	file = fopen(pathname, "r");
 	if (!file) {
 		fprintf(stderr,

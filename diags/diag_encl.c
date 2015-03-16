@@ -237,6 +237,7 @@ servevent(char *refcode, int sev, char *text, struct dev_vpd *vpd,
 
 	encl = malloc(sizeof(struct sl_data_enclosure));
 	if (encl == NULL) {
+		free(entry);
 		fprintf(stderr, "Out of memory\n");
 		return 0;
 	}

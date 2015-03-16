@@ -146,15 +146,13 @@ add_callout(struct sl_callout **callouts, char priority, uint32_t type,
 	struct sl_callout *c;
 
 	if (*callouts == NULL) {
-		*callouts = (struct sl_callout *)malloc(sizeof
-							(struct sl_callout));
+		*callouts = malloc(sizeof(struct sl_callout));
 		c = *callouts;
 	} else {
 		c = *callouts;
 		while (c->next != NULL)
 			c = c->next;
-		c->next = (struct sl_callout *)malloc(sizeof
-						      (struct sl_callout));
+		c->next = malloc(sizeof(struct sl_callout));
 		c = c->next;
 	}
 	if (c == NULL) {
@@ -230,15 +228,14 @@ servevent(char *refcode, int sev, char *text, struct dev_vpd *vpd,
 	if ((refcode == NULL) || (text == NULL) || (vpd == NULL))
 		return 0;
 
-	entry = (struct sl_event *)malloc(sizeof(struct sl_event));
+	entry = malloc(sizeof(struct sl_event));
 	if (entry == NULL) {
 		fprintf(stderr, "Out of memory\n");
 		return 0;
 	}
 	memset(entry, 0, sizeof(struct sl_event));
 
-	encl = (struct sl_data_enclosure *)malloc(
-					sizeof(struct sl_data_enclosure));
+	encl = malloc(sizeof(struct sl_data_enclosure));
 	if (encl == NULL) {
 		fprintf(stderr, "Out of memory\n");
 		return 0;
@@ -357,8 +354,8 @@ static void
 make_prev_path(const char *encl_loc)
 {
 	free(cmd_opts.prev_path);
-	cmd_opts.prev_path = (char *) malloc(sizeof(DIAG_ENCL_PREV_PAGES_DIR) +
-						strlen(encl_loc) + 4);
+	cmd_opts.prev_path = malloc(sizeof(DIAG_ENCL_PREV_PAGES_DIR) +
+					strlen(encl_loc) + 4);
 	strncpy(cmd_opts.prev_path, DIAG_ENCL_PREV_PAGES_DIR,
 		strlen(DIAG_ENCL_PREV_PAGES_DIR));
 	strcat(cmd_opts.prev_path, encl_loc);
@@ -442,7 +439,7 @@ diagnose(const char *sg, struct dev_vpd **diagnosed)
 
 	printf("DIAGNOSING %s\n", sg);
 
-	vpd = (struct dev_vpd *)malloc(sizeof(struct dev_vpd));
+	vpd = malloc(sizeof(struct dev_vpd));
 	if (vpd == NULL) {
 		fprintf(stderr, "Out of memory\n");
 		return 1;

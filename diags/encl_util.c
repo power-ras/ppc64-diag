@@ -11,7 +11,9 @@
 #include <scsi/scsi_ioctl.h>
 #include <scsi/sg.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
 
+#include "utils.h"
 #include "encl_util.h"
 
 struct sense_data_t {
@@ -160,17 +162,31 @@ trim_location_code(struct dev_vpd *vpd)
 int
 read_vpd_from_lscfg(struct dev_vpd *vpd, const char *sg)
 {
+	int status = 0;
 	char buf[128], *pos;
 	FILE *fp;
+	pid_t cpid;
+	char *args[] = {LSCFG_PATH, "-vl", NULL, NULL};
 
 	/* use lscfg to find the MTM and location for the specified device */
-	snprintf(buf, 128, "lscfg -vl %s", sg);
-	fp = popen(buf, "r");
+
+	/* Command exists and has exec permissions ? */
+	if (access(LSCFG_PATH, F_OK|X_OK) == -1) {
+		fprintf(stderr, "Unable to retrieve the MTM or location code.\n"
+				"Check that %s is installed and has execute "
+				"permissions.", LSCFG_PATH);
+			return -1;
+	}
+
+	args[2] = (char *const) sg;
+	fp = spopen(args, &cpid);
 	if (fp == NULL) {
-		fprintf(stderr, "Unable to retrieve the MTM or location code. "
-				"Ensure that lsvpd is installed.\n\n");
+		fprintf(stderr, "Unable to retrieve the MTM or location code.\n"
+				"Failed to execute \"%s -vl %s\" command.\n",
+				LSCFG_PATH, sg);
 		return -1;
 	}
+
 	while (fgets_nonl(buf, 128, fp) != NULL) {
 		if ((pos = strstr(buf, "Machine Type")) != NULL) {
 			if (!(pos = skip_dots(pos)))
@@ -202,7 +218,21 @@ read_vpd_from_lscfg(struct dev_vpd *vpd, const char *sg)
 		}
 	}
 	trim_location_code(vpd);
-	pclose(fp);
+
+	status = spclose(fp, cpid);
+	/* spclose failed */
+	if (status == -1) {
+		fprintf(stderr, "%s : %d -- Failed in spclose(), "
+				"error : %s\n", __func__, __LINE__,
+				strerror(errno));
+		return -1;
+	}
+	/* spclose() succeeded, but command failed */
+	if (status != 0) {
+		fprintf(stdout, "%s : %d -- spclose() exited with status : "
+				"%d\n", __func__, __LINE__, status);
+		return -1;
+	}
 
 	return 0;
 }

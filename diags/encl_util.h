@@ -8,6 +8,7 @@
 
 /* SES sys path */
 #define SCSI_SES_PATH		"/sys/class/enclosure"
+#define LSVPD_PATH		"/usr/sbin/lsvpd"
 
 /* device vpd */
 struct dev_vpd {

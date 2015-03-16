@@ -14,6 +14,7 @@
 
 #include "encl_util.h"
 #include "encl_led.h"
+#include "utils.h"
 #include "platform.h"
 
 static struct {
@@ -79,16 +80,28 @@ open_sg_device(const char *encl)
 static int
 loc_code_device(const char *loccode, char *sg, int sg_size)
 {
-	int rc, found = 0;
-	char buf[128], cmd[128];
-	char *dev;
+	int rc, found = 0, status = 0;
 	FILE *fp;
+	pid_t cpid;
+	char buf[128];
+	char *dev;
+	char *args[] = {LSVPD_PATH, "-l", NULL, NULL};
 
-	snprintf(cmd, 128, "lsvpd -l %s", loccode);
-	fp = popen(cmd, "r");
+	/* Command exists and has exec permissions ? */
+	if (access(LSVPD_PATH, F_OK|X_OK) == -1) {
+		fprintf(stderr, "Failed to obtain the sg device details.\n"
+				"Check that %s is installed and has "
+				"execute permissions.", LSVPD_PATH);
+		return -1;
+	}
+
+	args[2] = (char *const) loccode;
+	fp = spopen(args, &cpid);
+
 	if (fp == NULL) {
-		fprintf(stderr, "Could not obtain the sg device details."
-			" Ensure that lsvpd is installed.\n");
+		fprintf(stderr, "Could not obtain the sg device details.\n"
+			"Failed to execute \"%s -l %s\" command.\n",
+			LSVPD_PATH, loccode);
 		return -1;
 	}
 
@@ -109,7 +122,20 @@ loc_code_device(const char *loccode, char *sg, int sg_size)
 		}
 	}
 
-	pclose(fp);
+	status = spclose(fp, cpid);
+	/* spclose() failed */
+	if (status == -1) {
+		fprintf(stderr, "%s : %d - failed in spclose(), "
+				"error : %s\n", __func__, __LINE__,
+				strerror(errno));
+		return -1;
+	}
+	/* spclose() succeeded, but command failed */
+	if (status != 0) {
+		fprintf(stdout, "%s : %d - spclose() exited with status : "
+				"%d\n", __func__, __LINE__, status);
+		return -1;
+	}
 
 	if (found)
 		return 0;

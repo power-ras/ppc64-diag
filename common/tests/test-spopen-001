@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#WARNING: DO NOT RUN THIS FILE DIRECTLY
+#  This file expects to be a part of ppc64-diag/common test suite
+#  Run this file with ../run_tests -t test-spopen-001
+
+
+SPOPEN=$(dirname $0)/tests/spopen
+CAT=`which cat`
+
+function do_cat_test()
+{
+	local _rc _size=0
+	tmp_file=$(mktemp /tmp/spopen-test.XXX)
+	$SPOPEN $CAT ${SPOPEN}.c > $tmp_file
+	_size=$(stat -c %s ${SPOPEN}.c)
+	cmp -s --bytes=$_size $tmp_file ${SPOPEN}.c
+	_rc=$?
+	rm $tmp_file
+	return $_rc
+}
+
+do_cat_test
+rc=$?
+return $rc

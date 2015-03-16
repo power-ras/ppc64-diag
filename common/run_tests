@@ -1,0 +1,58 @@
+#!/bin/sh
+
+COMMON_TEST_DIR=$(dirname $0)/tests
+
+all_tests="${COMMON_TEST_DIR}/test*"
+verbose=0
+
+# Test results
+function msg_failure()
+{
+	echo "FAIL: $1"
+	exit 1
+}
+
+function msg_pass()
+{
+	if [ $verbose -eq 1 ]; then
+		echo "PASS: $1"
+	fi
+}
+
+# Build the test suite
+if [ ! -e $COMMON_TEST_DIR ]; then
+	msg_failure "Test cases not available"
+fi
+
+if [ ! -x ${COMMON_TEST_DIR}/spopen ]; then
+	msg_failure "Fatal error, cannot execute tests. Did you make?";
+fi
+
+while getopts ":vt:" opt; do
+	case "$opt" in
+		v)
+			verbose=1
+			;;
+		t)
+			all_tests=$OPTARG
+			;;
+	esac
+done
+
+# Run the actual tests
+for common_test in $all_tests; do
+	if [ ! -e $common_test ]; then
+		msg_failure "$common_test doesn't exits"
+	fi
+
+	source $common_test
+	rc=$?
+	if [[ $rc -ne 0 ]]; then
+		msg_failure "$common_test FAILED with RC $rc"
+	else
+		msg_pass $common_test
+	fi
+done
+
+echo "PASS"
+exit 0

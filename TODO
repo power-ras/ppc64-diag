@@ -3,3 +3,4 @@ in the project. Please reach out to us if your interesting in helping out:
 
 Listed in not particular order:
 1. make install check
+2. Add support to build utilities written in C++ to be linked with platform.o

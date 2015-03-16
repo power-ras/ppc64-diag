@@ -14,7 +14,7 @@
 
 #include "encl_util.h"
 #include "encl_led.h"
-#include "platform.c"
+#include "platform.h"
 
 static struct {
 	char	*mtm;

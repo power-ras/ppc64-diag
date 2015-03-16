@@ -7,7 +7,7 @@ include rules.mk
 .SILENT:
 BUILD_DIR=$(CURDIR)
 
-SUBDIRS = rtas_errd diags scripts ela lpd opal_errd opal-dump-parse
+SUBDIRS = common rtas_errd diags scripts ela lpd opal_errd opal-dump-parse
 
 LICENSE = COPYRIGHT
 
@@ -15,6 +15,8 @@ DOXYGEN_CFG = doxygen.config
 TARBALL_FILES += $(DOXYGEN_CFG)
 
 all:
+	@echo "Building common files..."
+	@$(MAKE) -C common
 	@echo "Building rtas_errd files..."
 	@$(MAKE) -C rtas_errd
 	@echo "Building diags files..."

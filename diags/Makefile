@@ -4,10 +4,17 @@
 
 include ../rules.mk
 
+COMMON_UTILS_DIR = ../common/
+
+INCLUDE = -I$(COMMON_UTILS_DIR)
+
 PROGS = diag_encl encl_led
+
 DIAG_ENCL_OBJS = diag_encl.o 7031_D24_T24.o bluehawk.o encl_util.o
-DIAG_ENCL_LIBS = -lservicelog -lrtasevent
 ENCL_LED_OBJS = encl_led.o encl_util.o bluehawk_led.o
+COMMON_UTILS_OBJ = $(addprefix $(COMMON_UTILS_DIR)/, platform.o)
+
+DIAG_ENCL_LIBS = -lservicelog -lrtasevent
 
 SUBDIRS = man
 
@@ -18,11 +25,11 @@ all: $(PROGS)
 
 diag_encl: $(DIAG_ENCL_OBJS)
 	@echo "LD $(WORK_DIR)/$@"
-	@$(CC) $(CFLAGS) -o $@ $^ $(DIAG_ENCL_LIBS)
+	@$(CC) $(CFLAGS) $(INCLUDE) $(COMMON_UTILS_OBJ) $(DIAG_ENCL_LIBS) -o $@ $^
 
 encl_led: $(ENCL_LED_OBJS)
 	@echo "LD $(WORK_DIR)/$@"
-	@$(CC) $(CFLAGS) -o $@ $^
+	@$(CC) $(CFLAGS) $(INCLUDE) $(COMMON_UTILS_OBJ) -o $@ $^
 
 diag_encl.o: encl_util.h diag_encl.h
 

@@ -19,7 +19,7 @@
 
 #include "encl_util.h"
 #include "diag_encl.h"
-#include "platform.c"
+#include "platform.h"
 
 static struct option long_options[] = {
 	{"cmp_prev",		no_argument,		NULL, 'c'},

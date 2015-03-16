@@ -166,25 +166,44 @@ add_callout(struct sl_callout **callouts, char priority, uint32_t type,
 	c->priority = priority;
 	c->type = type;
 	if (proc_id) {
-		c->procedure = (char *)malloc(strlen(proc_id) + 1);
-		strcpy(c->procedure, proc_id);
+		c->procedure = strdup(proc_id);
+		if (c->procedure == NULL)
+			goto err_out;
 	}
 	if (location) {
-		c->location = (char *)malloc(strlen(location) + 1);
-		strcpy(c->location, location);
+		c->location = strdup(location);
+		if (c->location == NULL)
+			goto err_out;
 	}
 	if (fru) {
-		c->fru = (char *)malloc(strlen(fru) + 1);
-		strcpy(c->fru, fru);
+		c->fru = strdup(fru);
+		if (c->fru == NULL)
+			goto err_out;
 	}
 	if (sn) {
-		c->serial = (char *)malloc(strlen(sn) + 1);
-		strcpy(c->serial, sn);
+		c->serial = strdup(sn);
+		if (c->serial == NULL)
+			goto err_out;
 	}
 	if (ccin) {
-		c->ccin = (char *)malloc(strlen(ccin) + 1);
-		strcpy(c->ccin, ccin);
+		c->ccin = strdup(ccin);
+		if (c->ccin == NULL)
+			goto err_out;
 	}
+
+	return;
+
+err_out:
+	free(c->procedure);
+	free(c->location);
+	free(c->fru);
+	free(c->serial);
+	free(c->ccin);
+	free(c);
+
+	fprintf(stderr, "%s : %d - Failed to allocate memory.\n",
+			__func__, __LINE__);
+
 }
 
 /**
@@ -234,14 +253,18 @@ servevent(char *refcode, int sev, char *text, struct dev_vpd *vpd,
 	entry->disposition = SL_DISP_UNRECOVERABLE;
 	entry->serviceable = 1;
 	entry->call_home_status = SL_CALLHOME_CANDIDATE;
-	entry->description = (char *)malloc(strlen(text) + 1);
-	strcpy(entry->description, text);
-	entry->refcode = (char *)malloc(strlen(refcode) + 1);
-	strcpy(entry->refcode, refcode);
-	encl->enclosure_model = (char *)malloc(strlen(vpd->mtm) + 1);
-	strcpy(encl->enclosure_model, vpd->mtm);
-	encl->enclosure_serial = (char *)malloc(strlen(vpd->sn) + 1);
-	strcpy(encl->enclosure_serial, vpd->sn);
+	entry->description = strdup(text);
+	if (entry->description == NULL)
+		goto err0;
+	entry->refcode = strdup(refcode);
+	if (entry->refcode == NULL)
+		goto err1;
+	encl->enclosure_model = strdup(vpd->mtm);
+	if (encl->enclosure_model == NULL)
+		goto err2;
+	encl->enclosure_serial = strdup(vpd->sn);
+	if (encl->enclosure_serial == NULL)
+		goto err3;
 
 	entry->callouts = callouts;
 
@@ -261,6 +284,21 @@ servevent(char *refcode, int sev, char *text, struct dev_vpd *vpd,
 	}
 
 	return key;
+
+err3:
+	free(encl->enclosure_model);
+err2:
+	free(entry->refcode);
+err1:
+	free(entry->description);
+err0:
+	free(entry);
+	free(encl);
+
+	fprintf(stderr, "%s : %d - Failed to allocate memory.\n",
+			__func__, __LINE__);
+
+	return 0;
 }
 
 /*

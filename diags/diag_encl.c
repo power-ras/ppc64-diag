@@ -21,6 +21,8 @@
 #include "diag_encl.h"
 #include "platform.h"
 
+#define VPD_PATHNAME_EXTN_MAXLEN	5
+
 static struct option long_options[] = {
 	{"cmp_prev",		no_argument,		NULL, 'c'},
 	{"fake",		required_argument,	NULL, 'f'},
@@ -276,7 +278,8 @@ read_fake_vpd(struct dev_vpd *vpd, const char *pg2_path)
 	assert(vpd_path);
 	dot = strrchr(vpd_path, '.');
 	assert(dot && !strcmp(dot, ".pg2"));
-	strcpy(dot, ".vpd");
+	strncpy(dot, ".vpd", VPD_PATHNAME_EXTN_MAXLEN - 1);
+	dot[VPD_PATHNAME_EXTN_MAXLEN - 1] = '\0';
 
 	f = fopen(vpd_path, "r");
 	if (!f) {
@@ -317,8 +320,9 @@ make_prev_path(const char *encl_loc)
 {
 	free(cmd_opts.prev_path);
 	cmd_opts.prev_path = (char *) malloc(sizeof(DIAG_ENCL_PREV_PAGES_DIR) +
-					strlen(encl_loc) + 4);
-	strcpy(cmd_opts.prev_path, DIAG_ENCL_PREV_PAGES_DIR);
+						strlen(encl_loc) + 4);
+	strncpy(cmd_opts.prev_path, DIAG_ENCL_PREV_PAGES_DIR,
+		strlen(DIAG_ENCL_PREV_PAGES_DIR));
 	strcat(cmd_opts.prev_path, encl_loc);
 	strcat(cmd_opts.prev_path, ".pg2");
 }

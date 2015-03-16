@@ -11,13 +11,15 @@
 #define LSVPD_PATH		"/usr/sbin/lsvpd"
 #define LSCFG_PATH		"/usr/sbin/lscfg"
 
+#define VPD_LOCATION_MAXLEN	128
+
 /* device vpd */
 struct dev_vpd {
-	char mtm[128];
-	char location[128];	/* like full_loc, but truncated at '-' */
-	char full_loc[128];
-	char sn[128];
-	char fru[128];
+	char mtm[VPD_LOCATION_MAXLEN];
+	char location[VPD_LOCATION_MAXLEN];	/* like full_loc, but truncated at '-' */
+	char full_loc[VPD_LOCATION_MAXLEN];
+	char sn[VPD_LOCATION_MAXLEN];
+	char fru[VPD_LOCATION_MAXLEN];
 	struct dev_vpd *next;
 };
 

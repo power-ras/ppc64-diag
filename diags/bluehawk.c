@@ -12,6 +12,9 @@
 #include "diag_encl.h"
 #include "bluehawk.h"
 
+#define ES_STATUS_STRING_MAXLEN		32
+#define LOCATION_SUFFIX_MAXLEN		32
+
 /* SRN Format :
  *	for SAS : 2667-xxx
  */
@@ -431,10 +434,12 @@ static uint8_t
 svclog_status(enum element_status_code sc, char *crit)
 {
 	if (sc == ES_CRITICAL) {
-		strcpy(crit, "Critical");
+		strncpy(crit, "Critical", ES_STATUS_STRING_MAXLEN - 1);
+		crit[ES_STATUS_STRING_MAXLEN - 1] = '\0';
 		return SL_SEV_ERROR;
 	} else if (sc == ES_NONCRITICAL) {
-		strcpy(crit, "Non-critical");
+		strncpy(crit, "Non-critical", ES_STATUS_STRING_MAXLEN - 1);
+		crit[ES_STATUS_STRING_MAXLEN - 1] = '\0';
 		return SL_SEV_WARNING;
 	} else
 		return 0;
@@ -592,8 +597,8 @@ create_mp_callout(struct sl_callout **callouts, char *location, int fd)
 static int
 report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 {
-	char location[128+32], *loc_suffix;
-	char description[512], crit[32];
+	char location[VPD_LOCATION_MAXLEN], *loc_suffix;
+	char description[512], crit[ES_STATUS_STRING_MAXLEN];
 	char srn[16];
 	unsigned int i;
 	int sev;
@@ -606,7 +611,8 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 
 	have_ps_vpd = 0;
 	have_wh_vpd = 0;
-	strcpy(location, vpd->location);
+	strncpy(location, vpd->location, VPD_LOCATION_MAXLEN - 1);
+	location[VPD_LOCATION_MAXLEN - 1] = '\0';
 	loc_suffix = location + strlen(location);
 
 	if (cmd_opts.cmp_prev) {
@@ -786,7 +792,8 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 		sprintf(description,
 			"%s fault in midplane of RAID enclosure.%s",
 			crit, ref_svc_doc);
-		strcpy(loc_suffix, "-P1");
+		strncpy(loc_suffix, "-P1", LOCATION_SUFFIX_MAXLEN - 1);
+		loc_suffix[LOCATION_SUFFIX_MAXLEN - 1] = '\0';
 		callouts = NULL;
 		create_mp_callout(&callouts, location, fd);
 		servevent("none", sev, description, vpd, callouts);

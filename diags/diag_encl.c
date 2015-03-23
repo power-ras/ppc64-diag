@@ -357,6 +357,9 @@ make_prev_path(const char *encl_loc)
 	free(cmd_opts.prev_path);
 	cmd_opts.prev_path = malloc(sizeof(DIAG_ENCL_PREV_PAGES_DIR) +
 					strlen(encl_loc) + 4);
+	if (!cmd_opts.prev_path)
+		return;
+
 	strncpy(cmd_opts.prev_path, DIAG_ENCL_PREV_PAGES_DIR,
 		strlen(DIAG_ENCL_PREV_PAGES_DIR));
 	strcat(cmd_opts.prev_path, encl_loc);

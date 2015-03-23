@@ -18,6 +18,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include "utils.h"
 #include "lp_diag.h"
 #include "lp_util.h"
 
@@ -224,16 +225,17 @@ get_ses_fru_fault_state(const char *buf)
 static int
 ses_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 {
-	char	cmd[128];
 	char	buf[128];
 	char	*desc;
 	char	*fru_loc;
+	char	*args[] = {SCSI_INDICATOR_CMD, "-v", "-l",
+				(char *const)vpd->dev, NULL};
+	int	rc;
+	pid_t	cpid;
 	FILE	*fp;
 	struct	loc_code *curr = *list;
 
-	snprintf(cmd, 128, "%s -v -l %s 2> /dev/null", SCSI_INDICATOR_CMD,
-		 vpd->dev);
-	fp = popen(cmd, "r");
+	fp = spopen(args, &cpid);
 	if (fp == NULL) {
 		log_msg("Unable to get enclosure indicator list. "
 			"Ensure that encl_led command is installed.");
@@ -264,7 +266,11 @@ ses_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 			/* Read until pipe becomes empty */
 			while (fgets_nonl(buf, 128, fp) != NULL)
 				;
-			pclose(fp);
+
+			rc = spclose(fp, cpid);
+			if (rc)
+				log_msg("spclose failed [rc=%d]\n", rc);
+
 			return -1;
 		}
 		memset(curr, 0, sizeof(struct loc_code));
@@ -290,7 +296,12 @@ ses_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 			snprintf(curr->ds, VPD_LENGTH, "Enclosure %s : %s",
 				 vpd->dev, desc);
 	}
-	pclose(fp);
+
+	rc = spclose(fp, cpid);
+	if (rc) {
+		log_msg("spclose failed [rc=%d]\n", rc);
+		return -1;
+	}
 	return 0;
 }
 
@@ -353,19 +364,24 @@ int
 get_ses_indicator(int indicator, struct loc_code *loc, int *state)
 {
 	int	fru_found = 0;
-	char	cmd[128];
 	char	buf[128];
 	char	*fru_loc;
 	char	*fru;
+	char	*args[] = {SCSI_INDICATOR_CMD,
+		           "-l",
+			   (char *const)loc->dev,
+			   /* FRU loc */ NULL,
+			   NULL};
+	int	rc;
+	pid_t	cpid;
 	FILE	*fp;
 
 	fru_loc = get_relative_fru_location(loc->code);
 	if (!fru_loc) /* Enclosure location code */
 		fru_loc = "-";
 
-	snprintf(cmd, 128, "%s -l %s %s 2> /dev/null", SCSI_INDICATOR_CMD,
-		 loc->dev, fru_loc);
-	fp = popen(cmd, "r");
+	args[3] = (char *const)fru_loc;
+	fp = spopen(args, &cpid);
 	if (fp == NULL) {
 		log_msg("Unable to get enclosure LED status. "
 			"Ensure that encl_led command is installed.");
@@ -384,7 +400,12 @@ get_ses_indicator(int indicator, struct loc_code *loc, int *state)
 				*state = get_ses_fru_fault_state(buf);
 		}
 	}
-	pclose(fp);
+
+	rc = spclose(fp, cpid);
+	if (rc) {
+		log_msg("spclose failed [rc=%d]\n", rc);
+		return -1;
+	}
 
 	if (!fru_found)
 		return -1;

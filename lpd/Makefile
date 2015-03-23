@@ -4,9 +4,14 @@
 
 include ../rules.mk
 
+COMMON_UTILS_DIR = ../common/
+
 CMDS = lp_diag usysident usysattn
 
-COMMON_OBJS = files.o lp_util.o indicator_ses.o indicator_rtas.o indicator.o
+COMMON_UTILS_OBJ = $(COMMON_UTILS_DIR)/utils.o
+LPD_COMMON_OBJS = files.o lp_util.o indicator_ses.o indicator_rtas.o indicator.o
+COMMON_OBJS = $(COMMON_UTILS_OBJ) $(LPD_COMMON_OBJS)
+
 LP_DIAG_OBJS =  servicelog.o lp_diag.o
 USYSIDENT_OBJS = usysident.o
 
@@ -41,4 +46,4 @@ uninstall:
 
 clean:
 	@echo "Cleaning up lpd files..."
-	@rm -rf $(CMDS) $(COMMON_OBJS) $(LP_DIAG_OBJS) $(USYSIDENT_OBJS)
+	@rm -rf $(CMDS) $(LPD_COMMON_OBJS) $(LP_DIAG_OBJS) $(USYSIDENT_OBJS)

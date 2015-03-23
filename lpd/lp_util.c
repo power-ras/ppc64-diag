@@ -17,6 +17,9 @@
 #include <sys/types.h>
 
 #include "lp_diag.h"
+#include "utils.h"
+
+#define LSVPD_PATH	"/usr/sbin/lsvpd"
 
 /**
  * fgets_nonl - Read a line and strip the newline.
@@ -60,11 +63,13 @@ read_vpd_from_lsvpd(struct dev_vpd *vpd, const char *device)
 {
 	char	buf[128];
 	char	*pos;
+	char	*args[] = {LSVPD_PATH, "-l", (char *const)device, NULL};
+	pid_t	cpid;
+	int	rc;
 	FILE	*fp;
 
 	/* use lsvpd to find the device vpd */
-	snprintf(buf, 128, "lsvpd -l %s 2>/dev/null", device);
-	fp = popen(buf, "r");
+	fp = spopen(args, &cpid);
 	if (fp == NULL) {
 		log_msg("Unable to retrieve the vpd for \"%s\". "
 			"Ensure that lsvpd package is installed.", device);
@@ -104,7 +109,13 @@ read_vpd_from_lsvpd(struct dev_vpd *vpd, const char *device)
 			vpd->fru[VPD_LENGTH - 1] = '\0';
 		}
 	}
-	pclose(fp);
+
+	rc = spclose(fp, cpid);
+	if (rc) {
+		log_msg("spclose() failed [rc=%d]\n", rc);
+		return -1;
+	}
+
 	return 0;
 }
 

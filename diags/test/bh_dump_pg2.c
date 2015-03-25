@@ -106,7 +106,7 @@ main(int argc, char **argv)
 		fprintf(stderr, "bad format of sg arg\n");
 		exit(2);
 	}
-	sprintf(dev_sg, "/dev/%s", sg);
+	snprintf(dev_sg, 20, "/dev/%s", sg);
 	fd = open(dev_sg, O_RDWR);
 	if (fd < 0) {
 		perror(dev_sg);

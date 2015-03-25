@@ -14,6 +14,7 @@
 
 #define ES_STATUS_STRING_MAXLEN		32
 #define LOCATION_SUFFIX_MAXLEN		32
+#define EVENT_DESC_SIZE			512
 
 /* SRN Format :
  *	for SAS : 2667-xxx
@@ -36,8 +37,9 @@
 #define TEMP_THRESHOLD		0x246
 
 /* Build SRN */
+#define SRN_SIZE	16
 #define build_srn(srn, element) \
-	sprintf(srn, "%03X-%03X", SAS_SRN, element)
+	snprintf(srn, SRN_SIZE, "%03X-%03X", SAS_SRN, element)
 
 static struct bluehawk_diag_page2 dp;
 static struct bluehawk_diag_page2 prev_dp;	/* for -c */
@@ -105,7 +107,7 @@ status_string(enum element_status_code sc,
 {
 	static char invalid_msg[40];	/* So we're not reentrant. */
 	if (!status_is_valid(sc, valid_codes)) {
-		sprintf(invalid_msg, "(UNEXPECTED_STATUS_CODE=%u)", sc);
+		snprintf(invalid_msg, 40, "(UNEXPECTED_STATUS_CODE=%u)", sc);
 		return invalid_msg;
 	}
 	switch (sc) {
@@ -598,10 +600,10 @@ static int
 report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 {
 	char location[VPD_LOCATION_MAXLEN], *loc_suffix;
-	char description[512], crit[ES_STATUS_STRING_MAXLEN];
-	char srn[16];
+	char description[EVENT_DESC_SIZE], crit[ES_STATUS_STRING_MAXLEN];
+	char srn[SRN_SIZE];
 	unsigned int i;
-	int sev;
+	int sev, loc_suffix_size;
 	char run_diag_encl[] = "  Run diag_encl for more detailed status,"
 		" and refer to the system service documentation for guidance.";
 	char ref_svc_doc[] =
@@ -613,6 +615,7 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 	have_wh_vpd = 0;
 	strncpy(location, vpd->location, VPD_LOCATION_MAXLEN - 1);
 	location[VPD_LOCATION_MAXLEN - 1] = '\0';
+	loc_suffix_size = VPD_LOCATION_MAXLEN - strlen(location);
 	loc_suffix = location + strlen(location);
 
 	if (cmd_opts.cmp_prev) {
@@ -625,9 +628,10 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 		sev = svclog_element_status(&dp.disk_status[i].byte0, crit);
 		if (sev == 0)
 			continue;
-		sprintf(description, "%s fault in RAID enclosure disk %u.%s",
-						crit, i+1, run_diag_encl);
-		sprintf(loc_suffix, "-P1-D%u", i+1);
+		snprintf(description, EVENT_DESC_SIZE,
+			 "%s fault in RAID enclosure disk %u.%s",
+			 crit, i + 1, run_diag_encl);
+		snprintf(loc_suffix, loc_suffix_size, "-P1-D%u", i+1);
 		callouts = NULL;
 		/* VPD for disk drives is not available from the SES. */
 		add_location_callout(&callouts, location);
@@ -639,10 +643,10 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 		sev = svclog_element_status(&dp.ps_status[i].byte0, crit);
 		if (sev == 0)
 			continue;
-		sprintf(description,
-			"%s fault in %s power supply in RAID enclosure.%s",
-			crit, left_right[i], run_diag_encl);
-		sprintf(loc_suffix, "-P1-E%u", i+1);
+		snprintf(description, EVENT_DESC_SIZE,
+			 "%s fault in %s power supply in RAID enclosure.%s",
+			 crit, left_right[i], run_diag_encl);
+		snprintf(loc_suffix, loc_suffix_size, "-P1-E%u", i+1);
 		build_srn(srn, CRIT_PS);
 		callouts = NULL;
 		create_ps_callout(&callouts, location, i, fd);
@@ -655,11 +659,11 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 								crit);
 		if (sev == 0)
 			continue;
-		sprintf(description,
-			"%s fault associated with %s power supply in RAID"
-			" enclosure: voltage sensor(s) reporting voltage(s)"
-			" out of range.%s", crit, left_right[i], run_diag_encl);
-		sprintf(loc_suffix, "-P1-E%u", i+1);
+		snprintf(description, EVENT_DESC_SIZE,
+			 "%s fault associated with %s power supply in RAID "
+			 "enclosure: voltage sensor(s) reporting voltage(s) "
+			 "out of range.%s", crit, left_right[i], run_diag_encl);
+		snprintf(loc_suffix, loc_suffix_size, "-P1-E%u", i+1);
 		build_srn(srn, VOLTAGE_THRESHOLD);
 		callouts = NULL;
 		create_ps_callout(&callouts, location, i, fd);
@@ -672,10 +676,10 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 								crit);
 		if (sev == 0)
 			continue;
-		sprintf(description,
-			"%s fault in fan for %s power supply in RAID"
-			" enclosure.%s", crit, left_right[i], run_diag_encl);
-		sprintf(loc_suffix, "-P1-E%u", i+1);
+		snprintf(description, EVENT_DESC_SIZE,
+			 "%s fault in fan for %s power supply in RAID "
+			 "enclosure.%s", crit, left_right[i], run_diag_encl);
+		snprintf(loc_suffix, loc_suffix_size, "-P1-E%u", i+1);
 		build_srn(srn, CRIT_PS);
 		callouts = NULL;
 		create_ps_callout(&callouts, location, i, fd);
@@ -689,10 +693,10 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 								crit);
 		if (sev == 0)
 			continue;
-		sprintf(description,
-			"%s fault in %s fan assembly in RAID enclosure.%s",
-			crit, left_right[i], run_diag_encl);
-		sprintf(loc_suffix, "-P1-C%u-A1", i+1);
+		snprintf(description, EVENT_DESC_SIZE,
+			 "%s fault in %s fan assembly in RAID enclosure.%s",
+			 crit, left_right[i], run_diag_encl);
+		snprintf(loc_suffix, loc_suffix_size, "-P1-C%u-A1", i+1);
 		build_srn(srn, CRIT_FAN);
 		callouts = NULL;
 		/* VPD for fan assemblies is not available from the SES. */
@@ -707,12 +711,12 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 			&dp.temp_sensor_sets[i].power_supply, 2, crit);
 		if (sev == 0)
 			continue;
-		sprintf(description,
-			"%s fault associated with %s power supply in RAID"
-			" enclosure: temperature sensor(s) reporting"
-			" temperature(s) out of range.%s",
-			crit, left_right[i], run_diag_encl);
-		sprintf(loc_suffix, "-P1-E%u", i+1);
+		snprintf(description, EVENT_DESC_SIZE,
+			 "%s fault associated with %s power supply in RAID "
+			 "enclosure: temperature sensor(s) reporting "
+			 "temperature(s) out of range.%s",
+			 crit, left_right[i], run_diag_encl);
+		snprintf(loc_suffix, loc_suffix_size, "-P1-E%u", i+1);
 		build_srn(srn, PS_TEMP_THRESHOLD);
 		callouts = NULL;
 		create_ps_callout(&callouts, location, i, fd);
@@ -726,12 +730,13 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 								crit);
 		if (sev == 0)
 			continue;
-		sprintf(description,
-			"%s fault associated with %s side of RAID enclosure:"
-			" temperature sensor(s) reporting temperature(s) out"
-			" of range.%s", crit, left_right[i], run_diag_encl);
+		snprintf(description, EVENT_DESC_SIZE,
+			 "%s fault associated with %s side of RAID "
+			 "enclosure: temperature sensor(s) reporting "
+			 "temperature(s) out of range.%s",
+			 crit, left_right[i], run_diag_encl);
 		/* Not the power supply, so assume the warhawk. */
-		sprintf(loc_suffix, "-P1-C%u", i+1);
+		snprintf(loc_suffix, loc_suffix_size, "-P1-C%u", i+1);
 		build_srn(srn, TEMP_THRESHOLD);
 		callouts = NULL;
 		create_wh_callout(&callouts, location, i, fd);
@@ -743,10 +748,10 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 		sev = svclog_element_status(&dp.esm_status[i].byte0, crit);
 		if (sev == 0)
 			continue;
-		sprintf(description,
-			"%s electronics fault in %s Enclosure RAID Module.%s",
-			crit, left_right[i], ref_svc_doc);
-		sprintf(loc_suffix, "-P1-C%u", i+1);
+		snprintf(description, EVENT_DESC_SIZE,
+			 "%s electronics fault in %s Enclosure RAID Module.%s",
+			 crit, left_right[i], ref_svc_doc);
+		snprintf(loc_suffix, loc_suffix_size, "-P1-C%u", i+1);
 		build_srn(srn, CRIT_ESM);
 		callouts = NULL;
 		create_wh_callout(&callouts, location, i, fd);
@@ -760,10 +765,10 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 									crit);
 		if (sev == 0)
 			continue;
-		sprintf(description,
-			"%s fault in SAS connector T%u of %s RAID Enclosure"
-			" Module.%s", crit, t, left_right[lr], ref_svc_doc);
-		sprintf(loc_suffix, "-P1-C%u-T%u", lr+1, t);
+		snprintf(description, EVENT_DESC_SIZE,
+			 "%s fault in SAS connector T%u of %s RAID Enclosure"
+			 " Module.%s", crit, t, left_right[lr], ref_svc_doc);
+		snprintf(loc_suffix, loc_suffix_size, "-P1-C%u-T%u", lr+1, t);
 		callouts = NULL;
 		/* No VPD for SAS connectors in the SES. */
 		add_location_callout(&callouts, location);
@@ -776,10 +781,10 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 								    crit);
 		if (sev == 0)
 			continue;
-		sprintf(description,
-			"%s fault in PCIe controller for %s RAID Enclosure "
-			"Module.%s", crit, left_right[i], ref_svc_doc);
-		sprintf(loc_suffix, "-P1-C%u-T3", i+1);
+		snprintf(description, EVENT_DESC_SIZE,
+			 "%s fault in PCIe controller for %s RAID Enclosure "
+			 "Module.%s", crit, left_right[i], ref_svc_doc);
+		snprintf(loc_suffix, loc_suffix_size, "-P1-C%u-T3", i+1);
 		callouts = NULL;
 		/* No VPD for PCIe controllers in the SES. */
 		add_location_callout(&callouts, location);
@@ -789,9 +794,9 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 	/* midplane */
 	sev = svclog_element_status(&dp.midplane_element_status.byte0, crit);
 	if (sev != 0) {
-		sprintf(description,
-			"%s fault in midplane of RAID enclosure.%s",
-			crit, ref_svc_doc);
+		snprintf(description, EVENT_DESC_SIZE,
+			 "%s fault in midplane of RAID enclosure.%s",
+			 crit, ref_svc_doc);
 		strncpy(loc_suffix, "-P1", LOCATION_SUFFIX_MAXLEN - 1);
 		loc_suffix[LOCATION_SUFFIX_MAXLEN - 1] = '\0';
 		callouts = NULL;

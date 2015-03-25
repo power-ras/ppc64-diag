@@ -20,6 +20,9 @@
 #include "encl_led.h"
 #include "bluehawk.h"
 
+#define COMP_DESC_SIZE	64
+#define COMP_LOC_CODE	16
+
 enum bh_component_type {
 	BHC_ENCLOSURE,
 	BHC_MIDPLANE,
@@ -121,8 +124,8 @@ static void
 report_component(struct bluehawk_diag_page2 *dp, int fault, int ident,
 		 enum bh_component_type type, unsigned int i, int verbose)
 {
-	char loc_code[16];
-	char desc[64];
+	char loc_code[COMP_LOC_CODE];
+	char desc[COMP_DESC_SIZE];
 	static const char *left_right[] = { "left", "right" };
 
 	switch (type) {
@@ -135,38 +138,43 @@ report_component(struct bluehawk_diag_page2 *dp, int fault, int ident,
 						"P1", "midplane", verbose);
 		break;
 	case BHC_DISK:
-		sprintf(loc_code, "P1-D%u", i+1);
-		sprintf(desc, "disk %u", i+1);
+		snprintf(loc_code, COMP_LOC_CODE, "P1-D%u", i+1);
+		snprintf(desc, COMP_DESC_SIZE, "disk %u", i+1);
 		REPORT_COMPONENT(dp, disk_status[i], fault, ident, loc_code,
 							desc, verbose);
 		break;
 	case BHC_POWER_SUPPLY:
-		sprintf(loc_code, "P1-E%u", i+1);
-		sprintf(desc, "%s power supply", left_right[i]);
+		snprintf(loc_code, COMP_LOC_CODE, "P1-E%u", i+1);
+		snprintf(desc, COMP_DESC_SIZE,
+			 "%s power supply", left_right[i]);
 		REPORT_COMPONENT(dp, ps_status[i], fault, ident, loc_code,
 							desc, verbose);
 		break;
 	case BHC_ERM:
-		sprintf(loc_code, "P1-C%u", i+1);
-		sprintf(desc, "%s Enclosure RAID Module", left_right[i]);
+		snprintf(loc_code, COMP_LOC_CODE, "P1-C%u", i+1);
+		snprintf(desc, COMP_DESC_SIZE,
+			 "%s Enclosure RAID Module", left_right[i]);
 		REPORT_COMPONENT(dp, esm_status[i], fault, ident, loc_code,
 							desc, verbose);
 		break;
 	case BHC_PCI_CONTROLLER:
-		sprintf(loc_code, "P1-C%u-T3", i+1);
-		sprintf(desc, "%s PCIe controller", left_right[i]);
+		snprintf(loc_code, COMP_LOC_CODE, "P1-C%u-T3", i+1);
+		snprintf(desc, COMP_DESC_SIZE,
+			 "%s PCIe controller", left_right[i]);
 		REPORT_COMPONENT(dp, scc_controller_status[i], fault, ident,
 						loc_code, desc, verbose);
 		break;
 	case BHC_SAS_CONNECTOR:
-		sprintf(loc_code, "P1-C%u-T%u", (i/2)+1, (i%2)+1);
-		sprintf(desc, "%s SAS connector T%d", left_right[i/2], (i%2)+1);
+		snprintf(loc_code, COMP_LOC_CODE,
+			 "P1-C%u-T%u", (i/2)+1, (i%2)+1);
+		snprintf(desc, COMP_DESC_SIZE,
+			 "%s SAS connector T%d", left_right[i/2], (i%2)+1);
 		REPORT_COMPONENT(dp, sas_connector_status[i], fault, ident,
 						loc_code, desc, verbose);
 		break;
 	case BHC_FAN_ASSEMBLY:
-		sprintf(loc_code, "P1-C%u-A1", i+1);
-		sprintf(desc, "%s fan assembly", left_right[i]);
+		snprintf(loc_code, COMP_LOC_CODE, "P1-C%u-A1", i+1);
+		snprintf(desc, COMP_DESC_SIZE, "%s fan assembly", left_right[i]);
 		REPORT_COMPONENT(dp, fan_sets[i].fan_element[0], fault, ident,
 						loc_code, desc, verbose);
 		break;

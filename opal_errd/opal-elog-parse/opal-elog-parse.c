@@ -162,7 +162,7 @@ int read_elog(char path[], char **buf){
 	}
 
 	*buf = malloc(bufsz);
-	if(!buf){
+	if(!*buf){
 		fprintf(stderr, "Failed to allocate buffer\n");
 		return -1;
 	}

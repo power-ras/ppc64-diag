@@ -148,10 +148,10 @@ _dbg(const char *fmt, ...)
 	va_start(ap, fmt);
 	len = snprintf(buf, LP_ERROR_LOG_MAX, "DEBUG: ");
 	len += vsnprintf(buf + len, LP_ERROR_LOG_MAX - len, fmt, ap);
+	va_end(ap);
+
 	if (len < 0 || len >= LP_ERROR_LOG_MAX)
 		return;	/* Insufficient buffer size */
-
-	va_end(ap);
 
 	fprintf(stdout, buf);
 	fprintf(stdout, "\n");
@@ -186,6 +186,7 @@ log_msg(const char *fmt, ...)
 	len += vsnprintf(buf + len, LP_ERROR_LOG_MAX - len, fmt, ap);
 	if (len < 0 || len >= LP_ERROR_LOG_MAX) {
 		dbg("Insufficient buffer size");
+		va_end(ap);
 		return;
 	}
 	va_end(ap);
@@ -313,7 +314,7 @@ rotate_log_file(char *lp_log_file)
 	}
 
 	/* sync log directory */
-	rc = fsync(dir_fd);
+	fsync(dir_fd);
 	close(dir_fd);
 }
 

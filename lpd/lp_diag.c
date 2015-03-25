@@ -925,6 +925,7 @@ create_menu(struct loc_code *ident_list, struct loc_code *attn_list)
 
 	if (!cur_state || !prev_state || !my_items) {
 		log_msg("Out of memory");
+		free(my_items);
 		return -1;
 	}
 

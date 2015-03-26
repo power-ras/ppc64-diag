@@ -31,7 +31,7 @@ int parse_sw_v1_scn(struct opal_sw_v1_scn *swv1,
 		return -EINVAL;
 	}
 
-	bzero(swv1->file_id, swv1->id_length);
+	memset(swv1->file_id, 0, swv1->id_length);
 	memcpy(swv1->file_id, swv1buf->file_id, swv1->id_length);
 	swv1->file_id[swv1->id_length - 1] = '\0';
 

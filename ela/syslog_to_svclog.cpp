@@ -425,6 +425,7 @@ log_event(SyslogEvent *sys, SyslogMessage *msg)
 		free(os_data);
 		cerr << "Failed to log servicelog event: out of memory."
 								<< endl;
+		return -1;
 	}
 	memset(svc, 0, sizeof(*svc));
 	/* next, id set by servicelog_event_log() */

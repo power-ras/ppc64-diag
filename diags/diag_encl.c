@@ -269,6 +269,7 @@ servevent(char *refcode, int sev, char *text, struct dev_vpd *vpd,
 	rc = servicelog_open(&slog, 0);
 	if (rc != 0) {
 		fprintf(stderr, "%s", servicelog_error(slog));
+		servicelog_event_free(entry);
 		return 0;
 	}
 

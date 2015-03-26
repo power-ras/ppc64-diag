@@ -632,7 +632,7 @@ main(int argc, char *argv[])
 		edir = opendir(SCSI_SES_PATH);
 		if (!edir) {
 			fprintf(stderr,
-				"System does not have SCSI enclsoure(s).\n");
+				"System does not have SCSI enclosure(s).\n");
 			return -1;
 		}
 

@@ -256,7 +256,7 @@ valid_enclosure_device(const char *sg)
 
 	edir = opendir(SCSI_SES_PATH);
 	if (!edir) {
-		fprintf(stderr, "System does not have SCSI enclsoure(s).\n");
+		fprintf(stderr, "System does not have SCSI enclosure(s).\n");
 		return -1;
 	}
 

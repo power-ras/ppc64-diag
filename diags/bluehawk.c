@@ -13,7 +13,6 @@
 #include "bluehawk.h"
 
 #define ES_STATUS_STRING_MAXLEN		32
-#define LOCATION_SUFFIX_MAXLEN		32
 #define EVENT_DESC_SIZE			512
 
 /* SRN Format :
@@ -797,8 +796,8 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 		snprintf(description, EVENT_DESC_SIZE,
 			 "%s fault in midplane of RAID enclosure.%s",
 			 crit, ref_svc_doc);
-		strncpy(loc_suffix, "-P1", LOCATION_SUFFIX_MAXLEN - 1);
-		loc_suffix[LOCATION_SUFFIX_MAXLEN - 1] = '\0';
+		strncpy(loc_suffix, "-P1", loc_suffix_size - 1);
+		loc_suffix[loc_suffix_size - 1] = '\0';
 		callouts = NULL;
 		create_mp_callout(&callouts, location, fd);
 		servevent("none", sev, description, vpd, callouts);

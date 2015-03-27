@@ -355,16 +355,22 @@ missing_vpd:
 static void
 make_prev_path(const char *encl_loc)
 {
+	int path_len = strlen(DIAG_ENCL_PREV_PAGES_DIR) + strlen(encl_loc) + 5;
+
 	free(cmd_opts.prev_path);
-	cmd_opts.prev_path = malloc(sizeof(DIAG_ENCL_PREV_PAGES_DIR) +
-					strlen(encl_loc) + 4);
+	cmd_opts.prev_path = malloc(path_len);
 	if (!cmd_opts.prev_path)
 		return;
 
+	memset(cmd_opts.prev_path, 0, path_len);
 	strncpy(cmd_opts.prev_path, DIAG_ENCL_PREV_PAGES_DIR,
 		strlen(DIAG_ENCL_PREV_PAGES_DIR));
-	strcat(cmd_opts.prev_path, encl_loc);
-	strcat(cmd_opts.prev_path, ".pg2");
+
+	path_len -= strlen(DIAG_ENCL_PREV_PAGES_DIR);
+	strncat(cmd_opts.prev_path, encl_loc, path_len - 1);
+
+	path_len -= strlen(encl_loc);
+	strncat(cmd_opts.prev_path, ".pg2", path_len - 1);
 }
 
 static void

@@ -191,10 +191,17 @@ setup_rtas_event_scenario(void)
 	}
 
 	len = read(fd, scenario_buf, sbuf.st_size);
+	if (len == -1) {
+		log_msg(NULL, "Could not read from scenario file %s, %s",
+			scenario_file, strerror(errno));
+		close(fd);
+		return -1;
+	}
+
 	close(fd);
 
 	/* Now, convert all '\n' and EOF chars to '\0' */
-	for (i = 0; i < sbuf.st_size; i++) {
+	for (i = 0; i < len; i++) {
 		if (scenario_buf[i] == '\n') {
 			scenario_buf[i] = '\0';
 			scenario_count++;
@@ -621,6 +628,7 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 			log_msg(NULL, "fsync failed, on %s\nexit status: %d",
 					dirname(rtas_errd_log), errno);
 		}
+		close(dir_fd);
 
 		rtas_errd_log_fd = open(rtas_errd_log,
 					O_RDWR | O_CREAT | O_TRUNC,

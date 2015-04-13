@@ -18,7 +18,6 @@
 #include <sys/mman.h>
 #include <sys/wait.h>
 #include <librtas.h>
-#include <iniparser.h>
 #include "config.h"
 
 #define RTAS_PARAM_AUTO_RESTART		21
@@ -35,15 +34,250 @@ char *config_file = "/etc/ppc64-diag/ppc64-diag.config";
  */
 struct ppc64_diag_config d_cfg;
 
-static const char *rtas_config_keys[] = {
-	"MinProcessors",
-	"MinEntitledCapacity",
-	"ScanlogDumpPath",
-	"PlatformDumpPath",
-	"AutoRestartPolicy",
-};
+/**
+ * get_token
+ * @brief return the next token from the provided buffer.
+ *
+ * This routine is modified parser/tokenizer for interpreting the 
+ * ppc64-diag config file.
+ *
+ * @param str point at which to began looking for tokens
+ * @param str_end end of token buffer
+ * @param tok buffer to be filled in with the found token
+ * @param line_no reference to line number in the config file
+ * @return pointer to where the tokenizer stopped in 'str'
+ */
+static char *
+get_token(char *str, char *str_end, char *tok, int *line_no)
+{
+	char	*start = NULL;
 
-#define CONFIG_MAX	(sizeof(rtas_config_keys)/sizeof(rtas_config_keys[0]))
+	while (str < str_end) {
+	    switch (*str) {
+		case '#':
+			/* A '#' denotes the beginning of a comment that
+			 * continues to the end of the line ('\n')
+			 * character.  Skip ahead to the next line and 
+			 * continue searching.
+			 */
+			while ((str < str_end) && (*str++ != '\n'));
+			(*line_no)++;
+			break;
+
+		case '\\':
+			/* A '\' denotes a multi-line string.  If we haven't
+			 * started a string yet simply skip ahead to the next 
+			 * line and continue searching...
+			 */
+			if (start == NULL) {
+				while ((str < str_end) && (*str++ != '\n'));
+				(*line_no)++;
+				break;
+			}
+
+			/* ...Otherwise, return the token we have already 
+			 * started then skip ahead to the next line and
+			 * return that point as the end of the search.
+			 */
+			snprintf(tok, str - start + 1, "%s", start);
+			
+			while ((str < str_end) && (*str++ != '\n'));
+			(*line_no)++;
+
+			return str;
+			break;
+			
+		case ' ':
+		case '\t':
+			/* Whitespace is either is token delimiter if we
+			 * have started reading a token, or it is igored.
+			 */
+			if (start == NULL) {
+				str++;
+				break;
+			}
+
+			snprintf(tok, str - start + 1, "%s", start);
+			return str + 1;
+			break;
+
+		case '\n':
+			/* Newlines are either token delimiters if we
+			 * have started reading a token, or a seperate token
+			 * on its own.
+			 */
+			if (start == NULL) {
+				tok[0] = '\n';
+				tok[1] = '\0';
+				(*line_no)++;
+				str++;
+			} else {
+				snprintf(tok, str - start + 1, "%s", start);
+			}
+
+			return str;
+			break;
+
+		case '{':
+		case '}':
+		case '=':
+			/* All three ('{', '}', and '=') are both token
+			 * delimiters if we have started reading a token or
+			 * a token on their own.
+			 */
+			if (start == NULL) {
+				snprintf(tok, 2, "%s", str);
+				str++;
+			} else {
+				snprintf(tok, str - start + 1, "%s", start);
+			}
+
+			return str;
+			break;
+
+		case '"':
+			/* A quoted string is returned as a single token
+			 * containing everything in quotes, or a token
+			 * delimiter if we have begun reading in a token.
+			 * NOTE, we do not allow quoted strings the span
+			 * multiple lines.
+			 */
+			if (start == NULL) {
+				start = str++;
+				while ((str < str_end) && (*str != '"')) {
+					if (*str == '\n')
+						return NULL;
+					else
+						str++;
+				}
+				snprintf(tok, str - start + 1, "%s", start);
+				str++;
+			} else {
+				snprintf(tok, str - start + 1, "%s", start);
+			}
+
+			return str;
+			break;
+
+		default:
+			/* By default everything else is part of a token */
+			if (start == NULL)
+				start = str;
+
+			str++;
+			break;
+	    }
+	}
+
+	return (char *)EOF;
+}
+
+		
+/**
+ * get_config_string
+ * @brief retrieve a string associated with a configuration entry
+ *
+ * For the purposes of parsing the ppc64-diag config file a string is
+ * considered everything that comes after the '=' character up to
+ * the newline ('\n') character.  Strings can span multiple lines 
+ * if they end in a '\', but this is handled by get_token() and we
+ * only need to look for the newline character here.
+ *
+ * @param start should point to the '=' following an entry name
+ * @param end end of buffer containing the string
+ * @param buf buffer into which the string is copied
+ * @param line_no reference to the line number in the config file
+ * @return pointer to where we stopped parsing or NULL on failure
+ */
+static char *
+get_config_string(char *start, char *end, char *buf, int *line_no)
+{
+	char	tok[1024];
+	int	offset = 0;
+
+	/* The first token token should be '=' */
+	start = get_token(start, end, tok, line_no);
+	if ((start == NULL) || (tok[0] != '='))
+		return NULL;
+
+	/* Next token should be the string, this string can be a series
+	 * of tokens or one string in quotes.  We just get everything up
+	 * to the newline.  The code looks a bit odd here, but that is so
+	 * we can add in spaces between tokens which are ignored by the
+	 * tokenizer.
+	 */
+	start = get_token(start, end, tok, line_no);
+	if (start == NULL)
+		return NULL;
+
+	offset += sprintf(buf, "%s", tok);
+
+	start = get_token(start, end, tok, line_no);
+	while ((start != NULL) && (tok[0] != '\n')) {
+		offset += sprintf(buf + offset, " %s", tok);
+		start = get_token(start, end, tok, line_no);
+	}
+
+	return start;
+}
+
+/**
+ * get_config_num
+ * @brief Retrieve a numeric value for a configuration entry
+ *
+ * @param start should point to the '=' following an entry name
+ * @param end end of buffer containing thevalue 
+ * @param val int reference into which the value is copied
+ * @param line_no reference to the line number in the config file
+ * @return pointer to where we stopped parsing or NULL on failure
+ */
+static char *
+get_config_num(char *start, char *end, int *val, int *line_no)
+{
+	char	tok[1024];
+
+	/* The first token should be '=' */
+	start = get_token(start, end, tok, line_no);
+	if ((start == NULL) || (tok[0] != '='))
+		return NULL;
+
+	/* Next token should be the value */
+	start = get_token(start, end, tok, line_no);
+	if (start != NULL)
+		*val = ((int)strtol(tok, NULL, 10) > 1 ?
+				(int)strtol(tok, NULL, 10) : 1);
+
+	return start;
+}
+
+/**
+ * get_restart_policy_value
+ * @brief Retrieve Auto Restart Policy value
+ *
+ * Same as get_config_num(), except we handle 0 and negative
+ * values here.
+ */
+static char *
+get_restart_policy_value(char *start, char *end, int *val, int *line_no)
+{
+	char	tok[1024];
+	char	*next_char;
+
+	/* The first token should be '=' */
+	start = get_token(start, end, tok, line_no);
+	if ((start == NULL) || (tok[0] != '='))
+		return NULL;
+
+	/* Next token should be the value */
+	start = get_token(start, end, tok, line_no);
+	if (start != NULL) {
+		*val = (int)strtol(tok, &next_char, 10);
+		if (*next_char != '\0')
+		    *val = -1;
+	}
+
+	return start;
+}
 
 /**
  * config_restart_policy
@@ -55,28 +289,43 @@ static const char *rtas_config_keys[] = {
  * ibm,os-auto-restart parameter in NVRAM (older systems), or by setting
  * the partition_auto_restart system parameter (more recent systems).
  *
+ * @param start place to start loking
+ * @param end pointer to end of 'start' buffer
+ * @param line_no refernece to the current line number
  * @param update_param if zero, the param will not actually be updated
+ * @returns pointer to current position in the config file, or NULL on failure
  */
-static void config_restart_policy(int update_param)
+static char *
+config_restart_policy(char *start, char *end, int *line_no, int update_param)
 {
 	struct stat	sbuf;
+	char		*cur;
 	char		system_arg[80];
 	char		param[3];
 	int		rc;
 
+	cur = get_restart_policy_value(start, end,
+				       &d_cfg.restart_policy, line_no);
+	if (cur == NULL) {
+		d_cfg.log_msg("Parsing error for configuration file "
+			      "entry \"AutoRestartPolicy\", " "line %d", 
+			      line_no);
+		return cur;
+	}
+
 	/* Validate the restart value */
 	if (! (d_cfg.restart_policy == 0 || d_cfg.restart_policy == 1)) {
 		d_cfg.log_msg("Invalid parameter (%d) specified for the "
-			      "AutoRestartPolicy in config file "
+			      "AutoRestartPolicy (line %d) in config file "
 			      "(%s), expecting a 0 or a 1.  The Auto Restart "
 			      "Policy has not been configured",
-			      d_cfg.restart_policy, config_file);
+			      d_cfg.restart_policy, *line_no, config_file);
 		d_cfg.restart_policy = -1;
-		return;
+		return cur;
 	}
 
 	if (!update_param)
-		return;
+		return cur;
 
 	/* Try to set the system parameter with the ibm,set-sysparm RTAS call */
 	*(uint16_t *)param = htobe16(1);
@@ -86,7 +335,7 @@ static void config_restart_policy(int update_param)
 	case 0:			/* success */
 		d_cfg.log_msg("Configuring the Auto Restart Policy to %d",
 			      d_cfg.restart_policy);
-		return;
+		return cur;
 	case -1:		/* hardware error */
 		d_cfg.log_msg("Hardware error while attempting to set the "
 			      "Auto Restart Policy via RTAS; attempting "
@@ -117,7 +366,7 @@ static void config_restart_policy(int update_param)
 		d_cfg.log_msg("Could not configure the Auto Restart Policy "
 			      "due to a missing requisite (nvram command)");
 		d_cfg.restart_policy = -1;
-		return;
+		return cur;
 	}
 
 	/* See if the ibm,os-auto-restart config variable is in 
@@ -128,9 +377,10 @@ static void config_restart_policy(int update_param)
 	if (system(system_arg) == -1) {
 		d_cfg.log_msg("The current system does not support the "
 			      "Auto Restart Policy; the AutoRestartPolicy "
-			      "configuration entry is being skipped");
+			      "configuration entry (line %d) is being skipped",
+			      line_no);
 		d_cfg.restart_policy = -1;
-		return;
+		return cur;
 	}
 
 	sprintf(system_arg, "%s%d", "/usr/sbin/nvram -p common "
@@ -141,128 +391,171 @@ static void config_restart_policy(int update_param)
 			      "due to a failure in running the nvram command",
 			      d_cfg.restart_policy);
 		d_cfg.restart_policy = -1;
-		return;
+		return cur;
 	}
 
 	d_cfg.log_msg("Configuring the Auto Restart Policy to %d (in NVRAM)",
 		      d_cfg.restart_policy);
+
+	return cur;
 }
 
 /**
  * parse_config_entries
  * @brief Parse the ppc64-diag config file entries
- *
- * @param config_dict (dictionary object) after parsing the config file
+ * 
+ * @param buf buffer containg the ppc64-diag config file contents
+ * @param buf_end pointer to the end of 'buf'
  * @param update_sysconfig if 0, configuration params (in NVRAM) will not update
+ * @returns 0 on success, -1 on error
  */
-static void parse_config_entries(dictionary *config_dict, int update_sysconfig)
+static int
+parse_config_entries(char *buf, char *buf_end, int update_sysconfig)
 {
-	int len, ret;
-	int n_secs, i, j;
-	char *result;
+	char	*cur = buf;
+	char	tok[1024];
+	int	line_no = 1;
+	int	rc = 0;
 
-	n_secs = iniparser_getnsec(config_dict);
+	do {
+		cur = get_token(cur, buf_end, tok, &line_no);
+		if (cur == (char *)EOF)
+			break;
 
-	/* Check if any sections are specified */
-	if (n_secs > 0) {
-		for (i = 0; i < n_secs; i++)
-			d_cfg.log_msg("Error in the configuration file %s"
-				      " section [%s] not expected", config_file,
-				      iniparser_getsecname(config_dict, i));
-		return;
-	}
+		if (cur == NULL) {
+			d_cfg.log_msg("Parsing error in configuration "
+				      "file near line %d", line_no);
+			rc = -1;
+			break;
+		}
+		
+		/* Ignore newlines */
+		if (tok[0] == '\n') {
+			continue;
+		}
 
-	/* Check if any invalid keys are specified */
-	for (i = 0; i < config_dict->n; i++) {
-		int found = 0;
-		/* Discard the ':' stored in dictionary (as section is null) */
-		char *dict_key = config_dict->key[i] + 1;
+		/* MinProcessors */
+		if (strcmp(tok, "MinProcessors") == 0) {
+			cur = get_config_num(cur, buf_end, 
+					     &d_cfg.min_processors, &line_no); 
+			if (cur == NULL) {
+				d_cfg.log_msg("Parsing error for "
+					      "configuration file entry "
+					      "\"MinProcessors\", line %d", 
+					      line_no);
+				rc = -1;
+				break;
+			} 
+			else {
+				d_cfg.log_msg("Configuring Minimum "
+					      "Processors to %d", 
+					      d_cfg.min_processors);
+			}
+			
+		/* MinEntitledCapacity */
+		} else if (strcmp(tok, "MinEntitledCapacity") == 0) {
+			cur = get_config_num(cur, buf_end, 
+					     &d_cfg.min_entitled_capacity,
+					     &line_no);
+			if (cur == NULL) {
+				d_cfg.log_msg("Parsing error for "
+					      "configuration file entry "
+					      "\"MinEntitledCapacity\", "
+					      "line %d", line_no);
+				rc = -1;
+				break;
+			} 
+			else {
+				d_cfg.log_msg("Configuring Minimum "
+					      "Entitled Capacity to %d", 
+					      d_cfg.min_entitled_capacity);
+			}
+			
+		/* ScanlogDumpPath */
+		} else if (strcmp(tok, "ScanlogDumpPath") == 0) {
+			int len;
 
-		for (j = 0; j < CONFIG_MAX; j++)
-			if (!strncasecmp(dict_key, rtas_config_keys[j],
-					strlen(rtas_config_keys[j]))) {
-				found = 1;
+			cur = get_config_string(cur, buf_end,
+						d_cfg.scanlog_dump_path,
+						&line_no);
+			if (cur == NULL) {
+				d_cfg.log_msg("Parsing error for "
+					      "configuration file entry "
+					      "\"ScanlogDumpPath\", line %d", 
+					      line_no);
+				rc = -1;
 				break;
 			}
 
-		if (!found)
-			d_cfg.log_msg("Error in the configuration file %s key"
-				      " [%s] not valid", config_file, dict_key);
-	}
+			/* We need to ensure the path specified ends in a '/' */
+			len = strlen(d_cfg.scanlog_dump_path);
+			if (d_cfg.scanlog_dump_path[len-1] != '/') {
+				d_cfg.scanlog_dump_path[len] = '/';
+				d_cfg.scanlog_dump_path[len + 1] = '\0';
+			}
 
-	ret = iniparser_getint(config_dict, ":MinProcessors", 0);
-	if (ret > 0) {
-		d_cfg.min_processors = ret;
-		d_cfg.log_msg("Configuring Minimum Processors to %d",
-			      d_cfg.min_processors);
-	} else {
-		d_cfg.log_msg("Parsing error for configuration file entry "
-			      "\"MinProcessors\" [value = %d]", ret);
-	}
+			d_cfg.log_msg("Configuring Scanlog Dump Path to "
+				      "\"%s\"", d_cfg.scanlog_dump_path);
 
-	ret = iniparser_getint(config_dict, ":MinEntitledCapacity", -1);
-	if (ret > -1) {
-		d_cfg.min_entitled_capacity = ret;
-		d_cfg.log_msg("Configuring Minimum Entitled Capacity to %d",
-			      d_cfg.min_entitled_capacity);
-	} else {
-		d_cfg.log_msg("Parsing error for configuration file entry "
-			      "\"MinEntitledCapacity\" [value = %d]", ret);
-	}
+		/* PlaformDumpPath */
+		} else if (strcmp(tok, "PlatformDumpPath") == 0) {
+			int len;
 
-	result = iniparser_getstring(config_dict, ":ScanlogDumpPath", NULL);
-	if (result != NULL) {
-		strcpy(d_cfg.scanlog_dump_path, result);
+			cur = get_config_string(cur, buf_end,
+						d_cfg.platform_dump_path,
+						&line_no); 
 
-		/* We need to ensure the path specified ends in a '/' */
-		len = strlen(d_cfg.scanlog_dump_path);
-		if (d_cfg.scanlog_dump_path[len-1] != '/') {
-			d_cfg.scanlog_dump_path[len] = '/';
-			d_cfg.scanlog_dump_path[len + 1] = '\0';
+			if (cur == NULL) {
+				d_cfg.log_msg("Parsing error for "
+					      "configuration file entry "
+					      "\"PlatformDumpPath\", line %d", 
+					      line_no);
+				rc = -1;
+				break;
+			}
+
+			/* We need to ensure the path specified ends in a '/' */
+			len = strlen(d_cfg.platform_dump_path);
+			if (d_cfg.platform_dump_path[len-1] != '/') {
+				d_cfg.platform_dump_path[len] = '/';
+				d_cfg.platform_dump_path[len + 1] = '\0';
+			}
+
+			d_cfg.log_msg("Configuring Platform Dump Path to "
+				      "\"%s\"", d_cfg.platform_dump_path);
+
+		/* AutoRestartPolicy */
+		} else if (strcmp(tok, "AutoRestartPolicy") == 0) {
+			cur = config_restart_policy(cur, buf_end, &line_no,
+					update_sysconfig);
+			if (cur == NULL) {
+				rc = -1;
+				break;
+			}
+
+		} 
+		else {
+			d_cfg.log_msg("Configuration error: \"%s\", line %d, "
+				      "is not a valid configuration name", 
+				      tok, line_no);
+			rc = -1;
+			break;
 		}
-		d_cfg.log_msg("Configuring Scanlog Dump Path to "
-			      "\"%s\"", d_cfg.scanlog_dump_path);
-	} else {
-		d_cfg.log_msg("Parsing error for configuration file entry "
-			      "\"ScanlogDumpPath\"");
-	}
+	} while ((cur != NULL) && (cur < buf_end));
 
-	result = iniparser_getstring(config_dict, ":PlatformDumpPath", NULL);
-	if (result != NULL) {
-		strcpy(d_cfg.platform_dump_path, result);
-
-		/* We need to ensure the path specified ends in a '/' */
-		len = strlen(d_cfg.platform_dump_path);
-		if (d_cfg.platform_dump_path[len-1] != '/') {
-			d_cfg.platform_dump_path[len] = '/';
-			d_cfg.platform_dump_path[len + 1] = '\0';
-		}
-		d_cfg.log_msg("Configuring Platform Dump Path to "
-			      "\"%s\"", d_cfg.platform_dump_path);
-	} else {
-		d_cfg.log_msg("Parsing error for configuration file entry "
-			      "\"PlatformDumpPath\"");
-	}
-
-	ret = iniparser_getint(config_dict, ":AutoRestartPolicy", -1);
-	if (ret == 0 || ret == 1) {
-		d_cfg.restart_policy = ret;
-		config_restart_policy(update_sysconfig);
-	} else {
-		d_cfg.log_msg("Parsing error for configuration file entry "
-			      "\"AutoRestartPolicy\" [value = %d]", ret);
-	}
+	return rc;
 }
 
 /**
  * init_d_cfg
  * @brief initialize the ppc64-diag config structure
  */
-static void init_d_cfg(void (*log_msg)(char *, ...))
+static void
+init_d_cfg(void (*log_msg)(char *, ...))
 {
 	d_cfg.min_processors = 1;
 	d_cfg.min_entitled_capacity = 5;
-
+	
 	strcpy(d_cfg.scanlog_dump_path, "/var/log/");
 	strcpy(d_cfg.platform_dump_path, "/var/log/dump/");
 
@@ -284,23 +577,57 @@ static void init_d_cfg(void (*log_msg)(char *, ...))
 int
 diag_cfg(int update_sysconfig, void (*log_msg)(char *, ...))
 {
-	dictionary *config_dict = NULL;
+	struct stat	cfg_sbuf;
+	char		*cfg_mmap = NULL;
+	char		*cur = NULL, *end;
+	int		cfg_fd;
 
 	/* initialize the configuration variables */
 	init_d_cfg(log_msg);
 
-	/* Parse a config file and return an allocated dictionary object.*/
-	config_dict = iniparser_load(config_file);
-	if (!config_dict) {
-		d_cfg.log_msg("Could not parse config file %s (%s)",
-			      config_file, strerror(errno));
-		return -1;
+	/* open and map the configuration file */
+	if ((cfg_fd = open(config_file, O_RDONLY)) < 0) {
+		d_cfg.log_msg("Could not open the ppc64-diag configuration "
+			      "file \"%s\", %s", config_file, strerror(errno));
+		return 0;
 	}
 
-	/* parse the configuration entries */
-	parse_config_entries(config_dict, update_sysconfig);
+	if ((fstat(cfg_fd, &cfg_sbuf)) < 0) {
+		d_cfg.log_msg("Could not get status of the ppc64-diag "
+			      "configuration file \"%s\", %s. No configuration "
+			      "data has been read, using default ppc64-diag "
+			      "settings", config_file, strerror(errno));
+		close(cfg_fd);
+		return 0;	
+	}
+	
+	/* If this is a zero-length file, do nothing */
+	if (cfg_sbuf.st_size == 0) {
+		close(cfg_fd);
+		return 0;
+	}
 
-	iniparser_freedict(config_dict);
+	if ((cfg_mmap = mmap(0, cfg_sbuf.st_size, PROT_READ, MAP_PRIVATE,
+			     cfg_fd, 0)) == (char *)-1) {
+		d_cfg.log_msg("Could not map ppc64-diag configuration file "
+			      "\"%s\", %s. No configuration data has been "
+			      "read, using default ppc64-diag settings", 
+			      config_file, strerror(errno));
+		close(cfg_fd);
+		return 0;
+	}
 
+	cur = cfg_mmap;
+	end = cfg_mmap + cfg_sbuf.st_size;
+
+	if (parse_config_entries(cur, end, update_sysconfig)) {
+		d_cfg.log_msg("Due to an error parsing the ppc64-diag "
+			      "configuration file, The default configuration "
+			      "settings will be used");
+		init_d_cfg(log_msg);
+	}
+
+	munmap(cfg_mmap, cfg_sbuf.st_size);
+	close(cfg_fd);
 	return 0;
 }

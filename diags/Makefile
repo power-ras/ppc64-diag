@@ -25,7 +25,7 @@ all: $(PROGS)
 
 diag_encl: $(DIAG_ENCL_OBJS)
 	@echo "LD $(WORK_DIR)/$@"
-	@$(CC) $(CFLAGS) $(INCLUDE) $(COMMON_UTILS_OBJ) $(DIAG_ENCL_LIBS) -o $@ $^
+	@$(CC) $(CFLAGS) $(INCLUDE) $(COMMON_UTILS_OBJ) -o $@ $^ $(DIAG_ENCL_LIBS)
 
 encl_led: $(ENCL_LED_OBJS)
 	@echo "LD $(WORK_DIR)/$@"

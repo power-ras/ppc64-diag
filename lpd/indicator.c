@@ -21,6 +21,9 @@
 #include "indicator_ses.h"
 #include "indicator_rtas.h"
 
+/* Indicator operating mode */
+uint32_t	operating_mode;
+
 /* Note:
  *	At present, we do not support all SES enclosures/devices. Consider
  *	removing device_supported() and enclosure_supported() once we

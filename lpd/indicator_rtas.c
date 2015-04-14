@@ -20,9 +20,6 @@
 /* RTAS error buffer size */
 #define RTAS_ERROR_BUF_SIZE	64
 
-/* Indicator operating mode */
-uint32_t	operating_mode;
-
 /**
  * parse_work_area - Parse the working buffer
  *

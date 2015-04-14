@@ -242,6 +242,7 @@ indicator_log_write(const char *fmt, ...)
 	len += vsnprintf(buf + len, LP_ERROR_LOG_MAX - len, fmt, ap);
 	if (len < 0 || len >= LP_ERROR_LOG_MAX) {
 		log_msg("Insufficient buffer size");
+		va_end(ap);
 		return -1;
 	}
 	va_end(ap);

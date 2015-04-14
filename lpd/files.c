@@ -343,6 +343,7 @@ init_files(void)
 	}
 
 	/* open event log file */
+	rotate_log_file(lp_event_log_file);
 	lp_event_log_fd = open(lp_event_log_file,
 			       O_RDWR | O_CREAT | O_APPEND,
 			       S_IRUSR | S_IWUSR | S_IRGRP);

@@ -233,7 +233,8 @@ get_dt_status(char *dev)
 	char target[80];
 	char *ptr;
 	char *system_args[6] = {NULL, };		/* execv args		*/
-	char *tmp_file = "/tmp/get_dt_files";
+	char tmp_file[] = "/tmp/get_dt_files";
+	int fd;
 	pid_t cpid;					/* child pid		*/
 	int rc;						/* return value		*/
 	int status;					/* child exit status	*/
@@ -244,8 +245,16 @@ get_dt_status(char *dev)
 	system_args[3] = "status";
 	system_args[4] = "-print";
 
+	fd = mkstemp(tmp_file);
+	if (fd == -1) {
+		log_msg(NULL, "tmp file creation failed, at "
+			"get_dt_status\n");
+		exit (-2);
+	} /* open */
+
 	cpid = fork();
 	if (cpid == -1) {
+		close(fd);
 		log_msg(NULL, "Fork failed, at get_dt_status\n");
 		return NULL;
 	} /* fork */
@@ -272,6 +281,7 @@ get_dt_status(char *dev)
 		close(fd);
 		exit (-2);
 	} else { /* parent */
+		close(fd);
 		rc = waitpid(cpid, &status, 0);
 		if (rc == -1) {
 			log_msg(NULL, "wait on child failed at, "
@@ -285,14 +295,14 @@ get_dt_status(char *dev)
 	}
 
 	/* results of the find command */
-	fp1 = fopen("/tmp/get_dt_files", "r");
+	fp1 = fopen(tmp_file, "r");
 	if (fp1 == 0) {
-		fprintf(stderr, "open failed on /tmp/get_dt_files\n");
+		fprintf(stderr, "open failed on %s\n", tmp_file);
 		return NULL;
 	}
 
 	while (fscanf (fp1, "%s", loc_file) != EOF) {
-		dbg("read from /tmp/get_dt_files, \"%s\"", loc_file);
+		dbg("read from /%s, \"%s\"", tmp_file, loc_file);
 
 		/* read the status in case this is the one */
 		fp2 = fopen(loc_file, "r");

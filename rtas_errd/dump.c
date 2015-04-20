@@ -72,8 +72,10 @@ get_machine_serial()
 static int
 load_scanlog_module(int load)
 {
-	int rc;
-	char system_arg[80];
+	int rc, i = 0;
+	pid_t cpid;			/* child pid			*/
+	char *system_args[5] = {NULL,};	/* **argv passed to execv	*/
+	int status;			/* exit status of child		*/
 
 	/* If SCANLOG_DUMP_FILE exists, then the module is either already
 	 * loaded, or the procfs interface is built into the kernel rather
@@ -82,26 +84,39 @@ load_scanlog_module(int load)
 	if (load && !access(SCANLOG_DUMP_FILE, F_OK))
 		return 0;
 
-	if ((strlen(MODPROBE_PROGRAM) + strlen(SCANLOG_MODULE)
-			+ (load ? 2 : 4)) > 79) {
-		log_msg(NULL, "%s module could not be %s, buffer is not long "
-			"enough to run %s", SCANLOG_MODULE,
-			(load ? "loaded" : "unloaded"), MODPROBE_PROGRAM);
+	system_args[i++] = MODPROBE_PROGRAM;
+	system_args[i++] = "-q";
+	if (!load)
+		system_args[i++] = "-r";
+	system_args[i++] = SCANLOG_MODULE;
 
+	cpid = fork();
+	if (cpid == -1) {
+		log_msg(NULL, "Fork failed, while probing for scanlog\n");
 		return 1;
-	}
+	} /* fork */
 
-	sprintf(system_arg, "%s %s %s 2>/dev/null", MODPROBE_PROGRAM,
-		(load ? "" : "-r"), SCANLOG_MODULE);
-	rc = system(system_arg);
-	if (rc) {
-		if (errno == ENOENT)
+	if (cpid == 0 ) { /* child */
+		rc = execv(system_args[0], system_args);
+		if (errno != ENOENT) {
+			log_msg(NULL, "%s module could not be %s, could not run "
+				"%s; system call returned %d", SCANLOG_MODULE,
+				(load ? "loaded" : "unloaded"), MODPROBE_PROGRAM, rc);
+		} else {
+			log_msg(NULL, "module %s not found", SCANLOG_MODULE);
+		}
+
+		exit(-2);
+	} else { /* parent */
+		rc = waitpid(cpid, &status, 0);
+		if (rc == -1) {
+			log_msg(NULL, "wait failed, while probing for "
+				"scanlog\n");
 			return 1;
-		log_msg(NULL, "%s module could not be %s, could not run "
-			"%s; system call returned %d", SCANLOG_MODULE,
-			(load ? "loaded" : "unloaded"), MODPROBE_PROGRAM, rc);
+		}
 
-		return 1;
+		if ((signed char)WEXITSTATUS(status) == -2) /* exit on failure */
+			return 1;
 	}
 
 	return 0;

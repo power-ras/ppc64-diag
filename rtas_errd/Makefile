@@ -8,6 +8,8 @@ CMDS = rtas_errd convert_dt_node_props extract_platdump
 SCRIPTS = rc.powerfail
 PRRN_HOTPLUG = prrn_hotplug
 
+COMMON_UTILS_OBJ = ../$(COM_DIR)/utils.o
+
 RTAS_ERRD_OBJS = rtas_errd.o epow.o dump.o guard.o eeh.o update.o \
 		 files.o config.o diag_support.o ela.o v6ela.o servicelog.o \
 		 signal.o prrn.o hotplug.o
@@ -23,7 +25,7 @@ DOXYGEN_CFG = doxygen.config
 
 all: $(CMDS) $(SCRIPTS)
 
-rtas_errd: $(RTAS_ERRD_OBJS)
+rtas_errd: $(RTAS_ERRD_OBJS) $(COMMON_UTILS_OBJ)
 	@echo "LD $(WORK_DIR)/$@"
 	$(CC) $(CFLAGS) -o $@ $^ $(RTAS_ERRD_LIBS)
 

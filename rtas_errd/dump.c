@@ -15,6 +15,7 @@
 #include <librtasevent.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include "utils.h"
 #include "rtas_errd.h"
 
 #define DUMP_MAX_FNAME_LEN	40
@@ -236,9 +237,11 @@ check_platform_dump(struct event *event)
 	uint64_t dump_tag;
 	char	filename[DUMP_MAX_FNAME_LEN + 20], *pos;
 	char	pathname[DUMP_MAX_FNAME_LEN + 40];
-	char	cmd_buf[60];
 	FILE	*f;
 	int	rc, bytes;
+	char    *system_args[3] = {NULL, };     /* execv arguments      */
+	char 	tmp_sys_arg[60];		/* tmp sys_args		*/
+	pid_t	cpid;                           /* child pid            */
 
 	dump_scn = rtas_get_dump_scn(event->rtas_event);
 	if (dump_scn == NULL)
@@ -258,13 +261,14 @@ check_platform_dump(struct event *event)
 	dump_tag |= ((uint64_t)dump_scn->v6hdr.subtype << 32);
 	dbg("Dump ID: 0x%016LX", dump_tag);
 
-	snprintf(cmd_buf, 60, "%s 0x%016LX", EXTRACT_PLATDUMP_CMD,
-		(long long unsigned int)dump_tag);
+	snprintf(tmp_sys_arg, 60, "0x%016LX", (long long unsigned int)dump_tag);
+	system_args[0] = EXTRACT_PLATDUMP_CMD;
+	system_args[1] = tmp_sys_arg;
 
 	/* sigchld_handler() messes up pclose(). */
 	restore_sigchld_default();
 
-	f = popen(cmd_buf, "r");
+	f = spopen(system_args, &cpid);
 	if (f == NULL) {
 		log_msg(event, "Failed to open pipe to %s.",
 			EXTRACT_PLATDUMP_CMD);
@@ -272,11 +276,11 @@ check_platform_dump(struct event *event)
 		return;
 	}
 	fgets(filename, DUMP_MAX_FNAME_LEN + 20, f);
-	rc = pclose(f);
+	rc = spclose(f, cpid);
 
 	setup_sigchld_handler();
 
-	if ((rc == -1) || (WEXITSTATUS(rc) != 0)) {
+	if (rc) {
 		dbg("%s failed to extract the dump", EXTRACT_PLATDUMP_CMD);
 		return;
 	}

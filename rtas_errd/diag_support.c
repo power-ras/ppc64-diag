@@ -14,10 +14,10 @@
 #include <librtas.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-
+#include "utils.h"
 #include "rtas_errd.h"
 
-#define CMD_LSVPD "lsvpd"
+#define CMD_LSVPD "/usr/sbin/lsvpd"
 
 char target_status[80];
 
@@ -59,14 +59,13 @@ free_diag_vpd(struct event *event)
  * Execute the 'lsvpd' command and open a pipe to read the data
  */
 static int
-lsvpd_init(FILE **fp)
+lsvpd_init(FILE **fp, pid_t *cpid)
 {
-	char	cmd[128];
+	char *system_args[2] = {CMD_LSVPD, NULL,}; /* execv arguments      */
 
 	dbg("start lsvpd_init");
 
-	sprintf(cmd, "%s 2>/dev/null", CMD_LSVPD);
-	*fp = popen(cmd, "r");
+	*fp = spopen(system_args, cpid);
 	if (!*fp) {
 		perror("popen");
 		dbg("lsvpd_init failed popen (%s)", CMD_LSVPD);
@@ -82,7 +81,7 @@ lsvpd_init(FILE **fp)
  * Close the open a pipe on 'lsvpd'.
  */
 static int
-lsvpd_term(FILE *fp)
+lsvpd_term(FILE *fp, pid_t *cpid)
 {
 	int rc = 0;
 	char line[512];
@@ -91,7 +90,7 @@ lsvpd_term(FILE *fp)
         /* entries until pipe is empty.      */
         if (fp) {
 		while (fgets(line, sizeof(line), fp));
-		rc = pclose(fp);
+		rc = spclose(fp, *cpid);
         }
 
         return rc;
@@ -191,6 +190,7 @@ get_diag_vpd(struct event *event, char *phyloc)
 {
 	int rc = 0;
 	FILE *fp = NULL;
+	pid_t cpid;                       /* child pid */
 
 	dbg("start get_diag_vpd");
 
@@ -200,7 +200,7 @@ get_diag_vpd(struct event *event, char *phyloc)
 	/* sigchld_handler() messes up pclose(). */
 	restore_sigchld_default();
 
-	if (lsvpd_init(&fp) != 0) {
+	if (lsvpd_init(&fp, &cpid) != 0) {
 		setup_sigchld_handler();
 		return 1;
 	}
@@ -209,12 +209,12 @@ get_diag_vpd(struct event *event, char *phyloc)
 	       strcmp(event->diag_vpd.yl, phyloc)) {
 		if (lsvpd_read(event, fp)) {
 			dbg("end get_diag_vpd, failure");
-			rc = lsvpd_term(fp);
+			rc = lsvpd_term(fp, &cpid);
 			setup_sigchld_handler();
 			return 1;
 		}
 	}
-	rc = lsvpd_term(fp);
+	rc = lsvpd_term(fp, &cpid);
 	if (rc)
 		dbg("end get_diag_vpd, pclose failure");
 	else

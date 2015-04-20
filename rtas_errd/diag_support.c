@@ -298,15 +298,15 @@ get_dt_status(char *dev)
 		fp2 = fopen(loc_file, "r");
 		if (fp2 == 0) {
 			fprintf(stderr, "open failed on %s\n", loc_file);
-			return NULL;
+			goto out;
 		}
+
 		if (fscanf(fp2, "%s", target_status)) {
 			dbg("target_status = \"%s\", loc_file = \"%s\"",
 			    target_status, loc_file);
-		}
-		else {
+		} else {
 			fprintf(stderr, "read failed on %s\n", loc_file);
-			return NULL;
+			goto out;
 		}
 
 		fclose(fp2);
@@ -317,7 +317,7 @@ get_dt_status(char *dev)
 		fp2 = fopen(loc_file, "r");
 		if (fp2 == 0) {
 			fprintf(stderr, "open failed on %s\n", loc_file);
-			return NULL;
+			goto out;
 		}
 
 		if (fscanf(fp2, "%s", target)) {
@@ -325,19 +325,27 @@ get_dt_status(char *dev)
 			    target, loc_file);
 			if (strcmp(dev, target) == 0) {
 				dbg("status = \"%s\"", target_status);
-				return target_status;
+					fclose (fp2);
+					fclose (fp1);
+					return target_status;
 			}
 
 			fclose (fp2);
-		}
-		else {
+		} else {
 			fprintf(stderr, "read failed on %s\n", loc_file);
-			return NULL;
+			goto out;
 		}
 	}
 
-	fclose(fp1);
 	fprintf(stderr, "error: status NOT FOUND\n");
+
+out:
+	if (fp2)
+		fclose(fp2);
+
+	if (fp1)
+		fclose(fp1);
+
 	return NULL;
 }
 

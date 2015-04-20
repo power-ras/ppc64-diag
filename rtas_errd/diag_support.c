@@ -12,6 +12,8 @@
 #include <errno.h>
 #include <ctype.h>
 #include <librtas.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "rtas_errd.h"
 
@@ -230,11 +232,56 @@ get_dt_status(char *dev)
 	char loc_file[80];
 	char target[80];
 	char *ptr;
-	char command[]="/usr/bin/find /proc/device-tree -name status -print > /tmp/get_dt_files";
+	char *system_args[6] = {NULL, };		/* execv args		*/
+	char *tmp_file = "/tmp/get_dt_files";
+	pid_t cpid;					/* child pid		*/
+	int rc;						/* return value		*/
+	int status;					/* child exit status	*/
 
-	if (system(command) != 0) {
-		fprintf(stderr, "get_dt_status find command failed\n");
+	system_args[0] = "/usr/bin/find";
+	system_args[1] = "/proc/device-tree";
+	system_args[2] = "-name";
+	system_args[3] = "status";
+	system_args[4] = "-print";
+
+	cpid = fork();
+	if (cpid == -1) {
+		log_msg(NULL, "Fork failed, at get_dt_status\n");
 		return NULL;
+	} /* fork */
+
+	if (cpid == 0) { /* child */
+		int fd = open(tmp_file, O_CREAT | O_WRONLY | O_TRUNC,
+					S_IRUSR | S_IWUSR);
+		if (fd == -1) {
+			log_msg(NULL, "tmp file creation failed, at "
+				"get_dt_status\n");
+			exit (-2);
+		} /* open */
+
+		rc = dup2(fd, STDOUT_FILENO);
+		if (rc == -1) {
+			log_msg(NULL, "STDOUT redirection failed, at "
+				"get_dt_status\n");
+			close(fd);
+			exit (-2);
+		}
+
+		rc = execv(system_args[0], system_args);
+		log_msg(NULL, "get_dt_status find command failed\n");
+		close(fd);
+		exit (-2);
+	} else { /* parent */
+		rc = waitpid(cpid, &status, 0);
+		if (rc == -1) {
+			log_msg(NULL, "wait on child failed at, "
+				"get_dt_status\n");
+			return NULL;
+		} /* waitpid */
+
+		/* Return on EXIT_FAILURE */
+		if ((signed char)WEXITSTATUS(status) == -2)
+			return NULL;
 	}
 
 	/* results of the find command */

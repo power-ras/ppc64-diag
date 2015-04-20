@@ -15,6 +15,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <dirent.h>
+#include "utils.h"
 #include "rtas_errd.h"
 
 #define DRMGR_PROGRAM		"/usr/sbin/drmgr"
@@ -185,8 +186,10 @@ retrieve_drc_name(enum event_type type, struct event *event, unsigned int id,
 	struct stat sbuf;
 	int rc, ret=1;
 	FILE *fp;
-	char cmd[1024];
 	uint8_t status;
+	char *system_args[9] = {NULL,}; /* execv arguments      	*/
+	char tmp_sys_arg[100];		/* tmp sys_arg for snprintf	*/
+	pid_t cpid;                     /* child pid            	*/
 
 	if (stat(CONVERT_DT_PROPS_PROGRAM, &sbuf) < 0) {
 		log_msg(event, "The command \"%s\" does not exist, %s",
@@ -194,14 +197,24 @@ retrieve_drc_name(enum event_type type, struct event *event, unsigned int id,
 		return 0;
 	}
 
+	system_args[0] = CONVERT_DT_PROPS_PROGRAM;
+	system_args[1] = "--context";
 	if (type == CPUTYPE) {
-		snprintf(cmd, 1024,"%s --context cpu --from interrupt-server "
-		"--to drc-name %u 2>/dev/null", CONVERT_DT_PROPS_PROGRAM, id);
-	}
-	else { /* event type is mem */
-		snprintf(cmd, 1024, "%s --context mem --from drc-index --to "
-			 "drc-name 0x%08x 2>/dev/null", CONVERT_DT_PROPS_PROGRAM,
-			  id);
+		system_args[2] = "cpu";
+		system_args[3] = "--from";
+		system_args[4] = "interrupt-server";
+		system_args[5] = "--to";
+		system_args[6] = "drc-name";
+		snprintf(tmp_sys_arg, 100, "%u", id);
+		system_args[7] = tmp_sys_arg;
+	} else { /* event type is mem */
+		system_args[2] = "mem";
+		system_args[3] = "--from";
+		system_args[4] = "drc-index";
+		system_args[5] = "--to";
+		system_args[6] = "drc-name";
+		snprintf(tmp_sys_arg, 100, "0x%08x", id);
+		system_args[7] = tmp_sys_arg;
 	}
 
 	/* Note :
@@ -215,7 +228,8 @@ retrieve_drc_name(enum event_type type, struct event *event, unsigned int id,
 	 */
 	restore_sigchld_default();
 
-	if ((fp = popen(cmd, "r")) == NULL) {
+	fp = spopen(system_args, &cpid);
+	if (fp == NULL) {
 		if (type == CPUTYPE) {
 			log_msg(event, "Cannot obtain the drc-name for the "
 				"CPU with ID %u; Could not run %s. %s", id,
@@ -228,7 +242,7 @@ retrieve_drc_name(enum event_type type, struct event *event, unsigned int id,
 		}
 		setup_sigchld_handler();
 		return 0;
-	}
+	} /* fp == NULL */
 
 	rc = fread(buffer, 1, bufsize, fp);
 	if (rc == bufsize) {
@@ -244,8 +258,7 @@ retrieve_drc_name(enum event_type type, struct event *event, unsigned int id,
 	} else
 		buffer[0] = '\0';
 
-	rc = pclose(fp);
-	status = (int8_t)WEXITSTATUS(rc);
+	status = spclose(fp, cpid);
 
 	setup_sigchld_handler();
 

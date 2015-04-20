@@ -121,7 +121,7 @@ lsvpd_read(struct event *event, FILE *fp)
 			line[strlen(line) - 1] = '\0';
 
 		if (! strncmp(line, "*DS", 3)) {
-			event->diag_vpd.ds = (char *)malloc(strlen (line) + 1);
+			event->diag_vpd.ds = malloc(strlen (line) + 1);
 			if (event->diag_vpd.ds == NULL)
 				return rc;
 
@@ -130,7 +130,7 @@ lsvpd_read(struct event *event, FILE *fp)
 		}
 
 		if (! strncmp(line, "*YL", 3)) {
-			event->diag_vpd.yl = (char *)malloc(strlen (line) + 1);
+			event->diag_vpd.yl = malloc(strlen (line) + 1);
 			if (event->diag_vpd.yl == NULL)
 				return rc;
 
@@ -139,7 +139,7 @@ lsvpd_read(struct event *event, FILE *fp)
 		}
 
 		if (! strncmp(line, "*FN", 3)) {
-			event->diag_vpd.fn = (char *)malloc(strlen (line) + 1);
+			event->diag_vpd.fn = malloc(strlen (line) + 1);
 			if (event->diag_vpd.fn == NULL)
 				return rc;
 
@@ -148,7 +148,7 @@ lsvpd_read(struct event *event, FILE *fp)
 		}
 
 		if (! strncmp(line, "*SN", 3)) {
-			event->diag_vpd.sn = (char *)malloc(strlen (line) + 1);
+			event->diag_vpd.sn = malloc(strlen (line) + 1);
 			if (event->diag_vpd.sn == NULL)
 				return rc;
 
@@ -157,7 +157,7 @@ lsvpd_read(struct event *event, FILE *fp)
 		}
 
 		if (! strncmp(line, "*SE", 3)) {
-			event->diag_vpd.se = (char *)malloc(strlen (line) + 1);
+			event->diag_vpd.se = malloc(strlen (line) + 1);
 			if (event->diag_vpd.se == NULL)
 				return rc;
 
@@ -166,7 +166,7 @@ lsvpd_read(struct event *event, FILE *fp)
 		}
 
 		if (! strncmp(line, "*TM", 3)) {
-			event->diag_vpd.tm = (char *)malloc(strlen (line) + 1);
+			event->diag_vpd.tm = malloc(strlen (line) + 1);
 			if (event->diag_vpd.tm == NULL)
 				return rc;
 

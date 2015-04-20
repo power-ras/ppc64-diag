@@ -127,44 +127,70 @@ add_callout(struct event *event, char pri, int type, char *proc, char *loc,
 	struct sl_callout *callout = event->sl_entry->callouts;
 
 	if (!callout) {
-		event->sl_entry->callouts = (struct sl_callout *)malloc(
-							sizeof(*callout));
+		event->sl_entry->callouts = malloc(sizeof(*callout));
 		callout = event->sl_entry->callouts;
 	}
 	else {
 		while (callout->next)
 			callout = callout->next;
-		callout->next = (struct sl_callout *)malloc(sizeof(*callout));
+		callout->next = malloc(sizeof(*callout));
 		callout = callout->next;
 	}
 
-	if (!callout) return;
+	if (!callout)
+		goto mem_fail;
 
 	memset(callout, 0, sizeof(*callout));
 
 	callout->priority = pri;
 	callout->type = type;
 	if (proc) {
-		callout->procedure = (char *)malloc(strlen(proc) + 1);
+		callout->procedure = malloc(strlen(proc) + 1);
+		if (callout->procedure == NULL)
+			goto mem_fail;
 		strncpy(callout->procedure, proc, strlen(proc) + 1);
 	}
 	if (loc) {
-		callout->location = (char *)malloc(strlen(loc) + 1);
+		callout->location = malloc(strlen(loc) + 1);
+		if (callout->location == NULL)
+			goto mem_fail;
 		strncpy(callout->location, loc, strlen(loc) + 1);
 	}
 	if (pn) {
-		callout->fru = (char *)malloc(strlen(pn) + 1);
+		callout->fru = malloc(strlen(pn) + 1);
+		if (callout->fru == NULL)
+			goto mem_fail;
 		strncpy(callout->fru, pn, strlen(pn) + 1);
 	}
 	if (sn) {
-		callout->serial = (char *)malloc(strlen(sn) + 1);
+		callout->serial = malloc(strlen(sn) + 1);
+		if (callout->serial == NULL)
+			goto mem_fail;
 		strncpy(callout->serial, sn, strlen(sn) + 1);
 	}
 	if (ccin) {
-		callout->ccin = (char *)malloc(strlen(ccin) + 1);
+		callout->ccin = malloc(strlen(ccin) + 1);
+		if (callout->ccin == NULL)
+			goto mem_fail;
 		strncpy(callout->ccin, ccin, strlen(ccin) + 1);
 	}
 
+	return;
+
+mem_fail:
+	if (callout->ccin)
+		free(callout->ccin);
+	if (callout->serial)
+		free(callout->serial);
+	if (callout->fru)
+		free(callout->fru);
+	if (callout->location)
+		free(callout->location);
+	if (callout->procedure)
+		free(callout->procedure);
+	if (callout)
+		free(callout);
+	log_msg(event, "Memory allocation failed");
 	return;
 }
 
@@ -218,7 +244,11 @@ log_event(struct event *event)
 
 			new_len = strlen(event->sl_entry->description) +
 				  txtlen + 3;
-			new_desc = (char *)malloc(new_len);
+			new_desc = malloc(new_len);
+			if (new_desc == NULL) {
+				log_msg(event, "Memory allocation failed");
+				return;
+			}
 			snprintf(new_desc, new_len, "%s\n\n%s",
 				 event->sl_entry->description,
 				 event->addl_text);
@@ -226,7 +256,11 @@ log_event(struct event *event)
 			free(event->sl_entry->description);
 			event->sl_entry->description = new_desc;
 		} else {
-			event->sl_entry->description = (char *)malloc(txtlen+1);
+			event->sl_entry->description = malloc(txtlen+1);
+			if (event->sl_entry->description == NULL) {
+				log_msg(event, "Memory allocation failed");
+				return;
+			}
 			snprintf(event->sl_entry->description, txtlen,
 				 "%s", event->addl_text);
 		}

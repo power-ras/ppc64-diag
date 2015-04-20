@@ -215,12 +215,21 @@ report_src(struct event *event, struct rtas_priv_hdr_scn *privhdr,
 		return 1;
 	}
 
-	event->sl_entry->refcode = (char *)malloc(strlen(src->primary_refcode)
+	event->sl_entry->refcode = malloc(strlen(src->primary_refcode)
 						  +1);
+	if (event->sl_entry->refcode == NULL) {
+		log_msg(event, "Memory allocation failed\n");
+		return 1;
+	}
 	strcpy(event->sl_entry->refcode, src->primary_refcode);
 
 	msg = get_message_id(V6_ERROR_MSG, usrhdr);
-	event->sl_entry->description = (char *)malloc(strlen(msg)+1);
+	event->sl_entry->description = malloc(strlen(msg)+1);
+	if (event->sl_entry->description == NULL) {
+		free(event->sl_entry->refcode);
+		log_msg(event, "Memory allocation failed\n");
+		return 1;
+	}
 	strcpy(event->sl_entry->description, msg);
 
 	rtas_data->addl_words[0] = src->ext_refcode2;
@@ -472,10 +481,19 @@ report_menugoal(struct event *event, struct rtas_priv_hdr_scn *privhdr,
 	event->sl_entry->call_home_status = SL_CALLHOME_NONE;
 
 	snprintf(menu_num_str, 20, "#%d", menu_num);
-	event->sl_entry->refcode = (char *)malloc(strlen(menu_num_str)+1);
+	event->sl_entry->refcode = malloc(strlen(menu_num_str)+1);
+	if (event->sl_entry->refcode == NULL) {
+		log_msg(event, "Memory allocaion failed.\n");
+		return;
+	}
 	strcpy(event->sl_entry->refcode, menu_num_str);
 
-	event->sl_entry->description = (char *)malloc(strlen(msg)+1);
+	event->sl_entry->description = malloc(strlen(msg)+1);
+	if (event->sl_entry->description == NULL) {
+		free(event->sl_entry->refcode);
+		log_msg(event, "Memory allocaion failed.\n");
+		return;
+	}
 	strcpy(event->sl_entry->description, msg);
 
 	dbg("menugoal: number = %d, message = \"%s\"", menu_num, msg);
@@ -503,8 +521,13 @@ process_v6(struct event *event)
 	dbg("Processing version 6 event");
 
 	/* create and populate the servicelog entry */
-	event->sl_entry = (struct sl_event *)malloc(sizeof(struct sl_event));
-	rtas_data = (struct sl_data_rtas *)malloc(sizeof(struct sl_data_rtas));
+	event->sl_entry = malloc(sizeof(struct sl_event));
+	if (event->sl_entry == NULL)
+		goto sl_entry;
+
+	rtas_data = malloc(sizeof(struct sl_data_rtas));
+	if (rtas_data == NULL)
+		goto rtas_data;
 
 	memset(event->sl_entry, 0, sizeof(struct sl_event));
 	memset(rtas_data, 0, sizeof(struct sl_data_rtas));
@@ -519,15 +542,19 @@ process_v6(struct event *event)
 	mt = rtas_get_mt_scn(event->rtas_event);
 	if (mt != NULL) {
 		event->sl_entry->machine_model =
-				(char *)malloc(strlen(mt->mtms.model)+1);
+				malloc(strlen(mt->mtms.model)+1);
 		if (event->sl_entry->machine_model)
 			strcpy(event->sl_entry->machine_model, mt->mtms.model);
+		else
+			goto machine_model;
 
 		event->sl_entry->machine_serial =
-				(char *)malloc(strlen(mt->mtms.serial_no)+1);
+				malloc(strlen(mt->mtms.serial_no)+1);
 		if (event->sl_entry->machine_serial)
 			strcpy(event->sl_entry->machine_serial,
 			       mt->mtms.serial_no);
+		else
+			goto machine_serial;
 	}
 
 	/*
@@ -552,7 +579,9 @@ process_v6(struct event *event)
 	}
 
 	event->sl_entry->raw_data_len = event->length;
-	event->sl_entry->raw_data = (unsigned char *)malloc(event->length);
+	event->sl_entry->raw_data = malloc(event->length);
+	if (event->sl_entry->raw_data == NULL)
+		goto raw_data;
 	memcpy(event->sl_entry->raw_data, event->event_buf, event->length);
 
 	/* populate the "additional data" section of the servicelog entry */
@@ -593,4 +622,19 @@ process_v6(struct event *event)
 		report_menugoal(event, privhdr, usrhdr);
 
 	return 0;
+
+raw_data:
+	if (event->sl_entry->machine_serial)
+		free(event->sl_entry->machine_serial);
+machine_serial:
+	if (event->sl_entry->machine_model)
+		free(event->sl_entry->machine_model);
+machine_model:
+	free(rtas_data);
+rtas_data:
+	free(event->sl_entry);
+sl_entry:
+	log_msg(event, "Memory allocation failed\n");
+	return -1;
+
 }

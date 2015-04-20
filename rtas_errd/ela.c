@@ -428,7 +428,7 @@ save_epow_reset(struct event *event, int error_type)
 {
 	struct epow_reset *new_reset;
 
-	new_reset = (struct epow_reset *)malloc(sizeof(*new_reset));
+	new_reset = malloc(sizeof(*new_reset));
 	if (new_reset == NULL)
 		return -1;
 
@@ -565,7 +565,11 @@ process_pre_v6(struct event *event)
 	}
 
 	/* create and populate an entry to be logged to servicelog */
-	event->sl_entry = (struct sl_event *)malloc(sizeof(struct sl_event));
+	event->sl_entry = malloc(sizeof(struct sl_event));
+	if (event->sl_entry == NULL) {
+		log_msg(event, "Memory allocation failed");
+		return -1;
+	}
 	memset(event->sl_entry, 0, sizeof(struct sl_event));
 	event->sl_entry->time_event = get_event_date(event);
 	event->sl_entry->type = SL_TYPE_BASIC;
@@ -586,7 +590,12 @@ process_pre_v6(struct event *event)
 	}
 
 	event->sl_entry->raw_data_len = event->length;
-	event->sl_entry->raw_data = (unsigned char *)malloc(event->length);
+	event->sl_entry->raw_data = malloc(event->length);
+	if (event->sl_entry->raw_data == NULL) {
+		free(event->sl_entry);
+		log_msg(event, "Memory allocation failed");
+		return -1;
+	}
 	memcpy(event->sl_entry->raw_data, event->event_buf, event->length);
 
 	deconfig_error = exthdr->unrecoverable_bypassed;
@@ -1320,7 +1329,11 @@ report_srn(struct event *event, int nlocs,
 
 	event->sl_entry->call_home_status = SL_CALLHOME_CANDIDATE;
 
-	event->sl_entry->description = (char *)malloc(strlen(e_desc->rmsg)+1);
+	event->sl_entry->description = malloc(strlen(e_desc->rmsg)+1);
+	if (event->sl_entry->description == NULL) {
+		log_msg(event, "Memory allocation failed");
+		return -1;
+	}
 	strcpy(event->sl_entry->description, e_desc->rmsg);
 
 	dbg("srn: \"%s\"", event->sl_entry->refcode);
@@ -1372,7 +1385,7 @@ get_loc_code(struct event *event, int mode, int *nlocs)
 			copyLCB = NULL;
 		}
 
-		copyLCB = (char *)malloc(strlen(event->loc_codes) + 1);
+		copyLCB = malloc(strlen(event->loc_codes) + 1);
 		if (copyLCB == NULL)
 			return NULL;
 
@@ -1545,12 +1558,21 @@ report_menugoal(struct event *event, char *fmt, ...)
 		}
 
 		snprintf(menu_num_str, 20, "#%d", atoi(buffer));
-		event->sl_entry->refcode = (char *)malloc(
+		event->sl_entry->refcode = malloc(
 						strlen(menu_num_str)+1);
+		if (event->sl_entry->refcode == NULL) {
+			log_msg(event, "Memory allocation failed.\n");
+			return -1;
+		}
 		strcpy(event->sl_entry->refcode, menu_num_str);
 
 		msg = strchr(buffer, ' ') + 1;
-		event->sl_entry->description = (char *)malloc(strlen(msg)+1);
+		event->sl_entry->description = malloc(strlen(msg)+1);
+		if (event->sl_entry->description == NULL) {
+			free(event->sl_entry->refcode);
+			log_msg(event, "Memory allocation failed.\n");
+			return -1;
+		}
 		strcpy(event->sl_entry->description, msg);
 
 		dbg("menugoal: number = %s, message = \"%s\"", menu_num_str,
@@ -1704,7 +1726,7 @@ get_cpu_frus(struct event *event)
 	int nlocs = 0;
 	int rc = RC_INVALID;
 
-	buf = (char *)malloc(strlen(event->loc_codes)+4);
+	buf = malloc(strlen(event->loc_codes)+4);
 	if (buf == NULL)
 		return 0;
 
@@ -1743,7 +1765,7 @@ get_cpu_frus(struct event *event)
 				/* Rearrange locs as loc2, loc1 */
 				if (event->loc_codes != NULL)
 					free(event->loc_codes);
-				event->loc_codes = (char *)
+				event->loc_codes =
 					malloc(strlen(loc1) +
 						     strlen(loc2) + 2);
 				if (event->loc_codes == NULL)
@@ -1756,7 +1778,7 @@ get_cpu_frus(struct event *event)
 				/* Rearrange loc as loc2, loc1, loc3 */
 				if (event->loc_codes != NULL)
 					free(event->loc_codes);
-				event->loc_codes = (char *)
+				event->loc_codes =
 					malloc(strlen(loc1) +
 						     strlen(loc2) +
 						     strlen(loc3) + 3);

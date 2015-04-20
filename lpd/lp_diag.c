@@ -19,7 +19,7 @@
 #include <menu.h>
 #include <signal.h>
 
-#include "platform.c"
+#include "platform.h"
 #include "lp_diag.h"
 #include "lp_util.h"
 

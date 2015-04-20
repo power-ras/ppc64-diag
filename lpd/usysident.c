@@ -23,7 +23,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "platform.c"
+#include "platform.h"
 #include "lp_diag.h"
 
 #define CMD_LINE_OPTIONS	"d:l:s:-:thV"

@@ -4,19 +4,18 @@
 .SILENT:
 include ../../rules.mk
 
-MANPAGES = lp_diag.8 usysattn.8 usysident.8 usysfault.8
+LPD_MAN = lp_diag.8.gz usysattn.8.gz usysident.8.gz usysfault.8.gz
 
-C_MANPAGES = lp_diag.8.gz usysattn.8.gz usysident.8.gz usysfault.8.gz
+all: $(LPD_MAN)
 
-all: $(MANPAGES)
+%.8.gz: %.8
+	gzip -c $< > $@
 
 install: all
-	@$(call install_man,$(MANPAGES),$(DESTDIR))
-	for file in $(MANPAGES) ; do \
-		gzip -f $(DESTDIR)/$(MAN_DIR)/$$file ;\
-	done
+	@$(call install_man,$(LPD_MAN),$(DESTDIR))
 
 uninstall:
-	@$(call uninstall_man,$(C_MANPAGES),$(DESTDIR))
+	@$(call uninstall_man,$(LPD_MAN),$(DESTDIR))
 
 clean:
+	@rm -f *.gz

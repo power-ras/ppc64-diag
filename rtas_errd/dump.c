@@ -191,15 +191,12 @@ check_scanlog_dump(void)
 	chmod(scanlog_filename, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
 	temp = scanlog_filename + strlen(d_cfg.scanlog_dump_path);
-	bytes = strlen(temp);
-	if ((scanlog = malloc(bytes + 1)) != 0)
-		strncpy(scanlog, temp, bytes + 1);
-	else {
+	scanlog = strdup(temp);
+	if (scanlog == NULL) {
 		log_msg(NULL, "Could not allocate space for scanlog filename, "
 			"%s. A scanlog dump could not be copied to the "
 			"filesystem", strerror(errno));
-		scanlog = NULL;
-	}
+	} /* strdup(scanlog) */
 
 scanlog_out:
 	if (in != -1)

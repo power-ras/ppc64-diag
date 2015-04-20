@@ -161,7 +161,8 @@ check_scanlog_dump(void)
 		goto scanlog_error;
 	}
 
-	out = open(scanlog_filename, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
+	out = open(scanlog_filename, O_WRONLY | O_CREAT | O_TRUNC,
+			S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 	if (out <= 0) {
 		log_msg(NULL, "Could not open %s for writing, %s",
 			scanlog_filename, strerror(errno));
@@ -187,8 +188,6 @@ check_scanlog_dump(void)
 	if (bytes < 0)
 		log_msg(NULL, "Could not read from %s, %s", SCANLOG_DUMP_FILE,
 			strerror(errno));
-
-	chmod(scanlog_filename, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
 	temp = scanlog_filename + strlen(d_cfg.scanlog_dump_path);
 	scanlog = strdup(temp);

@@ -133,7 +133,7 @@ get_indicator_for_loc_code(struct loc_code *list, const char *location)
 int
 get_indicator_mode(void)
 {
-	return get_rtas_indicator_mode();
+	return rtas_platform.get_indicator_mode();
 }
 
 /**
@@ -148,7 +148,7 @@ get_indicator_mode(void)
 int
 get_indicator_list(int indicator, struct loc_code **list)
 {
-	return get_rtas_indicator_list(indicator, list);
+	return rtas_platform.get_indicator_list(indicator, list);
 }
 
 /**
@@ -167,7 +167,7 @@ get_indicator_list(int indicator, struct loc_code **list)
 int
 get_indicator_state(int indicator, struct loc_code *loc, int *state)
 {
-	return get_rtas_indicator_state(indicator, loc, state);
+	return rtas_platform.get_indicator_state(indicator, loc, state);
 }
 
 /**
@@ -186,7 +186,7 @@ get_indicator_state(int indicator, struct loc_code *loc, int *state)
 int
 set_indicator_state(int indicator, struct loc_code *loc, int new_value)
 {
-	return set_rtas_indicator_state(indicator, loc, new_value);
+	return rtas_platform.set_indicator_state(indicator, loc, new_value);
 }
 
 /**

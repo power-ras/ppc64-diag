@@ -471,3 +471,11 @@ set_rtas_indicator_state(int indicator, struct loc_code *loc, int new_value)
 
 	return -1;
 }
+
+struct platform rtas_platform = {
+	.name			= "rtas",
+	.get_indicator_mode	= get_rtas_indicator_mode,
+	.get_indicator_list	= get_rtas_indicator_list,
+	.get_indicator_state	= get_rtas_indicator_state,
+	.set_indicator_state	= set_rtas_indicator_state,
+};

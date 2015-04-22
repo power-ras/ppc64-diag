@@ -124,6 +124,8 @@ struct platform {
 #define DECLARE_PLATFORM(name)\
 	const struct platform name ##_platform
 
+extern struct platform rtas_platform;
+
 /* files.c */
 extern void _dbg(const char *, ...);
 extern void log_msg(const char *, ...);

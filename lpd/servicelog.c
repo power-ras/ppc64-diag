@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <servicelog-1/servicelog.h>
 
 #include "lp_diag.h"
 

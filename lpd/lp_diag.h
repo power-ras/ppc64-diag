@@ -7,8 +7,8 @@
 #define LP_DIAG_H
 
 #include <limits.h>
-#include <servicelog-1/servicelog.h>
 #include <linux/types.h>
+#include <stdint.h>
 
 /* Definations for indicator operating mode */
 #define LED_MODE_GUIDING_LIGHT	0x01
@@ -103,32 +103,27 @@ struct loc_code {
 
 
 /* files.c */
-int init_files(void);
-void close_files(void);
-void _dbg(const char *, ...);
-void log_msg(const char *, ...);
-int indicator_log_write(const char *, ...);
+extern void _dbg(const char *, ...);
+extern void log_msg(const char *, ...);
+extern int indicator_log_write(const char *, ...);
+extern int init_files(void);
+extern void close_files(void);
 
 /* indicator.c */
-int check_operating_mode(void);
-int get_indicator_list(int, struct loc_code **);
-int get_indicator_state(int , struct loc_code *, int *);
-int set_indicator_state(int , struct loc_code *, int);
-void get_all_indicator_state(int , struct loc_code *);
-void set_all_indicator_state(int , struct loc_code *, int);
-int enable_check_log_indicator(void);
-int disable_check_log_indicator(void);
-void free_indicator_list(struct loc_code *);
-
-int truncate_loc_code(char *);
-struct loc_code *get_indicator_for_loc_code(struct loc_code *, const char *);
-const char *get_indicator_desc(int );
-int get_indicator_type(const char *);
-
-/* servicelog.c */
-int get_service_event(int, struct sl_event **);
-int get_all_open_service_event(struct sl_event **);
-int get_repair_event(int, struct sl_event **);
-int print_service_event(struct sl_event *);
+extern const char *get_indicator_desc(int );
+extern int get_indicator_type(const char *);
+extern int is_enclosure_loc_code(struct loc_code *);
+extern int truncate_loc_code(char *);
+extern struct loc_code *get_indicator_for_loc_code(struct loc_code *,
+						   const char *);
+extern int get_indicator_state(int , struct loc_code *, int *);
+extern int set_indicator_state(int , struct loc_code *, int);
+extern void get_all_indicator_state(int , struct loc_code *);
+extern void set_all_indicator_state(int , struct loc_code *, int);
+extern int check_operating_mode(void);
+extern int enable_check_log_indicator(void);
+extern int disable_check_log_indicator(void);
+extern int get_indicator_list(int, struct loc_code **);
+extern void free_indicator_list(struct loc_code *);
 
 #endif  /* LP_DIAG_H */

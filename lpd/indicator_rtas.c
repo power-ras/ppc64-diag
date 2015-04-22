@@ -15,7 +15,6 @@
 #include <librtas.h>
 
 #include "lp_diag.h"
-#include "lp_util.h"
 
 /* Token defination for indicator */
 #define RTAS_INDICATOR_IDENT	9007

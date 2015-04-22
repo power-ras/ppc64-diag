@@ -20,6 +20,7 @@
 #include <signal.h>
 
 #include "platform.h"
+#include "servicelog.h"
 #include "lp_diag.h"
 #include "lp_util.h"
 

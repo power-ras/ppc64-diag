@@ -451,7 +451,7 @@ set_ses_indicator(int indicator, struct loc_code *loc, int new_value)
 
 		args[0] = (char *)SCSI_INDICATOR_CMD;
 		args[1] = indicator == IDENT_INDICATOR ? "-i" : "-f";
-		args[2] = new_value == INDICATOR_ON ? "on" : "off";
+		args[2] = new_value == LED_STATE_ON ? "on" : "off";
 		args[3] = loc->dev;
 		args[4] = fru_loc;
 		args[5] = NULL;

@@ -17,6 +17,9 @@
 #include "lp_diag.h"
 #include "lp_util.h"
 
+/* Defination for type of indicator call */
+#define DYNAMIC_INDICATOR       0xFFFFFFFF
+
 /* RTAS error buffer size */
 #define RTAS_ERROR_BUF_SIZE	64
 

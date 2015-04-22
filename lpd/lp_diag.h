@@ -11,17 +11,14 @@
 #include <linux/types.h>
 
 /* Definations for indicator operating mode */
-#define GUIDING_LIGHT_MODE	0x01
-#define LIGHT_PATH_MODE		0x02
+#define LED_MODE_GUIDING_LIGHT	0x01
+#define LED_MODE_LIGHT_PATH	0x02
 
 /* Definations for RTAS indicator call token values */
 #define IDENT_INDICATOR         9007
 #define ATTN_INDICATOR          9006
 #define INDICATOR_TYPE(x)       (((x) == IDENT_INDICATOR) ? "identification" \
 							  : "attention")
-
-/* Defination for type of indicator call */
-#define DYNAMIC_INDICATOR       0xFFFFFFFF
 
 /* Definations for indicator type */
 #define TYPE_ALL		0
@@ -31,9 +28,9 @@
 #define TYPE_EOL		4
 
 /* Indicator state */
-#define INDICATOR_SAME		-1
-#define INDICATOR_ON		1
-#define INDICATOR_OFF		0
+#define LED_STATE_SAME		-1
+#define LED_STATE_ON		1
+#define LED_STATE_OFF		0
 
 /* Buffer size */
 #define BUF_SIZE		4096

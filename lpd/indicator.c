@@ -180,7 +180,7 @@ get_all_indicator_state(int indicator, struct loc_code *loc)
  *
  * @indicator	identification or attention indicator
  * @loc		location code structure
- * @new_value	INDICATOR_ON/INDICATOR_OFF
+ * @new_value	LED_STATE_ON/LED_STATE_OFF
  *
  * Returns :
  *	0 on success, !0 on failure
@@ -205,7 +205,7 @@ set_all_indicator_state(int indicator, struct loc_code *loc, int new_value)
 	 * enclosure does not turn OFF enclosure identify indicator.
 	 */
 	if (encl && indicator == IDENT_INDICATOR &&
-				new_value == INDICATOR_OFF)
+				new_value == LED_STATE_OFF)
 		set_indicator_state(indicator, encl, new_value);
 }
 
@@ -237,9 +237,9 @@ check_operating_mode(void)
 	if (!list)	/* failed */
 		return -1;
 	else if (!list->next)
-		operating_mode = GUIDING_LIGHT_MODE;
+		operating_mode = LED_MODE_GUIDING_LIGHT;
 	else
-		operating_mode = LIGHT_PATH_MODE;
+		operating_mode = LED_MODE_LIGHT_PATH;
 
 	free_indicator_list(list);
 	return 0;
@@ -267,7 +267,7 @@ enable_check_log_indicator(void)
 	 * is check log indicator.
 	 */
 	clocation = &list[0];
-	rc = set_indicator_state(ATTN_INDICATOR, clocation, INDICATOR_ON);
+	rc = set_indicator_state(ATTN_INDICATOR, clocation, LED_STATE_ON);
 	free_indicator_list(list);
 
 	return rc;
@@ -295,7 +295,7 @@ disable_check_log_indicator(void)
 	 * is check log indicator.
 	 */
 	clocation = &list[0];
-	rc = set_indicator_state(ATTN_INDICATOR, clocation, INDICATOR_OFF);
+	rc = set_indicator_state(ATTN_INDICATOR, clocation, LED_STATE_OFF);
 	free_indicator_list(list);
 
 	return rc;
@@ -322,7 +322,7 @@ get_indicator_list(int indicator, struct loc_code **list)
 
 	/* FRU fault indicators are not supported in Guiding Light mode */
 	if (indicator == ATTN_INDICATOR &&
-	    operating_mode == GUIDING_LIGHT_MODE)
+	    operating_mode == LED_MODE_GUIDING_LIGHT)
 		return rc;
 
 	/* SES indicators */

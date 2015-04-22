@@ -39,12 +39,12 @@
 #define indicator_log_state(indicator, loc, state) \
 	if (indicator == ATTN_INDICATOR && !strchr(loc, '-')) \
 		indicator_log_write("System Attention Indicator : %s", \
-				    state == INDICATOR_ON ? "ON" : "OFF"); \
+				    state == LED_STATE_ON ? "ON" : "OFF"); \
 	else \
 		indicator_log_write("%s : %s : %s", loc, \
 				    indicator == IDENT_INDICATOR ? \
 				    "Identify" : "Fault", \
-				    state == INDICATOR_ON ? "ON" : "OFF");
+				    state == LED_STATE_ON ? "ON" : "OFF");
 
 
 /**
@@ -187,9 +187,9 @@ main(int argc, char **argv)
 
 	if (svalue && strstr(argv[0], CMD_IDENTIFY)) {
 		if (!strcmp(svalue, "identify"))
-			c = INDICATOR_ON;
+			c = LED_STATE_ON;
 		else if (!strcmp(svalue, "normal"))
-			c = INDICATOR_OFF;
+			c = LED_STATE_OFF;
 		else {
 			fprintf(stderr,
 				"The -s option must be either "
@@ -202,7 +202,7 @@ main(int argc, char **argv)
 	if (svalue && (strstr(argv[0], CMD_FAULT) ||
 		       strstr(argv[0], CMD_ATTN))) {
 		if (!strcmp(svalue, "normal"))
-			c = INDICATOR_OFF;
+			c = LED_STATE_OFF;
 		else {
 			fprintf(stderr,
 				"The -s option must be \"normal\".\n\n");
@@ -246,9 +246,9 @@ main(int argc, char **argv)
 
 	if (othervalue && strstr(argv[0], CMD_IDENTIFY)) {
 		if (!strcmp(othervalue, "all-on"))
-			c = INDICATOR_ON;
+			c = LED_STATE_ON;
 		else if (!strcmp(othervalue, "all-off"))
-			c = INDICATOR_OFF;
+			c = LED_STATE_OFF;
 		else {
 			fprintf(stderr,
 				"Unrecognized option: --%s\n\n", othervalue);
@@ -260,7 +260,7 @@ main(int argc, char **argv)
 	if (othervalue && (strstr(argv[0], CMD_ATTN) ||
 			   strstr(argv[0], CMD_FAULT))) {
 		if (!strcmp(othervalue, "all-off"))
-			c = INDICATOR_OFF;
+			c = LED_STATE_OFF;
 		else {
 			fprintf(stderr,
 				"Unrecognized option: --%s\n\n", othervalue);
@@ -410,12 +410,12 @@ retry:
 		 * then turning OFF all components ident indicator inside
 		 * enclosure does not turn OFF enclosure ident indicator.
 		 */
-		if (indicator == IDENT_INDICATOR && c == INDICATOR_OFF)
+		if (indicator == IDENT_INDICATOR && c == LED_STATE_OFF)
 			set_indicator_state(indicator, &list[0], c);
 
 		indicator_log_write("All %s Indicators : %s",
 				    indicator == IDENT_INDICATOR ? "Identify" : "Fault",
-				    c == INDICATOR_ON ? "ON" : "OFF");
+				    c == LED_STATE_ON ? "ON" : "OFF");
 	}
 
 indicator_cleanup:

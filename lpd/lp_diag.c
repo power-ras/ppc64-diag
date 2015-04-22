@@ -347,7 +347,7 @@ event_fru_callout(struct sl_callout *callouts, struct loc_code *list,
 								location);
 		}
 
-		rc = set_fault_indicator(loc_led, INDICATOR_ON);
+		rc = set_fault_indicator(loc_led, LED_STATE_ON);
 	}
 	return rc;
 }
@@ -370,7 +370,7 @@ repair_fru_callout(struct fru *fru, struct loc_code *list, int *attn_disable)
 
 	loc_led = get_indicator_for_loc_code(list, fru->location);
 	if (loc_led)
-		rc = set_fault_indicator(loc_led, INDICATOR_OFF);
+		rc = set_fault_indicator(loc_led, LED_STATE_OFF);
 	else {
 		indicator_log_write("%s does not have fault indicator",
 				    fru->location);
@@ -428,7 +428,7 @@ parse_service_event(int event_id)
 	/* First loc code is system attention indicator */
 	attn_loc = &list[0];
 
-	if (operating_mode == LIGHT_PATH_MODE) {
+	if (operating_mode == LED_MODE_LIGHT_PATH) {
 		if (event->callouts)
 			/* Run over FRU callout priority in order and
 			 * enable fault indicator
@@ -444,10 +444,10 @@ parse_service_event(int event_id)
 		}
 
 		if (attn_on)	/* check log indicator */
-			rc = set_attn_indicator(attn_loc, INDICATOR_ON);
+			rc = set_attn_indicator(attn_loc, LED_STATE_ON);
 	} else {
 		log_msg("Guiding Light mode");
-		rc = set_attn_indicator(attn_loc, INDICATOR_ON);
+		rc = set_attn_indicator(attn_loc, LED_STATE_ON);
 	}
 
 	if (rc)
@@ -526,7 +526,7 @@ parse_repair_event(int repair_id)
 	/* First loc code is system attention indicator */
 	attn_loc = &list[0];
 
-	if (operating_mode == LIGHT_PATH_MODE) {
+	if (operating_mode == LED_MODE_LIGHT_PATH) {
 		for_each_event(repair, repair_events) {
 			if (!service_event_supported(repair))
 				continue;
@@ -560,13 +560,13 @@ parse_repair_event(int repair_id)
 		}
 
 		if (!attn_keep && attn_disable)
-			rc = set_attn_indicator(attn_loc, INDICATOR_OFF);
+			rc = set_attn_indicator(attn_loc, LED_STATE_OFF);
 
 	} else {
 		log_msg("Guiding Light mode");
 
 		if (!open_events) /* No more open events */
-			rc = set_attn_indicator(attn_loc, INDICATOR_OFF);
+			rc = set_attn_indicator(attn_loc, LED_STATE_OFF);
 	}
 
 	if (rc)
@@ -758,14 +758,14 @@ UI_commit(WINDOW *my_menu_win, MENU *my_menu,
 			wrefresh(my_help_win);
 
 			if (!strcmp(desc, "attn")) {
-				rc = set_attn_indicator(&attn_list[0], INDICATOR_OFF);
+				rc = set_attn_indicator(&attn_list[0], LED_STATE_OFF);
 				cur_state[i] = ' ';
 
 				if (rc)
 					err = 1;
 			} else {
 				rc = set_indicator_state(IDENT_INDICATOR, loc,
-							 ident ? INDICATOR_OFF : INDICATOR_ON);
+							 ident ? LED_STATE_OFF : LED_STATE_ON);
 
 				if (rc) {
 					err = 1;

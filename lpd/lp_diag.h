@@ -14,11 +14,15 @@
 #define LED_MODE_GUIDING_LIGHT	0x01
 #define LED_MODE_LIGHT_PATH	0x02
 
-/* Definations for RTAS indicator call token values */
-#define IDENT_INDICATOR         9007
-#define ATTN_INDICATOR          9006
-#define INDICATOR_TYPE(x)       (((x) == IDENT_INDICATOR) ? "identification" \
-							  : "attention")
+/* Definations for indicator type */
+#define LED_TYPE_IDENT		0x00
+#define LED_TYPE_FAULT		0x01
+#define LED_TYPE_ATTN		0x02
+
+/* Indicator type description */
+#define LED_DESC_IDENT		"identify"
+#define LED_DESC_FAULT		"fault"
+#define LED_DESC_ATTN		"attention"
 
 /* Definations for indicator type */
 #define TYPE_ALL		0
@@ -122,6 +126,8 @@ int enclosure_supported(const char *);
 int truncate_loc_code(char *);
 struct loc_code *get_indicator_for_loc_code(struct loc_code *, const char *);
 int get_loc_code_for_dev(const char *, char *, int);
+const char *get_indicator_desc(int );
+int get_indicator_type(const char *);
 
 /* servicelog.c */
 int get_service_event(int, struct sl_event **);

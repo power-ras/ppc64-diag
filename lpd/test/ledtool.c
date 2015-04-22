@@ -24,7 +24,7 @@ int enable_fault_indicator(char *loccode)
 	struct	loc_code *list = NULL;
 	struct	loc_code *loc_led = NULL;
 
-	rc = get_indicator_list(ATTN_INDICATOR, &list);
+	rc = get_indicator_list(LED_TYPE_FAULT, &list);
 	if (!list)
 		return -1;
 
@@ -48,7 +48,7 @@ retry:
 	if (truncated)
 		fprintf(stderr, "Truncated location code = %s\n", loccode);
 
-	rc = set_indicator_state(ATTN_INDICATOR, loc_led, 1);
+	rc = set_indicator_state(LED_TYPE_FAULT, loc_led, 1);
 	if (rc == 0) {
 		if (loccode == NULL)
 			indicator_log_write("System Attention Indicator : ON");

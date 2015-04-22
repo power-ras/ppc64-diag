@@ -204,7 +204,7 @@ set_all_indicator_state(int indicator, struct loc_code *loc, int new_value)
 	 * then turning OFF all components identify indicator inside
 	 * enclosure does not turn OFF enclosure identify indicator.
 	 */
-	if (encl && indicator == IDENT_INDICATOR &&
+	if (encl && indicator == LED_TYPE_IDENT &&
 				new_value == LED_STATE_OFF)
 		set_indicator_state(indicator, encl, new_value);
 }
@@ -230,7 +230,7 @@ check_operating_mode(void)
 	int	rc;
 	struct	loc_code *list = NULL;
 
-	rc = get_rtas_indices(ATTN_INDICATOR, &list);
+	rc = get_rtas_indices(LED_TYPE_FAULT, &list);
 	if (rc)
 		return -1;
 
@@ -258,7 +258,7 @@ enable_check_log_indicator(void)
 	struct	loc_code *list = NULL;
 	struct	loc_code *clocation;
 
-	rc = get_rtas_indices(ATTN_INDICATOR, &list);
+	rc = get_rtas_indices(LED_TYPE_FAULT, &list);
 	if (rc)
 		return rc;
 
@@ -267,7 +267,7 @@ enable_check_log_indicator(void)
 	 * is check log indicator.
 	 */
 	clocation = &list[0];
-	rc = set_indicator_state(ATTN_INDICATOR, clocation, LED_STATE_ON);
+	rc = set_indicator_state(LED_TYPE_FAULT, clocation, LED_STATE_ON);
 	free_indicator_list(list);
 
 	return rc;
@@ -286,7 +286,7 @@ disable_check_log_indicator(void)
 	struct	loc_code *list = NULL;
 	struct	loc_code *clocation;
 
-	rc = get_rtas_indices(ATTN_INDICATOR, &list);
+	rc = get_rtas_indices(LED_TYPE_FAULT, &list);
 	if (rc)
 		return rc;
 
@@ -295,7 +295,7 @@ disable_check_log_indicator(void)
 	 * is check log indicator.
 	 */
 	clocation = &list[0];
-	rc = set_indicator_state(ATTN_INDICATOR, clocation, LED_STATE_OFF);
+	rc = set_indicator_state(LED_TYPE_FAULT, clocation, LED_STATE_OFF);
 	free_indicator_list(list);
 
 	return rc;
@@ -321,7 +321,7 @@ get_indicator_list(int indicator, struct loc_code **list)
 		return rc;
 
 	/* FRU fault indicators are not supported in Guiding Light mode */
-	if (indicator == ATTN_INDICATOR &&
+	if (indicator == LED_TYPE_FAULT &&
 	    operating_mode == LED_MODE_GUIDING_LIGHT)
 		return rc;
 
@@ -463,4 +463,38 @@ is_enclosure_loc_code(struct loc_code *loc)
 		return 1;
 
 	return 0;
+}
+
+/* Map LED type to description. */
+struct led_type_map {
+	const int	type;
+	const char	*desc;
+};
+static struct led_type_map led_type_map[] = {
+	{LED_TYPE_IDENT,	LED_DESC_IDENT},
+	{LED_TYPE_FAULT,	LED_DESC_FAULT},
+	{LED_TYPE_ATTN,		LED_DESC_ATTN},
+	{-1,			NULL},
+};
+
+int get_indicator_type(const char *indicator_desc)
+{
+	int i;
+
+	for (i = 0; led_type_map[i].desc != NULL; i++)
+		if (!strcmp(led_type_map[i].desc, indicator_desc))
+			return led_type_map[i].type;
+
+	return -1;
+}
+
+const char *get_indicator_desc(int indicator)
+{
+	int i;
+
+	for (i = 0; led_type_map[i].type != -1; i++)
+		if (led_type_map[i].type == indicator)
+			return led_type_map[i].desc;
+
+	return "Unknown";
 }

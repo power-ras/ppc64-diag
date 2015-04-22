@@ -394,7 +394,7 @@ get_ses_indicator(int indicator, struct loc_code *loc, int *state)
 		fru = get_ses_fru_location(buf);
 		if (fru && !strcmp(fru_loc, fru)) {
 			fru_found = 1;
-			if (indicator == IDENT_INDICATOR)
+			if (indicator == LED_TYPE_IDENT)
 				*state = get_ses_fru_identify_state(buf);
 			else
 				*state = get_ses_fru_fault_state(buf);
@@ -450,7 +450,7 @@ set_ses_indicator(int indicator, struct loc_code *loc, int new_value)
 		char *args[6];
 
 		args[0] = (char *)SCSI_INDICATOR_CMD;
-		args[1] = indicator == IDENT_INDICATOR ? "-i" : "-f";
+		args[1] = indicator == LED_TYPE_IDENT ? "-i" : "-f";
 		args[2] = new_value == LED_STATE_ON ? "on" : "off";
 		args[3] = loc->dev;
 		args[4] = fru_loc;

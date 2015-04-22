@@ -17,11 +17,29 @@
 #include "lp_diag.h"
 #include "lp_util.h"
 
+/* Token defination for indicator */
+#define RTAS_INDICATOR_IDENT	9007
+#define RTAS_INDICATOR_ATTN	9006
+
 /* Defination for type of indicator call */
 #define DYNAMIC_INDICATOR       0xFFFFFFFF
 
 /* RTAS error buffer size */
 #define RTAS_ERROR_BUF_SIZE	64
+
+/* Get RTAS token number for given LED type */
+static inline int get_rtas_token(int indicator)
+{
+	switch(indicator) {
+	/* We use same token number for fault and checklog indicator */
+	case LED_TYPE_ATTN:
+	case LED_TYPE_FAULT:
+		return RTAS_INDICATOR_ATTN;
+	case LED_TYPE_IDENT:
+		return RTAS_INDICATOR_IDENT;
+	}
+	return -1;
+}
 
 /**
  * parse_work_area - Parse the working buffer
@@ -158,12 +176,17 @@ get_rtas_indices(int indicator, struct loc_code **loc)
 	int	rc;
 	int	index = 1;
 	int	next_index;
+	int	rtas_token;
 	char	workarea[BUF_SIZE];
 	char	err_buf[RTAS_ERROR_BUF_SIZE];
 	struct	loc_code *list = NULL;
 
+	rtas_token = get_rtas_token(indicator);
+	if (rtas_token == -1)
+		return -3; /* Indicator type not supported */
+
 	do {
-		rc = rtas_get_indices(0, indicator, workarea, BUF_SIZE,
+		rc = rtas_get_indices(0, rtas_token, workarea, BUF_SIZE,
 				      index, &next_index);
 		switch (rc) {
 		case 1:		/* more data available */
@@ -186,8 +209,8 @@ get_rtas_indices(int indicator, struct loc_code **loc)
 			librtas_error(rc, err_buf, RTAS_ERROR_BUF_SIZE);
 			/* fall through */
 		case -3:	/* indicator type not supported. */
-			log_msg("The %s indicators are not supported "
-				"on this system", INDICATOR_TYPE(indicator));
+			log_msg("The %s indicators are not supported on this "
+				"system", get_indicator_desc(indicator));
 
 			if (rc == RTAS_UNKNOWN_OP)
 				log_msg(",\n%s", err_buf);
@@ -203,7 +226,7 @@ get_rtas_indices(int indicator, struct loc_code **loc)
 			librtas_error(rc, err_buf, RTAS_ERROR_BUF_SIZE);
 			log_msg("Could not retrieve data for %s "
 				"indicators,\n%s",
-				INDICATOR_TYPE(indicator), err_buf);
+				get_indicator_desc(indicator), err_buf);
 			free_indicator_list(list);
 			break;
 		}
@@ -231,13 +254,18 @@ int
 get_rtas_sensor(int indicator, struct loc_code *loc, int *state)
 {
 	int	rc;
+	int	rtas_token;
 	char	err_buf[RTAS_ERROR_BUF_SIZE];
 
+	rtas_token = get_rtas_token(indicator);
+	if (rtas_token == -1)
+		return -3; /* No such sensor implemented */
+
 	if (loc->index == DYNAMIC_INDICATOR)
-		rc = rtas_get_dynamic_sensor(indicator,
+		rc = rtas_get_dynamic_sensor(rtas_token,
 					     (void *)loc, state);
 	else
-		rc = rtas_get_sensor(indicator, loc->index, state);
+		rc = rtas_get_sensor(rtas_token, loc->index, state);
 
 	switch (rc) {
 	case 0:	/*success  */
@@ -258,7 +286,7 @@ get_rtas_sensor(int indicator, struct loc_code *loc, int *state)
 
 		log_msg("Could not get %ssensor %s indicators,\n%s",
 			(loc->index == DYNAMIC_INDICATOR) ? "dynamic " : "",
-			INDICATOR_TYPE(indicator), err_buf);
+			get_indicator_desc(indicator), err_buf);
 		break;
 	}
 
@@ -282,13 +310,18 @@ int
 set_rtas_indicator(int indicator, struct loc_code *loc, int new_value)
 {
 	int	rc;
+	int	rtas_token;
 	char	err_buf[RTAS_ERROR_BUF_SIZE];
 
+	rtas_token = get_rtas_token(indicator);
+	if (rtas_token == -1)
+		return -3; /* No such sensor implemented */
+
 	if (loc->index == DYNAMIC_INDICATOR)
-		rc = rtas_set_dynamic_indicator(indicator,
+		rc = rtas_set_dynamic_indicator(rtas_token,
 						new_value, (void *)loc);
 	else
-		rc = rtas_set_indicator(indicator, loc->index, new_value);
+		rc = rtas_set_indicator(rtas_token, loc->index, new_value);
 
 	switch (rc) {
 	case 0:	/*success  */
@@ -309,7 +342,7 @@ set_rtas_indicator(int indicator, struct loc_code *loc, int new_value)
 
 		log_msg("Could not set %ssensor %s indicators,\n%s",
 			(loc->index == DYNAMIC_INDICATOR) ? "dynamic " : "",
-			INDICATOR_TYPE(indicator), err_buf);
+			get_indicator_desc(indicator), err_buf);
 		break;
 	}
 

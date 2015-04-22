@@ -78,9 +78,9 @@ set_attn_indicator(struct loc_code *attn_loc, int new_state)
 	int	rc;
 	int	state;
 
-	rc = get_indicator_state(ATTN_INDICATOR, attn_loc, &state);
+	rc = get_indicator_state(LED_TYPE_FAULT, attn_loc, &state);
 	if (rc || state != new_state) {
-		rc = set_indicator_state(ATTN_INDICATOR, attn_loc, new_state);
+		rc = set_indicator_state(LED_TYPE_FAULT, attn_loc, new_state);
 
 		if (rc)
 			indicator_log_write("System Attention Indicator :"
@@ -109,9 +109,9 @@ set_fault_indicator(struct loc_code *loc, int new_state)
 	int	rc;
 	int	state;
 
-	rc = get_indicator_state(ATTN_INDICATOR, loc, &state);
+	rc = get_indicator_state(LED_TYPE_FAULT, loc, &state);
 	if (rc || state != new_state) {
-		rc = set_indicator_state(ATTN_INDICATOR, loc, new_state);
+		rc = set_indicator_state(LED_TYPE_FAULT, loc, new_state);
 
 		if (rc)
 			indicator_log_write("%s : Unable to %s fault indicator",
@@ -418,7 +418,7 @@ parse_service_event(int event_id)
 	indicator_log_write("---- Service event begin ----");
 
 	/* build indicator list */
-	rc = get_indicator_list(ATTN_INDICATOR, &list);
+	rc = get_indicator_list(LED_TYPE_FAULT, &list);
 	if (rc) {
 		log_msg("Unable to retrieve fault indicators");
 		indicator_log_write("Unable to retrieve fault indicators");
@@ -517,7 +517,7 @@ parse_repair_event(int repair_id)
 	indicator_log_write("---- Repair event begin ----");
 
 	/* build indicator list */
-	rc = get_indicator_list(ATTN_INDICATOR, &list);
+	rc = get_indicator_list(LED_TYPE_FAULT, &list);
 	if (rc) {
 		log_msg("Unable to retrieve fault indicators");
 		goto event_out;
@@ -742,8 +742,7 @@ UI_commit(WINDOW *my_menu_win, MENU *my_menu,
 		if (!strcmp(desc, "loc")) {
 			name = (char *)item_name(items[i]);
 			loc = get_indicator_for_loc_code(ident_list, name);
-			rc = get_indicator_state(IDENT_INDICATOR,
-						 loc, &ident);
+			rc = get_indicator_state(LED_TYPE_IDENT, loc, &ident);
 			if (rc) {
 				if (cur_state[i] == '+') {
 					cur_state[i] = prev_state[i];
@@ -764,7 +763,7 @@ UI_commit(WINDOW *my_menu_win, MENU *my_menu,
 				if (rc)
 					err = 1;
 			} else {
-				rc = set_indicator_state(IDENT_INDICATOR, loc,
+				rc = set_indicator_state(LED_TYPE_IDENT, loc,
 							 ident ? LED_STATE_OFF : LED_STATE_ON);
 
 				if (rc) {
@@ -949,7 +948,7 @@ create_menu(struct loc_code *ident_list, struct loc_code *attn_list)
 
 	for (cur = ident_list; cur; cur = cur->next, i++) {
 		/* Determine the identify indicator state */
-		rc = get_indicator_state(IDENT_INDICATOR, cur, &ident);
+		rc = get_indicator_state(LED_TYPE_IDENT, cur, &ident);
 
 		if (rc)
 			cur_state[i] = ' ';
@@ -1080,12 +1079,12 @@ startup_window(void)
 		return -1;
 	}
 
-	rc = get_indicator_list(ATTN_INDICATOR, &attn_list);
+	rc = get_indicator_list(LED_TYPE_FAULT, &attn_list);
 
 	if (rc)
 		log_msg("Unable to get system attention indicator");
 
-	rv = get_indicator_list(IDENT_INDICATOR, &ident_list);
+	rv = get_indicator_list(LED_TYPE_IDENT, &ident_list);
 
 	if (rv)
 		log_msg("Unable to get identify indicators");

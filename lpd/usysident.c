@@ -37,13 +37,12 @@
 
 /* Log indicator status */
 #define indicator_log_state(indicator, loc, state) \
-	if (indicator == ATTN_INDICATOR && !strchr(loc, '-')) \
+	if (indicator == LED_TYPE_FAULT && !strchr(loc, '-')) \
 		indicator_log_write("System Attention Indicator : %s", \
 				    state == LED_STATE_ON ? "ON" : "OFF"); \
 	else \
 		indicator_log_write("%s : %s : %s", loc, \
-				    indicator == IDENT_INDICATOR ? \
-				    "Identify" : "Fault", \
+				    get_indicator_desc(LED_TYPE_IDENT), \
 				    state == LED_STATE_ON ? "ON" : "OFF");
 
 
@@ -278,9 +277,9 @@ main(int argc, char **argv)
 	}
 
 	if (strstr(argv[0], CMD_IDENTIFY))
-		indicator = IDENT_INDICATOR;
+		indicator = LED_TYPE_IDENT;
 	else if (strstr(argv[0], CMD_FAULT) || strstr(argv[0], CMD_ATTN))
-		indicator = ATTN_INDICATOR;
+		indicator = LED_TYPE_FAULT;
 	else
 		return 1;
 
@@ -294,7 +293,7 @@ main(int argc, char **argv)
 	}
 
 	/* Light Path operating mode */
-	if (indicator == ATTN_INDICATOR) {
+	if (indicator == LED_TYPE_FAULT) {
 		rc = check_operating_mode();
 		if (rc)
 			return rc;
@@ -349,7 +348,8 @@ retry:
 				}
 			}
 			fprintf(stdout, "There is no %s indicator at location "
-				"code %s.\n", INDICATOR_TYPE(indicator), temp);
+				"code %s.\n",
+				get_indicator_desc(indicator), temp);
 			rc = 1;
 		} else { /* Found location code */
 			if (truncated)
@@ -410,11 +410,11 @@ retry:
 		 * then turning OFF all components ident indicator inside
 		 * enclosure does not turn OFF enclosure ident indicator.
 		 */
-		if (indicator == IDENT_INDICATOR && c == LED_STATE_OFF)
+		if (indicator == LED_TYPE_IDENT && c == LED_STATE_OFF)
 			set_indicator_state(indicator, &list[0], c);
 
 		indicator_log_write("All %s Indicators : %s",
-				    indicator == IDENT_INDICATOR ? "Identify" : "Fault",
+				    get_indicator_desc(indicator),
 				    c == LED_STATE_ON ? "ON" : "OFF");
 	}
 

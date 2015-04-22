@@ -101,6 +101,28 @@ struct loc_code {
 	struct		loc_code *next;
 };
 
+/* Each platform provides a set of hooks for LED operation. */
+struct platform {
+	const char	*name;
+
+	/* Check LED operating mode (Guiding Light/Light Path) */
+	int	(*get_indicator_mode)(void);
+
+	/* Get location code list for given led type */
+	int	(*get_indicator_list)(int led_type,
+				      struct loc_code **list);
+
+	/* Get LED state of given led_type for given location code */
+	int	(*get_indicator_state)(int led_type,
+				       struct loc_code *loc, int *state);
+
+	/* Update LED state of given led_type for given location code */
+	int	(*set_indicator_state)(int led_type,
+				       struct loc_code *loc, int new_value);
+};
+
+#define DECLARE_PLATFORM(name)\
+	const struct platform name ##_platform
 
 /* files.c */
 extern void _dbg(const char *, ...);

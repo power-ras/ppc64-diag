@@ -12,7 +12,7 @@
 #include <getopt.h>
 #include <stdlib.h>
 
-#include "lp_diag.h"
+#include "indicator.h"
 
 /**
  * enable_fault_indicator - Enable fault indicator for the given loc code

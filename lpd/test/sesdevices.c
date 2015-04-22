@@ -14,7 +14,7 @@
 #include <dirent.h>
 #include <sys/types.h>
 
-#include "lp_diag.h"
+#include "indicator.h"
 #include "lp_util.h"
 
 /* SES sys path */

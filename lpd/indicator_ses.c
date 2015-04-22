@@ -19,7 +19,7 @@
 #include <sys/wait.h>
 
 #include "utils.h"
-#include "lp_diag.h"
+#include "indicator.h"
 #include "lp_util.h"
 
 /* SES LED command name */

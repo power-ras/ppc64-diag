@@ -3,8 +3,8 @@
  * See 'COPYRIGHT' for License of this code.
  */
 
-#ifndef LP_DIAG_H
-#define LP_DIAG_H
+#ifndef INDICATOR_H
+#define INDICATOR_H
 
 #include <limits.h>
 #include <linux/types.h>
@@ -126,4 +126,4 @@ extern int disable_check_log_indicator(void);
 extern int get_indicator_list(int, struct loc_code **);
 extern void free_indicator_list(struct loc_code *);
 
-#endif  /* LP_DIAG_H */
+#endif  /* INDICATOR_H */

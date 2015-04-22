@@ -16,7 +16,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "lp_diag.h"
+#include "indicator.h"
 #include "lp_util.h"
 #include "indicator_ses.h"
 #include "indicator_rtas.h"

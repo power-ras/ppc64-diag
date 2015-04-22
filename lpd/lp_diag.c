@@ -21,7 +21,7 @@
 
 #include "platform.h"
 #include "servicelog.h"
-#include "lp_diag.h"
+#include "indicator.h"
 #include "lp_util.h"
 
 /* FRU callout priority as defined in PAPR+

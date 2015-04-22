@@ -23,7 +23,7 @@
 #include <sys/wait.h>
 #include <time.h>
 
-#include "lp_diag.h"
+#include "indicator.h"
 
 /* Program name */
 char	*program_name;

@@ -16,7 +16,7 @@
 #include <errno.h>
 #include <sys/types.h>
 
-#include "lp_diag.h"
+#include "indicator.h"
 #include "utils.h"
 
 #define LSVPD_PATH	"/usr/sbin/lsvpd"

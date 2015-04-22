@@ -12,7 +12,7 @@
 #include <string.h>
 #include <servicelog-1/servicelog.h>
 
-#include "lp_diag.h"
+#include "indicator.h"
 
 /* Query string should be same as "match" field in notification script.
  * see scripts/lp_diag_setup script.

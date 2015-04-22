@@ -25,6 +25,7 @@
 
 #include "platform.h"
 #include "lp_diag.h"
+#include "lp_util.h"
 
 #define CMD_LINE_OPTIONS	"d:l:s:-:thV"
 #define CMD_IDENTIFY		"usysident"

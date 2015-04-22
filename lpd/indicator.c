@@ -24,75 +24,106 @@
 /* Indicator operating mode */
 uint32_t	operating_mode;
 
-/* Note:
- *	At present, we do not support all SES enclosures/devices. Consider
- *	removing device_supported() and enclosure_supported() once we
- *	have Light Path support for all enclosures/devices.
- */
-/* List of all Light Path supported enclosures */
-static struct {
-	char *model;
-} supported_ses_enclosure[] = {
-	{"5888"},	/* Bluehawk */
-	{"EDR1"},	/* Bluehawk */
-	{NULL}
+/* Map LED type to description. */
+struct led_type_map {
+	const int	type;
+	const char	*desc;
+};
+static struct led_type_map led_type_map[] = {
+	{LED_TYPE_IDENT,	LED_DESC_IDENT},
+	{LED_TYPE_FAULT,	LED_DESC_FAULT},
+	{LED_TYPE_ATTN,		LED_DESC_ATTN},
+	{-1,			NULL},
 };
 
-/* List of all Light Path supported devices */
-static struct {
-	char	*subsystem;
-	char	*driver;
-} os_supported_device[] = {
-	{"net", "cxgb3"},	/* Chelsio network card*/
-	{"net", "e1000e"},	/* Intel network card*/
-	{NULL, NULL}
-};
 
-/**
- * device_supported - Check Light Path support for device
- *
- * @subsystem	subsystem
- * @driver	kernel driver
- *
- * Returns :
- *	1 if device is supported / 0 if device is not supported
- */
+/* Returns LED type */
 int
-device_supported(const char *subsystem, const char *driver)
+get_indicator_type(const char *indicator_desc)
 {
 	int i;
 
-	if (!subsystem || !driver)
-		return 0;
+	for (i = 0; led_type_map[i].desc != NULL; i++)
+		if (!strcmp(led_type_map[i].desc, indicator_desc))
+			return led_type_map[i].type;
 
-	for (i = 0; os_supported_device[i].driver; i++)
-		if (!strcmp(os_supported_device[i].subsystem, subsystem) &&
-		    !strcmp(os_supported_device[i].driver, driver))
-			return 1;
+	return -1;
+}
+
+/* Returns LED description */
+const char *
+get_indicator_desc(int indicator)
+{
+	int i;
+
+	for (i = 0; led_type_map[i].type != -1; i++)
+		if (led_type_map[i].type == indicator)
+			return led_type_map[i].desc;
+
+	return "Unknown";
+}
+
+/**
+ * is_enclosure_loc_code -
+ */
+int
+is_enclosure_loc_code(struct loc_code *loc)
+{
+	if (strchr(loc->code, '-') == NULL)
+		return 1;
+
 	return 0;
 }
 
 /**
- * enclosure_supported - Check Light Path support for enclosure
+ * truncate_loc_code - Truncate the last few characters of a location code
  *
- * @model	enclosure model
+ * Truncates the last few characters off of a location code; if an
+ * indicator doesn't exist at the orignal location, perhaps one exists
+ * at a location closer to the CEC.
+ *
+ * @loccode	location code to truncate
  *
  * Returns :
- *	1 if enclosure is supported / 0 if enclosure is not supported
+ *	1 - successful truncation / 0 - could not be truncated further
  */
 int
-enclosure_supported(const char *model)
+truncate_loc_code(char *loccode)
 {
 	int i;
 
-	if (!model)
-		return 0;
+	for (i = strlen(loccode) - 1; i >= 0; i--) {
+		if (loccode[i] == '-') {
+			loccode[i] = '\0';
+			return 1;	/* successfully truncated */
+		}
+	}
 
-	for (i = 0; supported_ses_enclosure[i].model; i++)
-		if (!strcmp(supported_ses_enclosure[i].model, model))
-			return 1;
 	return 0;
 }
+
+/**
+ * get_indicator_for_loc_code - Compare device location code with indicator list
+ *
+ * @list	indicator list
+ * @location	device location code
+ *
+ * Returns :
+ *	on success, loc_code structure
+ *	on failure, NULL
+ */
+struct loc_code *
+get_indicator_for_loc_code(struct loc_code *list, const char *location)
+{
+	while (list) {
+		if (!strcmp(list->code, location))
+			return list;
+		list = list->next;
+	}
+
+	return NULL;
+}
+
 
 /**
  * get_indicator_state - Retrieve the current state for an indicator
@@ -332,81 +363,6 @@ get_indicator_list(int indicator, struct loc_code **list)
 }
 
 /**
- * get_loc_code_for_dev - Get location code for the given device
- *
- * @device	device name
- * @location	output location code
- * @locsize	location code size
- *
- * Returns :
- *	0 on success / -1 on failure
- */
-int
-get_loc_code_for_dev(const char *device, char *location, int locsize)
-{
-	struct	dev_vpd vpd;
-
-	memset(&vpd, 0, sizeof(struct dev_vpd));
-	if (device && !read_vpd_from_lsvpd(&vpd, device)) {
-		if (location && vpd.location[0] != '\0') {
-			strncpy(location, vpd.location, locsize);
-			location[locsize - 1] = '\0';
-			return 0;
-		}
-	}
-	return -1;
-}
-
-/**
- * get_indicator_for_loc_code - Compare device location code with indicator list
- *
- * @list	indicator list
- * @location	device location code
- *
- * Returns :
- *	on success, loc_code structure
- *	on failure, NULL
- */
-struct loc_code *
-get_indicator_for_loc_code(struct loc_code *list, const char *location)
-{
-	while (list) {
-		if (!strcmp(list->code, location))
-			return list;
-		list = list->next;
-	}
-
-	return NULL;
-}
-
-/**
- * truncate_loc_code - Truncate the last few characters of a location code
- *
- * Truncates the last few characters off of a location code; if an
- * indicator doesn't exist at the orignal location, perhaps one exists
- * at a location closer to the CEC.
- *
- * @loccode	location code to truncate
- *
- * Returns :
- *	1 - successful truncation / 0 - could not be truncated further
- */
-int
-truncate_loc_code(char *loccode)
-{
-	int i;
-
-	for (i = strlen(loccode) - 1; i >= 0; i--) {
-		if (loccode[i] == '-') {
-			loccode[i] = '\0';
-			return 1;	/* successfully truncated */
-		}
-	}
-
-	return 0;
-}
-
-/**
  * free_indicator_list - Free loc_code structure
  *
  * @loc		list to free
@@ -424,77 +380,4 @@ free_indicator_list(struct loc_code *loc)
 		loc = loc->next;
 		free(tmp);
 	}
-}
-
-/**
- * fill_indicators_vpd - Fill indicators vpd data
- */
-void
-fill_indicators_vpd(struct loc_code *list)
-{
-	struct	dev_vpd vpd;
-	struct	loc_code *curr;
-
-	for (curr = list; curr; curr = curr->next) {
-		/* zero out the vpd structure */
-		memset(&vpd, 0, sizeof(struct dev_vpd));
-
-		if (read_vpd_from_lsvpd(&vpd, curr->code))
-			return;
-
-		strncpy(curr->devname, vpd.dev, DEV_LENGTH);
-		strncpy(curr->mtm, vpd.mtm, VPD_LENGTH);
-		strncpy(curr->sn, vpd.sn, VPD_LENGTH);
-		strncpy(curr->pn, vpd.pn, VPD_LENGTH);
-		strncpy(curr->fru, vpd.fru, VPD_LENGTH);
-		/* retain existing DS */
-		if (curr->ds[0] == '\0')
-			strncpy(curr->ds, vpd.ds, VPD_LENGTH);
-	}
-}
-
-/**
- * is_enclosure_loc_code -
- */
-int
-is_enclosure_loc_code(struct loc_code *loc)
-{
-	if (strchr(loc->code, '-') == NULL)
-		return 1;
-
-	return 0;
-}
-
-/* Map LED type to description. */
-struct led_type_map {
-	const int	type;
-	const char	*desc;
-};
-static struct led_type_map led_type_map[] = {
-	{LED_TYPE_IDENT,	LED_DESC_IDENT},
-	{LED_TYPE_FAULT,	LED_DESC_FAULT},
-	{LED_TYPE_ATTN,		LED_DESC_ATTN},
-	{-1,			NULL},
-};
-
-int get_indicator_type(const char *indicator_desc)
-{
-	int i;
-
-	for (i = 0; led_type_map[i].desc != NULL; i++)
-		if (!strcmp(led_type_map[i].desc, indicator_desc))
-			return led_type_map[i].type;
-
-	return -1;
-}
-
-const char *get_indicator_desc(int indicator)
-{
-	int i;
-
-	for (i = 0; led_type_map[i].type != -1; i++)
-		if (led_type_map[i].type == indicator)
-			return led_type_map[i].desc;
-
-	return "Unknown";
 }

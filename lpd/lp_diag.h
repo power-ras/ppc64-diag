@@ -118,14 +118,10 @@ void get_all_indicator_state(int , struct loc_code *);
 void set_all_indicator_state(int , struct loc_code *, int);
 int enable_check_log_indicator(void);
 int disable_check_log_indicator(void);
-void fill_indicators_vpd(struct loc_code *);
 void free_indicator_list(struct loc_code *);
 
-int device_supported(const char *, const char *);
-int enclosure_supported(const char *);
 int truncate_loc_code(char *);
 struct loc_code *get_indicator_for_loc_code(struct loc_code *, const char *);
-int get_loc_code_for_dev(const char *, char *, int);
 const char *get_indicator_desc(int );
 int get_indicator_type(const char *);
 

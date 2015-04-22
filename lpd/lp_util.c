@@ -21,6 +21,78 @@
 
 #define LSVPD_PATH	"/usr/sbin/lsvpd"
 
+
+/* Note:
+ *	At present, we do not support all SES enclosures/devices. Consider
+ *	removing device_supported() and enclosure_supported() once we
+ *	have Light Path support for all enclosures/devices.
+ */
+/* List of all Light Path supported enclosures */
+static struct {
+	char *model;
+} supported_ses_enclosure[] = {
+	{"5888"},	/* Bluehawk */
+	{"EDR1"},	/* Bluehawk */
+	{NULL}
+};
+
+/* List of all Light Path supported devices */
+static struct {
+	char	*subsystem;
+	char	*driver;
+} os_supported_device[] = {
+	{"net", "cxgb3"},	/* Chelsio network card*/
+	{"net", "e1000e"},	/* Intel network card*/
+	{NULL, NULL}
+};
+
+/**
+ * device_supported - Check Light Path support for device
+ *
+ * @subsystem	subsystem
+ * @driver	kernel driver
+ *
+ * Returns :
+ *	1 if device is supported / 0 if device is not supported
+ */
+int
+device_supported(const char *subsystem, const char *driver)
+{
+	int i;
+
+	if (!subsystem || !driver)
+		return 0;
+
+	for (i = 0; os_supported_device[i].driver; i++)
+		if (!strcmp(os_supported_device[i].subsystem, subsystem) &&
+		    !strcmp(os_supported_device[i].driver, driver))
+			return 1;
+	return 0;
+}
+
+/**
+ * enclosure_supported - Check Light Path support for enclosure
+ *
+ * @model	enclosure model
+ *
+ * Returns :
+ *	1 if enclosure is supported / 0 if enclosure is not supported
+ */
+int
+enclosure_supported(const char *model)
+{
+	int i;
+
+	if (!model)
+		return 0;
+
+	for (i = 0; supported_ses_enclosure[i].model; i++)
+		if (!strcmp(supported_ses_enclosure[i].model, model))
+			return 1;
+	return 0;
+}
+
+
 /**
  * fgets_nonl - Read a line and strip the newline.
  */
@@ -188,4 +260,57 @@ read_device_vpd(const char *path)
 	}
 	closedir(dir);
 	return vpd;
+}
+
+/**
+ * fill_indicators_vpd - Fill indicators vpd data
+ */
+void
+fill_indicators_vpd(struct loc_code *list)
+{
+	struct	dev_vpd vpd;
+	struct	loc_code *curr;
+
+	for (curr = list; curr; curr = curr->next) {
+		/* zero out the vpd structure */
+		memset(&vpd, 0, sizeof(struct dev_vpd));
+
+		if (read_vpd_from_lsvpd(&vpd, curr->code))
+			return;
+
+		strncpy(curr->devname, vpd.dev, DEV_LENGTH);
+		strncpy(curr->mtm, vpd.mtm, VPD_LENGTH);
+		strncpy(curr->sn, vpd.sn, VPD_LENGTH);
+		strncpy(curr->pn, vpd.pn, VPD_LENGTH);
+		strncpy(curr->fru, vpd.fru, VPD_LENGTH);
+		/* retain existing DS */
+		if (curr->ds[0] == '\0')
+			strncpy(curr->ds, vpd.ds, VPD_LENGTH);
+	}
+}
+
+/**
+ * get_loc_code_for_dev - Get location code for the given device
+ *
+ * @device	device name
+ * @location	output location code
+ * @locsize	location code size
+ *
+ * Returns :
+ *	0 on success / -1 on failure
+ */
+int
+get_loc_code_for_dev(const char *device, char *location, int locsize)
+{
+	struct	dev_vpd vpd;
+
+	memset(&vpd, 0, sizeof(struct dev_vpd));
+	if (device && !read_vpd_from_lsvpd(&vpd, device)) {
+		if (location && vpd.location[0] != '\0') {
+			strncpy(location, vpd.location, locsize);
+			location[locsize - 1] = '\0';
+			return 0;
+		}
+	}
+	return -1;
 }

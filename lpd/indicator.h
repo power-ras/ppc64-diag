@@ -105,6 +105,9 @@ struct loc_code {
 struct platform {
 	const char	*name;
 
+	/* Probe LED support */
+	int	(*probe)(void);
+
 	/* Check LED operating mode (Guiding Light/Light Path) */
 	int	(*get_indicator_mode)(void);
 

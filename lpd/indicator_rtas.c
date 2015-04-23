@@ -17,6 +17,9 @@
 #include "indicator.h"
 #include "indicator_ses.h"
 
+/* Device tree property for indicator list */
+#define RTAS_INDICATOR_DT_PATH	"/proc/device-tree/rtas/ibm,get-indices"
+
 /* Token defination for indicator */
 #define RTAS_INDICATOR_IDENT	9007
 #define RTAS_INDICATOR_ATTN	9006
@@ -349,6 +352,17 @@ set_rtas_indicator(int indicator, struct loc_code *loc, int new_value)
 	return rc;
 }
 
+/*
+ * rtas_indicator_probe - Probe indicator support on RTAS based platform
+ *
+ * Returns:
+ *   0 if indicator is supported, else -1
+ */
+static int
+rtas_indicator_probe(void)
+{
+	return 0;
+}
 
 /**
  * get_rtas_indicator_mode - Gets the service indicator operating mode
@@ -474,6 +488,7 @@ set_rtas_indicator_state(int indicator, struct loc_code *loc, int new_value)
 
 struct platform rtas_platform = {
 	.name			= "rtas",
+	.probe			= rtas_indicator_probe,
 	.get_indicator_mode	= get_rtas_indicator_mode,
 	.get_indicator_list	= get_rtas_indicator_list,
 	.get_indicator_state	= get_rtas_indicator_state,

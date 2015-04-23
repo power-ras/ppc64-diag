@@ -152,6 +152,9 @@ probe_indicator(void)
 		return -1;
 	}
 
+	if (platform.probe)
+		return platform.probe();
+
 	return 0;
 }
 

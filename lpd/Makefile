@@ -8,7 +8,8 @@ CMDS = lp_diag usysident usysattn
 
 COMMON_UTILS_OBJ = $(COMMON_DIR)/utils.o $(COMMON_DIR)/platform.o
 
-LPD_COMMON_OBJS = files.o lp_util.o indicator_ses.o indicator_rtas.o indicator.o
+LPD_COMMON_OBJS = files.o lp_util.o indicator_ses.o indicator_rtas.o \
+		  indicator_opal.o indicator.o
 COMMON_OBJS = $(COMMON_UTILS_OBJ) $(LPD_COMMON_OBJS)
 
 LP_DIAG_OBJS =  servicelog.o lp_diag.o

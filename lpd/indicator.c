@@ -144,6 +144,8 @@ probe_indicator(void)
 		platform = rtas_platform;
 		break;
 	case PLATFORM_POWERKVM:
+		platform = opal_platform;
+		break;
 	case PLATFORM_POWERKVM_GUEST:
 	default:
 		fprintf(stderr, "%s is not supported on the %s platform\n",

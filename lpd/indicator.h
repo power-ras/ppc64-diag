@@ -29,7 +29,8 @@
 #define TYPE_RTAS               1
 #define TYPE_SES                2
 #define TYPE_OS			3
-#define TYPE_EOL		4
+#define TYPE_OPAL		4
+#define TYPE_EOL		5
 
 /* Indicator state */
 #define LED_STATE_SAME		-1
@@ -129,6 +130,7 @@ struct platform {
 
 extern struct platform platform;
 extern struct platform rtas_platform;
+extern struct platform opal_platform;
 
 /* files.c */
 extern void _dbg(const char *, ...);

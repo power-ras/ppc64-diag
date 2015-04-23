@@ -19,7 +19,6 @@
 #include "platform.h"
 #include "indicator.h"
 #include "lp_util.h"
-#include "indicator_rtas.h"
 
 /* Indicator operating mode */
 uint32_t	operating_mode;

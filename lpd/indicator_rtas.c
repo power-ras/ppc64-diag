@@ -379,7 +379,7 @@ rtas_indicator_probe(void)
  * Returns :
  *	operating mode value
  */
-int
+static int
 get_rtas_indicator_mode(void)
 {
 	int	rc;
@@ -409,7 +409,7 @@ get_rtas_indicator_mode(void)
  * Returns :
  *	0 on success, !0 otherwise
  */
-int
+static int
 get_rtas_indicator_list(int indicator, struct loc_code **list)
 {
 	int	rc;
@@ -443,7 +443,7 @@ get_rtas_indicator_list(int indicator, struct loc_code **list)
  * Returns :
  *	indicator return code
  */
-int
+static int
 get_rtas_indicator_state(int indicator, struct loc_code *loc, int *state)
 {
 	switch (loc->type) {
@@ -471,7 +471,7 @@ get_rtas_indicator_state(int indicator, struct loc_code *loc, int *state)
  * Returns :
  *	indicator return code
  */
-int
+static int
 set_rtas_indicator_state(int indicator, struct loc_code *loc, int new_value)
 {
 	switch (loc->type) {

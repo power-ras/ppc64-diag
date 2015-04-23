@@ -295,7 +295,7 @@ main(int argc, char **argv)
 
 	/* Light Path operating mode */
 	if (indicator == LED_TYPE_FAULT) {
-		rc = check_operating_mode();
+		rc = get_indicator_mode();
 		if (rc)
 			return rc;
 	}

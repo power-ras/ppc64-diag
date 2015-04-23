@@ -138,14 +138,14 @@ extern int is_enclosure_loc_code(struct loc_code *);
 extern int truncate_loc_code(char *);
 extern struct loc_code *get_indicator_for_loc_code(struct loc_code *,
 						   const char *);
+extern int get_indicator_mode(void);
+extern int get_indicator_list(int, struct loc_code **);
 extern int get_indicator_state(int , struct loc_code *, int *);
 extern int set_indicator_state(int , struct loc_code *, int);
 extern void get_all_indicator_state(int , struct loc_code *);
 extern void set_all_indicator_state(int , struct loc_code *, int);
-extern int check_operating_mode(void);
 extern int enable_check_log_indicator(void);
 extern int disable_check_log_indicator(void);
-extern int get_indicator_list(int, struct loc_code **);
 extern void free_indicator_list(struct loc_code *);
 
 #endif  /* INDICATOR_H */

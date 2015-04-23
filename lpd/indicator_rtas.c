@@ -15,6 +15,7 @@
 #include <librtas.h>
 
 #include "indicator.h"
+#include "indicator_ses.h"
 
 /* Token defination for indicator */
 #define RTAS_INDICATOR_IDENT	9007
@@ -169,7 +170,7 @@ librtas_error(int error, char *buf, size_t size)
  * Returns :
  *	rtas call return value
  */
-int
+static int
 get_rtas_indices(int indicator, struct loc_code **loc)
 {
 	int	rc;
@@ -249,7 +250,7 @@ get_rtas_indices(int indicator, struct loc_code **loc)
  * Returns :
  *	rtas call return code
  */
-int
+static int
 get_rtas_sensor(int indicator, struct loc_code *loc, int *state)
 {
 	int	rc;
@@ -305,7 +306,7 @@ get_rtas_sensor(int indicator, struct loc_code *loc, int *state)
  * Returns :
  *	rtas call return code
  */
-int
+static int
 set_rtas_indicator(int indicator, struct loc_code *loc, int new_value)
 {
 	int	rc;
@@ -346,4 +347,127 @@ set_rtas_indicator(int indicator, struct loc_code *loc, int new_value)
 	}
 
 	return rc;
+}
+
+
+/**
+ * get_rtas_indicator_mode - Gets the service indicator operating mode
+ *
+ * Note: There is no defined property in PAPR+ to determine the indicator
+ *	 operating mode. There is some work being done to get property
+ *	 into PAPR. When that is done we will check for that property.
+ *
+ *	 At present, we will query RTAS fault indicators. It should return
+ *	 at least one fault indicator, that is check log indicator. If only
+ *	 one indicator is returned, then Guiding Light mode else Light Path
+ *	 mode.
+ *
+ * Returns :
+ *	operating mode value
+ */
+int
+get_rtas_indicator_mode(void)
+{
+	int	rc;
+	struct	loc_code *list = NULL;
+
+	rc = get_rtas_indices(LED_TYPE_FAULT, &list);
+	if (rc)
+		return -1;
+
+	if (!list)	/* failed */
+		return -1;
+	else if (!list->next)
+		operating_mode = LED_MODE_GUIDING_LIGHT;
+	else
+		operating_mode = LED_MODE_LIGHT_PATH;
+
+	free_indicator_list(list);
+	return 0;
+}
+
+/**
+ * get_rtas_indicator_list - Build indicator list of given type
+ *
+ * @indicator	identification or attention indicator
+ * @list	loc_code structure
+ *
+ * Returns :
+ *	0 on success, !0 otherwise
+ */
+int
+get_rtas_indicator_list(int indicator, struct loc_code **list)
+{
+	int	rc;
+
+	/* Get RTAS indicator list */
+	rc = get_rtas_indices(indicator, list);
+	if (rc)
+		return rc;
+
+	/* FRU fault indicators are not supported in Guiding Light mode */
+	if (indicator == LED_TYPE_FAULT &&
+	    operating_mode == LED_MODE_GUIDING_LIGHT)
+		return rc;
+
+	/* SES indicators */
+	get_ses_indices(indicator, list);
+
+	return rc;
+}
+
+/**
+ * get_rtas_indicator_state - Retrieve the current state for an indicator
+ *
+ * Call the appropriate routine for retrieving indicator values based on the
+ * type of indicator.
+ *
+ * @indicator	identification or attention indicator
+ * @loc		location code of the sensor
+ * @state	return location for the sensor state
+ *
+ * Returns :
+ *	indicator return code
+ */
+int
+get_rtas_indicator_state(int indicator, struct loc_code *loc, int *state)
+{
+	switch (loc->type) {
+	case TYPE_RTAS:
+		return get_rtas_sensor(indicator, loc, state);
+	case TYPE_SES:
+		return get_ses_indicator(indicator, loc, state);
+	default:
+		break;
+	}
+
+	return -1;
+}
+
+/**
+ * set_rtas_indicator_state - Set an indicator to a new state (on or off)
+ *
+ * Call the appropriate routine for setting indicators based on the type
+ * of indicator.
+ *
+ * @indicator	identification or attention indicator
+ * @loc		location code of rtas indicator
+ * @new_value	value to update indicator to
+ *
+ * Returns :
+ *	indicator return code
+ */
+int
+set_rtas_indicator_state(int indicator, struct loc_code *loc, int new_value)
+{
+	switch (loc->type) {
+	case TYPE_RTAS:
+		return set_rtas_indicator(indicator, loc, new_value);
+	case TYPE_SES:
+		return set_ses_indicator(indicator, loc, new_value);
+	default:
+		break;
+	}
+
+	return -1;
 }

@@ -18,7 +18,6 @@
 
 #include "indicator.h"
 #include "lp_util.h"
-#include "indicator_ses.h"
 #include "indicator_rtas.h"
 
 /* Indicator operating mode */
@@ -126,6 +125,33 @@ get_indicator_for_loc_code(struct loc_code *list, const char *location)
 
 
 /**
+ * get_indicator_mode - Gets the service indicator operating mode
+ *
+ * Returns :
+ *	operating mode value
+ */
+int
+get_indicator_mode(void)
+{
+	return get_rtas_indicator_mode();
+}
+
+/**
+ * get_indicator_list - Build indicator list of given type
+ *
+ * @indicator	identification or attention indicator
+ * @list	loc_code structure
+ *
+ * Returns :
+ *	0 on success, !0 otherwise
+ */
+int
+get_indicator_list(int indicator, struct loc_code **list)
+{
+	return get_rtas_indicator_list(indicator, list);
+}
+
+/**
  * get_indicator_state - Retrieve the current state for an indicator
  *
  * Call the appropriate routine for retrieving indicator values based on the
@@ -141,16 +167,7 @@ get_indicator_for_loc_code(struct loc_code *list, const char *location)
 int
 get_indicator_state(int indicator, struct loc_code *loc, int *state)
 {
-	switch (loc->type) {
-	case TYPE_RTAS:
-		return get_rtas_sensor(indicator, loc, state);
-	case TYPE_SES:
-		return get_ses_indicator(indicator, loc, state);
-	default:
-		break;
-	}
-
-	return -1;
+	return get_rtas_indicator_state(indicator, loc, state);
 }
 
 /**
@@ -169,16 +186,7 @@ get_indicator_state(int indicator, struct loc_code *loc, int *state)
 int
 set_indicator_state(int indicator, struct loc_code *loc, int new_value)
 {
-	switch (loc->type) {
-	case TYPE_RTAS:
-		return set_rtas_indicator(indicator, loc, new_value);
-	case TYPE_SES:
-		return set_ses_indicator(indicator, loc, new_value);
-	default:
-		break;
-	}
-
-	return -1;
+	return set_rtas_indicator_state(indicator, loc, new_value);
 }
 
 /**
@@ -241,42 +249,6 @@ set_all_indicator_state(int indicator, struct loc_code *loc, int new_value)
 }
 
 /**
- * check_operating_mode - Gets the service indicator operating mode
- *
- * Note: There is no defined property in PAPR+ to determine the indicator
- *	 operating mode. There is some work being done to get property
- *	 into PAPR. When that is done we will check for that property.
- *
- *	 At present, we will query RTAS fault indicators. It should return
- *	 at least one fault indicator, that is check log indicator. If only
- *	 one indicator is returned, then Guiding Light mode else Light Path
- *	 mode.
- *
- * Returns :
- *	operating mode value
- */
-int
-check_operating_mode(void)
-{
-	int	rc;
-	struct	loc_code *list = NULL;
-
-	rc = get_rtas_indices(LED_TYPE_FAULT, &list);
-	if (rc)
-		return -1;
-
-	if (!list)	/* failed */
-		return -1;
-	else if (!list->next)
-		operating_mode = LED_MODE_GUIDING_LIGHT;
-	else
-		operating_mode = LED_MODE_LIGHT_PATH;
-
-	free_indicator_list(list);
-	return 0;
-}
-
-/**
  * enable_check_log_indicator - Enable check log indicator
  *
  * Returns :
@@ -289,7 +261,7 @@ enable_check_log_indicator(void)
 	struct	loc_code *list = NULL;
 	struct	loc_code *clocation;
 
-	rc = get_rtas_indices(LED_TYPE_FAULT, &list);
+	rc = get_indicator_list(LED_TYPE_FAULT, &list);
 	if (rc)
 		return rc;
 
@@ -317,7 +289,7 @@ disable_check_log_indicator(void)
 	struct	loc_code *list = NULL;
 	struct	loc_code *clocation;
 
-	rc = get_rtas_indices(LED_TYPE_FAULT, &list);
+	rc = get_indicator_list(LED_TYPE_FAULT, &list);
 	if (rc)
 		return rc;
 
@@ -328,36 +300,6 @@ disable_check_log_indicator(void)
 	clocation = &list[0];
 	rc = set_indicator_state(LED_TYPE_FAULT, clocation, LED_STATE_OFF);
 	free_indicator_list(list);
-
-	return rc;
-}
-
-/**
- * get_indicator_list - Build indicator list of given type
- *
- * @indicator	identification or attention indicator
- * @list	loc_code structure
- *
- * Returns :
- *	0 on success, !0 otherwise
- */
-int
-get_indicator_list(int indicator, struct loc_code **list)
-{
-	int	rc;
-
-	/* Get RTAS indicator list */
-	rc = get_rtas_indices(indicator, list);
-	if (rc)
-		return rc;
-
-	/* FRU fault indicators are not supported in Guiding Light mode */
-	if (indicator == LED_TYPE_FAULT &&
-	    operating_mode == LED_MODE_GUIDING_LIGHT)
-		return rc;
-
-	/* SES indicators */
-	get_ses_indices(indicator, list);
 
 	return rc;
 }

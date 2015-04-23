@@ -122,7 +122,7 @@ int main(int argc, char **argv)
 	}
 
 	/* Light Path operating mode */
-	if (check_operating_mode() != 0) {
+	if (get_indicator_mode() != 0) {
 		close_files();
 		exit(1);
 	}

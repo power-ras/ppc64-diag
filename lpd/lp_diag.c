@@ -1223,7 +1223,7 @@ main(int argc, char *argv[])
 		goto cleanup;
 
 	/* Light Path operating mode */
-	rc = check_operating_mode();
+	rc = get_indicator_mode();
 	if (rc)
 		goto cleanup;
 

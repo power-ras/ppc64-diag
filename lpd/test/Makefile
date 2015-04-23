@@ -13,7 +13,7 @@ AM_CFLAGS = -DVERSION='"$(VERSION)"'
 
 LPD_DIR = $(ROOT_DIR)/lpd
 
-COMMON_OBJS = $(COMMON_DIR)/utils.o
+COMMON_OBJS = $(COMMON_DIR)/utils.o $(COMMON_DIR)/platform.o
 LPD_OBJS = $(COMMON_OBJS) ../files.o ../lp_util.o ../indicator_ses.o \
 	   ../indicator_rtas.o ../indicator.o ../servicelog.o
 

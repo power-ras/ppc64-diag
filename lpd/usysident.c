@@ -23,7 +23,6 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "platform.h"
 #include "indicator.h"
 #include "lp_util.h"
 
@@ -94,7 +93,6 @@ main(int argc, char **argv)
 	int	rc = 0;
 	int	trunc = 0;
 	int	truncated = 0;
-	int	platform = 0;
 	char	temp[LOCATION_LENGTH];
 	char	dloc[LOCATION_LENGTH];
 	char	*dvalue = NULL;
@@ -104,12 +102,9 @@ main(int argc, char **argv)
 	struct	loc_code *current;
 	struct	loc_code *list = NULL;
 
-	platform = get_platform();
-	if (platform != PLATFORM_PSERIES_LPAR) {
-		fprintf(stderr, "%s is not supported on the %s platform\n",
-				argv[0], __power_platform_name(platform));
+	program_name = argv[0];
+	if (probe_indicator() != 0)
 		return 1;
-	}
 
 	opterr = 0;
 	while ((c = getopt(argc, argv, CMD_LINE_OPTIONS)) != -1) {
@@ -285,7 +280,6 @@ main(int argc, char **argv)
 		return 1;
 
 	/* initialize */
-	program_name = argv[0];
 	lp_error_log_fd = 1; /* log message to stdout */
 	rc = init_files();
 	if (rc) {

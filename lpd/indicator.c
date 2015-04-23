@@ -16,12 +16,16 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "platform.h"
 #include "indicator.h"
 #include "lp_util.h"
 #include "indicator_rtas.h"
 
 /* Indicator operating mode */
 uint32_t	operating_mode;
+
+/* points to platform structure of running platform */
+struct platform platform;
 
 /* Map LED type to description. */
 struct led_type_map {
@@ -125,6 +129,33 @@ get_indicator_for_loc_code(struct loc_code *list, const char *location)
 
 
 /**
+ * probe_indicator - Check indicator support on running platform
+ *
+ * Returns :
+ *	0 on success, -1 on failure
+ */
+int
+probe_indicator(void)
+{
+	int p;
+	p = get_platform();
+
+	switch (p) {
+	case PLATFORM_PSERIES_LPAR:
+		platform = rtas_platform;
+		break;
+	case PLATFORM_POWERKVM:
+	case PLATFORM_POWERKVM_GUEST:
+	default:
+		fprintf(stderr, "%s is not supported on the %s platform\n",
+				program_name, __power_platform_name(p));
+		return -1;
+	}
+
+	return 0;
+}
+
+/**
  * get_indicator_mode - Gets the service indicator operating mode
  *
  * Returns :
@@ -133,7 +164,10 @@ get_indicator_for_loc_code(struct loc_code *list, const char *location)
 int
 get_indicator_mode(void)
 {
-	return rtas_platform.get_indicator_mode();
+	if (!platform.get_indicator_mode)
+		return -1;
+
+	return platform.get_indicator_mode();
 }
 
 /**
@@ -148,7 +182,10 @@ get_indicator_mode(void)
 int
 get_indicator_list(int indicator, struct loc_code **list)
 {
-	return rtas_platform.get_indicator_list(indicator, list);
+	if (!platform.get_indicator_list)
+		return -1;
+
+	return platform.get_indicator_list(indicator, list);
 }
 
 /**
@@ -167,7 +204,10 @@ get_indicator_list(int indicator, struct loc_code **list)
 int
 get_indicator_state(int indicator, struct loc_code *loc, int *state)
 {
-	return rtas_platform.get_indicator_state(indicator, loc, state);
+	if (!platform.get_indicator_state)
+		return -1;
+
+	return platform.get_indicator_state(indicator, loc, state);
 }
 
 /**
@@ -186,7 +226,10 @@ get_indicator_state(int indicator, struct loc_code *loc, int *state)
 int
 set_indicator_state(int indicator, struct loc_code *loc, int new_value)
 {
-	return rtas_platform.set_indicator_state(indicator, loc, new_value);
+	if (!platform.set_indicator_state)
+		return -1;
+
+	return platform.set_indicator_state(indicator, loc, new_value);
 }
 
 /**

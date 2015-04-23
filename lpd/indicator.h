@@ -124,6 +124,7 @@ struct platform {
 #define DECLARE_PLATFORM(name)\
 	const struct platform name ##_platform
 
+extern struct platform platform;
 extern struct platform rtas_platform;
 
 /* files.c */
@@ -140,6 +141,7 @@ extern int is_enclosure_loc_code(struct loc_code *);
 extern int truncate_loc_code(char *);
 extern struct loc_code *get_indicator_for_loc_code(struct loc_code *,
 						   const char *);
+extern int probe_indicator(void);
 extern int get_indicator_mode(void);
 extern int get_indicator_list(int, struct loc_code **);
 extern int get_indicator_state(int , struct loc_code *, int *);

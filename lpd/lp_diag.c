@@ -19,7 +19,6 @@
 #include <menu.h>
 #include <signal.h>
 
-#include "platform.h"
 #include "servicelog.h"
 #include "indicator.h"
 #include "lp_util.h"
@@ -1153,15 +1152,11 @@ main(int argc, char *argv[])
 	int	repair_flag = 0;
 	int	event_id = 0;
 	int	repair_id = 0;
-	int	platform = 0;
 	char	*next_char;
 
-	platform = get_platform();
-	if (platform != PLATFORM_PSERIES_LPAR) {
-		fprintf(stderr, "%s is not supported on the %s platform\n",
-				argv[0], __power_platform_name(platform));
+	program_name = argv[0];
+	if (probe_indicator() != 0)
 		return 1;
-	}
 
 	opterr = 0;
 	while ((c = getopt_long(argc, argv, LP_DIAG_ARGS,
@@ -1217,7 +1212,6 @@ main(int argc, char *argv[])
 	}
 
 	/* initialize */
-	program_name = argv[0];
 	rc = init_files();
 	if (rc)
 		goto cleanup;

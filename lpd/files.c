@@ -306,7 +306,7 @@ rotate_log_file(char *lp_log_file)
 		return;
 	}
 
-	dir_name = dirname(lp_log_file);
+	dir_name = dirname(lp_log_file0);
 	dir_fd = open(dir_name, O_RDONLY | O_DIRECTORY);
 	if (dir_fd == -1) {
 		dbg("Could not open log directory %s (%d: %s)",

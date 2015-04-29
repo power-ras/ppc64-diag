@@ -10,11 +10,10 @@
 #
 # Copyright (C) 2008 IBM Corporation
 #
- 
+
 # Update the VPD database with the dynamic VPD of the new system
-$rc = system("which vpdupdate > /dev/null 2>&1");
-if ($rc == 0) {
-	system("vpdupdate >/dev/null 2>&1");
+if (-x "/usr/sbin/vpdupdate") {
+	system("/usr/sbin/vpdupdate >/dev/null 2>&1");
 } else {
 	print STDERR "ppc64_diag_migrate: vpdupdate not found.\n";
 }

@@ -230,6 +230,7 @@ static int add_drconf_phandles()
 	fread(membuf, sbuf.st_size, 1, fd);
 	if (ferror(fd)) {
 		fclose(fd);
+		free(membuf);
 		return -1;
 	}
 	fclose(fd);

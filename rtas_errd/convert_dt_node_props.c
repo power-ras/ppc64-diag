@@ -457,6 +457,8 @@ cpu_drcindex_to_interruptserver(uint32_t drc_idx, uint32_t *int_servs,
 	uint32_t temp;
 
 	dir = opendir("/proc/device-tree/cpus");
+	if (!dir)
+		return 0;
 
 	while (!found && (entry = readdir(dir)) != NULL) {
 		if (!strncmp(entry->d_name, "PowerPC,POWER", 13)) {
@@ -490,6 +492,7 @@ cpu_drcindex_to_interruptserver(uint32_t drc_idx, uint32_t *int_servs,
 		}
 	}
 
+	closedir(dir);
 	return found;
 }
 

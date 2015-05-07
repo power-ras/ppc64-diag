@@ -31,32 +31,43 @@
  * get_machine_serial
  * @brief Retrieve a machines serial number
  *
- * Return a string containing the machine's serial number, obtained 
- * from procfs (the file named SYSID_FILE).  This routine mallocs a 
- * new string; it is the caller's responsibility to ensure that the 
+ * Return a string containing the machine's serial number, obtained
+ * from procfs (the file named SYSID_FILE).  This routine mallocs a
+ * new string; it is the caller's responsibility to ensure that the
  * string is freed.
- * 
+ *
  * @return pointer to (allocated) string, NULL on failure
  */
 static char *
 get_machine_serial()
 {
 	FILE *fp;
-	char buf[20], *ret;
+	char buf[20] = {0,}, *ret = NULL;
 
+	/*
+	 * Odds of SYSID_FILE, open failing is almost none.
+	 * But, better to catch the odds.
+	 */
 	fp = fopen(SYSID_FILE, "r");
-	fgets(buf, sizeof(buf), fp);
-	fclose(fp);
-
-	ret = (char *)malloc(20);
-	if (ret) {
-		/* Discard first 4 characters ("IBM,") */
-		strncpy(ret, buf+4, 20);
-		ret[19] = '\0';
+	if (!fp) {
+		log_msg(NULL, "%s: Failed to open %s, %s",
+				__func__, SYSID_FILE, strerror(errno));
 		return ret;
 	}
 
-	return NULL;
+	if (fgets(buf, sizeof(buf), fp) == NULL) {
+		log_msg(NULL, "%s: Reading file %s failed, %s",
+				__func__, SYSID_FILE, strerror(errno));
+	} else {
+		ret = strdup(buf + 4);
+		if (!ret) {
+			log_msg(NULL, "%s: Memory allocation failed, %s",
+				__func__, strerror(errno));
+		} /* strdup */
+	}
+
+	fclose(fp);
+	return ret;
 }
 
 /**

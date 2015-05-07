@@ -35,7 +35,11 @@ using namespace lsvpd;
 #include <servicelog-1/servicelog.h>
 extern "C" {
 #include "platform.c"
+#include "utils.c"
 }
+
+//Workaround for deprecated warning.
+#pragma GCC diagnostic ignored "-Wwrite-strings"
 
 #define LAST_EVENT_PATH "/var/log/ppc64-diag/last_syslog_event"
 #define LAST_EVENT_PATH_BAK LAST_EVENT_PATH ".bak"
@@ -596,8 +600,10 @@ compute_begin_date(void)
  * the popen() call.
  */
 static FILE *
-tail_message_file(void)
+tail_message_file(pid_t *cpid)
 {
+	char *system_args[8] = {0,};
+	FILE *p;
 	/*
 	 * Avoid stuff like popen("tail -F ... file; rm -rf /", "r")
 	 * when nasty msg_path = 'file; rm -rf /'.  To be extra safe,
@@ -626,33 +632,43 @@ tail_message_file(void)
 	}
 	close(fd);
 
-	string tail_command = string("/usr/bin/tail -F -n +0 -s 2 '") +
-							msg_path + "'";
-	FILE *p = popen(tail_command.c_str(), "r");
+	system_args[0] = "/usr/bin/tail";
+	system_args[1] = "-F";
+	system_args[2] = "-n";
+	system_args[3] = "+0";
+	system_args[4] = "-s";
+	system_args[5] = "2";
+	system_args[6] =  (char *)msg_path;
+	system_args[7] = NULL;
+	p = spopen(system_args, cpid);
 	if (!p) {
-		perror(tail_command.c_str());
+		perror("tail -F of message file");
 		return NULL;
 	}
 	return p;
 }
 
 static FILE *
-open_message_file(void)
+open_message_file(pid_t *cpid)
 {
+	FILE *f;
+
 	if (follow)
-		return tail_message_file();
-	FILE *f = fopen(msg_path, "r");
+		return tail_message_file(cpid);
+
+	f = fopen(msg_path, "r");
 	if (!f)
 		perror(msg_path);
+
 	return f;
 }
 
 static void
-close_message_file(void)
+close_message_file(pid_t *cpid)
 {
 	if (msg_file) {
 		if (follow) {
-			if (pclose(msg_file) != 0)
+			if (spclose(msg_file, *cpid) != 0)
 				perror("tail -F of message file");
 		} else
 			fclose(msg_file);
@@ -681,6 +697,7 @@ int main(int argc, char **argv)
 	int c, result;
 	int args_seen[0x100] = { 0 };
 	int platform = 0;
+	pid_t cpid;
 
 	progname = argv[0];
 
@@ -770,7 +787,7 @@ int main(int argc, char **argv)
 		compute_begin_date();
 
 	if (msg_path) {
-		msg_file = open_message_file();
+		msg_file = open_message_file(&cpid);
 		if (!msg_file) {
 			perror(msg_path);
 			exit(1);
@@ -778,7 +795,7 @@ int main(int argc, char **argv)
 	}
 
 	if (EventCatalog::parse(catalog_dir) != 0) {
-		close_message_file();
+		close_message_file(&cpid);
 		exit(2);
 	}
 
@@ -786,7 +803,7 @@ int main(int argc, char **argv)
 	if (result != 0) {
 		cerr << "servicelog_open() failed, returning "
 							<< result << endl;
-		close_message_file();
+		close_message_file(&cpid);
 		exit(3);
 	}
 
@@ -832,6 +849,6 @@ int main(int argc, char **argv)
 	}
 
 	servicelog_close(slog);
-	close_message_file();
+	close_message_file(&cpid);
 	exit(0);
 }

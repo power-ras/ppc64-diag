@@ -512,7 +512,7 @@ reformat_msg(char *msg)
 /**
  * _log_msg
  * @brief The real routine to write messages to rtas_errd_log
- * 
+ *
  * This is a common routine for formatting messages that go to the
  * /var/log/rtas_errd.log file.  Users should pass in a reference to
  * the rtas_event structure if this message is directly related a rtas
@@ -522,11 +522,11 @@ reformat_msg(char *msg)
  *
  * This routine will do several things to the message before printing
  * it out;
- * - Add a timestamp 
+ * - Add a timestamp
  * - If a rtas_event reference is passed in, a sequenbce number is added
  * - If errno is set, the results of perror are added.
- * - The entire message is then formatted to fit in 80 cols. 
- * 
+ * - The entire message is then formatted to fit in 80 cols.
+ *
  * @param event reference to event
  * @param fmt formatted string a la printf()
  * @param ... additional args a la printf()
@@ -537,6 +537,9 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 	struct stat sbuf;
 	char	buf[RTAS_ERROR_LOG_MAX];
 	int	len = 0, rc;
+	char	*dir_name;
+        char	*rtas_errd_log_c; /* Both rtas_errd_log/rtas_errd_log0 are
+				     global, so make a copy. */
 
 	if (rtas_errd_log_fd == -1) {
 		dbg("rtas_errd log file is not available");
@@ -622,11 +625,21 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 		/*
 		 * fsync /var/log/ to be  on safer side.
 		 */
-		dir_fd = open(dirname(rtas_errd_log), O_RDONLY|O_DIRECTORY);
+		rtas_errd_log_c = strdup(rtas_errd_log);
+		if (!rtas_errd_log_c) {
+			log_msg(NULL, "%s, Memory allocation failed, %s",
+					__func__, strerror(errno));
+			rtas_errd_log_fd = -1;
+			dbg("Could not re-open %s", rtas_errd_log);
+			return;
+
+		}
+		dir_name = dirname(rtas_errd_log_c);
+		dir_fd = open(dir_name, O_RDONLY|O_DIRECTORY);
 		rc = fsync(dir_fd);
 		if (rc == -1) {
 			log_msg(NULL, "fsync failed, on %s\nexit status: %d",
-					dirname(rtas_errd_log), errno);
+					dir_name, errno);
 		}
 		close(dir_fd);
 

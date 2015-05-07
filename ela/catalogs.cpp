@@ -24,6 +24,12 @@ using namespace std;
 #include "catalogs.h"
 #include <sstream>
 
+extern FILE *spopen(char **, pid_t *) __attribute__((weak));
+extern FILE *spclose(FILE *, pid_t)  __attribute__((weak));
+
+//Workaround for deprecated warning
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+
 enum regex_text_policy regex_text_policy = RGXTXT_READ;
 
 static CatalogCopy *catalog_copy = NULL;
@@ -868,14 +874,19 @@ SyslogEvent::SyslogEvent(const string& rp, const string& sev, const string& fmt,
 void
 MatchVariant::compute_regex_text(void)
 {
-	int get_prefix_args = 0;
+	int __attribute__((__unused__))get_prefix_args = 0;
 	FILE *in;
 	char regex_cstr[REGEX_MAXLEN];
+	std::ostringstream regex_maxlen;
+	string regex_max_s;
+	char *regex_len, *format;
+	char *args[4];
+	pid_t cpid;
 	Reporter *reporter = reporter_alias->reporter;
 	string full_format = reporter->prefix_format + parent->format;
 	size_t nl = full_format.find_last_of('\n');
 
-	// Strip trailing newline. 
+	// Strip trailing newline.
 	if (nl) {
 		if (full_format.substr(nl+1) != "")
 		parent->parser->semantic_error(
@@ -886,39 +897,53 @@ MatchVariant::compute_regex_text(void)
 	if (reporter->prefix_args && reporter->prefix_args->size() > 0)
 		get_prefix_args = 1;
 
-	std::stringstream command; 
-	command <<  "regex_converter " << REGEX_MAXLEN << " " << "\""; 
-	command << full_format << "\" " << get_prefix_args;
+	regex_maxlen << REGEX_MAXLEN;
+	regex_max_s = regex_maxlen.str();
+	regex_len = strdup(regex_max_s.c_str());
+	format = strdup(full_format.c_str());
+	if ((!regex_len) || (!format)) {
+		parent->parser->semantic_error("Memory allocation failed");
+		goto free_mem;
+	}
 
-	std::string tmp = command.str();
-	const char* cstr = tmp.c_str();
+	args[0] = "/usr/bin/regex_converter";
+	args[1] = regex_len;
+	args[2] = format;
+	args[3] = NULL;
 
-	if (!(in = popen(cstr, "r"))) {
+	if (!(in = spopen(args, &cpid))) {
 		parent->parser->semantic_error("cannot create regex text,"
 				"regex_converter may not be installed");
-		return;
+		goto free_mem;
 	}
- 
+
 	fgets(regex_cstr,REGEX_MAXLEN, in);
- 
-	pclose(in);
+
+	spclose(in, cpid);
 
 	if (!strcmp(regex_cstr, "regex parser failure")) {
 		parent->parser->semantic_error(
 				"cannot create regex text from format");
-		return;
+		goto free_mem;
 	}
 
 	regex_text = regex_cstr;
 
 	nl = regex_text.find_last_of('\n');
 
-	// Strip trailing newline. 
+	// Strip trailing newline.
 	if (nl) {
- 		regex_text = regex_text.substr(0, nl);
+		regex_text = regex_text.substr(0, nl);
 	}
-	// Change expr to ^expr$ so we match only the full message. 
+	// Change expr to ^expr$ so we match only the full message.
 	regex_text = "^" + regex_text + "$";
+
+free_mem:
+	if (regex_len)
+		free(regex_len);
+
+	if (format)
+		free(regex_len);
 }
 
 

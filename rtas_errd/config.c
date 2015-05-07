@@ -300,9 +300,10 @@ config_restart_policy(char *start, char *end, int *line_no, int update_param)
 {
 	struct stat	sbuf;
 	char		*cur;
-	char		system_arg[80];
 	char		param[3];
-	int		rc;
+	pid_t		cpid;		/* Pid of child */
+	int		rc;		/* Holds return value */
+	int		status;		/* exit value of child */
 
 	cur = get_restart_policy_value(start, end,
 				       &d_cfg.restart_policy, line_no);
@@ -372,26 +373,79 @@ config_restart_policy(char *start, char *end, int *line_no, int update_param)
 	/* See if the ibm,os-auto-restart config variable is in 
 	 * nvram on this machine
 	 */
-	sprintf(system_arg, "/usr/sbin/nvram "
-		"--print-config=ibm,os-auto-restart");
-	if (system(system_arg) == -1) {
+	cpid = fork();
+	if (cpid == -1) {
+		d_cfg.log_msg("Fork failed, while collecting ibm,os-auto-restart\n");
+		d_cfg.restart_policy = -1;
+		return cur;
+	} /* fork */
+
+	if (cpid == 0) { /* child */
+		char *system_arg[3]= {NULL, };
+
+		system_arg[0] = "/usr/sbin/nvram";
+		system_arg[1] = "--print-config=ibm,os-auto-restart";
+
+		rc = execv(system_arg[0], system_arg);
 		d_cfg.log_msg("The current system does not support the "
 			      "Auto Restart Policy; the AutoRestartPolicy "
 			      "configuration entry (line %d) is being skipped",
 			      line_no);
 		d_cfg.restart_policy = -1;
-		return cur;
+		exit(-2);
+	} else {/* parent */
+		/*
+		 * Use wait to make sure we do not update ibm,os-restart-policy,
+		 * before reading ibm,os-auto-restart.
+		 */
+		rc = waitpid(cpid, &status, 0);
+		if (rc == -1) {
+			d_cfg.log_msg("wait failed, while collecting"
+				      " ibm,os-auto-restart\n");
+			d_cfg.restart_policy = -1;
+			return cur;
+		}
+
+		if ((signed char)WEXITSTATUS(status) == -2)
+			return cur;
 	}
 
-	sprintf(system_arg, "%s%d", "/usr/sbin/nvram -p common "
-		"--update-config ibm,os-restart-policy=", d_cfg.restart_policy);
+	cpid = fork();
+	if (cpid == -1) {
+		d_cfg.log_msg("Fork failed, on updating ibm,os-restart-policy\n");
+		d_cfg.restart_policy = -1;
+		return cur;
+	} /* fork */
 
-	if (system(system_arg)) {
+	if (cpid == 0) { /* child */
+		char *system_arg[6]= {NULL,};
+		char tmp_sys_arg[50];
+
+		system_arg[0] = "/usr/sbin/nvram";
+		system_arg[1] = "-p";
+		system_arg[2] = "common";
+		system_arg[3] = "--update-config";
+		sprintf(tmp_sys_arg, "ibm,os-restart-policy=%d",
+			d_cfg.restart_policy);
+		system_arg[4] = tmp_sys_arg;
+
+		rc = execv(system_arg[0], system_arg);
 		d_cfg.log_msg("The Auto Restart Policy could not be configured "
 			      "due to a failure in running the nvram command",
 			      d_cfg.restart_policy);
 		d_cfg.restart_policy = -1;
-		return cur;
+		exit(-2);
+	} else { /* parent  */
+		rc = waitpid(cpid, &status, 0);
+		if (rc == -1) {
+			d_cfg.log_msg("wait failed, on updating ibm,os-restart-policy\n");
+			d_cfg.restart_policy = -1;
+			return cur;
+		}
+
+		/* Return on EXIT_FAILURE */
+		if ((signed char)WEXITSTATUS(status) == -2)
+			return cur;
 	}
 
 	d_cfg.log_msg("Configuring the Auto Restart Policy to %d (in NVRAM)",

@@ -33,6 +33,8 @@
 #include <inttypes.h>
 #include <time.h>
 #include <libudev.h>
+#include <sys/wait.h>
+
 #include "opal-elog-parse/opal-event-data.h"
 #define INOTIFY_FD	0
 #define UDEV_FD		1
@@ -308,9 +310,11 @@ static int parse_log(char *buffer, size_t bufsz)
 static void check_platform_dump(const char *extract_opal_dump_cmd,
 		const char *sysfs_path, const char *max_dump)
 {
+	int status;
+	pid_t fork_pid;
+
 	if (!extract_opal_dump_cmd || !sysfs_path)
 		return;
-	pid_t fork_pid;
 
 	if (access(extract_opal_dump_cmd, X_OK) != 0) {
 		syslog(LOG_NOTICE, "The command \"%s\" is not executable.\n",
@@ -337,6 +341,20 @@ static void check_platform_dump(const char *extract_opal_dump_cmd,
 		syslog(LOG_ERR, "Couldn't execv() into: %s (%d:%s)\n",
 		       extract_opal_dump_cmd, errno, strerror(errno));
 		exit(EXIT_FAILURE);
+	}
+
+	/* Parent - wait for child process to complete */
+	if (waitpid(fork_pid, &status, 0) == -1) {
+		syslog(LOG_ERR, "Wait failed, while running %s command\n",
+		       extract_opal_dump_cmd);
+		return;
+	}
+
+	status = (int8_t)WEXITSTATUS(status);
+	if (status) {
+		syslog(LOG_ERR, "%s command execution failed\n",
+		       extract_opal_dump_cmd);
+		return;
 	}
 }
 

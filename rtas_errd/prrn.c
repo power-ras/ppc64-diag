@@ -235,7 +235,7 @@ static int add_drconf_phandles()
 	}
 	fclose(fd);
 
-	entries = membuf[0];
+	entries = be32toh(membuf[0]);
 	mem = (struct drconf_cell *)&membuf[1];
 
 	for (i = 0; i < entries; i++) {

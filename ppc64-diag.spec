@@ -7,7 +7,7 @@ License:	Eclipse Public License (EPL) v1.0
 URL:		http://sourceforge.net/projects/linux-diag/files/ppc64-diag/
 Packager:	IBM Corp.
 Vendor:		IBM Corp.
-ExclusiveArch:  ppc ppc64
+ExclusiveArch:  ppc ppc64 ppc64le
 BuildRequires:  libservicelog-devel, flex, perl, /usr/bin/yacc
 BuildRequires:  libvpd-devel
 BuildRequires:  librtas-devel >= 1.3.9

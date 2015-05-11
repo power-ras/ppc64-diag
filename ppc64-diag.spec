@@ -1,5 +1,5 @@
 Name:	ppc64-diag
-Version:	2.6.7
+Version:	2.6.8
 Release:	1
 Summary:	PowerLinux Platform Diagnostics
 Group:		System Environment/Base
@@ -102,6 +102,12 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Mon May 11 2015 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.6.8
+- Cpu and memory hotplugging support for PowerKVM guest
+- Various fixes to opal-dump-parse tool
+- Few LE related fixes
+- Several security fixes across tools
+
 * Fri Aug 15 2014 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.6.7
 - Bug fixes in opal_errd and opal-elog-parse
 - Added opal-dump-parse tool

@@ -42,7 +42,6 @@
 
 static struct bluehawk_diag_page2 *dp;
 static struct bluehawk_diag_page2 *prev_dp;	/* for -c */
-static struct bluehawk_ctrl_page2 ctrl_page;	/* for -l */
 static int poked_leds;
 static int have_prev_dp;
 
@@ -826,9 +825,9 @@ do { \
 	if (!dp->status_element.fail && \
 			(sc == ES_CRITICAL || sc == ES_NONCRITICAL || \
 			 sc == ES_UNRECOVERABLE)) { \
-		ctrl_page.ctrl_element.common_ctrl.select = 1; \
-		ctrl_page.ctrl_element.rqst_fail = 1; \
-		ctrl_page.ctrl_element.rqst_ident = dp->status_element.ident; \
+		ctrl_page->ctrl_element.common_ctrl.select = 1; \
+		ctrl_page->ctrl_element.rqst_fail = 1; \
+		ctrl_page->ctrl_element.rqst_ident = dp->status_element.ident; \
 		poked_leds++; \
 	} \
 } while (0)
@@ -837,9 +836,16 @@ static int
 turn_on_fault_leds(int fd)
 {
 	int i;
+	struct bluehawk_ctrl_page2 *ctrl_page;
 
-	memset(&ctrl_page, 0, sizeof(ctrl_page));
 	poked_leds = 0;
+
+	ctrl_page = calloc(1, sizeof(struct bluehawk_ctrl_page2));
+	if (!ctrl_page) {
+		fprintf(stderr, "Failed to allocate memory to hold "
+				"control diagnostics page 02.\n");
+		return 1;
+	}
 
 	/* disk drives */
 	for (i = 0; i < NR_DISKS_PER_BLUEHAWK; i++)
@@ -880,18 +886,23 @@ turn_on_fault_leds(int fd)
 	if (poked_leds) {
 		int result;
 
-		ctrl_page.page_code = 2;
-		ctrl_page.page_length = sizeof(ctrl_page) - 4;
-		ctrl_page.generation_code = 0;
+		ctrl_page->page_code = 2;
+		ctrl_page->page_length = sizeof(struct bluehawk_ctrl_page2) - 4;
+		ctrl_page->generation_code = 0;
 		result = do_ses_cmd(fd, SEND_DIAGNOSTIC, 0, 0x10, 6,
-				SG_DXFER_TO_DEV, &ctrl_page, sizeof(ctrl_page));
+				SG_DXFER_TO_DEV, ctrl_page,
+				sizeof(struct bluehawk_ctrl_page2));
 		if (result != 0) {
 			perror("ioctl - SEND_DIAGNOSTIC");
 			fprintf(stderr, "result = %d\n", result);
 			fprintf(stderr, "failed to set LED(s) via SES\n");
+			free(ctrl_page);
 			return -1;
 		}
 	}
+
+	free(ctrl_page);
+
 	return 0;
 }
 

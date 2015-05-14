@@ -108,9 +108,17 @@ static void add_phandle_to_list(char *name, uint32_t phandle,
 	struct pmap_struct *pm;
 
 	pm = malloc(sizeof(struct pmap_struct));
+	if (!pm)
+		return;
+
 	memset(pm, 0, sizeof(struct pmap_struct));
 
 	pm->name = malloc(strlen(name) + 1);
+	if (!pm->name) {
+		free(pm);
+		return;
+	}
+
 	sprintf(pm->name, "%s", name);
 
 	pm->phandle = phandle;
@@ -433,11 +441,19 @@ static int update_properties(uint32_t phandle)
 				 */
 				if (longcmd) {
 					newcmd = malloc(cmdlen + vd);
+					if (!newcmd) {
+						free(longcmd);
+						return -1;
+					}
+
 					memcpy(newcmd, longcmd, cmdlen);
 					free(longcmd);
 					longcmd = newcmd;
 				} else {
 					longcmd = malloc(vd+128);
+					if (!longcmd)
+						return -1;
+
 					/* Build the command with a length
 					 * of six zeros
 					 */

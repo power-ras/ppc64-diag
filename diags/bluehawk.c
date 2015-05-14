@@ -41,7 +41,7 @@
 	snprintf(srn, SRN_SIZE, "%03X-%03X", SAS_SRN, element)
 
 static struct bluehawk_diag_page2 *dp;
-static struct bluehawk_diag_page2 prev_dp;	/* for -c */
+static struct bluehawk_diag_page2 *prev_dp;	/* for -c */
 static struct bluehawk_ctrl_page2 ctrl_page;	/* for -l */
 static int poked_leds;
 static int have_prev_dp;
@@ -421,7 +421,7 @@ element_status_reportable(const struct element_status_byte0 *new)
 	if (!have_prev_dp)
 		return 1;
 	offset = ((char *) new) - ((char *) dp);
-	old = (struct element_status_byte0 *) (((char *) &prev_dp) + offset);
+	old = (struct element_status_byte0 *) (((char *) prev_dp) + offset);
 	return status_worsened((enum element_status_code) old->status,
 				(enum element_status_code) new->status);
 }
@@ -618,8 +618,15 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 	loc_suffix = location + strlen(location);
 
 	if (cmd_opts.cmp_prev) {
-		int rc = read_page2_from_file(&prev_dp, cmd_opts.prev_path, 0);
-		have_prev_dp = (rc == 0);
+		prev_dp = calloc(1, sizeof(struct bluehawk_diag_page2));
+		if (!prev_dp) {
+			fprintf(stderr, "Failed to allocate memory to hold "
+				"prev. status diagnostics page 02 results.\n");
+			return 1;
+		}
+
+		if (read_page2_from_file(prev_dp, cmd_opts.prev_path, 0) == 0)
+			have_prev_dp = 1;
 	}
 
 	/* disk drives */
@@ -803,6 +810,8 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 		create_mp_callout(&callouts, location, fd);
 		servevent("none", sev, description, vpd, callouts);
 	}
+
+	free(prev_dp);
 
 	return write_page2_to_file(dp, cmd_opts.prev_path);
 }

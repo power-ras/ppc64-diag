@@ -249,6 +249,23 @@ static int add_drconf_phandles()
 }
 
 /**
+ * free_phandles
+ *
+ */
+static void free_phandles()
+{
+	struct pmap_struct *pm;
+
+	while (plist) {
+		pm = plist;
+		plist = plist->next;
+
+		free(pm->name);
+		free(pm);
+	}
+}
+
+/**
  * add_phandles
  *
  * @returns
@@ -258,10 +275,16 @@ static int add_phandles()
 	int rc;
 
 	rc = add_std_phandles(OFDT_BASE, NULL);
-	if (rc)
+	if (rc) {
+		free_phandles();
 		return rc;
+	}
 
-	return add_drconf_phandles();
+	rc = add_drconf_phandles();
+	if (rc)
+		free_phandles();
+
+	return rc;
 }
 
 /**
@@ -534,7 +557,7 @@ static void devtree_update(uint scope)
 		rc = rtas_update_nodes((char *)wa, -scope);
 		if (rc && rc != 1) {
 			dbg("Error %d from rtas_update_nodes()", rc);
-			return;
+			break;
 		}
 
 		op = wa+4;
@@ -569,6 +592,7 @@ static void devtree_update(uint scope)
 		}
 	} while (rc == 1);
 
+	free_phandles();
 	dbg("Finished devtree update");
 }
 

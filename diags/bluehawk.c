@@ -42,8 +42,12 @@
 
 static struct bluehawk_diag_page2 *dp;
 static struct bluehawk_diag_page2 *prev_dp;	/* for -c */
+static struct element_descriptor_page *edp;	/* for power supply VPD */
+
 static int poked_leds;
 static int have_prev_dp;
+/* 1 = have VPD for power supplies; -1 = failed to get it. */
+static int have_ps_vpd;
 
 static int
 read_page2_from_file(struct bluehawk_diag_page2 *pg, const char *path,
@@ -488,20 +492,23 @@ add_location_callout(struct sl_callout **callouts, char *location)
 	add_callout(callouts, 'M', 0, NULL, location, NULL, NULL, NULL);
 }
 
-/* 1 = have VPD for power supplies; -1 = failed to get it. */
-static int have_ps_vpd;
-static struct element_descriptor_page edp;	/* for power supply VPD */
-
 /* Create a callout for power supply i (i = 0 or 1). */
-static void
+static int
 create_ps_callout(struct sl_callout **callouts, char *location,
 						unsigned int i, int fd)
 {
 	if (fd < 0)
 		have_ps_vpd = -1;
 	if (!have_ps_vpd) {
+		edp = calloc(1, sizeof(struct element_descriptor_page));
+		if (!edp) {
+			fprintf(stderr, "Failed to allocate memory to "
+				"hold page containing VPD for PS (pg 07h).\n");
+			return 1;
+		}
+
 		int result = get_diagnostic_page(fd, RECEIVE_DIAGNOSTIC, 7,
-							&edp, sizeof(edp));
+				edp, sizeof(struct element_descriptor_page));
 		if (result == 0)
 			have_ps_vpd = 1;
 		else
@@ -509,7 +516,7 @@ create_ps_callout(struct sl_callout **callouts, char *location,
 	}
 	if (have_ps_vpd == 1) {
 		struct power_supply_descriptor *ps_vpd[] = {
-			&edp.ps0_vpd, &edp.ps1_vpd
+			&(edp->ps0_vpd), &(edp->ps1_vpd)
 		};
 		char fru_number[8+1];
 		char serial_number[12+1];
@@ -520,6 +527,10 @@ create_ps_callout(struct sl_callout **callouts, char *location,
 							serial_number, NULL);
 	} else
 		add_location_callout(callouts, location);
+
+	free(edp);
+
+	return 0;
 }
 
 static void
@@ -654,7 +665,8 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 		snprintf(loc_suffix, loc_suffix_size, "-P1-E%u", i+1);
 		build_srn(srn, CRIT_PS);
 		callouts = NULL;
-		create_ps_callout(&callouts, location, i, fd);
+		if (create_ps_callout(&callouts, location, i, fd))
+			goto err_out;
 		servevent(srn, sev, description, vpd, callouts);
 	}
 
@@ -671,7 +683,8 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 		snprintf(loc_suffix, loc_suffix_size, "-P1-E%u", i+1);
 		build_srn(srn, VOLTAGE_THRESHOLD);
 		callouts = NULL;
-		create_ps_callout(&callouts, location, i, fd);
+		if (create_ps_callout(&callouts, location, i, fd))
+			goto err_out;
 		servevent(srn, sev, description, vpd, callouts);
 	}
 
@@ -687,7 +700,8 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 		snprintf(loc_suffix, loc_suffix_size, "-P1-E%u", i+1);
 		build_srn(srn, CRIT_PS);
 		callouts = NULL;
-		create_ps_callout(&callouts, location, i, fd);
+		if (create_ps_callout(&callouts, location, i, fd))
+			goto err_out;
 		servevent(srn, sev, description, vpd, callouts);
 	}
 
@@ -724,7 +738,8 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 		snprintf(loc_suffix, loc_suffix_size, "-P1-E%u", i+1);
 		build_srn(srn, PS_TEMP_THRESHOLD);
 		callouts = NULL;
-		create_ps_callout(&callouts, location, i, fd);
+		if (create_ps_callout(&callouts, location, i, fd))
+			goto err_out;
 		servevent(srn, sev, description, vpd, callouts);
 	}
 
@@ -813,6 +828,10 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 	free(prev_dp);
 
 	return write_page2_to_file(dp, cmd_opts.prev_path);
+
+err_out:
+	free(prev_dp);
+	return 1;
 }
 
 /*

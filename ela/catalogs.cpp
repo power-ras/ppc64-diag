@@ -943,7 +943,7 @@ free_mem:
 		free(regex_len);
 
 	if (format)
-		free(regex_len);
+		free(format);
 }
 
 

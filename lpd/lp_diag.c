@@ -947,7 +947,7 @@ create_menu(struct loc_code *ident_list, struct loc_code *attn_list)
 		i++;
 	}
 
-	for (cur = ident_list, i; cur; cur = cur->next, i++) {
+	for (cur = ident_list; cur; cur = cur->next, i++) {
 		/* Determine the identify indicator state */
 		rc = get_indicator_state(IDENT_INDICATOR, cur, &ident);
 

@@ -72,6 +72,12 @@ FILE *spopen(char *argv[], pid_t *ppid)
 	if (argv == NULL)
 		return fp;
 
+	if (access(argv[0], F_OK|X_OK) != 0) {
+		fprintf(stderr, "%s : The command \"%s\" is not executable.\n",
+			__func__, argv[0]);
+		return fp;
+	}
+
 	if (pipe(pipefd) == -1) {
 		fprintf(stderr, "%s : %d - failed in pipe(), error : %s\n",
 			__func__, __LINE__, strerror(errno));

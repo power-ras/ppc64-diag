@@ -17,7 +17,7 @@
 /**
  * enable_fault_indicator - Enable fault indicator for the given loc code
  */
-int enable_fault_indicator(char *loccode)
+int enable_fault_indicator(char *loccode, int truncate)
 {
 	int	rc = 0;
 	int	truncated = 0;
@@ -34,7 +34,7 @@ int enable_fault_indicator(char *loccode)
 retry:
 		loc_led = get_indicator_for_loc_code(list, loccode);
 		if (!loc_led) {
-			if (truncate_loc_code(loccode)) {
+			if (truncate && truncate_loc_code(loccode)) {
 				truncated = 1;
 				goto retry;
 			}
@@ -69,24 +69,26 @@ void print_usage(char *progname)
 		"Enable system attention/fault indicators.\n"
 		"\nUsage : %s -f [<loc_code>]\n"
 		"\t-f : Fault indicator\n"
-		"\t-h : Print this usage message and exit\n"
-		"\n\tloc_code : Indicator location code\n",
+		"\t-t : Truncate location code if necessary\n"
+		"\t-h : Print this message and exit\n"
+		"\n\tloc_code : Location code\n",
 		progname);
 }
 
 /* ledtool command line arguments */
-#define LED_TOOL_ARGS    "fh"
+#define LED_TOOL_ARGS    "fht"
 
 /* main */
 int main(int argc, char **argv)
 {
+	char	*loccode = NULL;
 	int	rc = 0;
 	int	c;
 	int	fault = 0;
-	char	*loccode = NULL;
+	int	truncate = 0;
 
 	opterr = 0;
-	while ((c = getopt(argc, argv, LED_TOOL_ARGS)) != -1 ) {
+	while ((c = getopt(argc, argv, LED_TOOL_ARGS)) != -1) {
 		switch (c) {
 		case 'f':
 			fault = 1;
@@ -94,6 +96,9 @@ int main(int argc, char **argv)
 		case 'h':
 			print_usage(argv[0]);
 			exit(0);
+		case 't':
+			truncate = 1;
+			break;
 		default:
 			print_usage(argv[0]);
 			exit(1);
@@ -118,7 +123,7 @@ int main(int argc, char **argv)
 	rc = init_files();
 	if (rc) {
 		fprintf(stderr, "Unable to open log file.\n");
-		exit (1);
+		exit(1);
 	}
 
 	if (probe_indicator() != 0) {
@@ -133,7 +138,7 @@ int main(int argc, char **argv)
 	}
 
 	/* enable fault indicator */
-	rc = enable_fault_indicator(loccode);
+	rc = enable_fault_indicator(loccode, truncate);
 
 	close_files();
 

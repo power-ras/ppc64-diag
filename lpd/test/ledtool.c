@@ -121,6 +121,11 @@ int main(int argc, char **argv)
 		exit (1);
 	}
 
+	if (probe_indicator() != 0) {
+		close_files();
+		exit(1);
+	}
+
 	/* Light Path operating mode */
 	if (get_indicator_mode() != 0) {
 		close_files();

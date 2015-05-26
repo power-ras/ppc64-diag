@@ -45,7 +45,6 @@ static struct bluehawk_diag_page2 *prev_dp;	/* for -c */
 static struct element_descriptor_page *edp;	/* for power supply VPD */
 
 static int poked_leds;
-static int have_prev_dp;
 /* 1 = have VPD for power supplies; -1 = failed to get it. */
 static int have_ps_vpd;
 
@@ -421,7 +420,7 @@ element_status_reportable(const struct element_status_byte0 *new)
 	ptrdiff_t offset;
 	struct element_status_byte0 *old;
 
-	if (!have_prev_dp)
+	if (!prev_dp)
 		return 1;
 	offset = ((char *) new) - ((char *) dp);
 	old = (struct element_status_byte0 *) (((char *) prev_dp) + offset);
@@ -467,7 +466,7 @@ composite_status_reportable(const void *first_element, int nel)
 	int i;
 	const char *el = (const char *) first_element;
 
-	if (!have_prev_dp)
+	if (!prev_dp)
 		return 1;
 	for (i = 0; i < nel; i++, el += 4) {
 		if (element_status_reportable(
@@ -635,8 +634,10 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 			return 1;
 		}
 
-		if (read_page2_from_file(prev_dp, cmd_opts.prev_path, 0) == 0)
-			have_prev_dp = 1;
+		if (read_page2_from_file(prev_dp, cmd_opts.prev_path, 0) != 0) {
+			free(prev_dp);
+			prev_dp = NULL;
+		}
 	}
 
 	/* disk drives */

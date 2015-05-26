@@ -15,6 +15,9 @@
 #define ES_STATUS_STRING_MAXLEN		32
 #define EVENT_DESC_SIZE			512
 
+#define FRU_NUMBER_LEN			8
+#define SERIAL_NUMBER_LEN		12
+
 /* SRN Format :
  *	for SAS : 2667-xxx
  */
@@ -45,8 +48,6 @@ static struct bluehawk_diag_page2 *prev_dp;	/* for -c */
 static struct element_descriptor_page *edp;	/* for power supply VPD */
 
 static int poked_leds;
-/* 1 = have VPD for power supplies; -1 = failed to get it. */
-static int have_ps_vpd;
 
 static int
 read_page2_from_file(struct bluehawk_diag_page2 *pg, const char *path,
@@ -496,39 +497,39 @@ static int
 create_ps_callout(struct sl_callout **callouts, char *location,
 						unsigned int i, int fd)
 {
-	if (fd < 0)
-		have_ps_vpd = -1;
-	if (!have_ps_vpd) {
-		edp = calloc(1, sizeof(struct element_descriptor_page));
-		if (!edp) {
-			fprintf(stderr, "Failed to allocate memory to "
-				"hold page containing VPD for PS (pg 07h).\n");
-			return 1;
-		}
+	char fru_number[FRU_NUMBER_LEN + 1];
+	char serial_number[SERIAL_NUMBER_LEN + 1];
+	int rc;
+	struct power_supply_descriptor *ps_vpd[2];
 
-		int result = get_diagnostic_page(fd, RECEIVE_DIAGNOSTIC, 7,
-				edp, sizeof(struct element_descriptor_page));
-		if (result == 0)
-			have_ps_vpd = 1;
-		else
-			have_ps_vpd = -1;
-	}
-	if (have_ps_vpd == 1) {
-		struct power_supply_descriptor *ps_vpd[] = {
-			&(edp->ps0_vpd), &(edp->ps1_vpd)
-		};
-		char fru_number[8+1];
-		char serial_number[12+1];
-
-		strzcpy(fru_number, ps_vpd[i]->fru_number, 8);
-		strzcpy(serial_number, ps_vpd[i]->serial_number, 12);
-		add_callout(callouts, 'M', 0, NULL, location, fru_number,
-							serial_number, NULL);
-	} else
+	if (fd < 0) {
 		add_location_callout(callouts, location);
+		return 0;
+	}
 
+	edp = calloc(1, sizeof(struct element_descriptor_page));
+	if (!edp) {
+		fprintf(stderr, "Failed to allocate memory to "
+			"hold page containing VPD for PS (pg 07h).\n");
+		return 1;
+	}
+
+	rc = get_diagnostic_page(fd, RECEIVE_DIAGNOSTIC, 7, edp,
+				 sizeof(struct element_descriptor_page));
+	if (rc) {
+		add_location_callout(callouts, location);
+		goto out;
+	}
+
+	ps_vpd[0] = &(edp->ps0_vpd);
+	ps_vpd[1] = &(edp->ps1_vpd);
+	strzcpy(fru_number, ps_vpd[i]->fru_number, FRU_NUMBER_LEN);
+	strzcpy(serial_number, ps_vpd[i]->serial_number, SERIAL_NUMBER_LEN);
+	add_callout(callouts, 'M', 0, NULL,
+		    location, fru_number, serial_number, NULL);
+
+out:
 	free(edp);
-
 	return 0;
 }
 
@@ -619,7 +620,6 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 	struct sl_callout *callouts;
 	const char *left_right[] = { "left", "right" };
 
-	have_ps_vpd = 0;
 	have_wh_vpd = 0;
 	strncpy(location, vpd->location, VPD_LOCATION_MAXLEN - 1);
 	location[VPD_LOCATION_MAXLEN - 1] = '\0';

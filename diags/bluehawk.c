@@ -43,8 +43,6 @@
 #define build_srn(srn, element) \
 	snprintf(srn, SRN_SIZE, "%03X-%03X", SAS_SRN, element)
 
-static struct bluehawk_diag_page2 *dp;
-static struct bluehawk_diag_page2 *prev_dp;	/* for -c */
 static struct element_descriptor_page *edp;	/* for power supply VPD */
 
 static int poked_leds;
@@ -416,15 +414,16 @@ status_worsened(enum element_status_code old, enum element_status_code new)
  * prev_dp isn't valid, return 1.
  */
 static int
-element_status_reportable(const struct element_status_byte0 *new)
+element_status_reportable(const struct element_status_byte0 *new,
+			  const char * const dp, const char * const prev_dp)
 {
 	ptrdiff_t offset;
 	struct element_status_byte0 *old;
 
 	if (!prev_dp)
 		return 1;
-	offset = ((char *) new) - ((char *) dp);
-	old = (struct element_status_byte0 *) (((char *) prev_dp) + offset);
+	offset = ((char *) new) - dp;
+	old = (struct element_status_byte0 *) (prev_dp + offset);
 	return status_worsened((enum element_status_code) old->status,
 				(enum element_status_code) new->status);
 }
@@ -450,9 +449,10 @@ svclog_status(enum element_status_code sc, char *crit)
 }
 
 static uint8_t
-svclog_element_status(struct element_status_byte0 *b, char *crit)
+svclog_element_status(struct element_status_byte0 *b, const char * const dp,
+		      const char * const prev_dp, char *crit)
 {
-	if (!element_status_reportable(b))
+	if (!element_status_reportable(b, dp, prev_dp))
 		return 0;
 	return svclog_status(b->status, crit);
 }
@@ -462,7 +462,8 @@ svclog_element_status(struct element_status_byte0 *b, char *crit)
  * of the nel elements has worsened.
  */
 static int
-composite_status_reportable(const void *first_element, int nel)
+composite_status_reportable(const void *first_element, const char * const dp,
+			    const char * const prev_dp, int nel)
 {
 	int i;
 	const char *el = (const char *) first_element;
@@ -471,16 +472,18 @@ composite_status_reportable(const void *first_element, int nel)
 		return 1;
 	for (i = 0; i < nel; i++, el += 4) {
 		if (element_status_reportable(
-				(const struct element_status_byte0 *) el))
+				(const struct element_status_byte0 *) el,
+				(char *) dp, (char *) prev_dp))
 			return 1;
 	}
 	return 0;
 }
 
 static uint8_t
-svclog_composite_status(const void *first_element, int nel, char *crit)
+svclog_composite_status(const void *first_element,  const char * const dp,
+			const char * const prev_dp, int nel, char *crit)
 {
-	if (!composite_status_reportable(first_element, nel))
+	if (!composite_status_reportable(first_element, dp, prev_dp, nel))
 		return 0;
 	return svclog_status(composite_status(first_element, nel), crit);
 }
@@ -606,7 +609,8 @@ create_mp_callout(struct sl_callout **callouts, char *location, int fd)
 }
 
 static int
-report_faults_to_svclog(struct dev_vpd *vpd, int fd)
+report_faults_to_svclog(struct dev_vpd *vpd,
+			struct bluehawk_diag_page2 *dp, int fd)
 {
 	char location[VPD_LOCATION_MAXLEN], *loc_suffix;
 	char description[EVENT_DESC_SIZE], crit[ES_STATUS_STRING_MAXLEN];
@@ -619,6 +623,7 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 		"  Refer to the system service documentation for guidance.";
 	struct sl_callout *callouts;
 	const char *left_right[] = { "left", "right" };
+	struct bluehawk_diag_page2 *prev_dp = NULL;	/* for -c */
 
 	have_wh_vpd = 0;
 	strncpy(location, vpd->location, VPD_LOCATION_MAXLEN - 1);
@@ -642,7 +647,8 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 
 	/* disk drives */
 	for (i = 0; i < NR_DISKS_PER_BLUEHAWK; i++) {
-		sev = svclog_element_status(&(dp->disk_status[i].byte0), crit);
+		sev = svclog_element_status(&(dp->disk_status[i].byte0),
+					(char *) dp, (char *) prev_dp, crit);
 		if (sev == 0)
 			continue;
 		snprintf(description, EVENT_DESC_SIZE,
@@ -657,7 +663,8 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 
 	/* power supplies */
 	for (i = 0; i < 2; i++) {
-		sev = svclog_element_status(&(dp->ps_status[i].byte0), crit);
+		sev = svclog_element_status(&(dp->ps_status[i].byte0),
+					(char *) dp, (char *) prev_dp, crit);
 		if (sev == 0)
 			continue;
 		snprintf(description, EVENT_DESC_SIZE,
@@ -673,8 +680,8 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 
 	/* voltage sensors */
 	for (i = 0; i < 2; i++) {
-		sev = svclog_composite_status(&(dp->voltage_sensor_sets[i]), 2,
-								crit);
+		sev = svclog_composite_status(&(dp->voltage_sensor_sets[i]),
+			(char *) dp, (char *) prev_dp, 2, crit);
 		if (sev == 0)
 			continue;
 		snprintf(description, EVENT_DESC_SIZE,
@@ -692,7 +699,8 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 	/* power-supply fans -- lump with power supplies, not fan assemblies */
 	for (i = 0; i < 2; i++) {
 		sev = svclog_element_status(
-			&(dp->fan_sets[i].power_supply.byte0), crit);
+			&(dp->fan_sets[i].power_supply.byte0),
+			(char *) dp, (char *) prev_dp, crit);
 		if (sev == 0)
 			continue;
 		snprintf(description, EVENT_DESC_SIZE,
@@ -709,8 +717,8 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 	/* fan assemblies */
 	for (i = 0; i < 2; i++) {
 		/* 4 fans for each fan assembly */
-		sev = svclog_composite_status(
-				&(dp->fan_sets[i].fan_element), 4, crit);
+		sev = svclog_composite_status(&(dp->fan_sets[i].fan_element),
+				(char *) dp, (char *) prev_dp, 4, crit);
 		if (sev == 0)
 			continue;
 		snprintf(description, EVENT_DESC_SIZE,
@@ -728,7 +736,8 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 	for (i = 0; i < 2; i++) {
 		/* 2 sensors for each power supply */
 		sev = svclog_composite_status(
-			&(dp->temp_sensor_sets[i].power_supply), 2, crit);
+			&(dp->temp_sensor_sets[i].power_supply),
+			(char *) dp, (char *) prev_dp, 2, crit);
 		if (sev == 0)
 			continue;
 		snprintf(description, EVENT_DESC_SIZE,
@@ -747,8 +756,8 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 	/* temp sensors, except for those associated with power supplies */
 	for (i = 0; i < 2; i++) {
 		/* 5 sensors: croc, ppc, expander, 2*ambient */
-		sev = svclog_composite_status(&(dp->temp_sensor_sets[i]), 5,
-								crit);
+		sev = svclog_composite_status(&(dp->temp_sensor_sets[i]),
+			(char *) dp, (char *) prev_dp, 5, crit);
 		if (sev == 0)
 			continue;
 		snprintf(description, EVENT_DESC_SIZE,
@@ -766,7 +775,8 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 
 	/* ERM/ESM electronics */
 	for (i = 0; i < 2; i++) {
-		sev = svclog_element_status(&(dp->esm_status[i].byte0), crit);
+		sev = svclog_element_status(&(dp->esm_status[i].byte0),
+					(char *) dp, (char *) prev_dp, crit);
 		if (sev == 0)
 			continue;
 		snprintf(description, EVENT_DESC_SIZE,
@@ -783,7 +793,8 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 	for (i = 0; i < 4; i++) {
 		unsigned int t = i%2 + 1, lr = i/2;
 		sev = svclog_element_status(
-				&(dp->sas_connector_status[i].byte0), crit);
+				&(dp->sas_connector_status[i].byte0),
+				(char *) dp, (char *) prev_dp, crit);
 		if (sev == 0)
 			continue;
 		snprintf(description, EVENT_DESC_SIZE,
@@ -799,7 +810,8 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 	/* PCIe controllers */
 	for (i = 0; i < 2; i++) {
 		sev = svclog_element_status(
-			&(dp->scc_controller_status[i].byte0), crit);
+			&(dp->scc_controller_status[i].byte0),
+			(char *) dp, (char *) prev_dp, crit);
 		if (sev == 0)
 			continue;
 		snprintf(description, EVENT_DESC_SIZE,
@@ -814,7 +826,7 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 
 	/* midplane */
 	sev = svclog_element_status(&(dp->midplane_element_status.byte0),
-					crit);
+				(char *) dp, (char *) prev_dp, crit);
 	if (sev != 0) {
 		snprintf(description, EVENT_DESC_SIZE,
 			 "%s fault in midplane of RAID enclosure.%s",
@@ -826,12 +838,14 @@ report_faults_to_svclog(struct dev_vpd *vpd, int fd)
 		servevent("none", sev, description, vpd, callouts);
 	}
 
-	free(prev_dp);
+	if (prev_dp)
+		free(prev_dp);
 
 	return write_page2_to_file(dp, cmd_opts.prev_path);
 
 err_out:
-	free(prev_dp);
+	if (prev_dp)
+		free(prev_dp);
 	return 1;
 }
 
@@ -853,7 +867,7 @@ do { \
 } while (0)
 
 static int
-turn_on_fault_leds(int fd)
+turn_on_fault_leds(struct bluehawk_diag_page2 *dp, int fd)
 {
 	int i;
 	struct bluehawk_ctrl_page2 *ctrl_page;
@@ -950,6 +964,7 @@ diag_bluehawk(int fd, struct dev_vpd *vpd)
 	static const char *scc_controller_names[] = { "Left", "Right" };
 
 	int rc;
+	struct bluehawk_diag_page2 *dp;
 
 	dp = calloc(1, sizeof(struct bluehawk_diag_page2));
 	if (!dp) {
@@ -1072,14 +1087,14 @@ diag_bluehawk(int fd, struct dev_vpd *vpd)
 	 * the next query of the SES.
 	 */
 	if (cmd_opts.serv_event) {
-		rc = report_faults_to_svclog(vpd, fd);
+		rc = report_faults_to_svclog(vpd, dp, fd);
 		if (rc != 0)
 			goto err_out;
 	}
 
 	/* -l is not supported for fake path */
 	if (fd != -1 && cmd_opts.leds)
-		rc = turn_on_fault_leds(fd);
+		rc = turn_on_fault_leds(dp, fd);
 
 err_out:
 	free(dp);

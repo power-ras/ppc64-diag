@@ -46,6 +46,9 @@ void handle_hotplug_event(struct event *re)
 			case RTAS_HP_TYPE_MEMORY:
 				drmgr_args[2] = "mem";
                                 break;
+			case RTAS_HP_TYPE_PHB:
+				drmgr_args[2] = "phb";
+                                break;
                         default:
                                 dbg("Unknown or unsupported hotplug type %d\n",
 					hotplug->type);

@@ -16,3 +16,6 @@ install: all
 
 uninstall:
 	@$(call uninstall_man,$(MANPAGES),$(DESTDIR))
+
+clean:
+	@rm -f *.gz

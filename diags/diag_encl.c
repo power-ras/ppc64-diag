@@ -397,10 +397,12 @@ free_dev_vpd(struct dev_vpd *vpd)
 static int
 enclosure_maint_mode(const char *sg)
 {
-	char devsg[128], sgstate[128];
+	char devsg[PATH_MAX];
+	char sgstate[128];
 	FILE *fp;
 
-	snprintf(devsg, 128, "/sys/class/scsi_generic/%s/device/state", sg);
+	snprintf(devsg, PATH_MAX,
+		 "/sys/class/scsi_generic/%s/device/state", sg);
 	fp = fopen(devsg, "r");
 	if (!fp) {
 		perror(devsg);
@@ -439,7 +441,7 @@ static int
 diagnose(const char *sg, struct dev_vpd **diagnosed)
 {
 	int rc = 0, fd, found = 0, i;
-	char devsg[128];
+	char devsg[PATH_MAX];
 	struct dev_vpd *vpd = NULL;
 	struct dev_vpd *v;
 
@@ -499,7 +501,7 @@ diagnose(const char *sg, struct dev_vpd **diagnosed)
 					goto error_out;
 
 				/* Open sg device */
-				snprintf(devsg, 128, "/dev/%s", sg);
+				snprintf(devsg, PATH_MAX, "/dev/%s", sg);
 				fd = open(devsg, O_RDWR);
 				if (fd <= 1) {
 					fprintf(stderr, "Unable to open %s\n\n",
@@ -540,7 +542,7 @@ main(int argc, char *argv[])
 {
 	int failure = 0, option_index, rc;
 	int platform = 0;
-	char path[128];
+	char path[PATH_MAX];
 	DIR *edir, *sdir;
 	struct dirent *sdirent, *edirent;
 	struct dev_vpd *diagnosed = NULL;
@@ -648,7 +650,7 @@ main(int argc, char *argv[])
 			    !strcmp(edirent->d_name, ".."))
 				continue;
 
-			snprintf(path, 128, "%s/%s/device/scsi_generic",
+			snprintf(path, PATH_MAX, "%s/%s/device/scsi_generic",
 				 SCSI_SES_PATH, edirent->d_name);
 
 			sdir = opendir(path);

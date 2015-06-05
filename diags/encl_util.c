@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <dirent.h>
+#include <linux/limits.h>
 #include <sys/types.h>
 #include <scsi/scsi.h>
 #include <scsi/scsi_ioctl.h>
@@ -252,7 +253,7 @@ valid_enclosure_device(const char *sg)
 {
 	struct dirent *edirent, *sdirent;
 	DIR *edir, *sdir;
-	char path[128];
+	char path[PATH_MAX];
 
 	edir = opendir(SCSI_SES_PATH);
 	if (!edir) {
@@ -266,7 +267,7 @@ valid_enclosure_device(const char *sg)
 		    !strcmp(edirent->d_name, ".."))
 			continue;
 
-		snprintf(path, 128, "%s/%s/device/scsi_generic",
+		snprintf(path, PATH_MAX, "%s/%s/device/scsi_generic",
 			 SCSI_SES_PATH, edirent->d_name);
 
 		sdir = opendir(path);

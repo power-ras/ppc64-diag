@@ -150,8 +150,8 @@ trim_location_code(struct dev_vpd *vpd)
 {
 	char *hyphen;
 
-	strncpy(vpd->location, vpd->full_loc, VPD_LOCATION_MAXLEN - 1);
-	vpd->location[VPD_LOCATION_MAXLEN - 1] = '\0';
+	strncpy(vpd->location, vpd->full_loc, LOCATION_LENGTH - 1);
+	vpd->location[LOCATION_LENGTH - 1] = '\0';
 	hyphen = strchr(vpd->location, '-');
 	if (hyphen && (!strcmp(hyphen, "-P1-C1") || !strcmp(hyphen, "-P1-C2")))
 		*hyphen = '\0';

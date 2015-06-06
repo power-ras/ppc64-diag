@@ -612,7 +612,7 @@ static int
 report_faults_to_svclog(struct dev_vpd *vpd,
 			struct bluehawk_diag_page2 *dp, int fd)
 {
-	char location[VPD_LOCATION_MAXLEN], *loc_suffix;
+	char location[LOCATION_LENGTH], *loc_suffix;
 	char description[EVENT_DESC_SIZE], crit[ES_STATUS_STRING_MAXLEN];
 	char srn[SRN_SIZE];
 	unsigned int i;
@@ -626,9 +626,9 @@ report_faults_to_svclog(struct dev_vpd *vpd,
 	struct bluehawk_diag_page2 *prev_dp = NULL;	/* for -c */
 
 	have_wh_vpd = 0;
-	strncpy(location, vpd->location, VPD_LOCATION_MAXLEN - 1);
-	location[VPD_LOCATION_MAXLEN - 1] = '\0';
-	loc_suffix_size = VPD_LOCATION_MAXLEN - strlen(location);
+	strncpy(location, vpd->location, LOCATION_LENGTH - 1);
+	location[LOCATION_LENGTH - 1] = '\0';
+	loc_suffix_size = LOCATION_LENGTH - strlen(location);
 	loc_suffix = location + strlen(location);
 
 	if (cmd_opts.cmp_prev) {

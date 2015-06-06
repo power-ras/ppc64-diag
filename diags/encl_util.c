@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <dirent.h>
+#include <fcntl.h>
 #include <linux/limits.h>
 #include <sys/types.h>
 #include <scsi/scsi.h>
@@ -86,6 +87,25 @@ print_raw_data(FILE *ostream, char *data, int data_len)
 	}
 
 	return len;
+}
+
+/**
+ * open_sg_device
+ * @brief Open sg device for read/write operation
+ *
+ * @param encl sg device name
+ */
+int
+open_sg_device(const char *encl)
+{
+	char dev_sg[PATH_MAX];
+	int fd;
+
+	snprintf(dev_sg, PATH_MAX, "/dev/%s", encl);
+	fd = open(dev_sg, O_RDWR);
+	if (fd < 0)
+		perror(dev_sg);
+	return fd;
 }
 
 /**

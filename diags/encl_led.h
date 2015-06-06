@@ -8,8 +8,6 @@
 
 extern const char *progname;
 
-extern int open_sg_device(const char *);
-
 extern int bluehawk_list_leds(const char *, const char *, int);
 extern int bluehawk_set_led(const char *, const char *, int, int, int);
 

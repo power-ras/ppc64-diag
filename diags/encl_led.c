@@ -8,7 +8,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <getopt.h>
-#include <fcntl.h>
+#include <linux/limits.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -55,20 +55,6 @@ usage(void)
 		"\tenclosure: sgN device name or location code of enclosure\n"
 		"\tcomponent: component's location sub-code -- e.g., P1-E2\n",
 		progname);
-}
-
-#define DEVSG_MAXLEN 32
-int
-open_sg_device(const char *encl)
-{
-	char dev_sg[DEVSG_MAXLEN];
-	int fd;
-
-	snprintf(dev_sg, DEVSG_MAXLEN, "/dev/%s", encl);
-	fd = open(dev_sg, O_RDWR);
-	if (fd < 0)
-		perror(dev_sg);
-	return fd;
 }
 
 /**
@@ -156,7 +142,7 @@ loc_code_device(const char *loccode, char *sg, int sg_size)
 static int
 enclosure_dev_name(const char *encl, char *sg, int sg_size)
 {
-	if (!strncmp(encl, "sg", 2) && strlen(encl) < DEVSG_MAXLEN - 6) {
+	if (!strncmp(encl, "sg", 2) && strlen(encl) < PATH_MAX - 6) {
 		strncpy(sg, encl, sg_size);
 		return valid_enclosure_device(sg);
 	}

@@ -71,62 +71,6 @@ print_usage(const char *name) {
 }
 
 /**
- * print_raw_data
- * @brief Dump a section of raw data
- *
- * @param ostream stream to which output should be written
- * @param data pointer to data to dump
- * @param data_len length of data to dump
- * @return number of bytes written
- */
-int
-print_raw_data(FILE *ostream, char *data, int data_len)
-{
-	char *h, *a;
-	char *end = data + data_len;
-	unsigned int offset = 0;
-	int i, j;
-	int len = 0;
-
-	len += fprintf(ostream, "\n");
-
-	h = a = data;
-
-	while (h < end) {
-		/* print offset */
-		len += fprintf(ostream, "0x%04x:  ", offset);
-		offset += 16;
-
-		/* print hex */
-		for (i = 0; i < 4; i++) {
-			for (j = 0; j < 4; j++) {
-				if (h < end)
-					len += fprintf(ostream, "%02x", *h++);
-				else
-					len += fprintf(ostream, "  ");
-			}
-			len += fprintf(ostream, " ");
-		}
-
-		/* print ascii */
-		len += fprintf(ostream, "    [");
-		for (i = 0; i < 16; i++) {
-			if (a <= end) {
-				if ((*a >= ' ') && (*a <= '~'))
-					len += fprintf(ostream, "%c", *a);
-				else
-					len += fprintf(ostream, ".");
-				a++;
-			} else
-				len += fprintf(ostream, " ");
-		}
-		len += fprintf(ostream, "]\n");
-	}
-
-	return len;
-}
-
-/**
  * add_callout
  * @brief Create a new sl_callout struct
  *

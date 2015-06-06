@@ -24,6 +24,8 @@ struct dev_vpd {
 	struct dev_vpd *next;
 };
 
+extern int print_raw_data(FILE *ostream, char *data, int data_len);
+
 extern int do_ses_cmd(int fd, uint8_t cmd, uint8_t page_nr, uint8_t flags,
 		      uint8_t cmd_len, int dxfer_direction, void *buf,
 		      int buf_len);

@@ -15,8 +15,6 @@ struct cmd_opts {
 };
 extern struct cmd_opts cmd_opts;
 
-extern int print_raw_data(FILE *, char *, int);
-
 extern void add_callout(struct sl_callout **, char, uint32_t, char *, char *,
 			char *, char *, char *);
 extern uint32_t servevent(char *, int, char *, struct dev_vpd *, struct sl_callout *);

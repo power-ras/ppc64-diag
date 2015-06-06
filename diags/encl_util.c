@@ -108,6 +108,51 @@ open_sg_device(const char *encl)
 	return fd;
 }
 
+/*
+ * enclosure_maint_mode
+ * @brief Check the state of SCSI enclosure
+ *
+ * Returns:
+ *	-1 on failure
+ *	1 if sg is offline
+ *	0 if sg is running
+ */
+int
+enclosure_maint_mode(const char *sg)
+{
+	char devsg[PATH_MAX];
+	char sgstate[128];
+	FILE *fp;
+
+	snprintf(devsg, PATH_MAX,
+		 "/sys/class/scsi_generic/%s/device/state", sg);
+	fp = fopen(devsg, "r");
+	if (!fp) {
+		perror(devsg);
+		fprintf(stderr, "Unable to open enclosure "
+				"state file : %s\n", devsg);
+		return -1;
+	}
+
+	if (fgets_nonl(sgstate, 128, fp) == NULL) {
+		fprintf(stderr, "Unable to read the state of "
+				"enclosure device : %s\n", sg);
+		fclose(fp);
+		return -1;
+	}
+
+	/* Check device state */
+	if (!strcmp(sgstate, "offline")) {
+		fprintf(stderr, "Enclosure \"%s\" is offline."
+				" Cannot run diagnostics.\n", sg);
+		fclose(fp);
+		return 1;
+	}
+
+	fclose(fp);
+	return 0;
+}
+
 /**
  * do_ses_cmd
  * @brief Make the necessary sg ioctl() to do the indicated SES command

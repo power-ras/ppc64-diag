@@ -27,6 +27,7 @@ struct dev_vpd {
 extern int print_raw_data(FILE *ostream, char *data, int data_len);
 
 extern int open_sg_device(const char *encl);
+extern int enclosure_maint_mode(const char *sg);
 
 extern int do_ses_cmd(int fd, uint8_t cmd, uint8_t page_nr, uint8_t flags,
 		      uint8_t cmd_len, int dxfer_direction, void *buf,

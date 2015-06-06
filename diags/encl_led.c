@@ -250,6 +250,10 @@ main(int argc, char **argv)
 	if (enclosure_dev_name(enclosure, sg, sizeof(sg)) != 0)
 		exit(1);
 
+	/* Make sure sg is in running state */
+	if (enclosure_maint_mode(sg) != 0)
+		exit(1);
+
 	/* Get enclosure type as "Machine Type" from VPD. */
 	memset(&vpd, 0, sizeof(vpd));
 	if (read_vpd_from_lscfg(&vpd, sg) != 0)

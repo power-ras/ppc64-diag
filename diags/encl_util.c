@@ -143,8 +143,8 @@ enclosure_maint_mode(const char *sg)
 
 	/* Check device state */
 	if (!strcmp(sgstate, "offline")) {
-		fprintf(stderr, "Enclosure \"%s\" is offline."
-				" Cannot run diagnostics.\n", sg);
+		fprintf(stderr, "Enclosure \"%s\" is offline.\n Cannot run"
+				" diagnostics/LED operations.\n", sg);
 		fclose(fp);
 		return 1;
 	}

@@ -8,9 +8,9 @@
 
 extern const char *progname;
 
-int open_sg_device(const char *);
+extern int open_sg_device(const char *);
 
-int bluehawk_list_leds(const char *, const char *, int);
-int bluehawk_set_led(const char *, const char *, int, int, int);
+extern int bluehawk_list_leds(const char *, const char *, int);
+extern int bluehawk_set_led(const char *, const char *, int, int, int);
 
 #endif	/* _ENCL_LED_H */

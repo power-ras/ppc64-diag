@@ -29,6 +29,7 @@ extern int do_ses_cmd(int fd, uint8_t cmd, uint8_t page_nr, uint8_t flags,
 		      int buf_len);
 extern int get_diagnostic_page(int fd, uint8_t cmd, uint8_t page_nr, void *buf,
 			       int buf_len);
+
 extern char *fgets_nonl(char *buf, int size, FILE *s);
 extern int read_vpd_from_lscfg(struct dev_vpd *vpd, const char *sg);
 extern void trim_location_code(struct dev_vpd *vpd);

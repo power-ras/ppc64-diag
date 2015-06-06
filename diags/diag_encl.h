@@ -15,13 +15,13 @@ struct cmd_opts {
 };
 extern struct cmd_opts cmd_opts;
 
-int print_raw_data(FILE *, char *, int);
-void add_callout(struct sl_callout **, char, uint32_t, char *, char *,
-		 char *, char *, char *);
-uint32_t servevent(char *, int, char *, struct dev_vpd *, struct sl_callout *);
-int get_diagnostic_page(int, uint8_t, uint8_t, void *, int);
+extern int print_raw_data(FILE *, char *, int);
 
-int diag_7031_D24_T24(int, struct dev_vpd *);
-int diag_bluehawk(int, struct dev_vpd *);
+extern void add_callout(struct sl_callout **, char, uint32_t, char *, char *,
+			char *, char *, char *);
+extern uint32_t servevent(char *, int, char *, struct dev_vpd *, struct sl_callout *);
+
+extern int diag_7031_D24_T24(int, struct dev_vpd *);
+extern int diag_bluehawk(int, struct dev_vpd *);
 
 #endif	/* _DIAG_ENCL_H */

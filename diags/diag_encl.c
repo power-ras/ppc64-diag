@@ -385,7 +385,6 @@ static int
 diagnose(const char *sg, struct dev_vpd **diagnosed)
 {
 	int rc = 0, fd, found = 0, i;
-	char devsg[PATH_MAX];
 	struct dev_vpd *vpd = NULL;
 	struct dev_vpd *v;
 
@@ -447,13 +446,9 @@ diagnose(const char *sg, struct dev_vpd **diagnosed)
 					goto error_out;
 
 				/* Open sg device */
-				snprintf(devsg, PATH_MAX, "/dev/%s", sg);
-				fd = open(devsg, O_RDWR);
-				if (fd <= 1) {
-					fprintf(stderr, "Unable to open %s\n\n",
-							devsg);
+				fd = open_sg_device(sg);
+				if (fd < 0)
 					goto error_out;
-				}
 			}
 
 			/* diagnose */

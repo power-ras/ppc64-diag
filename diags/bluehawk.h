@@ -1,4 +1,7 @@
-/* Copyright (C) 2012 IBM Corporation */
+/*
+ * Copyright (C) 2012, 2015 IBM Corporation
+ * See 'COPYRIGHT' for License of this code.
+ */
 
 #ifndef __BLUEHAWK_H__
 #define __BLUEHAWK_H__

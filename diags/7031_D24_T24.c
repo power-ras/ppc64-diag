@@ -1,4 +1,7 @@
-/* Copyright (C) 2009, 2012 IBM Corporation */
+/*
+ * Copyright (C) 2009, 2015 IBM Corporation
+ * See 'COPYRIGHT' for License of this code.
+ */
 
 #include <stdio.h>
 #include <stdint.h>

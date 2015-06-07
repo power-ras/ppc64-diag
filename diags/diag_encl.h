@@ -14,7 +14,9 @@ struct cmd_opts {
 	char *fake_path;	/* -f */
 	char *prev_path;	/* for -c */
 };
+
 extern struct cmd_opts cmd_opts;
+extern int platform;
 
 extern int diag_7031_D24_T24(int, struct dev_vpd *);
 extern int diag_bluehawk(int, struct dev_vpd *);

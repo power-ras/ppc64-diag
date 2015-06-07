@@ -37,6 +37,7 @@ static struct option long_options[] = {
 	{0, 0, 0, 0}
 };
 
+int platform;	/* Holds PLATFORM_* */
 struct cmd_opts cmd_opts;
 
 static struct {
@@ -266,7 +267,6 @@ int
 main(int argc, char *argv[])
 {
 	int failure = 0, option_index, rc;
-	int platform = 0;
 	char path[PATH_MAX];
 	DIR *edir, *sdir;
 	struct dirent *sdirent, *edirent;

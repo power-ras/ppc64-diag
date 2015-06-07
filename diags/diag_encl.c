@@ -79,7 +79,7 @@ print_usage(const char *name) {
  * /some/file.vpd.
  */
 static int
-read_fake_vpd(struct dev_vpd *vpd, const char *pg2_path)
+read_fake_vpd(const char *sg, const char *pg2_path, struct dev_vpd *vpd)
 {
 	char *vpd_path, *dot;
 	char *result;
@@ -113,6 +113,9 @@ read_fake_vpd(struct dev_vpd *vpd, const char *pg2_path)
 		goto missing_vpd;
 	fclose(f);
 	free(vpd_path);
+
+	/* Add sg device name */
+	strncpy(vpd->dev, sg, PATH_MAX - 1);
 
 	trim_location_code(vpd);
 	return 0;
@@ -190,7 +193,7 @@ diagnose(const char *sg, struct dev_vpd **diagnosed)
 	memset(vpd, 0, sizeof(struct dev_vpd));
 
 	if (cmd_opts.fake_path)
-		rc = read_fake_vpd(vpd, cmd_opts.fake_path);
+		rc = read_fake_vpd(sg, cmd_opts.fake_path, vpd);
 	else
 		rc = read_vpd_from_lscfg(vpd, sg);
 

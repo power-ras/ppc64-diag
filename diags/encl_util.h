@@ -6,6 +6,7 @@
 #ifndef _ENCL_UTIL_H
 #define _ENCL_UTIL_H
 
+#include <linux/limits.h>
 #include <stdint.h>
 
 /* SES sys path */
@@ -18,6 +19,7 @@
 
 /* device vpd */
 struct dev_vpd {
+	char dev[PATH_MAX];
 	char mtm[VPD_LENGTH];
 	char location[LOCATION_LENGTH];	/* like full_loc, but truncated at '-' */
 	char full_loc[LOCATION_LENGTH];

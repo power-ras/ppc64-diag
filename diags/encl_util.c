@@ -344,6 +344,9 @@ read_vpd_from_lscfg(struct dev_vpd *vpd, const char *sg)
 	}
 	trim_location_code(vpd);
 
+	/* Add sg device name */
+	strncpy(vpd->dev, sg, PATH_MAX - 1);
+
 	status = spclose(fp, cpid);
 	/* spclose failed */
 	if (status == -1) {

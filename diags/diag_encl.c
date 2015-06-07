@@ -488,7 +488,7 @@ diagnose(const char *sg, struct dev_vpd **diagnosed)
 				}
 			}
 
-			/* fake patch ? */
+			/* fake path ? */
 			if (cmd_opts.fake_path)
 				fd = -1;
 			else {

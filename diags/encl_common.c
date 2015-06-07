@@ -191,9 +191,19 @@ servicelog_log_event(const char *refcode, int sev, const char *text,
 	entry->time_event = time(NULL);
 	entry->type = SL_TYPE_ENCLOSURE;
 	entry->severity = sev;
-	entry->disposition = SL_DISP_UNRECOVERABLE;
-	entry->serviceable = 1;
-	entry->call_home_status = SL_CALLHOME_CANDIDATE;
+	/*
+	 * Add service action and call home flag for event
+	 * with severity > WARNING
+	 */
+	if (sev > SL_SEV_WARNING) {
+		entry->disposition = SL_DISP_UNRECOVERABLE;
+		entry->serviceable = 1;
+		entry->call_home_status = SL_CALLHOME_CANDIDATE;
+	} else {
+		entry->disposition = SL_DISP_RECOVERABLE;
+		entry->serviceable = 0;
+		entry->call_home_status = SL_CALLHOME_NONE;
+	}
 	entry->description = strdup(text);
 	if (entry->description == NULL)
 		goto err0;

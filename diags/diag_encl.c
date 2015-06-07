@@ -325,16 +325,16 @@ read_fake_vpd(struct dev_vpd *vpd, const char *pg2_path)
 		return -1;
 	}
 
-	result = fgets_nonl(vpd->mtm, 128, f);
+	result = fgets_nonl(vpd->mtm, VPD_LENGTH, f);
 	if (!result)
 		goto missing_vpd;
-	result = fgets_nonl(vpd->full_loc, 128, f);
+	result = fgets_nonl(vpd->full_loc, LOCATION_LENGTH, f);
 	if (!result)
 		goto missing_vpd;
-	result = fgets_nonl(vpd->sn, 128, f);
+	result = fgets_nonl(vpd->sn, VPD_LENGTH, f);
 	if (!result)
 		goto missing_vpd;
-	result = fgets_nonl(vpd->fru, 128, f);
+	result = fgets_nonl(vpd->fru, VPD_LENGTH, f);
 	if (!result)
 		goto missing_vpd;
 	fclose(f);

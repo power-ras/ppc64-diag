@@ -193,30 +193,30 @@ read_vpd_from_lscfg(struct dev_vpd *vpd, const char *sg)
 		if ((pos = strstr(buf, "Machine Type")) != NULL) {
 			if (!(pos = skip_dots(pos)))
 				continue;
-			strncpy(vpd->mtm, pos, 128);
+			strncpy(vpd->mtm, pos, VPD_LENGTH - 1);
 		}
 		else if ((pos = strstr(buf, "Device Specific.(YL)")) != NULL) {
 			/* Old-style label for YL */
 			if (!(pos = skip_dots(pos)))
 				continue;
-			strncpy(vpd->full_loc, pos, 128);
+			strncpy(vpd->full_loc, pos, LOCATION_LENGTH - 1);
 		}
 		else if ((pos = strstr(buf, "Location Code")) != NULL) {
 			/* Newer label for YL */
 			if (!(pos = skip_dots(pos)))
 				continue;
-			strncpy(vpd->full_loc, pos, 128);
+			strncpy(vpd->full_loc, pos, LOCATION_LENGTH - 1);
 		}
 		else if ((pos = strstr(buf, "Serial Number")) != NULL) {
 			if (!(pos = skip_dots(pos)))
 				continue;
-			strncpy(vpd->sn, pos, 128);
+			strncpy(vpd->sn, pos, VPD_LENGTH - 1);
 		}
 		else if ((pos = strstr(buf, "..FN ")) != NULL) {
 			pos += 5;
 			while (*pos == ' ')
 				pos++;
-			strncpy(vpd->fru, pos, 128);
+			strncpy(vpd->fru, pos, VPD_LENGTH - 1);
 		}
 	}
 	trim_location_code(vpd);

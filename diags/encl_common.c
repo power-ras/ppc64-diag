@@ -6,9 +6,69 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <syslog.h>
 
 #include "encl_common.h"
 #include "encl_util.h"
+#include "diag_encl.h"
+#include "platform.h"
+
+struct event_severity_map {
+	int	severity;
+	char	*desc;
+};
+static struct event_severity_map event_severity_map[] = {
+	{SL_SEV_FATAL,		"Fatal"},
+	{SL_SEV_ERROR,		"Critical"},
+	{SL_SEV_ERROR_LOCAL,	"Critical"},
+	{SL_SEV_WARNING,	"Non-Critical"},
+	{SL_SEV_EVENT,		"Normal"},
+	{SL_SEV_INFO,		"Infomational"},
+	{SL_SEV_DEBUG,		"Debug"},
+	{-1,			"Unknown"},
+};
+
+/* Get severity description */
+static char *
+get_event_severity_desc(int severity)
+{
+	int i;
+
+	for (i = 0; event_severity_map[i].severity != -1; i++)
+		if (severity == event_severity_map[i].severity)
+			return event_severity_map[i].desc;
+
+	return "Unknown";
+}
+
+/**
+ * Get service action based on severity
+ *
+ * Presently we are clasifying event into two category:
+ *   - Service action and call home required
+ *   - No service action required
+ *
+ * In future we may add below event type for WARNING events
+ * (similar to ELOG):
+ *   - Service action required
+ **/
+static char *
+get_event_action_desc(int severity)
+{
+	switch (severity) {
+	case SL_SEV_FATAL:
+	case SL_SEV_ERROR:
+	case SL_SEV_ERROR_LOCAL:
+		return "Service action and call home required";
+	case SL_SEV_WARNING:  /* Fall through */
+	case SL_SEV_EVENT:
+	case SL_SEV_INFO:
+	case SL_SEV_DEBUG:
+	default:
+		break;
+	}
+	return "No service action required";
+}
 
 /**
  * add_callout
@@ -88,7 +148,7 @@ err_out:
 }
 
 /**
- * servevent
+ * servicelog_log_event
  * @brief Generate a serviceable event and an entry to the servicelog
  *
  * @param refcode the SRN or SRC for the serviceable event
@@ -98,9 +158,9 @@ err_out:
  * @param callouts a linked list of FRU callouts
  * @return key of the new servicelog entry
  */
-uint32_t
-servevent(const char *refcode, int sev, const char *text,
-	  struct dev_vpd *vpd, struct sl_callout *callouts)
+static uint32_t
+servicelog_log_event(const char *refcode, int sev, const char *text,
+		     struct dev_vpd *vpd, struct sl_callout *callouts)
 {
 	struct servicelog *slog;
 	struct sl_event *entry = NULL;
@@ -181,4 +241,57 @@ err0:
 			__func__, __LINE__);
 
 	return 0;
+}
+
+/**
+ * syslog_log_event
+ * @brief Generate a serviceable event and an entry to syslog
+ *
+ * @param refcode the SRN or SRC for the serviceable event
+ * @param sev the severity of the event
+ * @param vpd a structure containing the VPD of the target
+ */
+static int
+syslog_log_event(const char *refcode, int sev, struct dev_vpd *vpd)
+{
+	char *action, *severity_desc;
+	int log_options;
+
+	severity_desc = get_event_severity_desc(sev);
+	action = get_event_action_desc(sev);
+
+	/* syslog initialization */
+	setlogmask(LOG_UPTO(LOG_NOTICE));
+	log_options = LOG_CONS | LOG_PID | LOG_NDELAY;
+	openlog("DIAG_ENCL", log_options, LOG_LOCAL1);
+
+	syslog(LOG_NOTICE, "TM[%s]::SN[%s]::SRN[%s]::%s::%s",
+	       vpd->mtm, vpd->sn, refcode, severity_desc, action);
+	syslog(LOG_NOTICE, "Run 'diag_encl %s' for the details", vpd->dev);
+
+	closelog();
+	return 0;
+}
+
+/**
+ * servevent
+ * @brief Call platform specific event logging function
+ */
+uint32_t
+servevent(const char *refcode, int sev, const char *text,
+	  struct dev_vpd *vpd, struct sl_callout *callouts)
+{
+	if ((refcode == NULL) || (text == NULL) || (vpd == NULL))
+		return -1;
+
+	switch (platform) {
+	case PLATFORM_PSERIES_LPAR:
+		return servicelog_log_event(refcode, sev, text, vpd, callouts);
+	case PLATFORM_POWERKVM:
+		return syslog_log_event(refcode, sev, vpd);
+	case PLATFORM_POWERKVM_GUEST: /* Fall through */
+	default:
+		break;
+	}
+	return -1;
 }

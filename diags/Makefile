@@ -8,7 +8,8 @@ INCLUDE = -I$(COMMON_DIR)
 
 PROGS = diag_encl encl_led
 
-DIAG_ENCL_OBJS = diag_encl.o 7031_D24_T24.o bluehawk.o encl_util.o
+DIAG_ENCL_OBJS = diag_encl.o 7031_D24_T24.o bluehawk.o encl_util.o \
+		 encl_common.o
 ENCL_LED_OBJS = encl_led.o encl_util.o bluehawk_led.o
 COMMON_UTILS_OBJ = $(addprefix $(COMMON_DIR)/, platform.o utils.o)
 

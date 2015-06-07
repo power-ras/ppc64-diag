@@ -11,6 +11,7 @@
 #include <scsi/scsi.h>
 #include <scsi/sg.h>
 
+#include "encl_common.h"
 #include "encl_util.h"
 #include "diag_encl.h"
 #include "bluehawk.h"

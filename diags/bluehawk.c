@@ -17,36 +17,6 @@
 #include "diag_encl.h"
 #include "bluehawk.h"
 
-#define ES_STATUS_STRING_MAXLEN		32
-#define EVENT_DESC_SIZE			512
-
-#define FRU_NUMBER_LEN			8
-#define SERIAL_NUMBER_LEN		12
-
-/* SRN Format :
- *	for SAS : 2667-xxx
- */
-
-/* SAS SRN */
-#define SAS_SRN			0x2667
-
-/* SAS SES Reported Fail Indicator */
-#define CRIT_PS			0x125
-#define CRIT_FAN		0x135
-#define CRIT_ESM		0x155
-#define CRIT_EN			0x175
-#define DEVICE_CONFIG_ERROR	0x201
-#define ENCLOSURE_OPEN_FAILURE	0x202
-#define ENQUIRY_DATA_FAIL	0x203
-#define MEDIA_BAY		0x210
-#define VOLTAGE_THRESHOLD	0x239
-#define PS_TEMP_THRESHOLD	0x145
-#define TEMP_THRESHOLD		0x246
-
-/* Build SRN */
-#define SRN_SIZE	16
-#define build_srn(srn, element) \
-	snprintf(srn, SRN_SIZE, "%03X-%03X", SAS_SRN, element)
 
 static struct element_descriptor_page *edp;	/* for power supply VPD */
 
@@ -857,22 +827,6 @@ err_out:
 	return 1;
 }
 
-/*
- * If the indicated status element reports a fault, turn on the fault component
- * of the LED if it's not already on.  Keep the identify LED element unchanged.
- */
-#define FAULT_LED(poked_leds, dp, ctrl_page, ctrl_element, status_element) \
-do { \
-	enum element_status_code sc = dp->status_element.byte0.status; \
-	if (!dp->status_element.fail && \
-			(sc == ES_CRITICAL || sc == ES_NONCRITICAL || \
-			 sc == ES_UNRECOVERABLE)) { \
-		ctrl_page->ctrl_element.common_ctrl.select = 1; \
-		ctrl_page->ctrl_element.rqst_fail = 1; \
-		ctrl_page->ctrl_element.rqst_ident = dp->status_element.ident; \
-		poked_leds++; \
-	} \
-} while (0)
 
 static int
 turn_on_fault_leds(struct bluehawk_diag_page2 *dp, int fd)

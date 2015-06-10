@@ -861,7 +861,7 @@ err_out:
  * If the indicated status element reports a fault, turn on the fault component
  * of the LED if it's not already on.  Keep the identify LED element unchanged.
  */
-#define FAULT_LED(ctrl_element, status_element) \
+#define FAULT_LED(poked_leds, dp, ctrl_page, ctrl_element, status_element) \
 do { \
 	enum element_status_code sc = dp->status_element.byte0.status; \
 	if (!dp->status_element.fail && \
@@ -891,11 +891,12 @@ turn_on_fault_leds(struct bluehawk_diag_page2 *dp, int fd)
 
 	/* disk drives */
 	for (i = 0; i < NR_DISKS_PER_BLUEHAWK; i++)
-		FAULT_LED(disk_ctrl[i], disk_status[i]);
+		FAULT_LED(poked_leds, dp, ctrl_page,
+			  disk_ctrl[i], disk_status[i]);
 
 	/* power supplies */
 	for (i = 0; i < 2; i++)
-		FAULT_LED(ps_ctrl[i], ps_status[i]);
+		FAULT_LED(poked_leds, dp, ctrl_page, ps_ctrl[i], ps_status[i]);
 
 	/* No LEDs for voltage sensors */
 
@@ -904,26 +905,31 @@ turn_on_fault_leds(struct bluehawk_diag_page2 *dp, int fd)
 		enum element_status_code sc =
 				composite_status(&(dp->fan_sets[i]), 5);
 		if (sc != ES_OK && sc != ES_NOT_INSTALLED)
-			FAULT_LED(fan_sets[i].fan_element[0],
-						fan_sets[i].fan_element[0]);
+			FAULT_LED(poked_leds, dp, ctrl_page,
+				  fan_sets[i].fan_element[0],
+				  fan_sets[i].fan_element[0]);
 	}
 
 	/* No LEDs for temperature sensors */
 
 	/* ERM/ESM electronics */
 	for (i = 0; i < 2; i++)
-		FAULT_LED(esm_ctrl[i], esm_status[i]);
+		FAULT_LED(poked_leds, dp, ctrl_page,
+			  esm_ctrl[i], esm_status[i]);
 
 	/* SAS connectors */
 	for (i = 0; i < 4; i++)
-		FAULT_LED(sas_connector_ctrl[i], sas_connector_status[i]);
+		FAULT_LED(poked_leds, dp, ctrl_page,
+			  sas_connector_ctrl[i], sas_connector_status[i]);
 
 	/* PCIe controllers */
 	for (i = 0; i < 2; i++)
-		FAULT_LED(scc_controller_ctrl[i], scc_controller_status[i]);
+		FAULT_LED(poked_leds, dp, ctrl_page,
+			  scc_controller_ctrl[i], scc_controller_status[i]);
 
 	/* midplane */
-	FAULT_LED(midplane_element_ctrl, midplane_element_status);
+	FAULT_LED(poked_leds, dp, ctrl_page,
+		  midplane_element_ctrl, midplane_element_status);
 
 	if (poked_leds) {
 		int result;

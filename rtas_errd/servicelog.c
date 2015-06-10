@@ -127,20 +127,18 @@ add_callout(struct event *event, char pri, int type, char *proc, char *loc,
 	struct sl_callout *callout = event->sl_entry->callouts;
 
 	if (!callout) {
-		event->sl_entry->callouts = malloc(sizeof(*callout));
+		event->sl_entry->callouts = calloc(1, sizeof(*callout));
 		callout = event->sl_entry->callouts;
 	}
 	else {
 		while (callout->next)
 			callout = callout->next;
-		callout->next = malloc(sizeof(*callout));
+		callout->next = calloc(1, sizeof(*callout));
 		callout = callout->next;
 	}
 
 	if (!callout)
 		goto mem_fail;
-
-	memset(callout, 0, sizeof(*callout));
 
 	callout->priority = pri;
 	callout->type = type;

@@ -78,15 +78,11 @@ status_string(enum element_status_code sc,
 }
 
 void
-print_enclosure_status(struct enclosure_status *s)
+print_enclosure_status(struct enclosure_status *s,
+		       enum element_status_code valid_codes[])
 {
 	enum element_status_code sc =
 				(enum element_status_code) s->byte0.status;
-	/* Note: Deviation from spec V0.7
-	 *	 Spec author says below are valid state
-	 */
-	static enum element_status_code valid_codes[] = {
-		ES_OK, ES_CRITICAL, ES_NONCRITICAL, ES_EOL };
 
 	printf("%s", status_string(sc, valid_codes));
 
@@ -98,13 +94,11 @@ print_enclosure_status(struct enclosure_status *s)
 }
 
 void
-print_drive_status(struct disk_status *s)
+print_drive_status(struct disk_status *s,
+		   enum element_status_code valid_codes[])
 {
 	enum element_status_code sc =
 				(enum element_status_code) s->byte0.status;
-	static enum element_status_code valid_codes[] = {
-		ES_OK, ES_CRITICAL, ES_NONCRITICAL, ES_NOT_INSTALLED, ES_EOL
-	};
 
 	printf("%s", status_string(sc, valid_codes));
 
@@ -131,7 +125,7 @@ print_esm_status(struct esm_status *s)
 	enum element_status_code sc =
 				(enum element_status_code) s->byte0.status;
 	static enum element_status_code valid_codes[] = {
-		ES_OK, ES_CRITICAL, ES_NOT_INSTALLED, ES_EOL
+		ES_OK, ES_CRITICAL, ES_NONCRITICAL, ES_NOT_INSTALLED, ES_EOL
 	};
 
 	printf("%s", status_string(sc, valid_codes));
@@ -164,25 +158,11 @@ print_temp_sensor_status(struct temperature_sensor_status *s)
 }
 
 void
-print_fan_status(struct fan_status *s)
+print_fan_status(struct fan_status *s,
+		 enum element_status_code valid_codes[], const char *speed[])
 {
-	const char *speed[] = {
-		"Fan at lowest speed",
-		"Fan at 1-16% of highest speed",
-		"Fan at 17-33% of highest speed",
-		"Fan at 34-49% of highest speed",
-		"Fan at 50-66% of highest speed",
-		"Fan at 67-83% of highest speed",
-		"Fan at 84-99% of highest speed",
-		"Fan at highest speed"
-	};
-
 	enum element_status_code sc =
 				(enum element_status_code) s->byte0.status;
-	static enum element_status_code valid_codes[] = {
-		ES_OK, ES_CRITICAL, ES_NONCRITICAL, ES_NOT_INSTALLED,
-		ES_UNKNOWN, ES_EOL
-	};
 
 	printf("%s", status_string(sc, valid_codes));
 

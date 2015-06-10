@@ -336,11 +336,15 @@ extern int status_is_valid(enum element_status_code,
 			   enum element_status_code []);
 extern const char *status_string(enum element_status_code ,
 				 enum element_status_code []);
-extern void print_enclosure_status(struct enclosure_status *);
-extern void print_drive_status(struct disk_status *);
+
+extern void print_enclosure_status(struct enclosure_status *,
+				   enum element_status_code []);
+extern void print_drive_status(struct disk_status *,
+			       enum element_status_code []);
 extern void print_esm_status(struct esm_status *);
 extern void print_temp_sensor_status(struct temperature_sensor_status *);
-extern void print_fan_status(struct fan_status *);
+extern void print_fan_status(struct fan_status *,
+			     enum element_status_code [], const char **);
 extern void print_power_supply_status(struct power_supply_status *);
 extern void print_voltage_sensor_status(struct voltage_sensor_status *);
 
@@ -358,5 +362,6 @@ extern void add_callout_from_vpd_page(struct sl_callout **,
 				      char *, struct vpd_page *);
 extern uint32_t servevent(const char *, int, const char *,
 			  struct dev_vpd *, struct sl_callout *);
+
 
 #endif	/* _ENCL_COMMON_H */

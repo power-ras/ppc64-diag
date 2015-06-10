@@ -23,6 +23,51 @@ static int poked_leds;
 
 
 static void
+bh_print_drive_status(struct disk_status *s)
+{
+	static enum element_status_code valid_codes[] = {
+		ES_OK, ES_CRITICAL, ES_NONCRITICAL, ES_NOT_INSTALLED, ES_EOL
+	};
+
+	return print_drive_status(s, valid_codes);
+}
+
+static void
+bh_print_enclosure_status(struct enclosure_status *s)
+{
+	/* Note: Deviation from spec V0.7
+	 *	 Spec author says below are valid state
+	 */
+	static enum element_status_code valid_codes[] = {
+		ES_OK, ES_CRITICAL, ES_NONCRITICAL, ES_EOL
+	};
+
+	return print_enclosure_status(s, valid_codes);
+}
+
+static void
+bh_print_fan_status(struct fan_status *s)
+{
+	const char *speed[] = {
+		"Fan at lowest speed",
+		"Fan at 1-16% of highest speed",
+		"Fan at 17-33% of highest speed",
+		"Fan at 34-49% of highest speed",
+		"Fan at 50-66% of highest speed",
+		"Fan at 67-83% of highest speed",
+		"Fan at 84-99% of highest speed",
+		"Fan at highest speed"
+	};
+
+	static enum element_status_code valid_codes[] = {
+		ES_OK, ES_CRITICAL, ES_NONCRITICAL, ES_NOT_INSTALLED,
+		ES_UNKNOWN, ES_EOL
+	};
+
+	return print_fan_status(s, valid_codes, speed);
+}
+
+static void
 print_sas_connector_status(struct sas_connector_status *s)
 {
 	enum element_status_code sc =
@@ -556,7 +601,7 @@ diag_bluehawk(int fd, struct dev_vpd *vpd)
 		struct disk_status *ds = &(dp->disk_status[i]);
 		printf("    Disk %02d (Slot %02d): ", i+1,
 				ds->byte1.element_status.slot_address);
-		print_drive_status(ds);
+		bh_print_drive_status(ds);
 	}
 
 	printf("\n  Power Supply Status\n");
@@ -576,10 +621,10 @@ diag_bluehawk(int fd, struct dev_vpd *vpd)
 		int j;
 		printf("    %s:\n", fan_set_names[i]);
 		printf("      Power Supply:  ");
-		print_fan_status(&(dp->fan_sets[i].power_supply));
+		bh_print_fan_status(&(dp->fan_sets[i].power_supply));
 		for (j = 0; j < 4; j++) {
 			printf("      Fan Element %d:  ", j);
-			print_fan_status(&(dp->fan_sets[i].fan_element[j]));
+			bh_print_fan_status(&(dp->fan_sets[i].fan_element[j]));
 		}
 	}
 
@@ -605,7 +650,7 @@ diag_bluehawk(int fd, struct dev_vpd *vpd)
 	}
 
 	printf("\n  Enclosure Status:  ");
-	print_enclosure_status(&(dp->enclosure_element_status));
+	bh_print_enclosure_status(&(dp->enclosure_element_status));
 
 	printf("\n  ERM Electronics Status\n");
 	for (i = 0; i < 2; i++) {

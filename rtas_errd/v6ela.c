@@ -521,16 +521,13 @@ process_v6(struct event *event)
 	dbg("Processing version 6 event");
 
 	/* create and populate the servicelog entry */
-	event->sl_entry = malloc(sizeof(struct sl_event));
+	event->sl_entry = calloc(1, sizeof(struct sl_event));
 	if (event->sl_entry == NULL)
 		goto sl_entry;
 
-	rtas_data = malloc(sizeof(struct sl_data_rtas));
+	rtas_data = calloc(1, sizeof(struct sl_data_rtas));
 	if (rtas_data == NULL)
 		goto rtas_data;
-
-	memset(event->sl_entry, 0, sizeof(struct sl_event));
-	memset(rtas_data, 0, sizeof(struct sl_data_rtas));
 
 	event->sl_entry->addl_data = rtas_data;
 

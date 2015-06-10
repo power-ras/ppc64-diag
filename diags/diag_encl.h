@@ -6,6 +6,10 @@
 #ifndef _DIAG_ENCL_H
 #define _DIAG_ENCL_H
 
+#include <stdint.h>
+
+#include "encl_util.h"
+
 struct cmd_opts {
 	int cmp_prev;	/* -c */
 	int leds;	/* -l */

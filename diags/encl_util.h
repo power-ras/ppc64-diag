@@ -7,6 +7,7 @@
 #define _ENCL_UTIL_H
 
 #include <linux/limits.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 /* SES sys path */
@@ -31,6 +32,10 @@ struct dev_vpd {
 extern int print_raw_data(FILE *ostream, char *data, int data_len);
 
 extern int open_sg_device(const char *encl);
+extern int read_page2_from_file(const char *path, bool display_error_msg,
+				void *pg, int size);
+extern int write_page2_to_file(const char *path, void *pg, int size);
+
 extern int enclosure_maint_mode(const char *sg);
 
 extern int do_ses_cmd(int fd, uint8_t cmd, uint8_t page_nr, uint8_t flags,
@@ -42,6 +47,7 @@ extern int get_diagnostic_page(int fd, uint8_t cmd, uint8_t page_nr, void *buf,
 extern char *fgets_nonl(char *buf, int size, FILE *s);
 extern int read_vpd_from_lscfg(struct dev_vpd *vpd, const char *sg);
 extern void trim_location_code(struct dev_vpd *vpd);
+extern char *strzcpy(char *dest, const char *src, size_t n);
 extern int valid_enclosure_device(const char *sg);
 
 #endif /* _ENCL_UTIL_H */

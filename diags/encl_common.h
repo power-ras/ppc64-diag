@@ -73,6 +73,10 @@ do { \
 } while (0)
 
 
+#define CHK_IDENT_LED(s) if ((s)->ident) printf(" | IDENT_LED")
+#define CHK_FAULT_LED(s) if ((s)->fail) printf(" | FAULT_LED")
+
+
 enum element_status_code {
 	ES_UNSUPPORTED,		/* invalid status */
 	ES_OK,
@@ -328,8 +332,30 @@ struct power_supply_descriptor {
 } __attribute__((packed));
 
 
+extern int status_is_valid(enum element_status_code,
+			   enum element_status_code []);
+extern const char *status_string(enum element_status_code ,
+				 enum element_status_code []);
+extern void print_enclosure_status(struct enclosure_status *);
+extern void print_drive_status(struct disk_status *);
+extern void print_esm_status(struct esm_status *);
+extern void print_temp_sensor_status(struct temperature_sensor_status *);
+extern void print_fan_status(struct fan_status *);
+extern void print_power_supply_status(struct power_supply_status *);
+extern void print_voltage_sensor_status(struct voltage_sensor_status *);
+
+extern enum element_status_code composite_status(const void *, int);
+extern uint8_t svclog_element_status(struct element_status_byte0 *,
+				     const char * const ,
+				     const char * const , char *);
+extern uint8_t svclog_composite_status(const void *,  const char * const ,
+				       const char * const , int , char *);
+
 extern void add_callout(struct sl_callout **, char, uint32_t,
 			char *, char *, char *, char *, char *);
+extern void add_location_callout(struct sl_callout **, char *);
+extern void add_callout_from_vpd_page(struct sl_callout **,
+				      char *, struct vpd_page *);
 extern uint32_t servevent(const char *, int, const char *,
 			  struct dev_vpd *, struct sl_callout *);
 

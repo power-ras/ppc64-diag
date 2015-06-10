@@ -109,6 +109,55 @@ open_sg_device(const char *encl)
 	return fd;
 }
 
+/**
+ * read_page2_from_file
+ * @brief Read enclosure status diagnostics structure from file
+ */
+int
+read_page2_from_file(const char *path, bool display_error_msg,
+		     void *pg, int size)
+{
+	FILE *f;
+
+	f = fopen(path, "r");
+	if (!f) {
+		if (display_error_msg || errno != ENOENT)
+			perror(path);
+		return -1;
+	}
+	if (fread(pg, size, 1, f) != 1) {
+		if (display_error_msg)
+			perror(path);
+		fclose(f);
+		return -2;
+	}
+	fclose(f);
+	return 0;
+}
+
+/**
+ * write_page2_to_file
+ * @brief Write enclosure status diagnostics structure to file
+ */
+int
+write_page2_to_file(const char *path, void *pg, int size)
+{
+	FILE *f;
+
+	f = fopen(path, "w");
+	if (!f) {
+		perror(path);
+		return -1;
+	}
+	if (fwrite(pg, size, 1, f) != 1) {
+		perror(path);
+		fclose(f);
+		return -2;
+	}
+	fclose(f);
+	return 0;
+}
+
 /*
  * enclosure_maint_mode
  * @brief Check the state of SCSI enclosure
@@ -278,6 +327,18 @@ trim_location_code(struct dev_vpd *vpd)
 	hyphen = strchr(vpd->location, '-');
 	if (hyphen && (!strcmp(hyphen, "-P1-C1") || !strcmp(hyphen, "-P1-C2")))
 		*hyphen = '\0';
+}
+
+/**
+ * strzcpy
+ * @brief Copy src to dest and append NULL char
+ */
+char *
+strzcpy(char *dest, const char *src, size_t n)
+{
+	memcpy(dest, src, n);
+	dest[n] = '\0';
+	return dest;
 }
 
 /*

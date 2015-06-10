@@ -565,12 +565,11 @@ process_pre_v6(struct event *event)
 	}
 
 	/* create and populate an entry to be logged to servicelog */
-	event->sl_entry = malloc(sizeof(struct sl_event));
+	event->sl_entry = calloc(1, sizeof(struct sl_event));
 	if (event->sl_entry == NULL) {
 		log_msg(event, "Memory allocation failed");
 		return -1;
 	}
-	memset(event->sl_entry, 0, sizeof(struct sl_event));
 	event->sl_entry->time_event = get_event_date(event);
 	event->sl_entry->type = SL_TYPE_BASIC;
 	event->sl_entry->severity = servicelog_sev(event->rtas_hdr->severity);

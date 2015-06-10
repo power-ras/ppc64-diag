@@ -766,7 +766,7 @@ print_rtas_event(struct event *event)
 	buf_size = (len * 2) + (nlines * 0x10) + (2 * 0x40);
 	/* event_dump(event); */
 
-	out_buf = malloc(buf_size);
+	out_buf = calloc(1, buf_size);
 	if (out_buf == NULL) {
 		log_msg(NULL, "Could not allocate buffer to print RTAS event "
 			"%d, %s.  The event will not copied to %s",
@@ -774,7 +774,6 @@ print_rtas_event(struct event *event)
 			platform_log);
 		return -1;
 	}
-	memset(out_buf, 0, buf_size);
 
 	offset = sprintf(out_buf,
 			 "RTAS: %d -------- RTAS event begin --------\n",

@@ -107,11 +107,9 @@ static void add_phandle_to_list(char *name, uint32_t phandle,
 {
 	struct pmap_struct *pm;
 
-	pm = malloc(sizeof(struct pmap_struct));
+	pm = calloc(1, sizeof(struct pmap_struct));
 	if (!pm)
 		return;
-
-	memset(pm, 0, sizeof(struct pmap_struct));
 
 	pm->name = malloc(strlen(name) + 1);
 	if (!pm->name) {

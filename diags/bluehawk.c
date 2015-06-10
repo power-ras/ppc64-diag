@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <scsi/scsi.h>
 #include <scsi/sg.h>
 
@@ -52,19 +53,20 @@ static struct element_descriptor_page *edp;	/* for power supply VPD */
 static int poked_leds;
 
 static int
-read_page2_from_file(struct bluehawk_diag_page2 *pg, const char *path,
-						int complain_if_missing)
+read_page2_from_file(const char *path, bool display_error_msg,
+		     void *pg, int size)
 {
 	FILE *f;
 
 	f = fopen(path, "r");
 	if (!f) {
-		if (complain_if_missing || errno != ENOENT)
+		if (display_error_msg || errno != ENOENT)
 			perror(path);
 		return -1;
 	}
-	if (fread(pg, sizeof(*pg), 1, f) != 1) {
-		perror(path);
+	if (fread(pg, size, 1, f) != 1) {
+		if (display_error_msg)
+			perror(path);
 		fclose(f);
 		return -2;
 	}
@@ -73,7 +75,7 @@ read_page2_from_file(struct bluehawk_diag_page2 *pg, const char *path,
 }
 
 static int
-write_page2_to_file(const struct bluehawk_diag_page2 *pg, const char *path)
+write_page2_to_file(const char *path, void *pg, int size)
 {
 	FILE *f;
 
@@ -82,7 +84,7 @@ write_page2_to_file(const struct bluehawk_diag_page2 *pg, const char *path)
 		perror(path);
 		return -1;
 	}
-	if (fwrite(pg, sizeof(*pg), 1, f) != 1) {
+	if (fwrite(pg, size, 1, f) != 1) {
 		perror(path);
 		fclose(f);
 		return -2;
@@ -643,7 +645,8 @@ report_faults_to_svclog(struct dev_vpd *vpd,
 			return 1;
 		}
 
-		if (read_page2_from_file(prev_dp, cmd_opts.prev_path, 0) != 0) {
+		if (read_page2_from_file(cmd_opts.prev_path, false, prev_dp,
+					 sizeof(struct bluehawk_diag_page2)) != 0) {
 			free(prev_dp);
 			prev_dp = NULL;
 		}
@@ -845,7 +848,8 @@ report_faults_to_svclog(struct dev_vpd *vpd,
 	if (prev_dp)
 		free(prev_dp);
 
-	return write_page2_to_file(dp, cmd_opts.prev_path);
+	return write_page2_to_file(cmd_opts.prev_path, dp,
+				   sizeof(struct bluehawk_diag_page2));
 
 err_out:
 	if (prev_dp)
@@ -978,7 +982,8 @@ diag_bluehawk(int fd, struct dev_vpd *vpd)
 	}
 
 	if (cmd_opts.fake_path) {
-		rc = read_page2_from_file(dp, cmd_opts.fake_path, 1);
+		rc = read_page2_from_file(cmd_opts.fake_path, true,
+					  dp, sizeof(struct bluehawk_diag_page2));
 		fd = -1;
 	} else
 		rc = get_diagnostic_page(fd, RECEIVE_DIAGNOSTIC, 2,

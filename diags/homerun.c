@@ -304,6 +304,71 @@ hr_report_faults_to_svclog(int fd, struct dev_vpd *vpd,
 				   sizeof(struct hr_diag_page2));
 }
 
+static int
+hr_turn_on_fault_leds(struct hr_diag_page2 *dp, int fd)
+{
+	int i;
+	int poked_leds = 0;
+	struct hr_ctrl_page2 *ctrl_page;
+
+	ctrl_page = calloc(1, sizeof(struct hr_ctrl_page2));
+	if (!ctrl_page) {
+		fprintf(stderr, "%s: Failed to allocate memory\n",
+			__func__);
+		return 1;
+	}
+
+	/* disk drives */
+	for (i = 0; i < HR_NR_DISKS; i++)
+		FAULT_LED(poked_leds, dp, ctrl_page,
+			  disk_ctrl[i], disk_status[i]);
+
+	/* ERM/ESM electronics */
+	for (i = 0; i < HR_NR_ESM_CONTROLLERS; i++)
+		FAULT_LED(poked_leds, dp, ctrl_page,
+			  esm_ctrl[i], esm_status[i]);
+
+	/* No LEDs for temperature sensors */
+
+	/* fan assemblies */
+	for (i = 0; i < HR_NR_FAN_SET; i++) {
+		enum element_status_code sc =
+				composite_status(&(dp->fan_sets[i]),
+						 HR_NR_FAN_ELEMENT_PER_SET);
+		if (sc != ES_OK && sc != ES_NOT_INSTALLED)
+			FAULT_LED(poked_leds, dp, ctrl_page,
+				  fan_sets[i].fan_element[0],
+				  fan_sets[i].fan_element[0]);
+	}
+
+	/* power supplies */
+	for (i = 0; i < HR_NR_POWER_SUPPLY; i++)
+		FAULT_LED(poked_leds, dp, ctrl_page, ps_ctrl[i], ps_status[i]);
+
+	/* No LEDs for voltage sensors */
+
+	if (poked_leds) {
+		int result;
+
+		ctrl_page->page_code = 2;
+		ctrl_page->page_length = sizeof(struct hr_ctrl_page2) - 4;
+		ctrl_page->generation_code = 0;
+		result = do_ses_cmd(fd, SEND_DIAGNOSTIC, 0, 0x10, 6,
+				    SG_DXFER_TO_DEV, ctrl_page,
+				    sizeof(struct hr_ctrl_page2));
+		if (result != 0) {
+			perror("ioctl - SEND_DIAGNOSTIC");
+			fprintf(stderr, "result = %d\n", result);
+			fprintf(stderr, "failed to set LED(s) via SES\n");
+			free(ctrl_page);
+			return -1;
+		}
+	}
+
+	free(ctrl_page);
+	return 0;
+}
+
 /* @return 0 for success, 1 for failure */
 int
 diag_homerun(int fd, struct dev_vpd *vpd)
@@ -435,6 +500,10 @@ diag_homerun(int fd, struct dev_vpd *vpd)
 		if (rc != 0)
 			goto err_out;
 	}
+
+	/* -l is not supported for fake path */
+	if (fd != -1 && cmd_opts.leds)
+		rc = hr_turn_on_fault_leds(dp, fd);
 
 err_out:
 	free(dp);

@@ -47,6 +47,7 @@ static struct {
 	{"7031-D24/T24", diag_7031_D24_T24},	/* Pearl enclosure */
 	{"5888", diag_bluehawk},		/* Bluehawk enclosure */
 	{"EDR1", diag_bluehawk},		/* Bluehawk enclosure */
+	{"5887", diag_homerun},			/* Home Run enclosure */
 	{NULL, NULL},
 };
 

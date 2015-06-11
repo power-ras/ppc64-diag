@@ -71,7 +71,7 @@ get_enclosure_scsi_id(struct pearl_diag_page2 *dp)
  * @return OK, EMPTY, FAULT_NONCRITICAL, or FAULT_CRITICAL
  */
 static int
-print_drive_status(uint32_t status)
+pearl_print_drive_status(uint32_t status)
 {
 	int fail = 0, printed = 0, rc = OK;
 
@@ -390,17 +390,17 @@ diag_7031_D24_T24(int fd, struct dev_vpd *vpd)
 	printf("\n\n  Drive Status\n");
 
 	printf("    Slot SCSI ID %02d: ", (dp.drive_status1 & 0x000F0000)>>16);
-	rc = print_drive_status(dp.drive_status1);
+	rc = pearl_print_drive_status(dp.drive_status1);
 	printf("    Slot SCSI ID %02d: ", (dp.drive_status2 & 0x000F0000)>>16);
-	rc = print_drive_status(dp.drive_status2);
+	rc = pearl_print_drive_status(dp.drive_status2);
 	printf("    Slot SCSI ID %02d: ", (dp.drive_status3 & 0x000F0000)>>16);
-	rc = print_drive_status(dp.drive_status3);
+	rc = pearl_print_drive_status(dp.drive_status3);
 	printf("    Slot SCSI ID %02d: ", (dp.drive_status4 & 0x000F0000)>>16);
-	rc = print_drive_status(dp.drive_status4);
+	rc = pearl_print_drive_status(dp.drive_status4);
 	printf("    Slot SCSI ID %02d: ", (dp.drive_status5 & 0x000F0000)>>16);
-	rc = print_drive_status(dp.drive_status5);
+	rc = pearl_print_drive_status(dp.drive_status5);
 	printf("    Slot SCSI ID %02d: ", (dp.drive_status6 & 0x000F0000)>>16);
-	rc = print_drive_status(dp.drive_status6);
+	rc = pearl_print_drive_status(dp.drive_status6);
 
 	printf("\n  Power Supply Status\n");
 	printf("    Power Supply 1:  ");

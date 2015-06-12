@@ -21,9 +21,6 @@
 #include "encl_led.h"
 #include "bluehawk.h"
 
-#define COMP_DESC_SIZE	64
-#define COMP_LOC_CODE	16
-
 enum bh_component_type {
 	BHC_ENCLOSURE,
 	BHC_MIDPLANE,
@@ -35,19 +32,6 @@ enum bh_component_type {
 	BHC_FAN_ASSEMBLY
 };
 
-/*
- * It'd be nicer to do all this with functions, but different components
- * have their fail, ident, rqst_fail, and rqst_ident  bits in different
- * locations.
- */
-#define SET_LED(cp, dp, fault, idnt, ctrl_element, status_element) \
-do { \
-	(cp)->ctrl_element.common_ctrl.select = 1; \
-	(cp)->ctrl_element.rqst_fail = (fault == LED_SAME ? \
-					(dp)->status_element.fail : fault); \
-	(cp)->ctrl_element.rqst_ident = (idnt == LED_SAME ? \
-					(dp)->status_element.ident : idnt); \
-} while (0)
 
 static void
 check_range(unsigned int n, unsigned int min, unsigned int max, const char *lc)
@@ -109,17 +93,6 @@ decode_component_loc(const char *loc, enum bh_component_type *type,
 }
 
 static const char *on_off_string[] = { "off", "on" };
-
-#define REPORT_COMPONENT(dp, element, fault, idnt, loc_code, desc, verbose) \
-do { \
-	printf("%-5s %-5s %-9s", \
-		on_off_string[fault == LED_SAME ? dp->element.fail : fault], \
-		on_off_string[idnt == LED_SAME ? dp->element.ident : idnt], \
-		loc_code); \
-	if (verbose) \
-		printf("  %s", desc); \
-	printf("\n"); \
-} while (0)
 
 static void
 report_component(struct bluehawk_diag_page2 *dp, int fault, int ident,

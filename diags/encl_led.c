@@ -25,6 +25,7 @@ static struct {
 } encl_list[] = {
 	{"5888", bluehawk_list_leds, bluehawk_set_led}, /* Bluehawk enclosure */
 	{"EDR1", bluehawk_list_leds, bluehawk_set_led}, /* Bluehawk enclosure */
+	{"5887", homerun_list_leds, homerun_set_led},   /* Homerun  enclosure */
 	{NULL, NULL}
 };
 

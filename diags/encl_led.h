@@ -44,4 +44,7 @@ extern const char *progname;
 extern int bluehawk_list_leds(const char *, const char *, int);
 extern int bluehawk_set_led(const char *, const char *, int, int, int);
 
+extern int homerun_list_leds(const char *, const char *, int);
+extern int homerun_set_led(const char *, const char *, int, int, int);
+
 #endif	/* _ENCL_LED_H */

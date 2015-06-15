@@ -90,13 +90,13 @@ add_callout(struct sl_callout **callouts, char priority, uint32_t type,
 	struct sl_callout *c;
 
 	if (*callouts == NULL) {
-		*callouts = malloc(sizeof(struct sl_callout));
+		*callouts = calloc(1, sizeof(struct sl_callout));
 		c = *callouts;
 	} else {
 		c = *callouts;
 		while (c->next != NULL)
 			c = c->next;
-		c->next = malloc(sizeof(struct sl_callout));
+		c->next = calloc(1, sizeof(struct sl_callout));
 		c = c->next;
 	}
 	if (c == NULL) {
@@ -104,7 +104,6 @@ add_callout(struct sl_callout **callouts, char priority, uint32_t type,
 		return;
 	}
 
-	memset(c, 0, sizeof(struct sl_callout));
 	c->priority = priority;
 	c->type = type;
 	if (proc_id) {
@@ -171,20 +170,18 @@ servicelog_log_event(const char *refcode, int sev, const char *text,
 	if ((refcode == NULL) || (text == NULL) || (vpd == NULL))
 		return 0;
 
-	entry = malloc(sizeof(struct sl_event));
+	entry = calloc(1, sizeof(struct sl_event));
 	if (entry == NULL) {
 		fprintf(stderr, "Out of memory\n");
 		return 0;
 	}
-	memset(entry, 0, sizeof(struct sl_event));
 
-	encl = malloc(sizeof(struct sl_data_enclosure));
+	encl = calloc(1, sizeof(struct sl_data_enclosure));
 	if (encl == NULL) {
 		free(entry);
 		fprintf(stderr, "Out of memory\n");
 		return 0;
 	}
-	memset(encl, 0, sizeof(struct sl_data_enclosure));
 
 	entry->addl_data = encl;
 

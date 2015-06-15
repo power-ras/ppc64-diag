@@ -185,12 +185,11 @@ diagnose(const char *sg, struct dev_vpd **diagnosed)
 
 	printf("DIAGNOSING %s\n", sg);
 
-	vpd = malloc(sizeof(struct dev_vpd));
+	vpd = calloc(1, sizeof(struct dev_vpd));
 	if (vpd == NULL) {
 		fprintf(stderr, "Out of memory\n");
 		return 1;
 	}
-	memset(vpd, 0, sizeof(struct dev_vpd));
 
 	if (cmd_opts.fake_path)
 		rc = read_fake_vpd(sg, cmd_opts.fake_path, vpd);

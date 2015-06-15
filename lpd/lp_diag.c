@@ -274,10 +274,10 @@ build_callout_loc_code(struct sl_event *event, struct loc_code *list,
 					fru = fru->next;
 
 			if (!fru) {
-				fru = malloc(sizeof(struct fru));
+				fru = calloc(1, sizeof(struct fru));
 				frus = fru;
 			} else {
-				fru->next = malloc(sizeof(struct fru));
+				fru->next = calloc(1, sizeof(struct fru));
 				fru = fru->next;
 			}
 			if (!fru) {
@@ -286,7 +286,6 @@ build_callout_loc_code(struct sl_event *event, struct loc_code *list,
 				return NULL;
 			}
 
-			memset(fru, 0, sizeof(struct fru));
 			strncpy(fru->location, location, LOCATION_LENGTH - 1);
 		}
 	}

@@ -163,10 +163,10 @@ read_device_vpd(const char *path)
 			continue;
 
 		if (!curr) {
-			curr = malloc(sizeof(struct dev_vpd));
+			curr = calloc(1, sizeof(struct dev_vpd));
 			vpd = curr;
 		} else {
-			curr->next = malloc(sizeof(struct dev_vpd));
+			curr->next = calloc(1, sizeof(struct dev_vpd));
 			curr = curr->next;
 		}
 		if (!curr) {
@@ -175,9 +175,6 @@ read_device_vpd(const char *path)
 			closedir(dir);
 			return NULL;
 		}
-
-		/* zero out the vpd structure */
-		memset(curr, 0, sizeof(struct dev_vpd));
 
 		/* device name */
 		strncpy(curr->dev, dirent->d_name, DEV_LENGTH - 1);

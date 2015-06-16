@@ -5,7 +5,6 @@
 PROGS = bh_structs bh_mk_healthy bh_mk_hot_power bh_dump_pg2 bh_vpd
 SAMPLE_PAGES = bh_healthy.pg2 bh_hot_power.pg2
 CFLAGS = -g -Wall
-INCLUDE = -I..
 
 all: $(PROGS) $(SAMPLE_PAGES)
 

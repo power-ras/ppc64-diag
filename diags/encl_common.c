@@ -99,8 +99,8 @@ err_out:
  * @return key of the new servicelog entry
  */
 uint32_t
-servevent(char *refcode, int sev, char *text, struct dev_vpd *vpd,
-	  struct sl_callout *callouts)
+servevent(const char *refcode, int sev, const char *text,
+	  struct dev_vpd *vpd, struct sl_callout *callouts)
 {
 	struct servicelog *slog;
 	struct sl_event *entry = NULL;

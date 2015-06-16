@@ -12,7 +12,7 @@
 
 extern void add_callout(struct sl_callout **, char, uint32_t,
 			char *, char *, char *, char *, char *);
-extern uint32_t servevent(char *, int, char *,
+extern uint32_t servevent(const char *, int, const char *,
 			  struct dev_vpd *, struct sl_callout *);
 
 #endif	/* _ENCL_COMMON_H */

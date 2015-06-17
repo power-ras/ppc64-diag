@@ -127,6 +127,7 @@ loc_code_device(const char *loccode, char *sg, int sg_size)
 	if (found)
 		return 0;
 
+	fprintf(stderr, "%s is not a valid enclosure device\n", loccode);
 	return -1;
 }
 

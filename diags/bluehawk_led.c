@@ -255,7 +255,7 @@ bluehawk_set_led(const char *enclosure, const char *component, int fault,
 	case BHC_ENCLOSURE:
 		if (fault == LED_ON) {
 			fprintf(stderr, "%s: Cannot directly enable enclosure"
-					" fault indicator", enclosure);
+					" fault indicator\n", enclosure);
 			return -1;
 		}
 		SET_LED(&cp, &dp, fault, ident, enclosure_element_ctrl,

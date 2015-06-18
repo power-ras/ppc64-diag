@@ -679,6 +679,8 @@ diag_bluehawk(int fd, struct dev_vpd *vpd)
 				sizeof(struct bluehawk_diag_page2));
 	}
 
+	printf("\n\n");
+
 	/*
 	 * Report faults to servicelog, and turn on LEDs as appropriate.
 	 * LED status reported previously may not be accurate after we

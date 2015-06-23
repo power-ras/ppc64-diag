@@ -21,6 +21,16 @@ enum hr_component_type {
 };
 
 
+/* Retruns true if ESM has access to this element */
+static inline bool
+hr_element_access_allowed(enum element_status_code sc)
+{
+	if (sc == ES_NO_ACCESS_ALLOWED)
+		return false;
+
+	return true;
+}
+
 static void
 hr_check_range(unsigned int n, unsigned int min, unsigned int max, const char *lc)
 {
@@ -46,6 +56,13 @@ hr_decode_component_loc(struct hr_diag_page2 *dp, const char *loc,
 		hr_check_range(n, 1, HR_NR_DISKS, loc);
 		*type = HR_DISK;
 		*index = n - 1;
+
+		if (!hr_element_access_allowed(
+				dp->disk_status[*index].byte0.status)) {
+			fprintf(stderr,
+				"Doesn't have access to element : %s\n\n", loc);
+			return -1;
+		}
 	} else if (sscanf(loc, "P1-C%u%c", &n, &g) == 1) { /* ESM */
 		hr_check_range(n, 1, HR_NR_ESM_CONTROLLERS, loc);
 		*type = HR_ESM;
@@ -135,21 +152,28 @@ homerun_list_leds(const char *enclosure, const char *component, int verbose)
 		return -1;
 	}
 
-	printf("fault ident location  description\n");
 
 	if (component) {
 		rc = hr_decode_component_loc(&dp, component, &ctype, &cindex);
 		if (rc != 0)
 			return -1;
+
+		printf("fault ident location  description\n");
 		hr_report_component_from_ses(&dp, ctype, cindex, verbose);
 	} else {
+		printf("fault ident location  description\n");
 
 		/* Enclosure LED */
 		hr_report_component_from_ses(&dp, HR_ENCLOSURE, 0, verbose);
 
 		/* Disk LED */
-		for (i = 0; i < HR_NR_DISKS; i++)
+		for (i = 0; i < HR_NR_DISKS; i++) {
+			if (!hr_element_access_allowed(
+					dp.disk_status[i].byte0.status))
+				continue;
+
 			hr_report_component_from_ses(&dp, HR_DISK, i, verbose);
+		}
 
 		/* Power Supply LED */
 		for (i = 0; i < HR_NR_POWER_SUPPLY; i++)

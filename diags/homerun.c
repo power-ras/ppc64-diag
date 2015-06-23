@@ -13,6 +13,17 @@
 #include "encl_util.h"
 #include "homerun.h"
 
+
+/* Retruns true if ESM has access to this component */
+static inline bool
+hr_element_access_allowed(enum element_status_code sc)
+{
+	if (sc == ES_NO_ACCESS_ALLOWED)
+		return false;
+
+	return true;
+}
+
 /** Helper functions to print various component status **/
 
 static void
@@ -174,6 +185,9 @@ hr_report_faults_to_svclog(int fd, struct dev_vpd *vpd,
 
 	/* disk drives */
 	for (i = 0; i < HR_NR_DISKS; i++) {
+		if (!hr_element_access_allowed(dp->disk_status[i].byte0.status))
+			continue;
+
 		sev = svclog_element_status(&(dp->disk_status[i].byte0),
 					    (char *) dp, (char *) prev_dp, crit);
 		if (sev == 0)
@@ -319,9 +333,13 @@ hr_turn_on_fault_leds(struct hr_diag_page2 *dp, int fd)
 	}
 
 	/* disk drives */
-	for (i = 0; i < HR_NR_DISKS; i++)
+	for (i = 0; i < HR_NR_DISKS; i++) {
+		if (!hr_element_access_allowed(dp->disk_status[i].byte0.status))
+			continue;
+
 		FAULT_LED(poked_leds, dp, ctrl_page,
 			  disk_ctrl[i], disk_status[i]);
+	}
 
 	/* ERM/ESM electronics */
 	for (i = 0; i < HR_NR_ESM_CONTROLLERS; i++)
@@ -427,6 +445,9 @@ diag_homerun(int fd, struct dev_vpd *vpd)
 
 	printf("\n\n  Drive Status\n");
 	for (i = 0; i < HR_NR_DISKS; i++) {
+		if (!hr_element_access_allowed(dp->disk_status[i].byte0.status))
+			continue;
+
 		struct disk_status *ds = &(dp->disk_status[i]);
 		printf("    Disk %02d (Slot %02d): ", i+1,
 		       ds->byte1.element_status.slot_address);

@@ -648,7 +648,7 @@ report_faults_to_svclog(struct dev_vpd *vpd,
 			 "%s fault in %s power supply in RAID enclosure.%s",
 			 crit, left_right[i], run_diag_encl);
 		snprintf(loc_suffix, loc_suffix_size, "-P1-E%u", i+1);
-		build_srn(srn, CRIT_PS);
+		build_srn(srn, SRN_RC_CRIT_PS);
 		callouts = NULL;
 		if (create_ps_callout(&callouts, location, i, fd))
 			goto err_out;
@@ -666,7 +666,7 @@ report_faults_to_svclog(struct dev_vpd *vpd,
 			 "enclosure: voltage sensor(s) reporting voltage(s) "
 			 "out of range.%s", crit, left_right[i], run_diag_encl);
 		snprintf(loc_suffix, loc_suffix_size, "-P1-E%u", i+1);
-		build_srn(srn, VOLTAGE_THRESHOLD);
+		build_srn(srn, SRN_RC_VOLTAGE_THRESHOLD);
 		callouts = NULL;
 		if (create_ps_callout(&callouts, location, i, fd))
 			goto err_out;
@@ -684,7 +684,7 @@ report_faults_to_svclog(struct dev_vpd *vpd,
 			 "%s fault in fan for %s power supply in RAID "
 			 "enclosure.%s", crit, left_right[i], run_diag_encl);
 		snprintf(loc_suffix, loc_suffix_size, "-P1-E%u", i+1);
-		build_srn(srn, CRIT_PS);
+		build_srn(srn, SRN_RC_CRIT_PS);
 		callouts = NULL;
 		if (create_ps_callout(&callouts, location, i, fd))
 			goto err_out;
@@ -702,7 +702,7 @@ report_faults_to_svclog(struct dev_vpd *vpd,
 			 "%s fault in %s fan assembly in RAID enclosure.%s",
 			 crit, left_right[i], run_diag_encl);
 		snprintf(loc_suffix, loc_suffix_size, "-P1-C%u-A1", i+1);
-		build_srn(srn, CRIT_FAN);
+		build_srn(srn, SRN_RC_CRIT_FAN);
 		callouts = NULL;
 		/* VPD for fan assemblies is not available from the SES. */
 		add_location_callout(&callouts, location);
@@ -723,7 +723,7 @@ report_faults_to_svclog(struct dev_vpd *vpd,
 			 "temperature(s) out of range.%s",
 			 crit, left_right[i], run_diag_encl);
 		snprintf(loc_suffix, loc_suffix_size, "-P1-E%u", i+1);
-		build_srn(srn, PS_TEMP_THRESHOLD);
+		build_srn(srn, SRN_RC_PS_TEMP_THRESHOLD);
 		callouts = NULL;
 		if (create_ps_callout(&callouts, location, i, fd))
 			goto err_out;
@@ -744,7 +744,7 @@ report_faults_to_svclog(struct dev_vpd *vpd,
 			 crit, left_right[i], run_diag_encl);
 		/* Not the power supply, so assume the warhawk. */
 		snprintf(loc_suffix, loc_suffix_size, "-P1-C%u", i+1);
-		build_srn(srn, TEMP_THRESHOLD);
+		build_srn(srn, SRN_RC_TEMP_THRESHOLD);
 		callouts = NULL;
 		create_wh_callout(&callouts, location, i, fd);
 		servevent(srn, sev, description, vpd, callouts);
@@ -760,7 +760,7 @@ report_faults_to_svclog(struct dev_vpd *vpd,
 			 "%s electronics fault in %s Enclosure RAID Module.%s",
 			 crit, left_right[i], ref_svc_doc);
 		snprintf(loc_suffix, loc_suffix_size, "-P1-C%u", i+1);
-		build_srn(srn, CRIT_ESM);
+		build_srn(srn, SRN_RC_CRIT_ESM);
 		callouts = NULL;
 		create_wh_callout(&callouts, location, i, fd);
 		servevent(srn, sev, description, vpd, callouts);

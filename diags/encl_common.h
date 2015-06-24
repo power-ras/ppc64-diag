@@ -27,32 +27,33 @@
 
 
 /* SRN Format :
- *	for SAS : 2667-xxx
+ *      FFC-xxx
+ *	for SAS FFC = 2667
  *
  * Note:
  *   These SRN's are valid for Bluehawk and Homerun enclosures.
  */
 
-/* SAS SRN */
-#define SAS_SRN			0x2667
+/* Failing Function Code : SAS SCSI Enclosure Services */
+#define SRN_FFC_SAS			0x2667
 
-/* SAS SES Reported Fail Indicator */
-#define CRIT_PS			0x125
-#define CRIT_FAN		0x135
-#define CRIT_ESM		0x155
-#define CRIT_EN			0x175
-#define DEVICE_CONFIG_ERROR	0x201
-#define ENCLOSURE_OPEN_FAILURE	0x202
-#define ENQUIRY_DATA_FAIL	0x203
-#define MEDIA_BAY		0x210
-#define VOLTAGE_THRESHOLD	0x239
-#define PS_TEMP_THRESHOLD	0x145
-#define TEMP_THRESHOLD		0x246
+/* Return code for SAS SES components */
+#define SRN_RC_CRIT_PS			0x125
+#define SRN_RC_CRIT_FAN			0x135
+#define SRN_RC_CRIT_ESM			0x155
+#define SRN_RC_CRIT_EN			0x175
+#define SRN_RC_DEVICE_CONFIG_ERROR	0x201
+#define SRN_RC_ENCLOSURE_OPEN_FAILURE	0x202
+#define SRN_RC_ENQUIRY_DATA_FAIL	0x203
+#define SRN_RC_MEDIA_BAY		0x210
+#define SRN_RC_VOLTAGE_THRESHOLD	0x239
+#define SRN_RC_PS_TEMP_THRESHOLD	0x145
+#define SRN_RC_TEMP_THRESHOLD		0x246
 
 /* Build SRN */
 #define SRN_SIZE	16
 #define build_srn(srn, element) \
-	snprintf(srn, SRN_SIZE, "%03X-%03X", SAS_SRN, element)
+	snprintf(srn, SRN_SIZE, "%03X-%03X", SRN_FFC_SAS, element)
 
 /*
  * If the indicated status element reports a fault, turn on the fault component

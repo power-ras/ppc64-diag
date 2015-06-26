@@ -94,6 +94,9 @@ CFLAGS += -g -DDEBUG
 # Build with common directory included
 CFLAGS += -I$(COMMON_DIR)
 
+# Include ncurses directory
+CFLAGS += -I $(INC_DIR)/ncurses
+
 # Build with version string
 AM_CFLAGS = -DVERSION='"$(VERSION)"'
 

@@ -1,5 +1,5 @@
 Name:	ppc64-diag
-Version:	2.6.8
+Version:	2.6.9
 Release:	1
 Summary:	PowerLinux Platform Diagnostics
 Group:		System Environment/Base
@@ -102,6 +102,12 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Mon Jun 29 2015 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.6.9
+- Added Home Run (5887) enclosure diagnostics support
+- Added PHB hotplugging support for PowerKVM guest
+- Fixed LE issue in rtas_errd
+- Fixed memory leak in rtas_errd
+
 * Mon May 11 2015 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.6.8
 - Cpu and memory hotplugging support for PowerKVM guest
 - Various fixes to opal-dump-parse tool

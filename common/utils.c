@@ -29,17 +29,17 @@ static int process_child(char *argv[], int pipefd[])
 		return -1;
 	}
 
-	if (dup2(nullfd, STDERR_FILENO) == -1) {
+	/* redirect stdout to write-end of the pipe */
+	if (dup2(pipefd[1], STDOUT_FILENO) == -1) {
 		fprintf(stderr, "%s : %d - failed to redirect "
-				"\'/dev/null\' to stderr : %s\n",
+				"pipe write fd to stdout : %s\n",
 				__func__, __LINE__, strerror(errno));
 		goto err_out;
 	}
 
-	/* redirect stdout to write-end of the pipe */
-	if (dup2(pipefd[1], STDOUT_FILENO) == -1) {
+	if (dup2(nullfd, STDERR_FILENO) == -1) {
 		fprintf(stderr, "%s : %d - failed to redirect "
-				"pipe write fd to to stdout : %s\n",
+				"\'/dev/null\' to stderr : %s\n",
 				__func__, __LINE__, strerror(errno));
 		goto err_out;
 	}

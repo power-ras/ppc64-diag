@@ -543,6 +543,12 @@ static int find_and_read_elog_events(const char *elog_dir, const char *output_pa
 		} else {
 			/* Fall back to stat() */
 			rc = stat(elog_path, &sbuf);
+			if (rc == -1) {
+				/* skip on stat error */
+				free(namelist[i]);
+				continue;
+			}
+
 			if (S_ISDIR(sbuf.st_mode)) {
 				is_dir = 1;
 			}

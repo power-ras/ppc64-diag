@@ -228,7 +228,7 @@ get_diag_vpd(struct event *event, char *phyloc)
 char *
 get_dt_status(char *dev)
 {
-	FILE *fp1, *fp2;
+	FILE *fp1 = NULL, *fp2 = NULL;
 	char loc_file[80];
 	char target[80];
 	char *ptr;
@@ -339,8 +339,6 @@ get_dt_status(char *dev)
 					fclose (fp1);
 					return target_status;
 			}
-
-			fclose (fp2);
 		} else {
 			fprintf(stderr, "read failed on %s\n", loc_file);
 			goto out;

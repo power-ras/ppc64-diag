@@ -369,14 +369,13 @@ cpu_interruptserver_to_drcindex(uint32_t int_serv, uint32_t *drc_idx) {
 					if ((read(fd, &temp, 4)) == 4)  {
 						*drc_idx = be32toh(temp);
 						found = 1;
-					}
-					close(fd);
+					} /* if read */
 					break;
-				}
-			}
+				} /* if be32toh  */
+			} /* while */
 			close(fd);
 		}
-	}
+	} /* readdir */
 
 cleanup:
 	closedir(dir);

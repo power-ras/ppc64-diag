@@ -184,6 +184,7 @@ static int add_std_phandles(char *parent, char *p)
 
 		if (fread(&phandle, sizeof(phandle), 1, fd) != 1) {
 			dbg("Error reading phandle data!");
+			fclose(fd);
 			return -1;
 		}
 		*pend = '\0';

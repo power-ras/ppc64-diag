@@ -630,8 +630,11 @@ UI_help(MENU *my_menu)
 	cur = current_item(my_menu);
 	desc = item_description(cur);
 
-	if (!desc)
+	if (!desc) {
+		delwin(my_text_win);
+		delwin(my_help_win);
 		return;
+	}
 
 	if (!strcmp(desc, "ident"))
 		mvwprintw(my_text_win, 0, 0, help1);

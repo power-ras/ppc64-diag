@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <scsi/scsi.h>
 #include <scsi/sg.h>
 
@@ -149,14 +150,17 @@ homerun_list_leds(const char *enclosure, const char *component, int verbose)
 		fprintf(stderr,
 			"%s: cannot read diagnostic page from SES for %s\n",
 			progname, enclosure);
+		close(fd);
 		return -1;
 	}
 
 
 	if (component) {
 		rc = hr_decode_component_loc(&dp, component, &ctype, &cindex);
-		if (rc != 0)
+		if (rc != 0) {
+			close(fd);
 			return -1;
+		}
 
 		printf("fault ident location  description\n");
 		hr_report_component_from_ses(&dp, ctype, cindex, verbose);
@@ -185,6 +189,7 @@ homerun_list_leds(const char *enclosure, const char *component, int verbose)
 			hr_report_component_from_ses(&dp, HR_ESM, i, verbose);
 	}
 
+	close(fd);
 	return 0;
 }
 

@@ -1767,8 +1767,10 @@ get_cpu_frus(struct event *event)
 				event->loc_codes =
 					malloc(strlen(loc1) +
 						     strlen(loc2) + 2);
-				if (event->loc_codes == NULL)
+				if (event->loc_codes == NULL) {
+					free(buf);
 					return 0;
+				}
 
 				sprintf(event->loc_codes, "%s %s", loc2, loc1);
 				rc = RC_PLANAR_CPU;
@@ -1781,8 +1783,10 @@ get_cpu_frus(struct event *event)
 					malloc(strlen(loc1) +
 						     strlen(loc2) +
 						     strlen(loc3) + 3);
-				if (event->loc_codes == NULL)
+				if (event->loc_codes == NULL) {
+					free(buf);
 					return 0;
+				}
 
 				sprintf(event->loc_codes, "%s %s %s",
 					loc2, loc1, loc3);

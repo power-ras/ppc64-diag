@@ -329,10 +329,9 @@ int elog_summary(char *elog_path, uint32_t service_flag)
 	printf("|------------------------------------------------------------------------------|\n");
 
 	sz = read_elog(elog_path, &buffer);
-
-	if (sz <= 0){
+	if (sz < 0)
 		return -1;
-	}
+
 	if (sz < ELOG_MIN_READ_OFFSET) {
 		fprintf(stderr, "Partially read elog, cannot parse\n");
 		ret = -1;
@@ -340,19 +339,16 @@ int elog_summary(char *elog_path, uint32_t service_flag)
 		print_elog_summary(buffer, sz, service_flag);
 	}
 
-	free(buffer);
-
-	if(!ret){
+	if (!ret)
 		printf("|------------------------------------------------------------------------------|\n");
-	}
 
+	free(buffer);
 	return ret;
 }
 
 /* list all the error logs */
 int eloglist(uint32_t service_flag)
 {
-	int ret = 0;
 	char *buffer;
 	struct dirent **filelist;
 	int nfiles;
@@ -377,8 +373,7 @@ int eloglist(uint32_t service_flag)
 
 	for (i = 0; i < nfiles; i++){
 		sz = read_elog(filelist[i]->d_name, &buffer);
-
-		if (sz <= 0){
+		if (sz < 0){
 			free(filelist[i]);
 			continue;
 		} else if (sz < ELOG_MIN_READ_OFFSET) {
@@ -392,11 +387,9 @@ int eloglist(uint32_t service_flag)
 	}
 	free(filelist);
 
-	if(!ret){
-		printf("|------------------------------------------------------------------------------|\n");
-	}
+	printf("|------------------------------------------------------------------------------|\n");
 
-	return ret;
+	return 0;
 }
 
 int delete_elog(const char *eid)

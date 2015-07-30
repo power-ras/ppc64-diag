@@ -182,6 +182,7 @@ bluehawk_list_leds(const char *enclosure, const char *component, int verbose)
 		fprintf(stderr,
 			"%s: cannot read diagnostic page from SES for %s\n",
 			progname, enclosure);
+		close(fd);
 		return -1;
 	}
 
@@ -191,8 +192,11 @@ bluehawk_list_leds(const char *enclosure, const char *component, int verbose)
 		unsigned int cindex;
 		enum bh_component_type ctype;
 		rc = decode_component_loc(component, &ctype, &cindex);
-		if (rc != 0)
+		if (rc != 0) {
+			close(fd);
 			return -1;
+		}
+
 		report_component_from_ses(&dp, ctype, cindex, verbose);
 	} else {
 		unsigned int i;
@@ -217,6 +221,7 @@ bluehawk_list_leds(const char *enclosure, const char *component, int verbose)
 								verbose);
 	}
 
+	close(fd);
 	return 0;
 }
 

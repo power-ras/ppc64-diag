@@ -255,9 +255,9 @@ diagnose(const char *sg, struct dev_vpd **diagnosed)
 		vpd->next = *diagnosed;
 		*diagnosed = vpd;
 	} else {
-		free(vpd);
 		fprintf(stderr, "\tUnable to diagnose devices of machine "
 				"type/model: %s\n\n", vpd->mtm);
+		free(vpd);
 	}
 	return rc;
 

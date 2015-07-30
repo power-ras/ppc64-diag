@@ -1720,7 +1720,7 @@ report_io_error_frus(struct event *event, int sn,
 static int
 get_cpu_frus(struct event *event)
 {
-	char *buf;
+	char *buf, *tbuf = NULL, *free_me = NULL;
 	char *loc1 = NULL, *loc2 = NULL, *loc3 = NULL;
 	int nlocs = 0;
 	int rc = RC_INVALID;
@@ -1731,21 +1731,29 @@ get_cpu_frus(struct event *event)
 
 	loc1 = buf;
 
-	strcpy(loc1, get_loc_code(event, FIRST_LOC, &nlocs));
+	tbuf = get_loc_code(event, FIRST_LOC, &nlocs);
+	if ((tbuf == NULL) || (nlocs < 1))
+		goto out;
 
-	if (nlocs < 1) {
-		free(buf);
-		return rc;
-	}
+	free_me = tbuf;
+	strcpy(loc1, tbuf);
 
 	if (nlocs > 1) {
 		loc2 = loc1 + strlen(loc1) + 1;
-		strcpy(loc2, get_loc_code(event, NEXT_LOC, NULL));
+		tbuf = get_loc_code(event, NEXT_LOC, NULL);
+		if (tbuf == NULL)
+			goto out;
+
+		strcpy(loc2, tbuf);
 	}
 
 	if ( nlocs > 2 ) {
 		loc3 = loc2 + strlen(loc2) + 1;
-		strcpy(loc3, get_loc_code(event, NEXT_LOC, NULL));
+		tbuf = get_loc_code(event, NEXT_LOC, NULL);
+		if (tbuf == NULL)
+			goto out;
+
+		strcpy(loc3, tbuf);
 	}
 
 	if (is_planar(loc1)) {
@@ -1757,8 +1765,7 @@ get_cpu_frus(struct event *event)
 			else if (is_cpu(loc3))
 				rc = RC_PLANAR_2CPU;
 		}
-	}
-	else if (is_cpu(loc1)) {
+	} else if (is_cpu(loc1)) {
 		if (is_planar(loc2)) {
 			if (is_not_fru(loc3)) {
 				/* Rearrange locs as loc2, loc1 */
@@ -1766,36 +1773,32 @@ get_cpu_frus(struct event *event)
 					free(event->loc_codes);
 				event->loc_codes =
 					malloc(strlen(loc1) +
-						     strlen(loc2) + 2);
-				if (event->loc_codes == NULL) {
-					free(buf);
-					return 0;
-				}
+							strlen(loc2) + 2);
+				if (event->loc_codes == NULL)
+					goto out;
 
 				sprintf(event->loc_codes, "%s %s", loc2, loc1);
 				rc = RC_PLANAR_CPU;
-			}
-			else if (is_cpu(loc3)) {
+			} else if (is_cpu(loc3)) {
 				/* Rearrange loc as loc2, loc1, loc3 */
 				if (event->loc_codes != NULL)
 					free(event->loc_codes);
 				event->loc_codes =
 					malloc(strlen(loc1) +
-						     strlen(loc2) +
-						     strlen(loc3) + 3);
-				if (event->loc_codes == NULL) {
-					free(buf);
-					return 0;
-				}
+							strlen(loc2) +
+							strlen(loc3) + 3);
+				if (event->loc_codes == NULL)
+					goto out;
 
 				sprintf(event->loc_codes, "%s %s %s",
-					loc2, loc1, loc3);
+						loc2, loc1, loc3);
 				rc = RC_PLANAR_2CPU;
-			}
-		}
-	}
-
+			} /* is_cpu(loc3) */
+		} /* is_planar(loc2) */
+	} /* is_cpu(loc1) */
+out:
 	free(buf);
+	free(free_me);
 	return rc;
 }
 

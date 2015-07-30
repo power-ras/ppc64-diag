@@ -299,6 +299,8 @@ parse_lparcfg(char *param) {
 				log_msg(NULL, "Could not retrieve the value "
 					"for %s from /proc/ppc64/lparcfg",
 					param);
+				fclose(fp);
+				return -1;
 			}
 			pos++;
 			buffer[strlen(buffer)-1] = '\0';

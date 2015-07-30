@@ -255,10 +255,10 @@ ses_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 		desc = get_ses_fru_desc(fru_loc + strlen(fru_loc) + 1);
 
 		if (!curr) {
-			curr = malloc(sizeof(struct loc_code));
+			curr = calloc(1, sizeof(struct loc_code));
 			*list = curr;
 		} else {
-			curr->next = malloc(sizeof(struct loc_code));
+			curr->next = calloc(1, sizeof(struct loc_code));
 			curr = curr->next;
 		}
 		if (!curr) {
@@ -273,7 +273,6 @@ ses_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 
 			return -1;
 		}
-		memset(curr, 0, sizeof(struct loc_code));
 
 		/* fill loc_code structure */
 		strncpy(curr->code, vpd->location, LOCATION_LENGTH -1);

@@ -67,10 +67,10 @@ parse_rtas_workarea(struct loc_code *loc, const char *buf)
 	buf += sizeof(uint32_t);
 	for (i = 0; i < num; i++) {
 		if (!curr) {
-			curr = malloc(sizeof(struct loc_code));
+			curr = calloc(1, sizeof(struct loc_code));
 			loc = curr;
 		} else {
-			curr->next = malloc(sizeof(struct loc_code));
+			curr->next = calloc(1, sizeof(struct loc_code));
 			curr = curr->next;
 		}
 		if (!curr) {
@@ -79,7 +79,6 @@ parse_rtas_workarea(struct loc_code *loc, const char *buf)
 			free_indicator_list(loc);
 			return NULL;
 		}
-		memset(curr, 0, sizeof(struct loc_code));
 
 		/*
 		 * NOTE: Location code length and location code string combined

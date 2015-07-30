@@ -65,7 +65,7 @@ int print_opal_usr_hdr_scn(const struct opal_usr_hdr_scn *usrhdr)
 				print_line(entry,"Report to Hypervisor");
 			else
 				print_line(entry, "Report to Operating System");
-				entry = "";
+			entry = "";
 		}
 
 		if (usrhdr->action & OPAL_UH_ACTION_SERVICE) {

@@ -88,7 +88,6 @@ main(int argc, char **argv)
 {
 	int	c;
 	int	state;
-	int	index;
 	int	indicator;
 	int	rc = 0;
 	int	trunc = 0;
@@ -160,9 +159,9 @@ main(int argc, char **argv)
 	}
 
 	/* Option checking */
-	for (index = optind; index < argc; index++) {
+	if (optind < argc) {
 		fprintf(stderr,
-			"Unrecognized argument : %s\n\n", argv[index]);
+			"Unrecognized argument : %s\n\n", argv[optind]);
 		print_usage(argv[0]);
 		return 1;
 	}

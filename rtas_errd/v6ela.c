@@ -305,7 +305,7 @@ report_menugoal(struct event *event, struct rtas_priv_hdr_scn *privhdr,
 		struct rtas_usr_hdr_scn *usrhdr)
 {
 	char buffer[MAX_MENUGOAL_SIZE], menu_num_str[20];
-	char *msg;
+	char *msg = NULL;
 	int offset = 0;
 	uint menu_num = 0;
         long time_loc;

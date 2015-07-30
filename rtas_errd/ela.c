@@ -1117,6 +1117,9 @@ analyze_io_bus_error(struct event *event, int version, int error_type)
 	int sid, sed;
 	int rc = 0;
 
+	memset(&sigdev, 0, sizeof(struct device_ela));
+	memset(&sendev, 0, sizeof(struct device_ela));
+
 	/*
 	 * if this is version 3 or beyond, and there is a physical location
 	 * code in the log, then just return for SRN encoding

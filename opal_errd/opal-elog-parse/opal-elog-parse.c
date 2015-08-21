@@ -69,12 +69,18 @@ void print_usage(char *command)
 static int file_filter(const struct dirent *d)
 {
 	struct stat sbuf;
+	char filename[PATH_MAX];
+
 	if (d->d_type == DT_DIR)
 		return 0;
 	if (d->d_type == DT_REG)
 		return 1;
-	if (stat(d->d_name,&sbuf))
+
+	snprintf(filename, PATH_MAX, "%s/%s", opt_platform_dir, d->d_name);
+	if (stat(filename, &sbuf))
 		return 0;
+	if (S_ISREG(sbuf.st_mode))
+		return 1;
 	if (S_ISDIR(sbuf.st_mode))
 		return 0;
 	if (d->d_type == DT_UNKNOWN)

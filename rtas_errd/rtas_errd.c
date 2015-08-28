@@ -115,7 +115,7 @@ handle_rtas_event(struct event *event)
 	 * be done before the error log is written to disk, because
 	 * the log will be updated with the path to the dump
 	 */
-	dbg("Entering check_patform_dump()");
+	dbg("Entering check_platform_dump()");
 	check_platform_dump(event);
 
 	/* write the event to the platform file */
@@ -139,7 +139,7 @@ handle_rtas_event(struct event *event)
 	    case RTAS_HDR_TYPE_EPOW:
 		dbg("Entering check_epow()");
 		if (check_epow(event) <= 0) {
-			dbg("Recevied EPOW 0 (all is normal) event");
+			dbg("Received EPOW 0 (all is normal) event");
 			return 0;
 		}
 		break;
@@ -220,7 +220,7 @@ handle_rtas_event(struct event *event)
  * read_rtas_event
  * @brief Main routine to retrieve RTAS events from the kernel
  * 
- * Responsable for reading RTAS events from the kernel (via /proc)
+ * Responsible for reading RTAS events from the kernel (via /proc)
  * and calling handle_rtas_event() to process the event.
  */
 int
@@ -509,7 +509,7 @@ main(int argc, char *argv[])
 	sigact.sa_flags = SA_RESTART;
 	if (sigaction(SIGALRM, &sigact, NULL)) {
 		log_msg(NULL, "Could not initialize signal handler for "
-			"certian EPOW events (SIGALRM), %s", strerror(errno));
+			"certain EPOW events (SIGALRM), %s", strerror(errno));
 		goto error_out;
 	}
 

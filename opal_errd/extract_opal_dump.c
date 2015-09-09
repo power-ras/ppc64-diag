@@ -100,7 +100,6 @@ static void ack_dump(const char* dump_dir_path)
  */
 static void check_dup_dump_file(char *dumpname)
 {
-	struct stat sbuf;
 	char dump_path[PATH_MAX];
 	int rc;
 
@@ -111,7 +110,7 @@ static void check_dup_dump_file(char *dumpname)
 		return;
 	}
 
-	if (stat(dump_path, &sbuf) == -1)
+	if (access(dump_path, R_OK) == -1)
 		return;
 
 	if (unlink(dump_path) < 0)
@@ -379,7 +378,6 @@ int main(int argc, char *argv[])
 	int rc;
 	int fd;
 	fd_set exceptfds;
-	struct stat s;
 
 	setlogmask(LOG_UPTO(LOG_NOTICE));
 	openlog("OPAL_DUMP", LOG_CONS | LOG_PID | LOG_NDELAY | LOG_PERROR,
@@ -422,18 +420,29 @@ int main(int argc, char *argv[])
 	snprintf(sysfs_path, sizeof(sysfs_path), "%s/firmware/opal/dump",
 		 opt_sysfs);
 
-	rc = stat(sysfs_path, &s);
+	rc = access(sysfs_path, R_OK);
 	if (rc != 0) {
 		syslog(LOG_ERR, "Error accessing sysfs: %s (%d: %s)\n",
 		       sysfs_path, errno, strerror(errno));
 		goto err_out;
 	}
 
-	rc = stat(opt_output_dir, &s);
+	rc = access(opt_output_dir, W_OK);
 	if (rc != 0) {
-		syslog(LOG_ERR, "Error accessing output dir: %s (%d: %s)\n",
-		       opt_output_dir, errno, strerror(errno));
-		goto err_out;
+		if (errno == ENOENT) {
+			rc = mkdir(opt_output_dir,
+				   S_IRGRP | S_IRUSR | S_IWGRP | S_IWUSR | S_IXUSR);
+			if (rc != 0) {
+				syslog(LOG_ERR, "Error creating output directory:"
+						"%s (%d: %s)\n", opt_output_dir,
+						errno, strerror(errno));
+				goto err_out;
+			}
+		} else {
+			syslog(LOG_ERR, "Error accessing output dir: %s (%d: %s)\n",
+					opt_output_dir, errno, strerror(errno));
+			goto err_out;
+		}
 	}
 
 start:

@@ -1,5 +1,5 @@
 Name:	ppc64-diag
-Version:	2.6.9
+Version:	2.6.10
 Release:	1
 Summary:	PowerLinux Platform Diagnostics
 Group:		System Environment/Base
@@ -102,6 +102,10 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Sat Nov 7 2015 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.6.10
+- LED support on FSP based PowerNV platform
+- Few minor bugs fixes
+
 * Mon Jun 29 2015 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.6.9
 - Added Home Run (5887) enclosure diagnostics support
 - Added PHB hotplugging support for PowerKVM guest

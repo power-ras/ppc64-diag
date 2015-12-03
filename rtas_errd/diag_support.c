@@ -233,7 +233,7 @@ get_dt_status(char *dev)
 	char target[80];
 	char *ptr;
 	char *system_args[6] = {NULL, };		/* execv args		*/
-	char tmp_file[] = "/tmp/get_dt_files";
+	char tmp_file[] = "/tmp/get_dt_files-XXXXXX";
 	int fd;
 	pid_t cpid;					/* child pid		*/
 	int rc;						/* return value		*/

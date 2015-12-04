@@ -138,7 +138,7 @@ add_callout(struct event *event, char pri, int type, char *proc, char *loc,
 	}
 
 	if (!callout)
-		goto mem_fail;
+		return;
 
 	callout->priority = pri;
 	callout->type = type;
@@ -186,8 +186,8 @@ mem_fail:
 		free(callout->location);
 	if (callout->procedure)
 		free(callout->procedure);
-	if (callout)
-		free(callout);
+	free(callout);
+
 	log_msg(event, "Memory allocation failed");
 	return;
 }

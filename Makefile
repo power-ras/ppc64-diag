@@ -9,7 +9,7 @@ BUILD_DIR=$(CURDIR)
 
 SUBDIRS = common rtas_errd diags scripts ela lpd opal_errd opal-dump-parse
 
-LICENSE = COPYRIGHT
+LICENSE = COPYING
 
 DOXYGEN_CFG = doxygen.config
 TARBALL_FILES += $(DOXYGEN_CFG)

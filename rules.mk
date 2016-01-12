@@ -69,7 +69,7 @@ SHIPDIR = /tmp/$(PROJECT)-buildroot
 
 # Source tarball name and build directory
 TARBALL = $(PROJECT)-$(VERSION).tar.gz
-TARBALL_FILES = Makefile rules.mk COPYRIGHT $(SPECFILENAME)
+TARBALL_FILES = Makefile rules.mk COPYING $(SPECFILENAME)
 TB_DIR = $(PROJECT)-$(VERSION)
 COMMON_DIR = $(ROOT_DIR)/common
 

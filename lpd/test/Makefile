@@ -23,7 +23,7 @@ SES_TOOL_OBJS = sesdevices.o
 
 LED_TOOL_LIBS = -lrtas -lrtasevent -lservicelog
 
-LICENSE = COPYRIGHT
+LICENSE = COPYING
 
 all: $(CMDS)
 

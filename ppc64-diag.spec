@@ -3,7 +3,7 @@ Version:	2.6.10
 Release:	1
 Summary:	PowerLinux Platform Diagnostics
 Group:		System Environment/Base
-License:	Eclipse Public License (EPL) v1.0
+License:	GNU General Public License (GPL)
 URL:		http://sourceforge.net/projects/linux-diag/files/ppc64-diag/
 Packager:	IBM Corp.
 Vendor:		IBM Corp.
@@ -52,7 +52,7 @@ ln -sfv /usr/sbin/usysattn $RPM_BUILD_ROOT/usr/sbin/usysfault
 
 %files
 %defattr (-,root,root,-)
-%doc /usr/share/doc/packages/ppc64-diag/COPYRIGHT
+%doc /usr/share/doc/packages/ppc64-diag/COPYING
 %doc /usr/share/man/man8/*
 /usr/sbin/*
 %dir /etc/ppc64-diag

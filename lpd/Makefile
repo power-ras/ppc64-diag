@@ -18,7 +18,7 @@ USYSIDENT_OBJS = usysident.o
 COMMON_LIBS = -lrtas -lrtasevent -lservicelog
 LP_DIAG_LIBS = -lncurses -lmenu
 
-LICENSE = COPYRIGHT
+LICENSE = COPYING
 
 SUBDIRS = scripts man
 

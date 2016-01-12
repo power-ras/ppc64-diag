@@ -16,7 +16,7 @@
 
 const char *__platform_name[] = {
         "Unknown",
-        "PowerKVM Host",
+        "PowerNV",
         "PowerKVM pSeries Guest",
         "PowerVM pSeries LPAR",
 	/* Add new platforms name here */
@@ -34,7 +34,7 @@ get_platform(void)
 
 	while (fgets(line, LENGTH, fp)) {
 		if (strstr(line, "PowerNV")) {
-			rc = PLATFORM_POWERKVM;
+			rc = PLATFORM_POWERNV;
 			break;
 		} else if (strstr(line, "pSeries (emulated by qemu)")) {
 			rc = PLATFORM_POWERKVM_GUEST;

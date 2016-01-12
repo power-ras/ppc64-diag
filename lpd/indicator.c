@@ -143,7 +143,7 @@ probe_indicator(void)
 	case PLATFORM_PSERIES_LPAR:
 		platform = rtas_platform;
 		break;
-	case PLATFORM_POWERKVM:
+	case PLATFORM_POWERNV:
 		platform = opal_platform;
 		break;
 	case PLATFORM_POWERKVM_GUEST:

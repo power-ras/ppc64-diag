@@ -1,5 +1,5 @@
 Name:	ppc64-diag
-Version:	2.6.10
+Version:	2.7.0
 Release:	1
 Summary:	PowerLinux Platform Diagnostics
 Group:		System Environment/Base
@@ -10,15 +10,14 @@ Vendor:		IBM Corp.
 ExclusiveArch:  ppc ppc64 ppc64le
 BuildRequires:  libservicelog-devel, flex, perl, /usr/bin/yacc
 BuildRequires:  libvpd-devel
-BuildRequires:  librtas-devel >= 1.3.9
+BuildRequires:  librtas-devel >= 1.4.0
 BuildRequires:	ncurses-devel
 BuildRequires:	systemd-devel
 
 Requires:	servicelog
 Requires:	systemd
-# PCI hotplug support on PowerKVM guest depends on below
-# powerpc-utils version.
-Requires:	powerpc-utils >= 1.2.19
+# License change
+Requires:	powerpc-utils >= 1.3.0
 # Light Path Diagnostics depends on below lsvpd version.
 Requires:	lsvpd >= 1.7.1
 BuildRoot:	%{_tmppath}/%{name}-%{version}-build
@@ -102,6 +101,9 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Tue Jan 19 2016 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.7.0
+- Move from EPL to the GNU GPL license
+
 * Sat Nov 7 2015 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.6.10
 - LED support on FSP based PowerNV platform
 - Few minor bugs fixes

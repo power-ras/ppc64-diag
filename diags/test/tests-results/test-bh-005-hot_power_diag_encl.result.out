@@ -1,0 +1,97 @@
+DIAGNOSING sg8
+	Model    : 5888
+	Location : U5888.001.G123789
+
+  Overall Status:    NON_CRITICAL_FAULT
+
+  Drive Status
+    Disk 01 (Slot 00): ok
+    Disk 02 (Slot 01): ok
+    Disk 03 (Slot 02): ok
+    Disk 04 (Slot 03): ok
+    Disk 05 (Slot 04): ok
+    Disk 06 (Slot 05): ok
+    Disk 07 (Slot 06): ok
+    Disk 08 (Slot 07): ok
+    Disk 09 (Slot 08): ok
+    Disk 10 (Slot 09): ok
+    Disk 11 (Slot 10): ok
+    Disk 12 (Slot 11): ok
+    Disk 13 (Slot 12): ok
+    Disk 14 (Slot 13): ok
+    Disk 15 (Slot 14): ok
+    Disk 16 (Slot 15): ok
+    Disk 17 (Slot 16): ok
+    Disk 18 (Slot 17): ok
+    Disk 19 (Slot 18): ok
+    Disk 20 (Slot 19): ok
+    Disk 21 (Slot 20): ok
+    Disk 22 (Slot 21): ok
+    Disk 23 (Slot 22): ok
+    Disk 24 (Slot 23): ok
+    Disk 25 (Slot 24): ok
+    Disk 26 (Slot 25): ok
+    Disk 27 (Slot 26): ok
+    Disk 28 (Slot 27): ok
+    Disk 29 (Slot 28): ok
+    Disk 30 (Slot 29): ok
+
+  Power Supply Status
+    PS0 (Left):  ok
+      12V:  ok
+      3.3VA:  ok
+    PS1 (Right):  NON_CRITICAL_FAULT | DC_OVER_VOLTAGE | FAULT_LED
+      12V:  NON_CRITICAL_FAULT | NON_CRITICAL_OVER_VOLTAGE
+      3.3VA:  ok
+
+  Fan Status
+    Left Fan Assembly:
+      Power Supply:  ok
+      Fan Element 0:  ok
+      Fan Element 1:  ok
+      Fan Element 2:  ok
+      Fan Element 3:  ok
+    Right Fan Assembly:
+      Power Supply:  NON_CRITICAL_FAULT | FAULT_LED
+      Fan Element 0:  ok
+      Fan Element 1:  ok
+      Fan Element 2:  ok
+      Fan Element 3:  ok
+
+  Temperature Sensors
+    Left:
+      CRoC:  ok
+      PPC:  ok
+      Expander:  ok
+      Ambient 0:  ok
+      Ambient 1:  ok
+      Power Supply 0:  ok
+      Power Supply 1:  ok
+    Right:
+      CRoC:  ok
+      PPC:  ok
+      Expander:  ok
+      Ambient 0:  ok
+      Ambient 1:  ok
+      Power Supply 0:  NON_CRITICAL_FAULT | OVER_TEMPERATURE_WARNING
+      Power Supply 1:  NON_CRITICAL_FAULT | OVER_TEMPERATURE_WARNING
+
+  Enclosure Status:  ok
+
+  ERM Electronics Status
+    Left:  ok
+    Right:  ok
+
+  SAS Connector Status
+    Left - T1:  ok
+    Left - T2:  ok
+    Right - T1:  ok
+    Right - T2:  ok
+
+  PCIe Controller Status
+    Left:  ok
+    Right:  ok
+
+  Midplane Status:  ok
+
+

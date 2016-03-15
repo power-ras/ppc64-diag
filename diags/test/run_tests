@@ -1,0 +1,82 @@
+#!/bin/bash
+export RED='\e[0;31m'
+export GRN='\e[0;32m'
+export YLW='\e[0;33m'
+export NC='\e[0m' # No Colour
+
+export TSTDERR=`mktemp -d --tmpdir diag-run_tests.stderr.XXXXXXXXXX`
+export TSTDOUT=`mktemp -d --tmpdir diag-run_tests.stdout.XXXXXXXXXX`
+
+function run_binary {
+	if [[ -x $1 ]] ; then
+		$VALGRIND $1 $2 2>> $TSTDERR/$CUR_TEST.err 1>> $TSTDOUT/$CUR_TEST.out
+	else
+		echo "Fatal error, cannot execute binary '$1'. Did you make?";
+		rm -rf $TSTDERR $TSTDOUT
+		exit 1;
+	fi
+}
+
+function diff_with_result {
+	# Explicitly diff a file with an arbitary result file
+	if [[ $# -eq 1 ]] ; then
+		if ! diff -u $RESULT $1 ; then
+			register_fail;
+		fi
+	# Otherwise just diff result.out with stdout and result.err with stderr
+	else
+		if ! diff -u ${RESULT}.out $TSTDOUT/$CUR_TEST.out >> /dev/null ; then
+			register_fail;
+		fi
+		if ! diff -u ${RESULT}.err $TSTDERR/$CUR_TEST.err >> /dev/null ; then
+			register_fail;
+		fi
+	fi
+	register_success;
+
+}
+
+function register_success {
+	/bin/true
+}
+
+function register_fail {
+	echo "FAIL $CUR_TEST ";
+	rm -rf $TSTDERR $TSTDOUT
+	exit ${1:-1};
+}
+
+Q=0
+all_tests="tests/*"
+
+while getopts ":qt:" opt; do
+	case "$opt" in
+		q)
+			q=1
+			;;
+		t)
+			all_tests=$OPTARG
+	esac
+done
+
+for the_test in $all_tests; do
+	export CUR_TEST=$(basename $the_test)
+	export RESULT="tests-results/$CUR_TEST.result"
+	if [[ $q -eq 1 ]] ; then
+		source "$the_test"
+	else
+		source "$the_test"
+	fi
+	R=$?
+	if [[ $R -ne 0 ]] ; then
+		echo -e "${RED}$the_test FAILED with RC $R${NC}"
+		exit $R
+	fi
+	#reset for next test
+	rm $TSTDOUT/*
+	rm $TSTDERR/*
+done
+
+rm -rf $TSTDERR $TSTDOUT
+echo PASS
+exit 0

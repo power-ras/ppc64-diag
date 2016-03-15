@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#WARNING: DO NOT RUN THIS FILE DIRECTLY
+#  This file expects to be a part of ppc64-diag test suite
+#  Run this file with ../run_tests -t test-opal-elog-parse-004 -q
+
+
+run_binary "./bh_structs" ""
+#R=$?
+#if [ $R -ne 234 ]; then
+#	register_fail $R;
+#fi
+diff_with_result
+
+register_success

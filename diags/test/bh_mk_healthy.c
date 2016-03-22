@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include "encl_common.h"
 #include "bluehawk.h"
+#include "encl_util.h"
 #include "test_utils.h"
 
 extern struct bluehawk_diag_page2 healthy_page;
@@ -13,7 +15,8 @@ main(int argc, char **argv)
 		fprintf(stderr, "usage: %s pathname\n", argv[0]);
 		exit(1);
 	}
-	if (write_page2_to_file(&healthy_page, argv[1]) != 0)
+	if (write_page2_to_file(argv[1],
+		 &healthy_page, sizeof(healthy_page)) != 0)
 		exit(2);
 	exit(0);
 }

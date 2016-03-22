@@ -1,6 +1,7 @@
 #ifndef __TEST_UTILS_H__
 #define __TEST_UTILS_H__
 
+#include "encl_common.h"
 #include "bluehawk.h"
 
 extern enum element_status_code add_element_status(enum element_status_code cur,
@@ -25,7 +26,5 @@ extern enum element_status_code roll_up_sas_connector_status(
 extern enum element_status_code roll_up_scc_controller_status(
 					const struct bluehawk_diag_page2 *pg);
 extern unsigned int mean_temperature(const struct bluehawk_diag_page2 *pg);
-extern int write_page2_to_file(const struct bluehawk_diag_page2 *pg,
-							const char *path);
 
 #endif	/* __TEST_UTILS_H__ */

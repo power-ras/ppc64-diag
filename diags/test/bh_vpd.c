@@ -9,6 +9,8 @@
 #include <scsi/scsi_ioctl.h>
 #include <scsi/sg.h>
 #include <sys/ioctl.h>
+#include "encl_common.h"
+#include "encl_util.h"
 #include "bluehawk.h"
 
 /* from diag_encl.h */
@@ -81,14 +83,6 @@ get_vpd_page(int fd, char command, char page_nr, void *buf, int buf_len)
 	}
 
 	return rc;
-}
-
-static char *
-strzcpy(char *dest, const char *src, size_t n)
-{
-	memcpy(dest, src, n);
-	dest[n] = '\0';
-	return dest;
 }
 
 int

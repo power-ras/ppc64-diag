@@ -1,3 +1,4 @@
+#include "encl_common.h"
 #include "bluehawk.h"
 
 /*

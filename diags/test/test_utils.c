@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include "encl_common.h"
 #include "bluehawk.h"
 
 /*
@@ -102,23 +103,4 @@ mean_temperature(const struct bluehawk_diag_page2 *pg)
 	for (i = 0; i < 2*7; i++)
 		sum += sensors[i].temperature;
 	return sum / (2*7);
-}
-
-int
-write_page2_to_file(const struct bluehawk_diag_page2 *pg, const char *path)
-{
-	FILE *f;
-
-	f = fopen(path, "w");
-	if (!f) {
-		perror(path);
-		return -1;
-	}
-	if (fwrite(pg, sizeof(*pg), 1, f) != 1) {
-		perror(path);
-		fclose(f);
-		return -2;
-	}
-	fclose(f);
-	return 0;
 }

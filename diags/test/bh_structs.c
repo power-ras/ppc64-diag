@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include "encl_common.h"
 #include "bluehawk.h"
 
 #define szp(x) printf(#x " %zu\n", sizeof(struct x))

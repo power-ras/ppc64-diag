@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "encl_common.h"
 #include "bluehawk.h"
 #include "test_utils.h"
 
@@ -52,7 +53,7 @@ main(int argc, char **argv)
 	roll_up_temperature_sensor_status(&page);
 	page.overall_temp_sensor_status.temperature = mean_temperature(&page);
 
-	if (write_page2_to_file(&page, argv[1]) != 0)
+	if (write_page2_to_file(argv[1], &page, sizeof(page)) != 0)
 		exit(2);
 	exit(0);
 }

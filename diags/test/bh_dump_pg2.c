@@ -14,21 +14,6 @@
 #include "bluehawk.h"
 #include "test_utils.h"
 
-/* from diag_encl.h */
-struct sense_data_t {
-        uint8_t error_code;
-        uint8_t segment_numb;
-        uint8_t sense_key;
-        uint8_t info[4];
-        uint8_t add_sense_len;
-        uint8_t cmd_spec_info[4];
-        uint8_t add_sense_code;
-        uint8_t add_sense_code_qual;
-        uint8_t field_rep_unit_code;
-        uint8_t sense_key_spec[3];
-        uint8_t add_sense_bytes[0];
-};
-
 /* Dump bluehawk enclosure pg2 */
 int
 main(int argc, char **argv)

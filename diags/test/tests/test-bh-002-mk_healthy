@@ -2,14 +2,15 @@
 
 #WARNING: DO NOT RUN THIS FILE DIRECTLY
 #  This file expects to be a part of ppc64-diag test suite
-#  Run this file with ../run_tests -t test-opal-elog-parse-004 -q
+#  Run this file with ../run_tests -t test-bh-002-mk_healthy -q
 
 run_binary "./bh_mk_healthy" "bluehawk_healthy.pg2"
-#R=$?
-#if [ $R -ne 234 ]; then
-#	register_fail $R;
-#fi
-rm bluehawk_healthy.pg2
-diff_with_result
+R=$?
+if [ $R -ne 0 ]; then
+	register_fail $R;
+fi
 
+diff_with_result bluehawk_healthy.pg2
+
+rm bluehawk_healthy.pg2
 register_success

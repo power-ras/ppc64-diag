@@ -18,8 +18,13 @@ function run_binary {
 }
 
 function diff_with_result {
-	# Explicitly diff a file with an arbitary result file
-	if [[ $# -eq 1 ]] ; then
+	# Explicitly diff 2 arbitrary file
+	if [[ $# -eq 2 ]] ; then
+		if ! diff -u $1 $2 ; then
+			register_fail;
+		fi
+	# Explicitly diff a file with an arbitrary result file
+	elif [[ $# -eq 1 ]] ; then
 		if ! diff -u $RESULT $1 ; then
 			register_fail;
 		fi

@@ -2,20 +2,28 @@
 
 #WARNING: DO NOT RUN THIS FILE DIRECTLY
 #  This file expects to be a part of ppc64-diag test suite
-#  Run this file with ../run_tests -t test-opal-elog-parse-004 -q
+#  Run this file with ../run_tests -t test-bh-003-healthy_diag_encl -q
 
-
-run_binary "./bh_mk_healthy" "bluehawk_healthy.pg2"
 
 #copying vpd file
 cp bluehawk.vpd bluehawk_healthy.vpd
-run_binary "./../diag_encl" "-s -f bluehawk_healthy.pg2 sg8"
-#R=$?
-#if [ $R -ne 234 ]; then
-#	register_fail $R;
-#fi
+
+# Generate pg2 file
+run_binary "./bh_mk_healthy" "bluehawk_healthy.pg2"
+R=$?
+if [ $R -ne 0 ]; then
+	register_fail $R;
+fi
+
+run_binary "./../diag_encl" "-v -f bluehawk_healthy.pg2 sg8"
+R=$?
+if [ $R -ne 0 ]; then
+	register_fail $R;
+fi
+
+diff_with_result
+
 rm bluehawk_healthy.vpd
 rm bluehawk_healthy.pg2
-diff_with_result
 
 register_success

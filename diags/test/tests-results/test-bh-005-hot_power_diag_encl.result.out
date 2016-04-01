@@ -38,43 +38,43 @@ DIAGNOSING sg8
 
   Power Supply Status
     PS0 (Left):  ok
-      12V:  ok
-      3.3VA:  ok
+      12V:  ok | VOLTAGE = 12.00 volts
+      3.3VA:  ok | VOLTAGE = 3.50 volts
     PS1 (Right):  NON_CRITICAL_FAULT | DC_OVER_VOLTAGE | FAULT_LED
-      12V:  NON_CRITICAL_FAULT | NON_CRITICAL_OVER_VOLTAGE
-      3.3VA:  ok
+      12V:  NON_CRITICAL_FAULT | NON_CRITICAL_OVER_VOLTAGE | VOLTAGE = 12.00 volts
+      3.3VA:  ok | VOLTAGE = 3.50 volts
 
   Fan Status
     Left Fan Assembly:
-      Power Supply:  ok
-      Fan Element 0:  ok
-      Fan Element 1:  ok
-      Fan Element 2:  ok
-      Fan Element 3:  ok
+      Power Supply:  ok | Fan at 34-49% of highest speed
+      Fan Element 0:  ok | Fan at 34-49% of highest speed
+      Fan Element 1:  ok | Fan at 34-49% of highest speed
+      Fan Element 2:  ok | Fan at 34-49% of highest speed
+      Fan Element 3:  ok | Fan at 34-49% of highest speed
     Right Fan Assembly:
-      Power Supply:  NON_CRITICAL_FAULT | FAULT_LED
-      Fan Element 0:  ok
-      Fan Element 1:  ok
-      Fan Element 2:  ok
-      Fan Element 3:  ok
+      Power Supply:  NON_CRITICAL_FAULT | FAULT_LED | Fan at 1-16% of highest speed
+      Fan Element 0:  ok | Fan at 34-49% of highest speed
+      Fan Element 1:  ok | Fan at 34-49% of highest speed
+      Fan Element 2:  ok | Fan at 34-49% of highest speed
+      Fan Element 3:  ok | Fan at 34-49% of highest speed
 
   Temperature Sensors
     Left:
-      CRoC:  ok
-      PPC:  ok
-      Expander:  ok
-      Ambient 0:  ok
-      Ambient 1:  ok
-      Power Supply 0:  ok
-      Power Supply 1:  ok
+      CRoC:  ok | TEMPERATURE = 20C
+      PPC:  ok | TEMPERATURE = 20C
+      Expander:  ok | TEMPERATURE = 20C
+      Ambient 0:  ok | TEMPERATURE = 20C
+      Ambient 1:  ok | TEMPERATURE = 20C
+      Power Supply 0:  ok | TEMPERATURE = 20C
+      Power Supply 1:  ok | TEMPERATURE = 20C
     Right:
-      CRoC:  ok
-      PPC:  ok
-      Expander:  ok
-      Ambient 0:  ok
-      Ambient 1:  ok
-      Power Supply 0:  NON_CRITICAL_FAULT | OVER_TEMPERATURE_WARNING
-      Power Supply 1:  NON_CRITICAL_FAULT | OVER_TEMPERATURE_WARNING
+      CRoC:  ok | TEMPERATURE = 20C
+      PPC:  ok | TEMPERATURE = 20C
+      Expander:  ok | TEMPERATURE = 20C
+      Ambient 0:  ok | TEMPERATURE = 20C
+      Ambient 1:  ok | TEMPERATURE = 20C
+      Power Supply 0:  NON_CRITICAL_FAULT | OVER_TEMPERATURE_WARNING | TEMPERATURE = 60C
+      Power Supply 1:  NON_CRITICAL_FAULT | OVER_TEMPERATURE_WARNING | TEMPERATURE = 60C
 
   Enclosure Status:  ok
 
@@ -93,5 +93,30 @@ DIAGNOSING sg8
     Right:  ok
 
   Midplane Status:  ok
+
+
+Raw diagnostic page:
+
+0x0000:  02040144 00000000 01400000 01800000     [...D.....@......]
+0x0010:  01810000 01820000 01830000 01840000     [................]
+0x0020:  01850000 01860000 01870000 01880000     [................]
+0x0030:  01890000 018a0000 018b0000 018c0000     [................]
+0x0040:  018d0000 018e0000 018f0000 01900000     [................]
+0x0050:  01910000 01920000 01930000 01940000     [................]
+0x0060:  01950000 01960000 01970000 01980000     [................]
+0x0070:  01990000 019a0000 019b0000 019c0000     [................]
+0x0080:  019d0000 01000000 01000000 01000080     [................]
+0x0090:  01000080 01000080 01002d00 01002800     [..........-...(.]
+0x00a0:  01002800 01002800 01002800 01002800     [..(...(...(...(.]
+0x00b0:  01002800 01002800 01002800 01002800     [..(...(...(...(.]
+0x00c0:  01002800 01002800 01002800 03005004     [..(...(...(...P.]
+0x00d0:  03005004 01000080 01000083 01000083     [..P.............]
+0x00e0:  01000083 01000083 01000083 030000c1     [................]
+0x00f0:  01000083 01000083 01000083 01000083     [................]
+0x0100:  01000080 01000080 030008c0 01000000     [................]
+0x0110:  010004b0 0100015e 030804b0 0100015e     [.......^.......^]
+0x0120:  0105ff00 0105ff00 0105ff00 0105ff00     [................]
+0x0130:  0105ff00 01000000 01000000 01000000     [................]
+0x0140:  00000000 01000000                       [........        ]
 
 

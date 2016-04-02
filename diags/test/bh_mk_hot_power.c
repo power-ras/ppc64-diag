@@ -31,18 +31,18 @@ main(int argc, char **argv)
 	ps->byte0.status = ES_NONCRITICAL;
 	ps->dc_over_voltage = 1;
 	ps->fail = 1;
-	roll_up_power_supply_status(&page);
+	bh_roll_up_power_supply_status(&page);
 
 	vs = &page.voltage_sensor_sets[1].sensor_12V;
 	vs->byte0.status = ES_NONCRITICAL;
 	vs->warn_over = 1;
-	roll_up_voltage_sensor_status(&page);
+	bh_roll_up_voltage_sensor_status(&page);
 
 	fs = &page.fan_sets[1].power_supply;
 	fs->byte0.status = ES_NONCRITICAL;
 	fs->fail = 1;
 	fs->speed_code = 1;
-	roll_up_fan_status(&page);
+	bh_roll_up_fan_status(&page);
 
 	for (i = 0; i < 2; i++) {
 		ts = &page.temp_sensor_sets[1].power_supply[i];
@@ -50,8 +50,9 @@ main(int argc, char **argv)
 		ts->ot_warning = 1;
 		ts->temperature = TEMPERATURE_OFFSET + 60; // 60 deg C
 	}
-	roll_up_temperature_sensor_status(&page);
-	page.overall_temp_sensor_status.temperature = mean_temperature(&page);
+	bh_roll_up_temperature_sensor_status(&page);
+	page.overall_temp_sensor_status.temperature = bh_mean_temperature
+		(&page);
 
 	if (write_page2_to_file(argv[1], &page, sizeof(page)) != 0)
 		exit(2);

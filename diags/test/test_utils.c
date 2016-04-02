@@ -43,56 +43,56 @@ composite_status(const void* first_element, int nel)
 }
 
 enum element_status_code
-roll_up_disk_status(const struct bluehawk_diag_page2 *pg)
+bh_roll_up_disk_status(const struct bluehawk_diag_page2 *pg)
 {
 	return composite_status(&pg->disk_status, NR_DISKS_PER_BLUEHAWK);
 }
 
 enum element_status_code
-roll_up_esm_status(const struct bluehawk_diag_page2 *pg)
+bh_roll_up_esm_status(const struct bluehawk_diag_page2 *pg)
 {
 	return composite_status(&pg->esm_status, 2);
 }
 
 enum element_status_code
-roll_up_temperature_sensor_status(const struct bluehawk_diag_page2 *pg)
+bh_roll_up_temperature_sensor_status(const struct bluehawk_diag_page2 *pg)
 {
 	return composite_status(&pg->temp_sensor_sets, 2 * 7);
 }
 
 enum element_status_code
-roll_up_fan_status(const struct bluehawk_diag_page2 *pg)
+bh_roll_up_fan_status(const struct bluehawk_diag_page2 *pg)
 {
 	return composite_status(&pg->fan_sets, 2 * 5);
 }
 
 enum element_status_code
-roll_up_power_supply_status(const struct bluehawk_diag_page2 *pg)
+bh_roll_up_power_supply_status(const struct bluehawk_diag_page2 *pg)
 {
 	return composite_status(&pg->ps_status, 2);
 }
 
 enum element_status_code
-roll_up_voltage_sensor_status(const struct bluehawk_diag_page2 *pg)
+bh_roll_up_voltage_sensor_status(const struct bluehawk_diag_page2 *pg)
 {
 	return composite_status(&pg->voltage_sensor_sets, 2 * 2);
 }
 
 enum element_status_code
-roll_up_sas_connector_status(const struct bluehawk_diag_page2 *pg)
+bh_roll_up_sas_connector_status(const struct bluehawk_diag_page2 *pg)
 {
 	return composite_status(&pg->sas_connector_status, 4);
 }
 
 /* Is this valid? */
 enum element_status_code
-roll_up_scc_controller_status(const struct bluehawk_diag_page2 *pg)
+bh_roll_up_scc_controller_status(const struct bluehawk_diag_page2 *pg)
 {
 	return composite_status(&pg->scc_controller_status, 2);
 }
 
 unsigned int
-mean_temperature(const struct bluehawk_diag_page2 *pg)
+bh_mean_temperature(const struct bluehawk_diag_page2 *pg)
 {
 	struct temperature_sensor_status *sensors =
 				(struct temperature_sensor_status *)

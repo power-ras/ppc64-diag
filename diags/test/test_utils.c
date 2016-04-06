@@ -1,8 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+
 #include "encl_common.h"
 #include "bluehawk.h"
+#include "homerun.h"
 
 /*
  * Factor byte0->status into the composite status cur.  A missing element
@@ -42,6 +44,7 @@ composite_status(const void* first_element, int nel)
 	return s;
 }
 
+/* bluehawk specific call */
 enum element_status_code
 bh_roll_up_disk_status(const struct bluehawk_diag_page2 *pg)
 {
@@ -103,4 +106,59 @@ bh_mean_temperature(const struct bluehawk_diag_page2 *pg)
 	for (i = 0; i < 2*7; i++)
 		sum += sensors[i].temperature;
 	return sum / (2*7);
+}
+
+/* homerun specific call */
+enum element_status_code
+hr_roll_up_disk_status(const struct hr_diag_page2 *pg)
+{
+	return composite_status(&pg->disk_status, HR_NR_DISKS);
+}
+
+
+enum element_status_code
+hr_roll_up_esm_status(const struct hr_diag_page2 *pg)
+{
+	return composite_status(&pg->esm_status, HR_NR_ESM_CONTROLLERS);
+}
+
+enum element_status_code
+hr_roll_up_temperature_sensor_status(const struct hr_diag_page2 *pg)
+{
+	return composite_status(&pg->temp_sensor_sets,
+				HR_NR_TEMP_SENSOR_SET * 4);
+}
+
+enum element_status_code
+hr_roll_up_fan_status(const struct hr_diag_page2 *pg)
+{
+	return composite_status(&pg->fan_sets,
+				HR_NR_FAN_SET * HR_NR_FAN_ELEMENT_PER_SET);
+}
+
+enum element_status_code
+hr_roll_up_power_supply_status(const struct hr_diag_page2 *pg)
+{
+	return composite_status(&pg->ps_status, HR_NR_POWER_SUPPLY);
+}
+
+enum element_status_code
+hr_roll_up_voltage_sensor_status(const struct hr_diag_page2 *pg)
+{
+	return composite_status(&pg->voltage_sensor_sets,
+				HR_NR_VOLTAGE_SENSOR_SET * 3);
+}
+
+unsigned int
+hr_mean_temperature(const struct hr_diag_page2 *pg)
+{
+	struct temperature_sensor_status *sensors =
+				(struct temperature_sensor_status *)
+				&pg->temp_sensor_sets;
+	int sum = 0;
+	int i;
+
+	for (i = 0; i < HR_NR_TEMP_SENSOR_SET * 4; i++)
+		sum += sensors[i].temperature;
+	return sum / (HR_NR_TEMP_SENSOR_SET * 4);
 }

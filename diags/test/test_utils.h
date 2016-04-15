@@ -1,9 +1,17 @@
 #ifndef __TEST_UTILS_H__
 #define __TEST_UTILS_H__
 
-#include "encl_common.h"
+#include <arpa/inet.h>
+
 #include "bluehawk.h"
+#include "encl_common.h"
 #include "homerun.h"
+
+/* Convert host byte order to network byte order */
+static inline void convert_htons(uint16_t *offset)
+{
+	*offset = htons(*offset);
+}
 
 extern enum element_status_code add_element_status(enum element_status_code cur,
 				const struct element_status_byte0 *byte0);

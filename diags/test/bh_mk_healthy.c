@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "encl_common.h"
+
 #include "bluehawk.h"
+#include "encl_common.h"
 #include "encl_util.h"
 #include "test_utils.h"
 
@@ -15,6 +16,14 @@ main(int argc, char **argv)
 		fprintf(stderr, "usage: %s pathname\n", argv[0]);
 		exit(1);
 	}
+
+	convert_htons(&healthy_page.page_length);
+	convert_htons(&healthy_page.overall_voltage_status.voltage);
+	convert_htons(&healthy_page.voltage_sensor_sets[0].sensor_12V.voltage);
+	convert_htons(&healthy_page.voltage_sensor_sets[0].sensor_3_3VA.voltage);
+	convert_htons(&healthy_page.voltage_sensor_sets[1].sensor_12V.voltage);
+	convert_htons(&healthy_page.voltage_sensor_sets[1].sensor_3_3VA.voltage);
+
 	if (write_page2_to_file(argv[1],
 		 &healthy_page, sizeof(healthy_page)) != 0)
 		exit(2);

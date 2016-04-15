@@ -16,6 +16,15 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
+	convert_htons(&healthy_page.page_length);
+	convert_htons(&healthy_page.voltage_sensor_overall_status.voltage);
+	convert_htons(&healthy_page.voltage_sensor_sets[0].sensor_12V.voltage);
+	convert_htons(&healthy_page.voltage_sensor_sets[0].sensor_5V.voltage);
+	convert_htons(&healthy_page.voltage_sensor_sets[0].sensor_5VA.voltage);
+	convert_htons(&healthy_page.voltage_sensor_sets[1].sensor_12V.voltage);
+	convert_htons(&healthy_page.voltage_sensor_sets[1].sensor_5V.voltage);
+	convert_htons(&healthy_page.voltage_sensor_sets[1].sensor_5VA.voltage);
+
 	if (write_page2_to_file(argv[1],
 				&healthy_page, sizeof(healthy_page)) != 0)
 		exit(2);

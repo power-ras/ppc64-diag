@@ -23,6 +23,14 @@ main(int argc, char **argv)
 		fprintf(stderr, "usage: %s pathname\n", argv[0]);
 		exit(1);
 	}
+
+	convert_htons(&healthy_page.page_length);
+	convert_htons(&healthy_page.overall_voltage_status.voltage);
+	convert_htons(&healthy_page.voltage_sensor_sets[0].sensor_12V.voltage);
+	convert_htons(&healthy_page.voltage_sensor_sets[0].sensor_3_3VA.voltage);
+	convert_htons(&healthy_page.voltage_sensor_sets[1].sensor_12V.voltage);
+	convert_htons(&healthy_page.voltage_sensor_sets[1].sensor_3_3VA.voltage);
+
 	memcpy(&page, &healthy_page, sizeof(page));
 
 	page.non_crit = 1;

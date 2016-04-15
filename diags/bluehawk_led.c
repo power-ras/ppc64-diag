@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012, 2015 IBM Corporation
+ * Copyright (C) 2012, 2015, 2016 IBM Corporation
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <fcntl.h>
+#include <arpa/inet.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <scsi/scsi.h>
@@ -315,7 +316,8 @@ bluehawk_set_led(const char *enclosure, const char *component, int fault,
 	}
 
 	cp.page_code = 2;
-	cp.page_length = sizeof(cp) - 4;
+	/* Convert host byte order to network byte order */
+	cp.page_length = htons(sizeof(cp) - 4);
 	cp.generation_code = 0;
 
 	rc = do_ses_cmd(fd, SEND_DIAGNOSTIC, 0, 0x10,  6, SG_DXFER_TO_DEV, &cp,

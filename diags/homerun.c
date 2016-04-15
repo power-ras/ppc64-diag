@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 IBM Corporation
+ * Copyright (C) 2015, 2016 IBM Corporation
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <arpa/inet.h>
 #include <scsi/scsi.h>
 #include <scsi/sg.h>
 
@@ -383,6 +384,8 @@ hr_turn_on_fault_leds(struct hr_diag_page2 *dp, int fd)
 
 		ctrl_page->page_code = 2;
 		ctrl_page->page_length = sizeof(struct hr_ctrl_page2) - 4;
+		/* Convert host byte order to network byte order */
+		ctrl_page->page_length = htons(ctrl_page->page_length);
 		ctrl_page->generation_code = 0;
 		result = do_ses_cmd(fd, SEND_DIAGNOSTIC, 0, 0x10, 6,
 				    SG_DXFER_TO_DEV, ctrl_page,

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 IBM Corporation
+ * Copyright (C) 2015, 2016 IBM Corporation
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,6 +20,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 #include <scsi/scsi.h>
 #include <scsi/sg.h>
 
@@ -264,7 +265,8 @@ homerun_set_led(const char *enclosure,
 	}
 
 	cp.page_code = 2;
-	cp.page_length = sizeof(cp) - 4;
+	/* Convert host byte order to network byte order */
+	cp.page_length = htons(sizeof(cp) - 4);
 	cp.generation_code = 0;
 
 	rc = do_ses_cmd(fd, SEND_DIAGNOSTIC,

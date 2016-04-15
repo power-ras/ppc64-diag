@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012, 2015 IBM Corporation
+ * Copyright (C) 2012, 2015, 2016 IBM Corporation
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,6 +20,7 @@
 #define __BLUEHAWK_H__
 
 #include <stdint.h>
+#include <asm/byteorder.h>
 
 #include "encl_common.h"
 
@@ -60,6 +61,7 @@ struct sas_connector_status {
 	/* from 4.3.18, 4.3.19 */
 	struct element_status_byte0 byte0;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t ident:1;
 	uint8_t connector_type:7;	/* = 5 */
 
@@ -68,15 +70,31 @@ struct sas_connector_status {
 	uint8_t reserved2:1;
 	uint8_t fail:1;
 	uint8_t reserved3:6;
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t connector_type:7;	/* = 5 */
+	uint8_t ident:1;
+
+	uint8_t connector_physical_link;	/* = 0xff */
+
+	uint8_t reserved3:6;
+	uint8_t fail:1;
+	uint8_t reserved2:1;
+#endif
 };
 
 struct scc_controller_overall_status {
 	/* from 4.3.20 */
 	struct element_status_byte0 byte0;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t ident:1;
 	uint8_t fail:1;
 	uint8_t reserved2:6;
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved2:6;
+	uint8_t fail:1;
+	uint8_t ident:1;
+#endif
 
 	uint8_t reserved3;
 
@@ -87,12 +105,21 @@ struct scc_controller_element_status {
 	/* from 4.3.21 */
 	struct element_status_byte0 byte0;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t ident:1;
 	uint8_t fail:1;
 	uint8_t reserved2:6;
 
 	uint8_t reserved3:7;
 	uint8_t report:1;
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved2:6;
+	uint8_t fail:1;
+	uint8_t ident:1;
+
+	uint8_t report:1;
+	uint8_t reserved3:7;
+#endif
 
 	uint8_t reserved4;
 };
@@ -101,9 +128,15 @@ struct midplane_status {
 	/* from 4.3.22, 4.3.23 */
 	struct element_status_byte0 byte0;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t ident:1;
 	uint8_t fail:1;
 	uint8_t reserved2:6;
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved2:6;
+	uint8_t fail:1;
+	uint8_t ident:1;
+#endif
 
 	uint8_t reserved3;
 
@@ -119,12 +152,22 @@ struct midplane_status {
 struct bluehawk_diag_page2 {
 	uint8_t page_code;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t reserved1:3;
 	uint8_t invop:1;
 	uint8_t info:1;
 	uint8_t non_crit:1;
 	uint8_t crit:1;
 	uint8_t unrecov:1;
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t unrecov:1;
+	uint8_t crit:1;
+	uint8_t non_crit:1;
+	uint8_t info:1;
+	uint8_t invop:1;
+	uint8_t reserved1:3;
+#endif
 
 	uint16_t page_length;
 
@@ -166,6 +209,7 @@ struct disk_ctrl {
 
 	uint8_t reserved2;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t reserved3:1;
 	uint8_t do_not_remove:1;
 	uint8_t reserved4:1;
@@ -181,6 +225,24 @@ struct disk_ctrl {
 	uint8_t enable_byp_a:1;
 	uint8_t enable_byp_b:1;
 	uint8_t reserved7:2;
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved5:1;
+	uint8_t rqst_ident:1;
+	uint8_t rqst_remove:1;
+	uint8_t rqst_insert:1;
+	uint8_t rqst_missing:1;
+	uint8_t reserved4:1;
+	uint8_t do_not_remove:1;
+	uint8_t reserved3:1;
+
+	uint8_t reserved7:2;
+	uint8_t enable_byp_b:1;
+	uint8_t enable_byp_a:1;
+	uint8_t device_off:1;
+	uint8_t rqst_fail:1;	/* AKA rqst_fault */
+	uint8_t reserved6:2;
+#endif
 };
 
 struct fan_ctrl_set {
@@ -192,6 +254,7 @@ struct fan_ctrl_set {
 struct sas_connector_ctrl {
 	struct common_ctrl common_ctrl;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t rqst_ident:1;
 	uint8_t reserved2:7;
 
@@ -200,14 +263,31 @@ struct sas_connector_ctrl {
 	uint8_t reserved4:1;
 	uint8_t rqst_fail:1;
 	uint8_t reserved5:6;
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved2:7;
+	uint8_t rqst_ident:1;
+
+	uint8_t reserved3;
+
+	uint8_t reserved5:6;
+	uint8_t rqst_fail:1;
+	uint8_t reserved4:1;
+#endif
 };
 
 struct scc_controller_ctrl {
 	struct common_ctrl common_ctrl;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t rqst_ident:1;
 	uint8_t rqst_fail:1;
 	uint8_t reserved2:6;
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved2:6;
+	uint8_t rqst_fail:1;
+	uint8_t rqst_ident:1;
+#endif
 
 	uint16_t reserved3;
 };
@@ -216,9 +296,15 @@ struct scc_controller_ctrl {
 struct midplane_ctrl {
 	struct common_ctrl common_ctrl;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t rqst_ident:1;
 	uint8_t rqst_fail:1;
 	uint8_t reserved2:6;
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved2:6;
+	uint8_t rqst_fail:1;
+	uint8_t rqst_ident:1;
+#endif
 
 	uint16_t reserved3;
 };
@@ -226,11 +312,19 @@ struct midplane_ctrl {
 struct bluehawk_ctrl_page2 {
 	uint8_t page_code;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t reserved1:4;
 	uint8_t info:1;
 	uint8_t non_crit:1;
 	uint8_t crit:1;
 	uint8_t unrecov:1;
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t unrecov:1;
+	uint8_t crit:1;
+	uint8_t non_crit:1;
+	uint8_t info:1;
+	uint8_t reserved1:4;
+#endif
 
 	uint16_t page_length;
 

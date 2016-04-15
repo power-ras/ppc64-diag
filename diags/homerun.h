@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 IBM Corporation
+ * Copyright (C) 2015, 2016 IBM Corporation
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,6 +20,7 @@
 #define __HOMERUN_H__
 
 #include <stdint.h>
+#include <asm/byteorder.h>
 
 #include "encl_common.h"
 
@@ -71,12 +72,22 @@ struct hr_diag_page2 {
 	uint8_t page_code;	/* 0x02 */
 
 	/* byte 1 */
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t reserved1:3;
 	uint8_t invop:1;
 	uint8_t info:1;
 	uint8_t non_crit:1;
 	uint8_t crit:1;
 	uint8_t unrecov:1;
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t unrecov:1;
+	uint8_t crit:1;
+	uint8_t non_crit:1;
+	uint8_t info:1;
+	uint8_t invop:1;
+	uint8_t reserved1:3;
+#endif
 
 	/* byte 2-3 */
 	uint16_t page_length;	/* 0x10C */
@@ -154,6 +165,7 @@ struct hr_disk_ctrl {
 
 	uint8_t reserved2;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t rqst_active:1;
 	uint8_t do_not_remove:1;
 	uint8_t reserved3:1;
@@ -169,6 +181,24 @@ struct hr_disk_ctrl {
 	uint8_t enable_bypa:1;
 	uint8_t enable_bypb:1;
 	uint8_t reserved6:2;
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved4:1;
+	uint8_t rqst_ident:1;
+	uint8_t rqst_remove:1;
+	uint8_t rqst_insert:1;
+	uint8_t rqst_missing:1;
+	uint8_t reserved3:1;
+	uint8_t do_not_remove:1;
+	uint8_t rqst_active:1;
+
+	uint8_t reserved6:2;
+	uint8_t enable_bypb:1;
+	uint8_t enable_bypa:1;
+	uint8_t device_off:1;
+	uint8_t rqst_fail:1;
+	uint8_t reserved5:2;
+#endif
 };
 
 struct hr_fan_ctrl_set {
@@ -185,11 +215,20 @@ struct hr_ctrl_page2 {
 	uint8_t page_code;	/* 0x02 */
 
 	/* byte 2 */
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t reserved1:4;
 	uint8_t info:1;
 	uint8_t non_crit:1;
 	uint8_t crit:1;
 	uint8_t unrecov:1;
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t unrecov:1;
+	uint8_t crit:1;
+	uint8_t non_crit:1;
+	uint8_t info:1;
+	uint8_t reserved1:4;
+#endif
 
 	/* byte 3 */
 	uint16_t page_length;	/* 0x10c */

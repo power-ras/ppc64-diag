@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
+#include <arpa/inet.h>
 
 #include "encl_common.h"
 #include "encl_util.h"
@@ -235,7 +236,7 @@ print_voltage_sensor_status(struct voltage_sensor_status *s)
 	if (cmd_opts.verbose)
 		/* between +327.67 to -327.68
 		 */
-		printf(" | VOLTAGE = %.2f volts", s->voltage / 100.0);
+		printf(" | VOLTAGE = %.2f volts", ntohs(s->voltage) / 100.0);
 	printf("\n");
 }
 

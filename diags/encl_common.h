@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 IBM Corporation
+ * Copyright (C) 2015, 2016 IBM Corporation
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -28,6 +28,7 @@
  */
 
 #include <stdint.h>
+#include <asm/byteorder.h>
 #include <servicelog-1/servicelog.h>
 
 #include "encl_util.h"
@@ -104,21 +105,42 @@ enum element_status_code {
 };
 
 struct element_status_byte0 {
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t reserved1:1;	/* = 0 */
 	uint8_t prdfail:1;	/* not implemented */
 	uint8_t disabled:1;	/* not implemented */
 	uint8_t swap:1;
 	uint8_t status:4;	/* 0/1 or element_status_code */
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t status:4;	/* 0/1 or element_status_code */
+	uint8_t swap:1;
+	uint8_t disabled:1;	/* not implemented */
+	uint8_t prdfail:1;	/* not implemented */
+	uint8_t reserved1:1;	/* = 0 */
+#endif
 };
 
 struct overall_disk_status_byte1 {
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t device_environment:3;	/* = 010b */
 	uint8_t slot_address:5;
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t slot_address:5;
+	uint8_t device_environment:3;	/* = 010b */
+#endif
 };
 
 struct disk_element_status_byte1 {
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t hot_swap:1;		/* = 1 */
 	uint8_t slot_address:7;
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t slot_address:7;
+	uint8_t hot_swap:1;		/* = 1 */
+#endif
 };
 
 struct disk_status {
@@ -130,6 +152,7 @@ struct disk_status {
 		struct disk_element_status_byte1 element_status;
 	} byte1;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t app_client_bypassed_a:1;
 	uint8_t do_not_remove:1;
 	uint8_t enclosure_bypassed_a:1;
@@ -147,12 +170,33 @@ struct disk_status {
 	uint8_t bypassed_b:1;
 	uint8_t device_bypassed_a:1;
 	uint8_t device_bypassed_b:1;
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t report:1;
+	uint8_t ident:1;
+	uint8_t rmv:1;
+	uint8_t ready_to_insert:1;
+	uint8_t enclosure_bypassed_b:1;
+	uint8_t enclosure_bypassed_a:1;
+	uint8_t do_not_remove:1;
+	uint8_t app_client_bypassed_a:1;
+
+	uint8_t device_bypassed_b:1;
+	uint8_t device_bypassed_a:1;
+	uint8_t bypassed_b:1;
+	uint8_t bypassed_a:1;
+	uint8_t device_off:1;
+	uint8_t fail:1;		/* AKA fault_reqstd */
+	uint8_t fault_sensed:1;
+	uint8_t app_client_bypassed_b:1;
+#endif
 };
 
 struct enclosure_status {
 	struct element_status_byte0 byte0;
 	/* status is always 1. */
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t ident:1;
 	uint8_t reserved2:7;
 
@@ -163,11 +207,25 @@ struct enclosure_status {
 	uint8_t reserved4:6;
 	uint8_t failure_requested:1;
 	uint8_t warning_requested:1;
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved2:7;
+	uint8_t ident:1;
+
+	uint8_t warning_indication:1;
+	uint8_t fail:1;		/* AKA failure_indication */
+	uint8_t reserved3:6;
+
+	uint8_t warning_requested:1;
+	uint8_t failure_requested:1;
+	uint8_t reserved4:6;
+#endif
 };
 
 struct esm_status {
 	struct element_status_byte0 byte0;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t ident:1;
 	uint8_t fail:1;
 	uint8_t reserved2:6;
@@ -177,11 +235,23 @@ struct esm_status {
 
 	uint8_t hot_swap:1;
 	uint8_t reserved4:7;
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved2:6;
+	uint8_t fail:1;
+	uint8_t ident:1;
+
+	uint8_t report:1;
+	uint8_t reserved3:7;
+
+	uint8_t reserved4:7;
+	uint8_t hot_swap:1;
+#endif
 };
 
 struct temperature_sensor_status {
 	struct element_status_byte0 byte0;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t ident:1;
 	uint8_t reserved2:7;
 
@@ -192,14 +262,30 @@ struct temperature_sensor_status {
 	uint8_t ot_warning:1;
 	uint8_t ut_failure:1;
 	uint8_t ut_warning:1;
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved2:7;
+	uint8_t ident:1;
+
+	uint8_t temperature;
+
+	uint8_t ut_warning:1;
+	uint8_t ut_failure:1;
+	uint8_t ot_warning:1;
+	uint8_t ot_failure:1;
+	uint8_t reserved3:4;
+#endif
 };
 
 struct fan_status {
 	struct element_status_byte0 byte0;
 
-	uint16_t ident:1;
-	uint16_t reserved2:4;
-	uint16_t fan_speed:11;
+#if defined (__BIG_ENDIAN_BITFIELD)
+	uint8_t ident:1;
+	uint8_t reserved2:4;
+	uint8_t fan_speed_msb:3;
+
+	uint8_t fan_speed_lsb;
 
 	uint8_t hot_swap:1;
 	uint8_t fail:1;
@@ -207,11 +293,27 @@ struct fan_status {
 	uint8_t off:1;
 	uint8_t reserved3:1;
 	uint8_t speed_code:3;
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t fan_speed_msb:3;
+	uint8_t reserved2:4;
+	uint8_t ident:1;
+
+	uint8_t fan_speed_lsb;
+
+	uint8_t speed_code:3;
+	uint8_t reserved3:1;
+	uint8_t off:1;
+	uint8_t rqsted_on:1;
+	uint8_t fail:1;
+	uint8_t hot_swap:1;
+#endif
 } __attribute__((packed));
 
 struct power_supply_status {
 	struct element_status_byte0 byte0;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t ident:1;
 	uint8_t reserved2:7;
 
@@ -229,11 +331,32 @@ struct power_supply_status {
 	uint8_t temp_warn:1;
 	uint8_t ac_fail:1;
 	uint8_t dc_fail:1;
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved2:7;
+	uint8_t ident:1;
+
+	uint8_t reserved4:1;
+	uint8_t dc_over_current:1;
+	uint8_t dc_under_voltage:1;
+	uint8_t dc_over_voltage:1;
+	uint8_t reserved3:4;
+
+	uint8_t dc_fail:1;
+	uint8_t ac_fail:1;
+	uint8_t temp_warn:1;
+	uint8_t ovrtmp_fail:1;
+	uint8_t off:1;
+	uint8_t rqsted_on:1;
+	uint8_t fail:1;
+	uint8_t hot_swap:1;
+#endif
 };
 
 struct voltage_sensor_status {
 	struct element_status_byte0 byte0;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t ident:1;
 	uint8_t reserved2:3;
 	uint8_t warn_over:1;
@@ -241,23 +364,42 @@ struct voltage_sensor_status {
 	uint8_t crit_over:1;
 	uint8_t crit_under:1;
 
-	int16_t voltage;
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t crit_under:1;
+	uint8_t crit_over:1;
+	uint8_t warn_under:1;
+	uint8_t warn_over:1;
+	uint8_t reserved2:3;
+	uint8_t ident:1;
+#endif
+
+	uint16_t voltage;
 };
 
 
 /* Diagnostic page 2 layout for SEND DIAGNOSTIC command */
 
 struct common_ctrl {
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t select:1;
 	uint8_t prdfail:1;
 	uint8_t disable:1;
 	uint8_t rst_swap:1;
 	uint8_t reserved1:4;
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved1:4;
+	uint8_t rst_swap:1;
+	uint8_t disable:1;
+	uint8_t prdfail:1;
+	uint8_t select:1;
+#endif
 };
 
 struct enclosure_ctrl {
 	struct common_ctrl common_ctrl;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t rqst_ident:1;
 	uint8_t reserved2:7;
 
@@ -266,11 +408,23 @@ struct enclosure_ctrl {
 	uint8_t reserved4:6;
 	uint8_t rqst_fail:1;
 	uint8_t rqst_warn:1;
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved2:7;
+	uint8_t rqst_ident:1;
+
+	uint8_t reserved3;
+
+	uint8_t rqst_warn:1;
+	uint8_t rqst_fail:1;
+	uint8_t reserved4:6;
+#endif
 };
 
 struct esm_ctrl {
 	struct common_ctrl common_ctrl;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t rqst_ident:1;
 	uint8_t rqst_fail:1;
 	uint8_t reserved2:6;
@@ -278,12 +432,22 @@ struct esm_ctrl {
 	uint8_t reserved3:7;
 	uint8_t select_element:1;
 
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved2:6;
+	uint8_t rqst_fail:1;
+	uint8_t rqst_ident:1;
+
+	uint8_t select_element:1;
+	uint8_t reserved3:7;
+#endif
+
 	uint8_t reserved4;
 };
 
 struct fan_ctrl {
 	struct common_ctrl common_ctrl;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t rqst_ident:1;
 	uint8_t reserved2:7;
 
@@ -294,11 +458,25 @@ struct fan_ctrl {
 	uint8_t rqst_on:1;
 	uint8_t reserved5:2;
 	uint8_t requested_speed_code:3;
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved2:7;
+	uint8_t rqst_ident:1;
+
+	uint8_t reserved3;
+
+	uint8_t requested_speed_code:3;
+	uint8_t reserved5:2;
+	uint8_t rqst_on:1;
+	uint8_t rqst_fail:1;
+	uint8_t reserved4:1;
+#endif
 };
 
 struct power_supply_ctrl {
 	struct common_ctrl common_ctrl;
 
+#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t rqst_ident:1;
 	uint8_t reserved2:7;
 
@@ -307,6 +485,17 @@ struct power_supply_ctrl {
 	uint8_t reserved4:1;
 	uint8_t rqst_fail:1;
 	uint8_t reserved5:6;
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved2:7;
+	uint8_t rqst_ident:1;
+
+	uint8_t reserved3;
+
+	uint8_t reserved5:6;
+	uint8_t rqst_fail:1;
+	uint8_t reserved4:1;
+#endif
 };
 
 

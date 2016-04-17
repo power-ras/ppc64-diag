@@ -74,7 +74,7 @@ print_raw_data(FILE *ostream, char *data, int data_len)
 		/* print ascii */
 		len += fprintf(ostream, "    [");
 		for (i = 0; i < 16; i++) {
-			if (a <= end) {
+			if (a < end) {
 				if ((*a >= ' ') && (*a <= '~'))
 					len += fprintf(ostream, "%c", *a);
 				else

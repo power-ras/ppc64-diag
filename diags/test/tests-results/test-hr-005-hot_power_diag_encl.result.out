@@ -1,0 +1,101 @@
+DIAGNOSING sg8
+	Model    : 5887
+	Location : U5887.001.G123789
+
+
+  Overall Status:    NON_CRITICAL_FAULT
+
+  Drive Status
+    Disk 01 (Slot 00): ok
+    Disk 02 (Slot 01): ok
+    Disk 03 (Slot 02): ok
+    Disk 04 (Slot 03): ok
+    Disk 05 (Slot 04): ok
+    Disk 06 (Slot 05): ok
+    Disk 07 (Slot 06): ok
+    Disk 08 (Slot 07): ok
+    Disk 09 (Slot 08): ok
+    Disk 10 (Slot 09): ok
+    Disk 11 (Slot 10): ok
+    Disk 12 (Slot 11): ok
+    Disk 13 (Slot 12): ok
+    Disk 14 (Slot 13): ok
+    Disk 15 (Slot 14): ok
+    Disk 16 (Slot 15): ok
+    Disk 17 (Slot 16): ok
+    Disk 18 (Slot 17): ok
+    Disk 19 (Slot 18): ok
+    Disk 20 (Slot 19): ok
+    Disk 21 (Slot 20): ok
+    Disk 22 (Slot 21): ok
+    Disk 23 (Slot 22): ok
+    Disk 24 (Slot 23): ok
+
+  Power Supply Status
+    PS0 (Left):  ok
+      12V:  ok | VOLTAGE = 12.00 volts
+      5V:   ok | VOLTAGE = 5.50 volts
+      5VA:  ok | VOLTAGE = 5.50 volts
+    PS1 (Right):  NON_CRITICAL_FAULT | DC_OVER_VOLTAGE | FAULT_LED
+      12V:  NON_CRITICAL_FAULT | NON_CRITICAL_OVER_VOLTAGE | VOLTAGE = 12.00 volts
+      5V:   ok | VOLTAGE = 5.50 volts
+      5VA:  ok | VOLTAGE = 5.50 volts
+
+  Fan Status
+    Left Cooling Assembly:
+      Fan Element 0:  ok | Fan at third lowest speed
+      Fan Element 1:  ok | Fan at third lowest speed
+      Fan Element 2:  ok | Fan at third lowest speed
+      Fan Element 3:  ok | Fan at third lowest speed
+      Fan Element 4:  ok | Fan at third lowest speed
+      Fan Element 5:  ok | Fan at third lowest speed
+      Fan Element 6:  ok | Fan at third lowest speed
+      Fan Element 7:  ok | Fan at third lowest speed
+    Right Cooling Assembly:
+      Fan Element 0:  ok | Fan at third lowest speed
+      Fan Element 1:  NON_CRITICAL_FAULT | FAULT_LED | Fan at lowest speed
+      Fan Element 2:  ok | Fan at third lowest speed
+      Fan Element 3:  ok | Fan at third lowest speed
+      Fan Element 4:  ok | Fan at third lowest speed
+      Fan Element 5:  ok | Fan at third lowest speed
+      Fan Element 6:  ok | Fan at third lowest speed
+      Fan Element 7:  ok | Fan at third lowest speed
+
+  Temperature Sensors
+      Left Temperature Sensor Controller:  ok | TEMPERATURE = 20C
+      Temperature Sensor Power Supply 0L:  ok | TEMPERATURE = 20C
+      Temperature Sensor Power Supply 1L:  ok | TEMPERATURE = 20C
+      Temperature Sensor Power Supply 2L:  ok | TEMPERATURE = 20C
+      Right Temperature Sensor Controller:  ok | TEMPERATURE = 20C
+      Temperature Sensor Power Supply 0R:  NON_CRITICAL_FAULT | OVER_TEMPERATURE_WARNING | TEMPERATURE = 60C
+      Temperature Sensor Power Supply 1R:  NON_CRITICAL_FAULT | OVER_TEMPERATURE_WARNING | TEMPERATURE = 60C
+      Temperature Sensor Power Supply 2R:  NON_CRITICAL_FAULT | OVER_TEMPERATURE_WARNING | TEMPERATURE = 60C
+
+  Enclosure Status:  ok
+
+  ESM Electronics Status:  
+      Left:  ok
+      Right:  ok
+
+
+Raw diagnostic page:
+
+0x0000:  02040144 00000000 01400000 01800000     [...D.....@......]
+0x0010:  01810000 01820000 01830000 01840000     [................]
+0x0020:  01850000 01860000 01870000 01880000     [................]
+0x0030:  01890000 018a0000 018b0000 018c0000     [................]
+0x0040:  018d0000 018e0000 018f0000 01900000     [................]
+0x0050:  01910000 01920000 01930000 01940000     [................]
+0x0060:  01950000 01960000 01970000 01000000     [................]
+0x0070:  01000000 01000080 01000080 01000080     [................]
+0x0080:  01003700 01002800 01002800 01002800     [..7...(...(...(.]
+0x0090:  01002800 01002800 03005004 03005004     [..(...(...P...P.]
+0x00a0:  03005004 01000080 01000083 01000083     [..P.............]
+0x00b0:  01000083 01000083 01000083 01000083     [................]
+0x00c0:  01000083 01000083 01000083 030000c1     [................]
+0x00d0:  01000083 01000083 01000083 01000083     [................]
+0x00e0:  01000083 01000083 01000080 01000080     [................]
+0x00f0:  030008c0 01000000 010004b0 01000226     [...............&]
+0x0100:  01000226 030804b0 01000226 01000226     [...&.......&...&]
+
+

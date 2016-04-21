@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#WARNING: DO NOT RUN THIS FILE DIRECTLY
+#  This file expects to be a part of ppc64-diag test suite
+#  Run this file with ../run_tests -t test-hr-002-mk_healthy -q
+
+run_binary "./hr_mk_healthy" "homerun_healthy.pg2"
+R=$?
+if [ $R -ne 0 ]; then
+	register_fail $R;
+fi
+
+diff_with_result homerun_healthy.pg2
+
+rm homerun_healthy.pg2
+register_success

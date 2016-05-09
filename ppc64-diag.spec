@@ -1,5 +1,5 @@
 Name:	ppc64-diag
-Version:	2.7.0
+Version:	2.7.1
 Release:	1
 Summary:	PowerLinux Platform Diagnostics
 Group:		System Environment/Base
@@ -101,6 +101,9 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Mon May 9 2016 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.7.1
+- Fixed endianess issues in diagnostics code
+
 * Tue Jan 19 2016 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.7.0
 - Move from EPL to the GNU GPL license
 

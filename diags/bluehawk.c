@@ -35,7 +35,6 @@ static struct element_descriptor_page *edp;	/* for power supply VPD */
 
 static int poked_leds;
 
-
 static void
 bh_print_drive_status(struct disk_status *s)
 {
@@ -173,63 +172,6 @@ out:
 	return 0;
 }
 
-/* 1 = have VPD for a warhawk; -1 = failed to get it. */
-static int have_wh_vpd;
-static struct vpd_page whp;	/* for warhawk VPD */
-
-/*
- * The fru_label should be "P1-C1" or "P1-C2" (without the terminating null).
- * i is 0 or 1.
- */
-static int
-wh_location_match(int i, const char *fru_label)
-{
-	return ('0'+i+1 == fru_label[4]);
-}
-
-/*
- * Create a callout for warhawk i (left=0, right=1). VPD page 1 contains VPD
- * for only one of the warhawks.  If it's the wrong one, just do without the
- * VPD.
- *
- * TODO: Figure out how to get VPD for the other warhawk by inquiring via a
- * different sg device.
- */
-static void
-create_wh_callout(struct sl_callout **callouts, char *location, unsigned int i,
-									int fd)
-{
-	if (fd < 0)
-		have_wh_vpd = -1;
-	if (!have_wh_vpd) {
-		int result = get_diagnostic_page(fd, INQUIRY, 1, &whp,
-								sizeof(whp));
-		if (result == 0)
-			have_wh_vpd = 1;
-		else
-			have_wh_vpd = -1;
-	}
-	if (have_wh_vpd == 1 && wh_location_match(i, whp.fru_label))
-		add_callout_from_vpd_page(callouts, location, &whp);
-	else
-		add_location_callout(callouts, location);
-}
-
-/* midplane callout, with VPD from page 5 */
-static void
-create_mp_callout(struct sl_callout **callouts, char *location, int fd)
-{
-	struct vpd_page mp;
-	int result = -1;
-
-	if (fd >= 0)
-		result = get_diagnostic_page(fd, INQUIRY, 5, &mp, sizeof(mp));
-	if (result == 0)
-		add_callout_from_vpd_page(callouts, location, &mp);
-	else
-		add_location_callout(callouts, location);
-}
-
 static int
 report_faults_to_svclog(struct dev_vpd *vpd,
 			struct bluehawk_diag_page2 *dp, int fd)
@@ -247,7 +189,6 @@ report_faults_to_svclog(struct dev_vpd *vpd,
 	const char *left_right[] = { "left", "right" };
 	struct bluehawk_diag_page2 *prev_dp = NULL;	/* for -c */
 
-	have_wh_vpd = 0;
 	strncpy(location, vpd->location, LOCATION_LENGTH - 1);
 	location[LOCATION_LENGTH - 1] = '\0';
 	loc_suffix_size = LOCATION_LENGTH - strlen(location);
@@ -392,7 +333,7 @@ report_faults_to_svclog(struct dev_vpd *vpd,
 		snprintf(loc_suffix, loc_suffix_size, "-P1-C%u", i+1);
 		build_srn(srn, SRN_RC_TEMP_THRESHOLD);
 		callouts = NULL;
-		create_wh_callout(&callouts, location, i, fd);
+		create_esm_callout(&callouts, location, i, fd);
 		servevent(srn, sev, description, vpd, callouts);
 	}
 
@@ -408,7 +349,7 @@ report_faults_to_svclog(struct dev_vpd *vpd,
 		snprintf(loc_suffix, loc_suffix_size, "-P1-C%u", i+1);
 		build_srn(srn, SRN_RC_CRIT_ESM);
 		callouts = NULL;
-		create_wh_callout(&callouts, location, i, fd);
+		create_esm_callout(&callouts, location, i, fd);
 		servevent(srn, sev, description, vpd, callouts);
 	}
 
@@ -457,7 +398,7 @@ report_faults_to_svclog(struct dev_vpd *vpd,
 		strncpy(loc_suffix, "-P1", loc_suffix_size - 1);
 		loc_suffix[loc_suffix_size - 1] = '\0';
 		callouts = NULL;
-		create_mp_callout(&callouts, location, fd);
+		create_midplane_callout(&callouts, location, fd);
 		servevent("none", sev, description, vpd, callouts);
 	}
 

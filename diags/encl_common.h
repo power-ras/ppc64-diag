@@ -565,5 +565,7 @@ extern void add_callout_from_vpd_page(struct sl_callout **,
 extern uint32_t servevent(const char *, int, const char *,
 			  struct dev_vpd *, struct sl_callout *);
 
+void create_esm_callout(struct sl_callout **, char *, unsigned int, int);
+void create_midplane_callout(struct sl_callout **, char *, int);
 
 #endif	/* _ENCL_COMMON_H */

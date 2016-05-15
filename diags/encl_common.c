@@ -22,6 +22,8 @@
 #include <string.h>
 #include <syslog.h>
 #include <arpa/inet.h>
+#include <scsi/scsi.h>
+#include <scsi/sg.h>
 
 #include "encl_common.h"
 #include "encl_util.h"
@@ -665,4 +667,55 @@ servevent(const char *refcode, int sev, const char *text,
 		break;
 	}
 	return -1;
+}
+
+/*
+ * The fru_label should be "P1-C1" or "P1-C2" (without the terminating null).
+ * i is 0 or 1.
+ */
+static int
+esm_location_match(int i, const char *fru_label)
+{
+	return ('0'+i+1 == fru_label[4]);
+}
+
+/*
+ * Create a callout for ESM i (left=0, right=1). VPD page 1 contains VPD
+ * for only one of the element. If it's the wrong one, just do without the
+ * VPD.
+ *
+ * TODO: Figure out how to get VPD for the other ESM by inquiring via a
+ *       different sg device.
+ */
+void
+create_esm_callout(struct sl_callout **callouts, char *location,
+		       unsigned int i, int fd)
+{
+	int result = -1;
+	struct vpd_page element_vpdp;
+
+	if (fd >= 0)
+		result = get_diagnostic_page(fd, INQUIRY, 1,
+					     &element_vpdp, sizeof(element_vpdp));
+
+	if ((result == 0) && esm_location_match(i, element_vpdp.fru_label))
+		add_callout_from_vpd_page(callouts, location, &element_vpdp);
+	else
+		add_location_callout(callouts, location);
+}
+
+/* midplane callout, with VPD from page 5 */
+void
+create_midplane_callout(struct sl_callout **callouts, char *location, int fd)
+{
+	int result = -1;
+	struct vpd_page mp;
+
+	if (fd >= 0)
+		result = get_diagnostic_page(fd, INQUIRY, 5, &mp, sizeof(mp));
+
+	if (result == 0)
+		add_callout_from_vpd_page(callouts, location, &mp);
+	else
+		add_location_callout(callouts, location);
 }

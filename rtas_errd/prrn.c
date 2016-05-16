@@ -51,10 +51,10 @@ struct drconf_cell {
 
 static struct pmap_struct *plist;
 static int prrn_log_fd;
+static char prrn_filename[128];
 
 #define OFDT_BASE	"/proc/device-tree"
 #define OFDTPATH	"/proc/ppc64/ofdt"
-#define PRRN_HOTPLUG	"/etc/ppc64-diag/prrn_hotplug"
 #define DRCONF_PATH	"/proc/device-tree/ibm,dynamic-reconfiguration-memory/ibm,dynamic-memory"
 
 static int write_prrn_log(const char *buf, int len)
@@ -67,21 +67,15 @@ static int write_prrn_log(const char *buf, int len)
 
 static void open_prrn_log(void)
 {
-	time_t now;
-	int len;
-	char buf[128];
-
-	prrn_log_fd = open("/var/log/prrn_log", O_CREAT | O_WRONLY | O_TRUNC,
+	/* This file will be deleted by drmgr */
+	snprintf(prrn_filename, 128, "/var/log/prrn_log_%d", (int)time(0));
+	prrn_log_fd = open(prrn_filename, O_CREAT | O_WRONLY | O_TRUNC,
 			   S_IRUSR | S_IWUSR);
 	if (prrn_log_fd == -1) {
 		prrn_log_fd = 0;
 		dbg("Could not open PRRN log file");
 		return;
 	}
-
-	now = time(0);
-	len = sprintf(buf, "# PRRN Event Recieved: %s", ctime(&now));
-	write_prrn_log(buf, len);
 }
 
 static void close_prrn_log(void)
@@ -521,13 +515,10 @@ static void do_node_update(struct pmap_struct *pms, const char *type)
 	char buf[128];
 	int len;
 
-	if (pms->drc_index == 0)
-		len = sprintf(buf, "# %s %x - %s (%x)\n", type,
-			      pms->drc_index, pms->name, pms->phandle);
-	else
+	if (pms->drc_index != 0) {
 		len = sprintf(buf, "%s %x\n", type, pms->drc_index);
-
-	write_prrn_log(buf, len);
+		write_prrn_log(buf, len);
+	}
 
 	dbg("Updating property for %s (%08x)", pms->name, pms->phandle);
 	update_properties(pms->phandle);
@@ -631,19 +622,25 @@ void handle_prrn_event(struct event *re)
 	uint scope = re->rtas_hdr->ext_log_length;
 
 	open_prrn_log();
+	if (!prrn_log_fd)
+		return;
+
 	devtree_update(scope);
 	close_prrn_log();
 
 	/* Kick off script to do required hotplug add/remove */
 	pid = fork();
 	if (pid == -1) {
-		dbg("Could not exec prrn hotplug script!");
+		unlink(prrn_filename);
+		dbg("Could not exec drmgr PRRN handler.\n");
 		return;
 	}
 
 	if (pid == 0) { /* Child */
-		dbg("Kicking off %s script", PRRN_HOTPLUG);
-		execl(PRRN_HOTPLUG, "prrn_hotplug", NULL);
+		dbg("Executing drmgr prrn handler.\n");
+		execl("/usr/sbin/drmgr", "/usr/sbin/drmgr", "-P", prrn_filename,
+		      NULL);
+		unlink(prrn_filename);
 		/* Should not get here */
 		dbg("Failed PRRN Hotplug exec: %s", strerror(errno));
 		exit(0);

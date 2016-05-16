@@ -6,7 +6,6 @@ include ../rules.mk
 
 CMDS = rtas_errd convert_dt_node_props extract_platdump
 SCRIPTS = rc.powerfail
-PRRN_HOTPLUG = prrn_hotplug
 
 COMMON_UTILS_OBJ = $(COMMON_DIR)/utils.o
 
@@ -38,15 +37,13 @@ extract_platdump: $(EXTRACT_PLATDUMP_OBJS)
 	@$(CC) $(CFLAGS) -o $@ $^ $(EXTRACT_PLATDUMP_LIBS)
 
 install: all
-	@$(call install_sbin,$(CMDS),$(DESTDIR))	
-	@$(call install_files,$(SCRIPTS),744,$(DESTDIR)/etc)	
-	@$(call install_files,$(PRRN_HOTPLUG),744,$(DESTDIR)/etc/ppc64-diag)
+	@$(call install_sbin,$(CMDS),$(DESTDIR))
+	@$(call install_files,$(SCRIPTS),744,$(DESTDIR)/etc)
 
 uninstall:
 	@$(call uninstall_sbin,$(CMDS),$(DESTDIR))
 	@$(call uninstall_files,$(SCRIPTS),$(DESTDIR)/etc)
-	@$(call uninstall_files,$(PRRN_HOTPLUG),$(DESTDIR)/etc/ppc64-diag)
-	
+
 doc: $(DOXYGEN_CFG)
 	@echo "Creating doxygen docs..."
 	@$(DOXYGEN) $(DOXYGEN_CFG)

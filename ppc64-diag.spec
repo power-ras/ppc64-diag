@@ -17,7 +17,7 @@ BuildRequires:	systemd-devel
 Requires:	servicelog
 Requires:	systemd
 # License change
-Requires:	powerpc-utils >= 1.3.0
+Requires:	powerpc-utils >= 1.3.2
 # Light Path Diagnostics depends on below lsvpd version.
 Requires:	lsvpd >= 1.7.1
 BuildRoot:	%{_tmppath}/%{name}-%{version}-build
@@ -60,7 +60,6 @@ ln -sfv /usr/sbin/usysattn $RPM_BUILD_ROOT/usr/sbin/usysfault
 %dir /var/log/opal-elog
 %config /etc/ppc64-diag/*
 %config /etc/rc.powerfail
-%config %attr(744,root,root) /etc/ppc64-diag/prrn_hotplug
 %attr(755,root,root) %{_libexecdir}/%{name}/rtas_errd
 %attr(755,root,root) %{_libexecdir}/%{name}/opal_errd
 %attr(644,root,root) %{_unitdir}/rtas_errd.service

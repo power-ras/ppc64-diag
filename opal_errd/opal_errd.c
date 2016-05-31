@@ -340,6 +340,7 @@ static void check_platform_dump(const char *extract_opal_dump_cmd,
 	if (fork_pid == -1) {
 		syslog(LOG_NOTICE, "Couldn't fork() (%d:%s)\n",
 		       errno, strerror(errno));
+		return;
 	} else if (fork_pid == 0) {
 		/* Child */
 		char *args[] = { (char *)extract_opal_dump_cmd, "-s", (char *)sysfs_path,

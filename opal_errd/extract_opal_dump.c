@@ -36,6 +36,7 @@
 #include <syslog.h>
 
 #define DEFAULT_SYSFS_PATH	"/sys"
+#define DEFAULT_DUMP_PATH	"firmware/opal/dump"
 #define DEFAULT_OUTPUT_DIR	"/var/log/dump"
 #define DUMP_TYPE_LEN		7
 
@@ -431,8 +432,8 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	snprintf(sysfs_path, sizeof(sysfs_path), "%s/firmware/opal/dump",
-		 opt_sysfs);
+	snprintf(sysfs_path, sizeof(sysfs_path), "%s/%s",
+		 opt_sysfs, DEFAULT_DUMP_PATH);
 
 	rc = access(sysfs_path, R_OK);
 	if (rc != 0) {

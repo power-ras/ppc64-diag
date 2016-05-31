@@ -55,6 +55,7 @@
 #define POLL_TIMEOUT	1000 /* In milliseconds */
 
 #define DEFAULT_SYSFS_PATH		"/sys"
+#define DEFAULT_DUMP_PATH		"firmware/opal/dump"
 #define DEFAULT_OUTPUT_DIR		"/var/log/opal-elog"
 #define DEFAULT_EXTRACT_DUMP_CMD	"/usr/sbin/extract_opal_dump"
 #define DEFAULT_EXTRACT_DUMP_FNAME "extract_opal_dump"
@@ -690,6 +691,7 @@ int main(int argc, char *argv[])
 	int opt;
 	char sysfs_path[PATH_MAX];
 	char elog_path[PATH_MAX];
+	char dump_path[PATH_MAX];
 	char *extract_opal_dump_cmd = NULL;
 
 	int log_options;
@@ -773,6 +775,14 @@ int main(int argc, char *argv[])
 	 * If not, try to locate a valid extract_opal_dump binary
 	 */
 	extract_opal_dump_cmd = validate_extract_opal_dump(opt_extract_opal_dump_cmd);
+
+	/* Validate dump sysfs path */
+	snprintf(dump_path, sizeof(dump_path),
+		 "%s/%s", opt_sysfs, DEFAULT_DUMP_PATH);
+	if (access(dump_path, R_OK)) {
+		free(extract_opal_dump_cmd);
+		extract_opal_dump_cmd = NULL;
+	}
 
 	/* Use PATH_MAX but admit that it may be insufficient */
 	rc = snprintf(sysfs_path, sizeof(sysfs_path), "%s/firmware/opal",

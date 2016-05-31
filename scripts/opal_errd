@@ -48,10 +48,8 @@
 OE_BIN=/usr/sbin/opal_errd
 test -x $OE_BIN || exit 5
 
-# This daemon runs only on PowerNV platform
-platform=`cat /proc/cpuinfo | grep platform | awk '{print $3}'`
 if [ ! -e "/sys/firmware/opal/elog" ]; then
-	echo "opal_errd daemon is not supported on the $platform platform"
+	echo "opal_errd daemon is not supported on this platform"
 	exit 0
 fi
 

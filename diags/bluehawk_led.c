@@ -46,18 +46,6 @@ enum bh_component_type {
 	BHC_FAN_ASSEMBLY
 };
 
-
-static void
-check_range(unsigned int n, unsigned int min, unsigned int max, const char *lc)
-{
-	if (n < min || n > max) {
-		fprintf(stderr,
-			"%s: number %u out of range in location code %s\n",
-			progname, n, lc);
-		exit(1);
-	}
-}
-
 static int
 decode_component_loc(const char *loc, enum bh_component_type *type,
 		     unsigned int *index)
@@ -72,30 +60,30 @@ decode_component_loc(const char *loc, enum bh_component_type *type,
 		*type = BHC_MIDPLANE;
 		*index = 0;
 	} else if (sscanf(loc, "P1-D%u%c", &n, &g) == 1) {
-		check_range(n, 1, 30, loc);
+		element_check_range(n, 1, 30, loc);
 		*type = BHC_DISK;
 		*index = n - 1;
 	} else if (sscanf(loc, "P1-C%u%c", &n, &g) == 1) {
-		check_range(n, 1, 2, loc);
+		element_check_range(n, 1, 2, loc);
 		*type = BHC_ERM;
 		*index = n-1;
 	} else if (sscanf(loc, "P1-E%u%c", &n, &g) == 1) {
-		check_range(n, 1, 2, loc);
+		element_check_range(n, 1, 2, loc);
 		*type = BHC_POWER_SUPPLY;
 		*index = n-1;
 	} else if (sscanf(loc, "P1-C%u-T%u%c", &n, &n2, &g) == 2) {
-		check_range(n, 1, 2, loc);
+		element_check_range(n, 1, 2, loc);
 		if (n2 == 3) {
 			*type = BHC_PCI_CONTROLLER;
 			*index = n-1;
 		} else {
-			check_range(n2, 1, 2, loc);
+			element_check_range(n2, 1, 2, loc);
 			*type = BHC_SAS_CONNECTOR;
 			*index = (n-1)*2 + (n2-1);
 		}
 	} else if (sscanf(loc, "P1-C%u-A%u%c", &n, &n2, &g) == 2) {
-		check_range(n, 1, 2, loc);
-		check_range(n2, 1, 1, loc);
+		element_check_range(n, 1, 2, loc);
+		element_check_range(n2, 1, 1, loc);
 		*type = BHC_FAN_ASSEMBLY;
 		*index = n-1;
 	} else {

@@ -76,5 +76,7 @@ extern int read_vpd_from_lscfg(struct dev_vpd *vpd, const char *sg);
 extern void trim_location_code(struct dev_vpd *vpd);
 extern char *strzcpy(char *dest, const char *src, size_t n);
 extern int valid_enclosure_device(const char *sg);
+extern void element_check_range(unsigned int n, unsigned int min,
+				unsigned int max, const char *lc);
 
 #endif /* _ENCL_UTIL_H */

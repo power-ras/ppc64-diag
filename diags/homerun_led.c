@@ -46,16 +46,6 @@ hr_element_access_allowed(enum element_status_code sc)
 	return true;
 }
 
-static void
-hr_check_range(unsigned int n, unsigned int min, unsigned int max, const char *lc)
-{
-	if (n < min || n > max) {
-		fprintf(stderr,
-			"%s: number %u out of range in location code %s\n",
-			progname, n, lc);
-		exit(1);
-	}
-}
 
 static int
 hr_decode_component_loc(struct hr_diag_page2 *dp, const char *loc,
@@ -68,7 +58,7 @@ hr_decode_component_loc(struct hr_diag_page2 *dp, const char *loc,
 		*type = HR_ENCLOSURE;
 		*index = 0;
 	} else if (sscanf(loc, "P1-D%u%c", &n, &g) == 1) { /* Disk */
-		hr_check_range(n, 1, HR_NR_DISKS, loc);
+		element_check_range(n, 1, HR_NR_DISKS, loc);
 		*type = HR_DISK;
 		*index = n - 1;
 
@@ -79,11 +69,11 @@ hr_decode_component_loc(struct hr_diag_page2 *dp, const char *loc,
 			return -1;
 		}
 	} else if (sscanf(loc, "P1-C%u%c", &n, &g) == 1) { /* ESM */
-		hr_check_range(n, 1, HR_NR_ESM_CONTROLLERS, loc);
+		element_check_range(n, 1, HR_NR_ESM_CONTROLLERS, loc);
 		*type = HR_ESM;
 		*index = n-1;
 	} else if (sscanf(loc, "P1-E%u%c", &n, &g) == 1) { /* Power supply */
-		hr_check_range(n, 1, HR_NR_POWER_SUPPLY, loc);
+		element_check_range(n, 1, HR_NR_POWER_SUPPLY, loc);
 		*type = HR_POWER_SUPPLY;
 		*index = n-1;
 	} else {

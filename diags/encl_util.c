@@ -28,6 +28,7 @@
 #include <scsi/sg.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include "utils.h"
 #include "encl_util.h"
@@ -480,4 +481,14 @@ out:
 	closedir(sdir);
 	closedir(edir);
 	return 0;
+}
+
+void element_check_range(unsigned int n, unsigned int min,
+			 unsigned int max, const char *lc)
+{
+	if (n < min || n > max) {
+		fprintf(stderr,
+			"Number %u out of range in location code %s\n", n, lc);
+		exit(1);
+	}
 }

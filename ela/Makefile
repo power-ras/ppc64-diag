@@ -25,15 +25,15 @@ all: $(CMDS) $(CATALOG) $(CATALOG_REGEX)
 
 explain_syslog: $(ES_OBJS)
 	@echo "LD $(WORK_DIR)/$@"
-	$(CXX) $(CXXFLAGS) -o $@ $^ 
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^
 
 syslog_to_svclog: $(SS_OBJS) 
 	@echo "LD $(WORK_DIR)/$@"
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(SS_LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(SS_LIBS)
 
 add_regex: $(AR_OBJS)
 	@echo "LD $(WORK_DIR)/$@" 
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^
 
 rr.tab.o: rr.tab.c rr.tab.h catalogs.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c rr.tab.c

@@ -26,15 +26,15 @@ all: $(CMDS) $(SCRIPTS)
 
 rtas_errd: $(RTAS_ERRD_OBJS) $(COMMON_UTILS_OBJ)
 	@echo "LD $(WORK_DIR)/$@"
-	$(CC) $(CFLAGS) -o $@ $^ $(RTAS_ERRD_LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(RTAS_ERRD_LIBS)
 
 convert_dt_node_props: $(DT_NODE_OBJS)
 	@echo "LD $(WORK_DIR)/$@"
-	@$(CC) $(CFLAGS) -o $@ $^
+	@$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 extract_platdump: $(EXTRACT_PLATDUMP_OBJS)
 	@echo "LD $(WORK_DIR)/$@"
-	@$(CC) $(CFLAGS) -o $@ $^ $(EXTRACT_PLATDUMP_LIBS)
+	@$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(EXTRACT_PLATDUMP_LIBS)
 
 install: all
 	@$(call install_sbin,$(CMDS),$(DESTDIR))

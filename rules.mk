@@ -212,6 +212,6 @@ CLEAN = @echo ""
 # Default target for building object files
 %.o: %.c
 	@echo "CC $(WORK_DIR)/$@"
-	@$(CC) -c $(AM_CFLAGS) $(CFLAGS) $<
+	@$(CC) -c $(AM_CFLAGS) $(CFLAGS) $(CPPFLAGS) $<
 
 

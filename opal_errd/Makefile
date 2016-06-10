@@ -16,11 +16,11 @@ all: $(CMDS)
 
 opal_errd: $(OPAL_ERRD_OBJS)
 	@echo "LD $(WORK_DIR)/$@"
-	$(CC) $(CFLAGS) -o $@ $^ $(OPAL_ERRD_LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(OPAL_ERRD_LIBS)
 
 extract_opal_dump: $(OPAL_DUMP_OBJS)
 	@echo "LD $(WORK_DIR)/$@"
-	$(CC) $(CFLAGS) -o $@ $^ $(OPAL_DUMP_LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(OPAL_DUMP_LIBS)
 
 opal-elog-parse/opal-event-data.o:
 	@$(MAKE) -C opal-elog-parse opal-event-data.o

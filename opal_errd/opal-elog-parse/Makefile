@@ -30,7 +30,7 @@ all: $(CMDS)
 
 opal-elog-parse: $(OPAL_ELOG_OBJS)
 	@echo "LD $(WORK_DIR)/$@"
-	$(Q)$(CC) $(CFLAGS) -o $@ $^
+	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 opal-elog-parse.o: opal-elog-parse.c parse-opal-event.h libopalevents.h opal-event-data.h
 	@echo "CC $(WORK_DIR)/$@"

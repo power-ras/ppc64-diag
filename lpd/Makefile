@@ -26,15 +26,15 @@ all: $(CMDS)
 
 lp_diag: $(LP_DIAG_OBJS) $(COMMON_OBJS)
 	@echo "LD $(WORK_DIR)/$@"
-	$(CC) $(CFLAGS) -o $@ $^ $(COMMON_LIBS) $(LP_DIAG_LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(COMMON_LIBS) $(LP_DIAG_LIBS)
 
 usysident: $(USYSIDENT_OBJS) $(COMMON_OBJS)
 	@echo "LD $(WORK_DIR)/$@"
-	$(CC) $(CFLAGS) -o $@ $^ $(COMMON_LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(COMMON_LIBS)
 
 usysattn: $(USYSIDENT_OBJS) $(COMMON_OBJS)
 	@echo "LD $(WORK_DIR)/$@"
-	$(CC) $(CFLAGS) -o $@ $^ $(COMMON_LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(COMMON_LIBS)
 
 install: all
 	@$(call install_sbin,$(CMDS),$(DESTDIR))

@@ -122,7 +122,7 @@ find_event(char *str, int strlen, char *text, int textlen, int bad_char[])
 			return &text[j];
 		else
 			/* Since we're not using the good suffix rule
-			 * we need to gaurantee progress.
+			 * we need to guarantee progress.
 			 */
                         j += MAX(1, bad_char[(int)text[i+j]] - strlen + 1 + i);
 	}
@@ -198,7 +198,7 @@ get_rtas_no(char *ptr)
 
 /**
  * update_rtas_msgs
- * @brief Update RTAS messages in the platfrom log
+ * @brief Update RTAS messages in the platform log
  *
  * Update the file /var/log/platform with any RTAS events
  * found in syslog that have not been handled by rtas_errd.
@@ -299,7 +299,7 @@ update_rtas_msgs(void)
 	}
 
 	if (last_p == NULL) {
-		dbg("%s does not conatin any RTAS events", messages_log);
+		dbg("%s does not contain any RTAS events", messages_log);
 		goto cleanup;
 	}
 

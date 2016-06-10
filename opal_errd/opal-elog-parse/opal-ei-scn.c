@@ -66,7 +66,7 @@ int print_ei_scn(const struct opal_ei_scn *ei)
 	print_header("Environmental Information");
 	print_opal_v6_hdr(ei->v6hdr);
 	print_center("Genesis Readings");
-	print_line("Timetamp", "0x%016lx", ei->g_timestamp);
+	print_line("Timestamp", "0x%016lx", ei->g_timestamp);
 	print_ei_env_scn(&(ei->genesis));
 
 	print_center(" ");

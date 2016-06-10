@@ -337,7 +337,7 @@ rotate_log_file(char *lp_log_file)
  * init_files - Open log files
  *
  * Returns :
- *	0 on sucess, !0 on failure
+ *	0 on success, !0 on failure
  */
 int
 init_files(void)

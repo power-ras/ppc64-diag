@@ -9,7 +9,7 @@ DOXYGEN = `which doxygen`
 # Name of the rpm spec file
 SPECFILENAME = ppc64-diag.spec
 
-# resolves the root directory at which this build is occuring
+# resolves the root directory at which this build is occurring
 ROOT_DIR =                                              \
         $(shell                                         \
         while [ `pwd` != "/" ];                         \

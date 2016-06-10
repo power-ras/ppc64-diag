@@ -127,7 +127,7 @@ return 0
 
 ################################################################################
 # print_log_footer ()
-# Purpose	: Checks whether the testcase ended successfuly and prints
+# Purpose	: Checks whether the testcase ended successfully and prints
 #		  its status
 # Parameters	: None
 # Returns	: 0
@@ -264,7 +264,7 @@ exec_log "explain_syslog -m $MESSAGE_FILE"
 
 MESSAGE=$(explain_syslog -m $MESSAGE_FILE | grep "unrecognized message" )
 if [ "$MESSAGE" = "" ]; then
-    print_log "explain_syslog successfull"
+    print_log "explain_syslog successful"
 else
     print_log "ERROR: explain_syslog does not explain the message" | tee -a $ERROR_LOG
     IS_FAILED=1

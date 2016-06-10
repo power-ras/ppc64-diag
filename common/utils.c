@@ -109,7 +109,7 @@ FILE *spopen(char *argv[], pid_t *ppid)
 		return NULL;
 	case  0: /* Code executed by child */
 		if (process_child(argv, pipefd) == -1) {
-			fprintf(stderr, "%s : %d - Error occured while "
+			fprintf(stderr, "%s : %d - Error occurred while "
 					"processing write end of the pipe "
 					"(in child).", __func__, __LINE__);
 			exit(EXIT_FAILURE);

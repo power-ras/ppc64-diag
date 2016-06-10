@@ -131,7 +131,7 @@ parse_rtas_workarea(struct loc_code *loc, const char *buf)
  *	@author Nathan Fontenot <nfont@austin.ibm.com>
  *
  * This will check the error value for a librtas specific return code
- * and fill in the buffer with the appropraite error message.
+ * and fill in the buffer with the appropriate error message.
  *
  * @error	return code from librtas
  * @buf		buffer to fill with error string
@@ -160,7 +160,7 @@ librtas_error(int error, char *buf, size_t size)
 		snprintf(buf, size, "Kernel out of low memory");
 		break;
 	case RTAS_FREE_ERR:
-		snprintf(buf, size, "Attempt to free nonexistant RMO buffer");
+		snprintf(buf, size, "Attempt to free nonexistent RMO buffer");
 		break;
 	case RTAS_TIMEOUT:
 		snprintf(buf, size, "RTAS delay exceeded specified timeout");

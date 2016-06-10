@@ -68,7 +68,7 @@
 /**
  * ELOG retention policy
  *
- * Retain logs upto 30 days with max 1000 logs.
+ * Retain logs up to 30 days with max 1000 logs.
  */
 #define DEFAULT_MAX_ELOGS		1000
 #define DEFAULT_MAX_DAYS		30

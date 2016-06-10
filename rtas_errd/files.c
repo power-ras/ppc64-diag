@@ -87,7 +87,7 @@ char *epow_status_file = "/var/log/epow_status";
  * @brief buffer to hold scanlog dump path
  * 
  * This is a buffer that is allocated and filled when rtas_errd is 
- * intially exec()'ed via check_scanlog_dump(). The buffer will contain 
+ * initially exec()'ed via check_scanlog_dump(). The buffer will contain
  * the path to a scanlog dump and is reported with the first RTAS event 
  * we receive from the kernel.
  */
@@ -532,7 +532,7 @@ reformat_msg(char *msg)
  * the rtas_event structure if this message is directly related a rtas
  * event and a formatted message a la printf() style.  Please make sure
  * that the message passed in does not have any ending punctuation or
- * ends with a newline.  It sould also not have any internal newlines.
+ * ends with a newline.  It should also not have any internal newlines.
  *
  * This routine will do several things to the message before printing
  * it out;
@@ -618,7 +618,7 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 		if (rc == 0) {
 			rc = unlink(rtas_errd_log0);
 			if (rc == -1) {
-				log_msg(NULL, "An error occured during the "
+				log_msg(NULL, "An error occurred during the "
 					"rotation of the rtas_errd logs:\n "
 					"cmd = rm %s\nexit status: %d)",
 					rtas_errd_log0, errno);
@@ -630,7 +630,7 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 		 */
 		rc = rename(rtas_errd_log, rtas_errd_log0);
 		if (rc == -1) {
-			log_msg(NULL, "An error occured during rotation of "
+			log_msg(NULL, "An error occurred during rotation of "
 				"rtas_errd logs (logger alive):\n cmd = rename"
 				" %s %s\nexit status: %d)", rtas_errd_log,
 				rtas_errd_log0, errno);

@@ -117,7 +117,7 @@ get_token(char *str, char *str_end, char *tok, int *line_no)
 
 		case '\n':
 			/* Newlines are either token delimiters if we
-			 * have started reading a token, or a seperate token
+			 * have started reading a token, or a separate token
 			 * on its own.
 			 */
 			if (start == NULL) {

@@ -125,9 +125,9 @@ handle_platform_dump_error(int e, char *err_buf, int sz)
 		snprintf(err_buf, sz, "%s%s", err, "Kernel out of low memory");
 		break;
 
-	    case RTAS_FREE_ERR:	 /* attempt to free nonexistant rmo buffer */
+	    case RTAS_FREE_ERR:	 /* attempt to free nonexistent rmo buffer */
 		snprintf(err_buf, sz, "%s%s", err,
-			 "Attempt to free nonexistant rmo buffer");
+			 "Attempt to free nonexistent rmo buffer");
 		break;
 
 	    case RTAS_IO_ASSERT:  /* unexpected I/O error */
@@ -251,7 +251,7 @@ extract_platform_dump(uint64_t dump_tag)
 	seq = seq_next;
 
 	/* 
-	 * Retreive the prefix size and suggested filename for the dump
+	 * Retrieve the prefix size and suggested filename for the dump
 	 * from the dump header 
 	 */
 	if (bytes >= DUMP_HDR_PREFIX_OFFSET + sizeof(uint16_t)) {

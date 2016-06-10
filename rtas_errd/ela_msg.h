@@ -203,12 +203,12 @@
     "\n%s\n\nThe system will shutdown in 10 minutes."
 
 #define MSGMENUG160 "651160 ANALYZING SYSTEM ERROR LOG\n" \
-    "A system shutdown occured due to a critical \n" \
+    "A system shutdown occurred due to a critical \n" \
     "environmental and power warning.\n" \
     "The following physical location codes were reported:\n\n%s"
 
 #define MSGMENUG161 "651161 ANALYZING SYSTEM ERROR LOG\n" \
-    "A system shutdown occured due to a critical \n" \
+    "A system shutdown occurred due to a critical \n" \
     "environmental and power warning."
 
 #define MSGEPOWB17b0C12 "Power fault due to unspecified cause."

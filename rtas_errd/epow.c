@@ -176,7 +176,7 @@ parse_epow(struct event *event)
         if (rtas_hdr->extended == 0) {
 		if (state > 0) {
 			/* Assume a system halt */
-			log_epow(event, "Recieved shortened EPOW event, "
+			log_epow(event, "Received shortened EPOW event, "
 				 "assuming power failure");
 			return 10;
 		}

@@ -100,7 +100,7 @@ forced.
 }}
 action {{
 1. Enable autoneg to allow MDI setting.
-2. Dont force speed and/or duplex.
+2. Don't force speed and/or duplex.
 }}
 class: hardware  type: temp  refcode: "MDIreqAutoneg"
 
@@ -248,7 +248,7 @@ class: software  sl_severity: warning  refcode: "ErrCfgFC"
  * dup: e_dbg "RXing /C/, enable AutoNeg and stop forcing link.\n"
  * e_dbg "SERDES: Link up - forced.\n"
  * e_dbg "SERDES: Link down - force failed.\n"
- * e_dbg "SERDES: Link up - autoneg completed sucessfully.\n"
+ * e_dbg "SERDES: Link up - autoneg completed successfully.\n"
  * e_dbg "SERDES: Link down - invalidcodewords detected in autoneg.\n"
  * e_dbg "SERDES: Link down - no sync.\n"
  * e_dbg "SERDES: Link down - autoneg failed\n"

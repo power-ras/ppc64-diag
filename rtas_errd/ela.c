@@ -476,7 +476,7 @@ has_epow_reset(struct event *event, int error_type)
 
 	erptr = epow_reset_list;
 
-	/* Search for an occurance of the error_type */
+	/* Search for an occurrence of the error_type */
 	while (erptr != NULL) {
 		if (erptr->err_type == (error_type & 0xFFFFFF00)) {
 			/* found a match */
@@ -1097,7 +1097,7 @@ process_pre_v6(struct event *event)
 			e_desc->rcode = 0;
 			post_error_code = *(int *)&event->event_buf[I_POSTCODE];
 
-			/* Add any (upto 4) chrp location codes from the log */
+			/* Add any (up to 4) chrp location codes from the log */
 			loc = get_loc_code(event, FIRST_LOC, NULL);
 			i = 0;
 			while (loc && i < 4) {
@@ -1367,8 +1367,8 @@ report_srn(struct event *event, int nlocs,
  *
  *	The string of location codes is null terminated. However a special
  *	character, ">", means that the location codes that follow should not
- *	be reported to the user via diagnostics. Therefore, processing of 
- *	location codes will stop at the first occurance of ">" or a null 
+ *	be reported to the user via diagnostics. Therefore, processing of
+ *	location codes will stop at the first occurrence of ">" or a null
  *	terminator.
  *
  * RETURNS:
@@ -1449,7 +1449,7 @@ get_loc_code(struct event *event, int mode, int *nlocs)
 	if (loc < end_loc && *loc != 0x0) {
 		/* loc is the start of a location code */
 		/* use start_loc to find end of location code string */
-		/* find 1st occurance of null or blank, the loc. code delimit */
+		/* find 1st occurrence of null or blank, the loc. code delimit */
 		while (*loc == ' ')
 			loc++;	/* skip leading blanks */
 
@@ -1688,7 +1688,7 @@ report_io_error_frus(struct event *event, int sn,
 		if (swap_locs) {
 			if (i == 0) {
 				/* 1st loc code goes in 2nd fru */
-				/* but also puting loc in 1st fru */
+				/* but also putting loc in 1st fru */
 				/* in case  there is only 1 loc. */
 				strcpy(e_desc->frus[0].floc, loc);
 				strcpy(e_desc->frus[1].floc, loc);

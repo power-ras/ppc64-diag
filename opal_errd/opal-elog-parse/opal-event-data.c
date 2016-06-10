@@ -141,7 +141,7 @@ struct generic_desc{
    {0x78, "CMM B"}, \
    {0x7a, "Connection Monitoring - Hypervisor lost communication with service processor"}, \
    {0x7b, "Connection Monitoring - Service processor lost communication with hypervisor"}, \
-   {0x7c, "Connection Monitoring - Service processor lost communcation with hypervisor"}, \
+   {0x7c, "Connection Monitoring - Service processor lost communication with hypervisor"}, \
    {0x7e, "Connection Monitoring - Hypervisor lost communication with logical partition"}, \
    {0x7e, "Connection Monitoring - Hypervisor lost communication with BPA"}, \
    {0x7f, "Connection Monitoring - Hypervisor lost communication with another hypervisor"}, \

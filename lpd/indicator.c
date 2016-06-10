@@ -312,7 +312,7 @@ set_all_indicator_state(int indicator, struct loc_code *loc, int new_value)
  * enable_check_log_indicator - Enable check log indicator
  *
  * Returns :
- *	0 on sucess, !0 on failure
+ *	0 on success, !0 on failure
  */
 int
 enable_check_log_indicator(void)
@@ -340,7 +340,7 @@ enable_check_log_indicator(void)
  * disable_check_log_indicator - Disable check log indicator
  *
  * Returns :
- *	0 on sucess, !0 on failure
+ *	0 on success, !0 on failure
  */
 int
 disable_check_log_indicator(void)

@@ -487,7 +487,7 @@ event_out:
  * @repair_id	servicelog repair ID
  *
  * Returns :
- *	0 on sucess, !0 on failure
+ *	0 on success, !0 on failure
  */
 static int
 parse_repair_event(int repair_id)

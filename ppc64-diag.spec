@@ -101,7 +101,7 @@ fi
 
 %changelog
 * Mon May 9 2016 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.7.1
-- Fixed endianess issues in diagnostics code
+- Fixed endianness issues in diagnostics code
 
 * Tue Jan 19 2016 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.7.0
 - Move from EPL to the GNU GPL license

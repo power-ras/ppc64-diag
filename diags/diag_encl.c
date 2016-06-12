@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009, 2015 IBM Corporation
+ * Copyright (C) 2009, 2015, 2016 IBM Corporation
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -61,6 +61,8 @@ static struct {
 	{"5888", diag_bluehawk},		/* Bluehawk enclosure */
 	{"EDR1", diag_bluehawk},		/* Bluehawk enclosure */
 	{"5887", diag_homerun},			/* Home Run enclosure */
+	{"ESLL", diag_slider_lff},		/* Slider enclosure - LFF */
+	{"ESLS", diag_slider_sff},		/* Slider enclosure - SFF */
 	{NULL, NULL},
 };
 

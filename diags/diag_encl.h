@@ -38,5 +38,7 @@ extern int platform;
 extern int diag_7031_D24_T24(int, struct dev_vpd *);
 extern int diag_bluehawk(int, struct dev_vpd *);
 extern int diag_homerun(int, struct dev_vpd *);
+extern int diag_slider_lff(int, struct dev_vpd *);
+extern int diag_slider_sff(int, struct dev_vpd *);
 
 #endif	/* _DIAG_ENCL_H */

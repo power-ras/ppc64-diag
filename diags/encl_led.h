@@ -60,4 +60,10 @@ extern int bluehawk_set_led(const char *, const char *, int, int, int);
 extern int homerun_list_leds(const char *, const char *, int);
 extern int homerun_set_led(const char *, const char *, int, int, int);
 
+extern int slider_lff_list_leds(const char *, const char *, int);
+extern int slider_lff_set_led(const char *, const char *, int, int, int);
+
+extern int slider_sff_list_leds(const char *, const char *, int);
+extern int slider_sff_set_led(const char *, const char *, int, int, int);
+
 #endif	/* _ENCL_LED_H */

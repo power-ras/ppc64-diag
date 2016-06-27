@@ -39,6 +39,8 @@ static struct {
 	{"5888", bluehawk_list_leds, bluehawk_set_led}, /* Bluehawk enclosure */
 	{"EDR1", bluehawk_list_leds, bluehawk_set_led}, /* Bluehawk enclosure */
 	{"5887", homerun_list_leds, homerun_set_led},   /* Homerun  enclosure */
+	{"ESLL", slider_lff_list_leds, slider_lff_set_led}, /* slider LFF */
+	{"ESLS", slider_sff_list_leds, slider_sff_set_led}, /* slider SFF */
 	{NULL, NULL}
 };
 

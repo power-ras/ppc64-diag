@@ -5,6 +5,7 @@
 #include "encl_common.h"
 #include "bluehawk.h"
 #include "homerun.h"
+#include "slider.h"
 
 /*
  * Factor byte0->status into the composite status cur.  A missing element
@@ -161,4 +162,65 @@ hr_mean_temperature(const struct hr_diag_page2 *pg)
 	for (i = 0; i < HR_NR_TEMP_SENSOR_SET * 4; i++)
 		sum += sensors[i].temperature;
 	return sum / (HR_NR_TEMP_SENSOR_SET * 4);
+}
+
+/* slider specific call */
+
+enum element_status_code
+slider_roll_up_disk_status(const struct slider_lff_diag_page2 *pg)
+{
+	return composite_status(&pg->disk_status, SLIDER_NR_LFF_DISK);
+}
+
+enum element_status_code
+slider_roll_up_esm_status(const struct slider_lff_diag_page2 *pg)
+{
+	return composite_status(&pg->enc_service_ctrl_element, SLIDER_NR_ESC);
+}
+
+enum element_status_code
+slider_roll_up_temperature_sensor_status(const struct slider_lff_diag_page2 *pg)
+{
+	return composite_status(&pg->temp_sensor_sets, SLIDER_NR_TEMP_SENSOR);
+}
+
+enum element_status_code
+slider_roll_up_fan_status(const struct slider_lff_diag_page2 *pg)
+{
+	return composite_status(&pg->fan_sets,
+		SLIDER_NR_POWER_SUPPLY * SLIDER_NR_FAN_PER_POWER_SUPPLY);
+}
+
+enum element_status_code
+slider_roll_up_power_supply_status(const struct slider_lff_diag_page2 *pg)
+{
+	return composite_status(&pg->ps_status, SLIDER_NR_POWER_SUPPLY);
+}
+
+enum element_status_code
+slider_roll_up_voltage_sensor_status(const struct slider_lff_diag_page2 *pg)
+{
+	return composite_status(&pg->voltage_sensor_sets,
+		SLIDER_NR_VOLT_SENSOR_PER_ESM * SLIDER_NR_ESC);
+}
+
+enum element_status_code
+slider_roll_up_sas_connector_status(const struct slider_lff_diag_page2 *pg)
+{
+	return composite_status(&pg->sas_connector_status,
+		SLIDER_NR_SAS_CONNECTOR);
+}
+
+unsigned int
+slider_mean_temperature(const struct slider_lff_diag_page2 *pg)
+{
+	struct slider_temperature_sensor_status *sensors =
+				(struct slider_temperature_sensor_status *)
+				&pg->temp_sensor_sets;
+	int sum = 0;
+	int i;
+
+	for (i = 0; i < SLIDER_NR_TEMP_SENSOR; i++)
+		sum += sensors[i].temperature;
+	return sum / (SLIDER_NR_TEMP_SENSOR);
 }

@@ -6,6 +6,7 @@
 #include "bluehawk.h"
 #include "encl_common.h"
 #include "homerun.h"
+#include "slider.h"
 
 /* Convert host byte order to network byte order */
 static inline void convert_htons(uint16_t *offset)
@@ -52,5 +53,23 @@ extern enum element_status_code hr_roll_up_power_supply_status(
 extern enum element_status_code hr_roll_up_voltage_sensor_status(
 					const struct hr_diag_page2 *pg);
 extern unsigned int hr_mean_temperature(const struct hr_diag_page2 *pg);
+
+/* slider specific call */
+extern enum element_status_code slider_roll_up_disk_status(
+				const struct slider_lff_diag_page2 *pg);
+extern enum element_status_code slider_roll_up_esm_status(
+				const struct slider_lff_diag_page2 *pg);
+extern enum element_status_code slider_roll_up_temperature_sensor_status(
+				const struct slider_lff_diag_page2 *pg);
+extern enum element_status_code slider_roll_up_fan_status(
+				const struct slider_lff_diag_page2 *pg);
+extern enum element_status_code slider_roll_up_power_supply_status(
+				const struct slider_lff_diag_page2 *pg);
+extern enum element_status_code slider_roll_up_voltage_sensor_status(
+				const struct slider_lff_diag_page2 *pg);
+extern enum element_status_code slider_roll_up_sas_connector_status(
+				const struct slider_lff_diag_page2 *pg);
+extern unsigned int slider_mean_temperature(
+				const struct slider_lff_diag_page2 *pg);
 
 #endif	/* __TEST_UTILS_H__ */

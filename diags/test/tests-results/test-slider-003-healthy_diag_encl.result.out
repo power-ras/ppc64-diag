@@ -1,0 +1,228 @@
+DIAGNOSING sg8
+	Model    : ESLL
+	Location : UESLL.001.G123789
+
+  Overall Status:    ok
+
+  Drive Status
+    Disk 01 (Slot 00): ok                 
+    Disk 02 (Slot 01): ok                 
+    Disk 03 (Slot 02): ok                 
+    Disk 04 (Slot 03): ok                 
+    Disk 05 (Slot 04): ok                 
+    Disk 06 (Slot 05): ok                 
+    Disk 07 (Slot 06): ok                 
+    Disk 08 (Slot 07): ok                 
+    Disk 09 (Slot 08): ok                 
+    Disk 10 (Slot 09): ok                 
+    Disk 11 (Slot 10): ok                 
+    Disk 12 (Slot 11): ok                 
+
+  Power Supply Status
+    PS0 (Left ):  ok
+      3.3V:  ok | VOLTAGE = 3.50 volts
+      1V0 :  ok | VOLTAGE = 1.00 volts
+      1V8 :  ok | VOLTAGE = 1.80 volts
+      0V92:  ok | VOLTAGE = 0.90 volts
+    PS1 (Right):  ok
+      3.3V:  ok | VOLTAGE = 3.50 volts
+      1V0 :  ok | VOLTAGE = 1.00 volts
+      1V8 :  ok | VOLTAGE = 1.80 volts
+      0V92:  ok | VOLTAGE = 0.90 volts
+
+  Fan Status
+    Left power supply fans
+      Fan Element 1:  ok | speed :11470 rpm
+      Fan Element 2:  ok | speed :11470 rpm
+      Fan Element 3:  ok | speed :11470 rpm
+      Fan Element 4:  ok | speed :11470 rpm
+      Fan Element 5:  ok | speed :11470 rpm
+      Fan Element 6:  ok | speed :11470 rpm
+      Fan Element 7:  ok | speed :11470 rpm
+      Fan Element 8:  ok | speed :11470 rpm
+    Right power supply fans
+      Fan Element 1:  ok | speed :11470 rpm
+      Fan Element 2:  ok | speed :11470 rpm
+      Fan Element 3:  ok | speed :11470 rpm
+      Fan Element 4:  ok | speed :11470 rpm
+      Fan Element 5:  ok | speed :11470 rpm
+      Fan Element 6:  ok | speed :11470 rpm
+      Fan Element 7:  ok | speed :11470 rpm
+      Fan Element 8:  ok | speed :11470 rpm
+
+  Temperature Sensors
+    Enclosure Ambient air:  ok | TEMPERATURE = 20C
+    PSU1:
+      Temp sensor element 1 (Ambient ):  ok | TEMPERATURE = 20C
+      Temp sensor element 2 (Hot-Spot):  ok | TEMPERATURE = 20C
+      Temp sensor element 3 (Primary ):  ok | TEMPERATURE = 20C
+    PSU2:
+      Temp sensor element 1 (Ambient ):  ok | TEMPERATURE = 20C
+      Temp sensor element 2 (Hot-Spot):  ok | TEMPERATURE = 20C
+      Temp sensor element 3 (Primary ):  ok | TEMPERATURE = 20C
+    ENCL Service Cntrl 1:
+      Temp sensor Element 1 (Inlet   ):  ok | TEMPERATURE = 20C
+      Temp sensor Element 2 (Outlet  ):  ok | TEMPERATURE = 20C
+    ENCL Service Cntrl 2:
+      Temp sensor Element 1 (Inlet   ):  ok | TEMPERATURE = 20C
+      Temp sensor Element 2 (Outlet  ):  ok | TEMPERATURE = 20C
+
+  Enclosure service controller status
+    Left :  ok | First power on
+    Right:  ok | First power on
+
+  Enclosure Status:  ok | Normal Mode
+
+  SAS Expander Status
+    Left :  ok
+    Right:  ok
+
+  SAS Connector Status
+    Left:
+      Upstream   :  ok
+      Downstream :  ok
+      Uninstalled:  ok
+    Right:
+      Upstream   :  ok
+      Downstream :  ok
+      Uninstalled:  ok
+
+  Midplane Status:  ok
+
+  Phy Status
+    Left:
+      Phy Element  1: ok
+      Phy Element  2: ok
+      Phy Element  3: ok
+      Phy Element  4: ok
+      Phy Element  5: ok
+      Phy Element  6: ok
+      Phy Element  7: ok
+      Phy Element  8: ok
+      Phy Element  9: ok
+      Phy Element 10: ok
+      Phy Element 11: ok
+      Phy Element 12: ok
+      Phy Element 13: ok
+      Phy Element 14: ok
+      Phy Element 15: ok
+      Phy Element 16: ok
+      Phy Element 17: ok
+      Phy Element 18: ok
+      Phy Element 19: ok
+      Phy Element 20: ok
+      Phy Element 21: ok
+      Phy Element 22: ok
+      Phy Element 23: ok
+      Phy Element 24: ok
+      Phy Element 25: ok
+      Phy Element 26: ok
+      Phy Element 27: ok
+      Phy Element 28: ok
+      Phy Element 29: ok
+      Phy Element 30: ok
+      Phy Element 31: ok
+      Phy Element 32: ok
+      Phy Element 33: ok
+      Phy Element 34: ok
+      Phy Element 35: ok
+      Phy Element 36: ok
+    Right:
+      Phy Element  1: ok
+      Phy Element  2: ok
+      Phy Element  3: ok
+      Phy Element  4: ok
+      Phy Element  5: ok
+      Phy Element  6: ok
+      Phy Element  7: ok
+      Phy Element  8: ok
+      Phy Element  9: ok
+      Phy Element 10: ok
+      Phy Element 11: ok
+      Phy Element 12: ok
+      Phy Element 13: ok
+      Phy Element 14: ok
+      Phy Element 15: ok
+      Phy Element 16: ok
+      Phy Element 17: ok
+      Phy Element 18: ok
+      Phy Element 19: ok
+      Phy Element 20: ok
+      Phy Element 21: ok
+      Phy Element 22: ok
+      Phy Element 23: ok
+      Phy Element 24: ok
+      Phy Element 25: ok
+      Phy Element 26: ok
+      Phy Element 27: ok
+      Phy Element 28: ok
+      Phy Element 29: ok
+      Phy Element 30: ok
+      Phy Element 31: ok
+      Phy Element 32: ok
+      Phy Element 33: ok
+      Phy Element 34: ok
+      Phy Element 35: ok
+      Phy Element 36: ok
+
+  Statesave Buffer Status:
+    Element 1 (Left ): ok | No statesave available for retrieval
+    Element 2 (Right): ok | No statesave available for retrieval
+
+  CPLD Status:
+    Left : ok
+    Right: ok
+
+  Input Power Status:
+    PSU1:
+      Average Input Power: ok                           | Input power : 5
+      Peak Input Power   : ok                           | Input power : 5
+    PSU2:
+      Average Input Power: ok                           | Input power : 5
+      Peak Input Power   : ok                           | Input power : 5
+
+
+Raw diagnostic page:
+
+0x0000:  02000270 00000000 01000000 01000000     [...p............]
+0x0010:  01010000 01020000 01030000 01040000     [................]
+0x0020:  01050000 01060000 01070000 01080000     [................]
+0x0030:  01090000 010a0000 010b0000 01000000     [................]
+0x0040:  01000000 01000000 01047b00 01047b00     [..........{...{.]
+0x0050:  01047b00 01047b00 01047b00 01047b00     [..{...{...{...{.]
+0x0060:  01047b00 01047b00 01047b00 01047b00     [..{...{...{...{.]
+0x0070:  01047b00 01047b00 01047b00 01047b00     [..{...{...{...{.]
+0x0080:  01047b00 01047b00 01047b00 01002800     [..{...{...{...(.]
+0x0090:  01002800 01002800 01002800 01002800     [..(...(...(...(.]
+0x00a0:  01002800 01002800 01002800 01002800     [..(...(...(...(.]
+0x00b0:  01002800 01002800 01002800 01000000     [..(...(...(.....]
+0x00c0:  01000000 01000000 01000000 01000000     [................]
+0x00d0:  01000000 0100015e 01000064 010000b4     [.......^...d....]
+0x00e0:  0100005a 0100015e 01000064 010000b4     [...Z...^...d....]
+0x00f0:  0100005a 01000000 01000000 01000000     [...Z............]
+0x0100:  0100ff00 0100ff00 0100ff00 0100ff00     [................]
+0x0110:  0100ff00 0100ff00 0100ff00 00000000     [................]
+0x0120:  01000000 0100c000 0100c000 0100c000     [................]
+0x0130:  0100c000 0100c000 0100c000 0100c000     [................]
+0x0140:  0100c000 0100c000 0100c000 0100c000     [................]
+0x0150:  0100c000 0100c000 0100c000 0100c000     [................]
+0x0160:  0100c000 0100c000 0100c000 0100c000     [................]
+0x0170:  0100c000 0100c000 0100c000 0100c000     [................]
+0x0180:  0100c000 0100c000 0100c000 0100c000     [................]
+0x0190:  0100c000 0100c000 0100c000 0100c000     [................]
+0x01a0:  0100c000 0100c000 0100c000 0100c000     [................]
+0x01b0:  0100c000 0100c000 0100c000 0100c000     [................]
+0x01c0:  0100c000 0100c000 0100c000 0100c000     [................]
+0x01d0:  0100c000 0100c000 0100c000 0100c000     [................]
+0x01e0:  0100c000 0100c000 0100c000 0100c000     [................]
+0x01f0:  0100c000 0100c000 0100c000 0100c000     [................]
+0x0200:  0100c000 0100c000 0100c000 0100c000     [................]
+0x0210:  0100c000 0100c000 0100c000 0100c000     [................]
+0x0220:  0100c000 0100c000 0100c000 0100c000     [................]
+0x0230:  0100c000 0100c000 0100c000 0100c000     [................]
+0x0240:  0100c000 0100c000 01000000 01000000     [................]
+0x0250:  01000000 01000000 01000000 01000000     [................]
+0x0260:  01000500 01000500 01000500 01000500     [................]
+0x0270:  01000500                                [....            ]
+
+

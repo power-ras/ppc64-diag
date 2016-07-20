@@ -146,7 +146,7 @@ static void get_location_code(struct dev_vpd *vpd, char *loc_suffix_code)
 	}
 
 	if (loc_suffix_code)
-		snprintf(loc_suffix, loc_suffix_size, loc_suffix_code);
+		snprintf(loc_suffix, loc_suffix_size, "%s", loc_suffix_code);
 	else
 		*loc_suffix = '\0';
 }

@@ -31,6 +31,13 @@
 #include "encl_util.h"
 #include "slider.h"
 
+/* Get slider element offset */
+#define lff_offset(element) ((unsigned long) &((struct slider_lff_diag_page2 *)0)->element)
+#define sff_offset(element) ((unsigned long) &((struct slider_sff_diag_page2 *)0)->element)
+
+#define element_offset(element) ((slider_variant_flag == SLIDER_V_LFF) ? \
+				 lff_offset(element) : sff_offset(element))
+
 /* Global definition, as it is used by multiple caller */
 static const char * const sas_connector_names[] = {
 	"Upstream",
@@ -77,6 +84,11 @@ enum slider_variant {
 	SLIDER_V_SFF
 };
 enum slider_variant slider_variant_flag;
+
+/* Slider variant page size/number of disk */
+uint16_t slider_v_diag_page2_size;
+uint16_t slider_v_ctrl_page2_size;
+uint8_t slider_v_nr_disk;
 
 /* Create a callout for power supply i (i = 0 or 1). */
 static int slider_create_ps_callout(struct sl_callout **callouts,
@@ -152,16 +164,17 @@ static void get_location_code(struct dev_vpd *vpd, char *loc_suffix_code)
 }
 
 /* Report slider disk fault to svclog */
-static void report_slider_disk_fault_to_svclog(
-	struct slider_disk_status *disk_status, void *dp, void *prev_dp,
-	struct dev_vpd *vpd, int nr_disk)
+static void report_slider_disk_fault_to_svclog(void *dp, void *prev_dp,
+					       struct dev_vpd *vpd)
 {
 	char loc_suffix_code[LOCATION_LENGTH];
 	char description[EVENT_DESC_SIZE], crit[ES_STATUS_STRING_MAXLEN];
 	int i, sev;
 	struct sl_callout *callouts;
+	struct slider_disk_status *disk_status =
+		(struct slider_disk_status *)(dp + element_offset(disk_status));
 
-	for (i = 0; i < nr_disk; i++) {
+	for (i = 0; i < slider_v_nr_disk; i++) {
 		if (disk_status[i].byte0.status == ES_NO_ACCESS_ALLOWED)
 			continue;
 		sev = svclog_element_status(&(disk_status[i].byte0),
@@ -183,14 +196,15 @@ static void report_slider_disk_fault_to_svclog(
 
 /* Report slider power supply fault to svclog */
 static void report_slider_power_supply_fault_to_svclog(
-	struct power_supply_status *ps_status, void *dp, void *prev_dp,
-	struct dev_vpd *vpd, int fd)
+	void *dp, void *prev_dp, struct dev_vpd *vpd, int fd)
 {
 	char description[EVENT_DESC_SIZE], crit[ES_STATUS_STRING_MAXLEN];
 	char srn[SRN_SIZE];
 	char loc_suffix_code[LOCATION_LENGTH];
 	int i, sev, rc;
 	struct sl_callout *callouts;
+	struct power_supply_status *ps_status =
+		(struct power_supply_status *)(dp + element_offset(ps_status));
 
 	for (i = 0; i < SLIDER_NR_POWER_SUPPLY; i++) {
 		sev = svclog_element_status(&(ps_status[i].byte0),
@@ -212,14 +226,15 @@ static void report_slider_power_supply_fault_to_svclog(
 
 /* Report slider cooling element fault to svclog */
 static void report_slider_cooling_element_fault_to_svclog(
-	struct slider_fan_set *fan_sets, void *dp, void *prev_dp,
-	struct dev_vpd *vpd, int fd)
+	void *dp, void *prev_dp, struct dev_vpd *vpd, int fd)
 {
 	int i, j, sev, rc;
 	char description[EVENT_DESC_SIZE], crit[ES_STATUS_STRING_MAXLEN];
 	struct sl_callout *callouts;
 	char srn[SRN_SIZE];
 	char loc_suffix_code[LOCATION_LENGTH];
+	struct slider_fan_set *fan_sets =
+		(struct slider_fan_set *)(dp + element_offset(fan_sets));
 
 	for (i = 0; i < SLIDER_NR_POWER_SUPPLY; i++) {
 		for (j = 0; j < SLIDER_NR_FAN_PER_POWER_SUPPLY; j++) {
@@ -247,15 +262,16 @@ static void report_slider_cooling_element_fault_to_svclog(
 
 /* Report slider temperture sensor fault to svclog */
 static void report_slider_temp_sensor_fault_to_svclog(
-	struct slider_temperature_sensor_set *temp_sensor_sets,
-	void *dp, void *prev_dp, struct dev_vpd *vpd,
-	int fd)
+	void *dp, void *prev_dp, struct dev_vpd *vpd, int fd)
 {
 	int i, j, sev, rc;
 	char description[EVENT_DESC_SIZE], crit[ES_STATUS_STRING_MAXLEN];
 	struct sl_callout *callouts;
 	char srn[SRN_SIZE];
 	char loc_suffix_code[LOCATION_LENGTH];
+	struct slider_temperature_sensor_set *temp_sensor_sets =
+		(struct slider_temperature_sensor_set *)
+		(dp + element_offset(temp_sensor_sets));
 
 	/* Temperature sensor for enclosure */
 	for (i = 0; i < SLIDER_NR_ENCLOSURE; i++) {
@@ -331,15 +347,16 @@ static void report_slider_temp_sensor_fault_to_svclog(
 
 /* Report slider enclosure service controller fault to svclog */
 static void report_slider_esc_fault_to_svclog(
-	struct slider_enc_service_ctrl_status *enc_service_ctrl_element,
-	void *dp, void *prev_dp, struct dev_vpd *vpd,
-	int fd)
+	void *dp, void *prev_dp, struct dev_vpd *vpd, int fd)
 {
 	int i, sev;
 	char description[EVENT_DESC_SIZE], crit[ES_STATUS_STRING_MAXLEN];
 	struct sl_callout *callouts;
 	char srn[SRN_SIZE];
 	char loc_suffix_code[LOCATION_LENGTH];
+	struct slider_enc_service_ctrl_status *enc_service_ctrl_element =
+		(struct slider_enc_service_ctrl_status *)
+		(dp + element_offset(enc_service_ctrl_element));
 
 	for (i = 0; i < SLIDER_NR_ESC; i++) {
 		sev = svclog_element_status(&(enc_service_ctrl_element[i]
@@ -361,13 +378,15 @@ static void report_slider_esc_fault_to_svclog(
 
 /* Report slider enclosure fault to svclog */
 static void report_slider_enclosure_fault_to_svclog(
-	struct slider_encl_status *encl_element, void *dp, void *prev_dp,
-	struct dev_vpd *vpd)
+	void *dp, void *prev_dp, struct dev_vpd *vpd)
 {
 	int i, sev;
 	char description[EVENT_DESC_SIZE], crit[ES_STATUS_STRING_MAXLEN];
 	struct sl_callout *callouts;
 	char loc_suffix_code[LOCATION_LENGTH];
+	struct slider_encl_status *encl_element =
+		(struct slider_encl_status *)
+		(dp + element_offset(encl_element));
 
 	for (i = 0; i < SLIDER_NR_ENCLOSURE; i++) {
 		sev = svclog_element_status(&(encl_element->byte0),(char *) dp,
@@ -387,7 +406,6 @@ static void report_slider_enclosure_fault_to_svclog(
 
 /* Report slider voltage sensor fault to svclog */
 static void report_slider_volt_sensor_fault_to_svclog(
-	struct slider_voltage_sensor_set *voltage_sensor_sets,
 	void *dp, void *prev_dp, struct dev_vpd *vpd, int fd)
 {
 	int i, sev;
@@ -395,6 +413,9 @@ static void report_slider_volt_sensor_fault_to_svclog(
 	struct sl_callout *callouts;
 	char srn[SRN_SIZE];
 	char loc_suffix_code[LOCATION_LENGTH];
+	struct slider_voltage_sensor_set *voltage_sensor_sets =
+		(struct slider_voltage_sensor_set *)(dp
+			+ element_offset(voltage_sensor_sets));
 
 	for (i = 0; i < SLIDER_NR_ESC; i++) {
 		sev = svclog_composite_status(&(voltage_sensor_sets[i]),
@@ -419,7 +440,6 @@ static void report_slider_volt_sensor_fault_to_svclog(
 
 /* Report slider sas expander fault to svclog */
 static void report_slider_sas_expander_fault_to_svclog(
-	struct slider_sas_expander_status *sas_expander_element,
 	void *dp, void *prev_dp, struct dev_vpd *vpd)
 {
 	int i, sev;
@@ -427,6 +447,9 @@ static void report_slider_sas_expander_fault_to_svclog(
 	struct sl_callout *callouts;
 	char srn[SRN_SIZE];
 	char loc_suffix_code[LOCATION_LENGTH];
+	struct slider_sas_expander_status *sas_expander_element =
+		(struct slider_sas_expander_status *)(dp
+			+ element_offset(sas_expander_element));
 
 	/* SAS Expander */
 	for (i = 0; i < SLIDER_NR_SAS_EXPANDER; i++) {
@@ -449,13 +472,15 @@ static void report_slider_sas_expander_fault_to_svclog(
 
 /* Report slider sas connector fault to svclog */
 static void report_slider_sas_connector_fault_to_svclog(
-	struct slider_sas_connector_status *sas_connector_status,
 	void *dp, void *prev_dp, struct dev_vpd *vpd)
 {
 	int i, j, sev;
 	char description[EVENT_DESC_SIZE], crit[ES_STATUS_STRING_MAXLEN];
 	struct sl_callout *callouts;
 	char loc_suffix_code[LOCATION_LENGTH];
+	struct slider_sas_connector_status *sas_connector_status =
+		(struct slider_sas_connector_status *)(dp
+			+ element_offset(sas_connector_status));
 
 	for (i = 0; i < SLIDER_NR_SAS_EXPANDER; i++) {
 		for (j = 0; j < SLIDER_NR_SAS_CONNECTOR_PER_EXPANDER ; j++) {
@@ -484,13 +509,15 @@ static void report_slider_sas_connector_fault_to_svclog(
 
 /* Report slider midplane fault to svclog */
 static void report_slider_midplane_fault_to_svclog(
-	struct slider_midplane_status *midplane_element_status,
 	void *dp, void *prev_dp, struct dev_vpd *vpd, int fd)
 {
 	int sev;
 	char description[EVENT_DESC_SIZE], crit[ES_STATUS_STRING_MAXLEN];
 	struct sl_callout *callouts;
 	char loc_suffix_code[LOCATION_LENGTH];
+	struct slider_midplane_status *midplane_element_status =
+		(struct slider_midplane_status *)
+		(dp + element_offset(midplane_element_status));
 
 	sev = svclog_element_status(&(midplane_element_status->byte0),
 				    (char *) dp, (char *) prev_dp, crit);
@@ -507,13 +534,15 @@ static void report_slider_midplane_fault_to_svclog(
 }
 
 /* Report slider phy fault to svclog */
-static void report_slider_phy_fault_to_svclog(struct slider_phy_set *phy_sets,
+static void report_slider_phy_fault_to_svclog(
 	void *dp, void *prev_dp, struct dev_vpd *vpd)
 {
 	int i, j, sev;
 	char description[EVENT_DESC_SIZE], crit[ES_STATUS_STRING_MAXLEN];
 	struct sl_callout *callouts;
 	char loc_suffix_code[LOCATION_LENGTH];
+	struct slider_phy_set *phy_sets =
+		(struct slider_phy_set *)(dp + element_offset(phy_sets));
 
 	for (i = 0; i < SLIDER_NR_SAS_EXPANDER; i++) {
 		for (j = 0; j < SLIDER_NR_PHY_PER_SAS_EXPANDER; j++) {
@@ -538,13 +567,15 @@ static void report_slider_phy_fault_to_svclog(struct slider_phy_set *phy_sets,
 
 /* Report slider statesave buffer fault to svclog */
 static void report_slider_statesave_buffer_fault_to_svclog(
-	struct slider_statesave_buffer_status *ssb_element,
 	void *dp, void *prev_dp, struct dev_vpd *vpd)
 {
 	int i, sev;
 	char description[EVENT_DESC_SIZE], crit[ES_STATUS_STRING_MAXLEN];
 	struct sl_callout *callouts;
 	char loc_suffix_code[LOCATION_LENGTH];
+	struct slider_statesave_buffer_status *ssb_element =
+		(struct slider_statesave_buffer_status *)
+		(dp + element_offset(ssb_element));
 
 	for (i = 0; i < SLIDER_NR_SSB; i++) {
 		sev = svclog_element_status(&(ssb_element[i].byte0),
@@ -565,13 +596,15 @@ static void report_slider_statesave_buffer_fault_to_svclog(
 
 /* Report slider cpld fault to svclog */
 static void report_slider_cpld_fault_to_svclog(
-	struct slider_cpld_status *cpld_element, void *dp, void *prev_dp,
-	struct dev_vpd *vpd)
+	void *dp, void *prev_dp, struct dev_vpd *vpd)
 {
 	int i, sev;
 	char description[EVENT_DESC_SIZE], crit[ES_STATUS_STRING_MAXLEN];
 	struct sl_callout *callouts;
 	char loc_suffix_code[LOCATION_LENGTH];
+	struct slider_cpld_status *cpld_element =
+		(struct slider_cpld_status *)
+		(dp + element_offset(cpld_element));
 
 	for (i = 0; i < SLIDER_NR_ESC; i++) {
 		sev = svclog_element_status(&(cpld_element[i].byte0),
@@ -592,7 +625,6 @@ static void report_slider_cpld_fault_to_svclog(
 
 /* Report slider input power fault to svclog */
 static void report_slider_input_power_fault_to_svclog(
-	struct slider_input_power_status *input_power_element,
 	void *dp, void *prev_dp, struct dev_vpd *vpd)
 {
 	int i, j, sev;
@@ -600,6 +632,9 @@ static void report_slider_input_power_fault_to_svclog(
 	struct sl_callout *callouts;
 	char srn[SRN_SIZE];
 	char loc_suffix_code[LOCATION_LENGTH];
+	struct slider_input_power_status *input_power_element =
+		(struct slider_input_power_status *)
+		(dp + element_offset(input_power_element));
 
 	for (i = 0; i < SLIDER_NR_PSU; i++) {
 		for (j = 0; j < SLIDER_NR_INPUT_POWER_PER_PSU; j++) {
@@ -627,21 +662,21 @@ static void report_slider_input_power_fault_to_svclog(
 	}
 }
 
-static int slider_read_previous_page2(void **buffer, int size)
+static int slider_read_previous_page2(void **buffer)
 {
 	int rc;
 
 	if (!cmd_opts.cmp_prev)
 		return 0;
 
-	*buffer = calloc(1, size);
+	*buffer = calloc(1, slider_v_diag_page2_size);
 	if (!(*buffer)) {
 		fprintf(stderr, "%s : Failed to allocate memory\n", __func__);
 		return 1;
 	}
 
-	rc = read_page2_from_file(cmd_opts.prev_path, false, *buffer, size);
-
+	rc = read_page2_from_file(cmd_opts.prev_path, false,
+				  *buffer, slider_v_diag_page2_size);
 	if (rc != 0) {
 		free(*buffer);
 		*buffer = NULL;
@@ -650,177 +685,126 @@ static int slider_read_previous_page2(void **buffer, int size)
 	return 0;
 }
 
-/* Report slider LFF fault to svclog */
-static int report_slider_lff_faults_to_svclog(struct dev_vpd *vpd,
-	struct slider_lff_diag_page2 *dp, int fd)
+/*
+ * Report slider fault to sericelog for both variant of slider by calculating
+ * offset of different element
+ */
+static int report_slider_fault_to_svclog(void *dp, struct dev_vpd *vpd, int fd)
 {
 	int rc;
-	struct slider_lff_diag_page2 *prev_dp = NULL;
+	void *prev_dp = NULL;
 
-	rc = slider_read_previous_page2((void *)&prev_dp,
-					sizeof(struct slider_lff_diag_page2));
+	rc = slider_read_previous_page2((void *)&prev_dp);
 	if (rc)
 		return 1;
 
 	/* report disk fault */
-	report_slider_disk_fault_to_svclog(dp->disk_status, (void *)dp,
-		(void *)prev_dp, vpd, SLIDER_NR_LFF_DISK);
+	report_slider_disk_fault_to_svclog(dp, prev_dp, vpd);
 
 	/* report power supply fault */
-	report_slider_power_supply_fault_to_svclog(dp->ps_status, (void *)dp,
-		(void *)prev_dp, vpd, fd);
+	report_slider_power_supply_fault_to_svclog(dp, prev_dp, vpd, fd);
 
 	/* report cooling element fault */
-	report_slider_cooling_element_fault_to_svclog(dp->fan_sets, (void *)dp,
-		(void *)prev_dp, vpd, fd);
+	report_slider_cooling_element_fault_to_svclog(dp, prev_dp, vpd, fd);
 
 	/* report temp sensor fault */
-	report_slider_temp_sensor_fault_to_svclog(&(dp->temp_sensor_sets),
-		(void *)dp, (void *)prev_dp, vpd, fd);
+	report_slider_temp_sensor_fault_to_svclog(dp, prev_dp, vpd, fd);
 
 	/* report esc fault */
-	report_slider_esc_fault_to_svclog(dp->enc_service_ctrl_element,
-		(void *)dp, (void *)prev_dp, vpd, fd);
+	report_slider_esc_fault_to_svclog(dp, prev_dp, vpd, fd);
 
 	/* report enclosure fault */
-	report_slider_enclosure_fault_to_svclog(&(dp->encl_element),
-		(void *)dp, (void *)prev_dp, vpd);
+	report_slider_enclosure_fault_to_svclog(dp, prev_dp, vpd);
 
 	/* report voltage sensor fault */
-	report_slider_volt_sensor_fault_to_svclog(dp->voltage_sensor_sets,
-		(void *)dp, (void *)prev_dp, vpd, fd);
+	report_slider_volt_sensor_fault_to_svclog(dp, prev_dp, vpd, fd);
 
 	/* report sas expander fault */
-	report_slider_sas_expander_fault_to_svclog(dp->sas_expander_element,
-		(void *)dp, (void *)prev_dp, vpd);
+	report_slider_sas_expander_fault_to_svclog(dp, prev_dp, vpd);
 
 	/* report sas connector fault */
-	report_slider_sas_connector_fault_to_svclog(dp->sas_connector_status,
-		(void *)dp, (void *)prev_dp, vpd);
+	report_slider_sas_connector_fault_to_svclog(dp, prev_dp, vpd);
 
 	/* report midplane fault */
-	report_slider_midplane_fault_to_svclog(&(dp->midplane_element_status),
-		(void *)dp, (void *)prev_dp, vpd, fd);
+	report_slider_midplane_fault_to_svclog(dp, prev_dp, vpd, fd);
 
 	/* report phy fault */
-	report_slider_phy_fault_to_svclog(dp->phy_sets, (void *)dp,
-		(void *)prev_dp, vpd);
+	report_slider_phy_fault_to_svclog(dp, prev_dp, vpd);
 
 	/* report statesave buffer fault */
-	report_slider_statesave_buffer_fault_to_svclog(dp->ssb_element,
-		(void *)dp, (void *)prev_dp, vpd);
+	report_slider_statesave_buffer_fault_to_svclog(dp, prev_dp, vpd);
 
 	/* report cpld fault */
-	report_slider_cpld_fault_to_svclog(dp->cpld_element, (void *)dp,
-		(void *)prev_dp, vpd);
+	report_slider_cpld_fault_to_svclog(dp, prev_dp, vpd);
 
 	/* report input power fault */
-	report_slider_input_power_fault_to_svclog(dp->input_power_element,
-		(void *)dp, (void *)prev_dp, vpd);
+	report_slider_input_power_fault_to_svclog(dp, prev_dp, vpd);
 
 	if (prev_dp)
 		free(prev_dp);
 
 	return write_page2_to_file(cmd_opts.prev_path, dp,
-				   sizeof(struct slider_lff_diag_page2));
+				   slider_v_diag_page2_size);
 }
 
-/* Report slider LFF fault to svclog */
-static int report_slider_sff_faults_to_svclog(struct dev_vpd *vpd,
-	struct slider_sff_diag_page2 *dp, int fd)
-{
-	int rc;
-	struct slider_sff_diag_page2 *prev_dp = NULL;
+#define SLIDER_FAULT_LED(poked_leds, dp, ctrl_page, ctrl_element, \
+						status_element) \
+	do { \
+		if (slider_variant_flag == SLIDER_V_LFF) { \
+			struct slider_lff_diag_page2 *d \
+			= (struct slider_lff_diag_page2 *)dp; \
+			struct slider_lff_ctrl_page2 *c \
+			= (struct slider_lff_ctrl_page2 *)ctrl_page; \
+			FAULT_LED(poked_leds, d, c, ctrl_element, \
+					status_element);\
+		} else { \
+			struct slider_sff_diag_page2 *d \
+			= (struct slider_sff_diag_page2 *)dp; \
+			struct slider_sff_ctrl_page2 *c \
+			= (struct slider_sff_ctrl_page2 *)ctrl_page; \
+			FAULT_LED(poked_leds, d, c, ctrl_element, \
+					status_element); \
+		} \
+	} while (0)
 
-	rc = slider_read_previous_page2((void *)&prev_dp,
-					sizeof(struct slider_sff_diag_page2));
-	if (rc)
-		return 1;
+#define SLIDER_ASSIGN_CTRL_PAGE(ctrl_page) \
+	do { \
+		if (slider_variant_flag == SLIDER_V_LFF) { \
+			struct slider_lff_ctrl_page2 *c \
+			= (struct slider_lff_ctrl_page2 *)ctrl_page; \
+			c->page_code = 2; \
+			c->page_length = slider_v_ctrl_page2_size - 4; \
+			c->page_length = htons(c->page_length); \
+			c->generation_code = 0; \
+		} else { \
+			struct slider_sff_ctrl_page2 *c \
+			= (struct slider_sff_ctrl_page2 *)ctrl_page; \
+			c->page_code = 2; \
+			c->page_length = slider_v_ctrl_page2_size - 4; \
+			c->page_length = htons(c->page_length); \
+			c->generation_code = 0; \
+		} \
+	} while (0);
 
-	/* report disk fault */
-	report_slider_disk_fault_to_svclog(dp->disk_status, (void *)dp,
-		(void *)prev_dp, vpd, SLIDER_NR_SFF_DISK);
-
-	/* report power supply fault */
-	report_slider_power_supply_fault_to_svclog(dp->ps_status, (void *)dp,
-		(void *)prev_dp, vpd, fd);
-
-	/* report cooling element fault */
-	report_slider_cooling_element_fault_to_svclog(dp->fan_sets, (void *)dp,
-		(void *)prev_dp, vpd, fd);
-
-	/* report temp sensor fault */
-	report_slider_temp_sensor_fault_to_svclog(&(dp->temp_sensor_sets),
-		(void *)dp, (void *)prev_dp, vpd, fd);
-
-	/* report esc fault */
-	report_slider_esc_fault_to_svclog(dp->enc_service_ctrl_element,
-		(void *)dp, (void *)prev_dp, vpd, fd);
-
-	/* report enclosure fault */
-	report_slider_enclosure_fault_to_svclog(&(dp->encl_element),
-		(void *)dp, (void *)prev_dp, vpd);
-
-	/* report voltage sensor fault */
-	report_slider_volt_sensor_fault_to_svclog(dp->voltage_sensor_sets,
-		(void *)dp, (void *)prev_dp, vpd, fd);
-
-	/* report sas expander fault */
-	report_slider_sas_expander_fault_to_svclog(dp->sas_expander_element,
-		(void *)dp, (void *)prev_dp, vpd);
-
-	/* report sas connector fault */
-	report_slider_sas_connector_fault_to_svclog(dp->sas_connector_status,
-		(void *)dp, (void *)prev_dp, vpd);
-
-	/* report midplane fault */
-	report_slider_midplane_fault_to_svclog(&(dp->midplane_element_status),
-		(void *)dp, (void *)prev_dp, vpd, fd);
-
-	/* report phy fault */
-	report_slider_phy_fault_to_svclog(dp->phy_sets,
-		(void *)dp, (void *)prev_dp, vpd);
-
-	/* report statesave buffer fault */
-	report_slider_statesave_buffer_fault_to_svclog(dp->ssb_element,
-		(void *)dp, (void *)prev_dp, vpd);
-
-	/* report cpld fault */
-	report_slider_cpld_fault_to_svclog(dp->cpld_element, (void *)dp,
-		(void *)prev_dp, vpd);
-
-	/* report input power fault */
-	report_slider_input_power_fault_to_svclog(dp->input_power_element,
-		(void *)dp, (void *)prev_dp, vpd);
-
-	if (prev_dp)
-		free(prev_dp);
-
-	return write_page2_to_file(cmd_opts.prev_path, dp,
-				   sizeof(struct slider_sff_diag_page2));
-}
 
 /* Turn on led in case of failure of any element of enclosure */
-static int slider_lff_turn_on_fault_leds(struct slider_lff_diag_page2 *dp,
-					 int fd)
+static int slider_turn_on_fault_leds(void *dp, int fd)
 {
-	int i, rc = 0;
+	int i, result;
+	void *ctrl_page;
 	static int poked_leds;
-	struct slider_lff_ctrl_page2 *ctrl_page;
 
-	ctrl_page = calloc(1, sizeof(struct slider_lff_ctrl_page2));
+	ctrl_page = calloc(1, slider_v_ctrl_page2_size);
 	if (!ctrl_page) {
 		fprintf(stderr, "Failed to allocate memory to hold "
 				"control diagnostics page 02.\n");
 		return 1;
 	}
 
-	/* Disk drives */
-	for (i = 0; i < SLIDER_NR_LFF_DISK; i++) {
-		FAULT_LED(poked_leds, dp, ctrl_page,
-				disk_ctrl[i], disk_status[i]);
+	for (i = 0; i < slider_v_nr_disk; i++) {
+		SLIDER_FAULT_LED(poked_leds, dp, ctrl_page,
+				 disk_ctrl[i], disk_status[i]);
 	}
-
 
 	/* No LEDs for power supply */
 
@@ -828,99 +812,36 @@ static int slider_lff_turn_on_fault_leds(struct slider_lff_diag_page2 *dp,
 
 	/* No LEDs for temperature sensors */
 
-	/* ESM electronics */
-	for (i = 0; i < SLIDER_NR_ESC; i++) {
-		FAULT_LED(poked_leds, dp, ctrl_page,
-			  enc_service_ctrl_element[i],
-			  enc_service_ctrl_element[i]);
-	}
-
-	/* Enclosure */
-	for (i = 0; i < SLIDER_NR_ENCLOSURE; i++) {
-		FAULT_LED(poked_leds, dp, ctrl_page,
-			  encl_element, encl_element);
-	}
-
-	if (poked_leds) {
-		ctrl_page->page_code = 2;
-		ctrl_page->page_length =
-			sizeof(struct slider_lff_ctrl_page2) - 4;
-		/* Convert host byte order to network byte order */
-		ctrl_page->page_length = htons(ctrl_page->page_length);
-		ctrl_page->generation_code = 0;
-		rc = do_ses_cmd(fd, SEND_DIAGNOSTIC, 0, 0x10, 6,
-				SG_DXFER_TO_DEV, ctrl_page,
-				sizeof(struct slider_lff_ctrl_page2));
-		if (rc != 0) {
-			perror("ioctl - SEND_DIAGNOSTIC");
-			fprintf(stderr, "rc = %d\n", rc);
-			fprintf(stderr, "failed to set LED(s) via SES\n");
-		}
-	}
-
-	free(ctrl_page);
-
-	return rc;
-}
-
-/* Turn on led in case of failure of any element of enclosure */
-static int slider_sff_turn_on_fault_leds(struct slider_sff_diag_page2 *dp,
-					 int fd)
-{
-	int i, rc = 0;
-	struct slider_sff_ctrl_page2 *ctrl_page;
-	static int poked_leds;
-
-	ctrl_page = calloc(1, sizeof(struct slider_sff_ctrl_page2));
-	if (!ctrl_page) {
-		fprintf(stderr, "Failed to allocate memory to hold "
-				"control diagnostics page 02.\n");
-		return 1;
-	}
-
-	/* Disk drives */
-	for (i = 0; i < SLIDER_NR_SFF_DISK; i++)
-		FAULT_LED(poked_leds, dp, ctrl_page,
-			  disk_ctrl[i], disk_status[i]);
-
-	/* No LEDS for Power supplies */
-
-	/* No LEDs for voltage sensors */
-
-	/* No LEDs for temperature sensors */
-
 	/* ERM/ESM electronics */
-	for (i = 0; i < SLIDER_NR_ESC; i++)
-		FAULT_LED(poked_leds, dp, ctrl_page,
-			  enc_service_ctrl_element[i],
-			  enc_service_ctrl_element[i]);
+	for (i = 0; i < SLIDER_NR_ESC; i++) {
+		SLIDER_FAULT_LED(poked_leds, dp, ctrl_page,
+				 enc_service_ctrl_element[i],
+				 enc_service_ctrl_element[i]);
+	}
 
 	/* Enclosure */
 	for (i = 0; i < SLIDER_NR_ENCLOSURE; i++) {
-		FAULT_LED(poked_leds, dp, ctrl_page,
-			  encl_element, encl_element);
+		SLIDER_FAULT_LED(poked_leds, dp, ctrl_page,
+				 encl_element, encl_element);
 	}
 
 	if (poked_leds) {
-		ctrl_page->page_code = 2;
-		ctrl_page->page_length =
-			sizeof(struct slider_sff_ctrl_page2) - 4;
-		/* Convert host byte order to network byte order */
-		ctrl_page->page_length = htons(ctrl_page->page_length);
-		ctrl_page->generation_code = 0;
-		rc = do_ses_cmd(fd, SEND_DIAGNOSTIC, 0, 0x10, 6,
+		SLIDER_ASSIGN_CTRL_PAGE(ctrl_page);
+		result = do_ses_cmd(fd, SEND_DIAGNOSTIC, 0, 0x10, 6,
 				SG_DXFER_TO_DEV, ctrl_page,
-				sizeof(struct slider_sff_ctrl_page2));
-		if (rc != 0) {
+				slider_v_ctrl_page2_size);
+		if (result != 0) {
 			perror("ioctl - SEND_DIAGNOSTIC");
-			fprintf(stderr, "rc = %d\n", rc);
+			fprintf(stderr, "result = %d\n", result);
 			fprintf(stderr, "failed to set LED(s) via SES\n");
+			free(ctrl_page);
+			return -1;
 		}
 	}
 
 	free(ctrl_page);
 
-	return rc;
+	return 0;
 }
 
 /* Print slider temperature sensor status */
@@ -1003,15 +924,14 @@ static void print_slider_drive_status(struct slider_disk_status *s)
 }
 
 /* Print slider disk status */
-static void print_slider_disk_status(struct slider_disk_status *disk_status,
-				     int nr_disk)
+static void print_slider_disk_status(struct slider_disk_status *disk_status)
 {
 	int i;
 	struct slider_disk_status *ds;
 
 	printf("\n\n  Drive Status\n");
 
-	for (i = 0; i < nr_disk; i++) {
+	for (i = 0; i < slider_v_nr_disk; i++) {
 		ds = &(disk_status[i]);
 		/* Print only if disk element access bit is set */
 		if (ds->byte0.status == ES_NO_ACCESS_ALLOWED)
@@ -1425,13 +1345,13 @@ static void print_slider_input_power_status(
 }
 
 /* @return 0 for success, !0 for failure */
-static int slider_read_diag_page2(char **page, int size, int *fdp)
+static int slider_read_diag_page2(char **page, int *fdp)
 {
 	char *buffer;
 	int rc;
 
-	/* Allocating page */
-	buffer = calloc(1, size);
+	/* Allocating status diagnostics page */
+	buffer = calloc(1, slider_v_diag_page2_size);
 	if (!buffer) {
 		fprintf(stderr, "Failed to allocate memory to hold "
 			"current status diagnostics page 02 results.\n");
@@ -1439,12 +1359,12 @@ static int slider_read_diag_page2(char **page, int size, int *fdp)
 	}
 
 	if (cmd_opts.fake_path) {
-		rc = read_page2_from_file(cmd_opts.fake_path,
-					  true, buffer, size);
+		rc = read_page2_from_file(cmd_opts.fake_path, true,
+					  buffer, slider_v_diag_page2_size);
 		*fdp = -1;
 	} else {
 		rc = get_diagnostic_page(*fdp, RECEIVE_DIAGNOSTIC, 2,
-					 (void *)buffer, (int)size);
+			(void *)buffer, (int)slider_v_diag_page2_size);
 	}
 
 	if (rc != 0) {
@@ -1457,25 +1377,86 @@ static int slider_read_diag_page2(char **page, int size, int *fdp)
 	return rc;
 }
 
-/* func : diag_slider_lff
- * callback function for sff varint of slider
- * @return 0 for success, 1 for failure
- */
-int diag_slider_lff(int fd, struct dev_vpd *vpd)
+/* Slider variant details */
+static int fill_slider_v_specific_details(void)
 {
-	char *buffer;
-	int rc;
-	struct slider_lff_diag_page2 *dp;
+	if (slider_variant_flag == SLIDER_V_LFF) {
+		slider_v_diag_page2_size = sizeof(struct slider_lff_diag_page2);
+		slider_v_ctrl_page2_size = sizeof(struct slider_lff_ctrl_page2);
+		slider_v_nr_disk = SLIDER_NR_LFF_DISK;
+	} else if (slider_variant_flag == SLIDER_V_SFF) {
+		slider_v_diag_page2_size = sizeof(struct slider_sff_diag_page2);
+		slider_v_ctrl_page2_size = sizeof(struct slider_sff_ctrl_page2);
+		slider_v_nr_disk = SLIDER_NR_SFF_DISK;
+	} else {
+		return -1;
+	}
 
-	/* Slider variant flag */
-	slider_variant_flag = SLIDER_V_LFF;
+	return 0;
+}
 
-	rc = slider_read_diag_page2(&buffer,
-				    sizeof(struct slider_lff_diag_page2), &fd);
-	if (rc)
-		return 1;
+/* Prints slider element status */
+static void diag_print_slider_status(void *dp)
+{
+	print_slider_disk_status
+		((struct slider_disk_status *)
+		(dp + element_offset(disk_status)));
 
-	dp = (struct slider_lff_diag_page2 *)buffer;
+	print_slider_power_supply_status
+		((struct power_supply_status *)
+		(dp + element_offset(ps_status)),
+		(struct slider_voltage_sensor_set *)
+		(dp + element_offset(voltage_sensor_sets)));
+
+	print_slider_fan_status
+		((struct slider_fan_set *)
+		(dp + element_offset(fan_sets)));
+
+	print_slider_temp_sensor_sets
+		((struct slider_temperature_sensor_set *)
+		(dp + element_offset(temp_sensor_sets)));
+
+	print_esc_status
+		((struct slider_enc_service_ctrl_status *)
+		(dp + element_offset(enc_service_ctrl_element)));
+
+	print_slider_enclosure_status
+		((struct slider_encl_status *)
+		(dp + element_offset(encl_element)));
+
+	print_slider_sas_expander_status
+		((struct slider_sas_expander_status *)
+		(dp + element_offset(sas_expander_element)));
+
+	print_slider_sas_connector_status
+		((struct slider_sas_connector_status *)
+		(dp + element_offset(sas_connector_status)));
+
+	print_slider_midplane_status
+		((struct slider_midplane_status *)
+		(dp + element_offset(midplane_element_status)));
+
+	print_slider_phy_status((struct slider_phy_set *)
+		(dp + element_offset(phy_sets)));
+
+	print_slider_ssb_status
+		((struct slider_statesave_buffer_status *)
+		(dp + element_offset(ssb_element)));
+
+	print_slider_cpld_status
+		((struct slider_cpld_status *)
+		(dp + element_offset(cpld_element)));
+
+	print_slider_input_power_status
+		((struct slider_input_power_status *)
+		(dp + element_offset(input_power_element)));
+}
+
+static void diag_print_slider_overall_lff_status(void *buffer)
+{
+	struct slider_lff_diag_page2 *dp
+		= (struct slider_lff_diag_page2 *)buffer;
+
 	printf("  Overall Status:    ");
 	if (dp->crit) {
 		printf("CRITICAL_FAULT");
@@ -1487,27 +1468,71 @@ int diag_slider_lff(int fd, struct dev_vpd *vpd)
 		printf("UNRECOVERABLE_FAULT");
 	else
 		printf("ok");
+}
 
-	/* Print slider drawer element status */
-	print_slider_disk_status(dp->disk_status, SLIDER_NR_LFF_DISK);
-	print_slider_power_supply_status
-		(dp->ps_status, dp->voltage_sensor_sets);
-	print_slider_fan_status(dp->fan_sets);
-	print_slider_temp_sensor_sets(&(dp->temp_sensor_sets));
-	print_esc_status(dp->enc_service_ctrl_element);
-	print_slider_enclosure_status(&(dp->encl_element));
-	print_slider_sas_expander_status(dp->sas_expander_element);
-	print_slider_sas_connector_status(dp->sas_connector_status);
-	print_slider_midplane_status(&(dp->midplane_element_status));
-	print_slider_phy_status(dp->phy_sets);
-	print_slider_ssb_status(dp->ssb_element);
-	print_slider_cpld_status(dp->cpld_element);
-	print_slider_input_power_status(dp->input_power_element);
+static void diag_print_slider_overall_sff_status(void *buffer)
+{
+	struct slider_sff_diag_page2 *dp
+		= (struct slider_sff_diag_page2 *)buffer;
 
+	printf("  Overall Status:    ");
+	if (dp->crit) {
+		printf("CRITICAL_FAULT");
+		if (dp->non_crit)
+			printf(" | NON_CRITICAL_FAULT");
+	} else if (dp->non_crit)
+		printf("NON_CRITICAL_FAULT");
+	else if (dp->unrecov)
+		printf("UNRECOVERABLE_FAULT");
+	else
+		printf("ok");
+}
+
+static inline int diag_print_slider_overall_status(void *buffer)
+{
+	if (slider_variant_flag == SLIDER_V_LFF) {
+		diag_print_slider_overall_lff_status(buffer);
+	} else if (slider_variant_flag == SLIDER_V_SFF) {
+		diag_print_slider_overall_sff_status(buffer);
+	} else {
+		return 1;
+	}
+
+	return 0;
+}
+
+/*
+ * Slider diagnostics
+ * Returns 0 in success and 1 in failure
+ */
+static int diag_slider(int slider_type, int fd, struct dev_vpd *vpd)
+{
+	char *buffer;
+	int rc;
+
+	/* Slider variant flag */
+	slider_variant_flag = slider_type;
+
+	/* Fill slider variant specific details */
+	if (fill_slider_v_specific_details())
+		return 1;
+
+	/* Read diag page */
+	if (slider_read_diag_page2(&buffer, &fd))
+		return 1;
+
+	/* Print enclosure overall status */
+	rc = diag_print_slider_overall_status((void *)buffer);
+	if (rc)
+		goto err_out;
+
+	/* Print slider element status */
+	diag_print_slider_status(buffer);
+
+	/* Print raw data */
 	if (cmd_opts.verbose) {
 		printf("\n\nRaw diagnostic page:\n");
-		print_raw_data(stdout, (char *) dp,
-				sizeof(struct slider_lff_diag_page2));
+		print_raw_data(stdout, buffer, slider_v_diag_page2_size);
 	}
 	printf("\n\n");
 
@@ -1520,94 +1545,40 @@ int diag_slider_lff(int fd, struct dev_vpd *vpd)
 	 * immediately in the next query of the SES.
 	 */
 	if (cmd_opts.serv_event) {
-		rc = report_slider_lff_faults_to_svclog(vpd, dp, fd);
-		if (rc != 0)
+		rc = report_slider_fault_to_svclog(buffer, vpd, fd);
+		if (rc)
 			goto err_out;
 	}
 
-	/* -l is not supported for fake path */
+	/* Set led state (option -l is not supported for fake path) */
 	if (fd != -1 && cmd_opts.leds)
-		rc = slider_lff_turn_on_fault_leds(dp, fd);
+		rc = slider_turn_on_fault_leds(buffer, fd);
 
 err_out:
 	free(buffer);
-	return (rc != 0);
+	return rc;
 }
 
-/* func : diag_slider_sff
- * callback function for sff varint of slider
+/*
+ * callback function for lff variant of slider
+ * @return 0 for success, 1 for failure
+ */
+int diag_slider_lff(int fd, struct dev_vpd *vpd)
+{
+	if (diag_slider(SLIDER_V_LFF, fd, vpd))
+		return 1;
+
+	return 0;
+}
+
+/*
+ * callback function for sff variant of slider
  * @return 0 for success, 1 for failure
  */
 int diag_slider_sff(int fd, struct dev_vpd *vpd)
 {
-	int rc;
-	struct slider_sff_diag_page2 *dp;
-	char *buffer;
-
-	/* Slider variant flag */
-	slider_variant_flag = SLIDER_V_SFF;
-
-	rc = slider_read_diag_page2(&buffer,
-				    sizeof(struct slider_sff_diag_page2), &fd);
-	if (rc)
+	if (diag_slider(SLIDER_V_SFF, fd, vpd))
 		return 1;
 
-	dp = (struct slider_sff_diag_page2 *)buffer;
-
-	printf("  Overall Status:    ");
-	if (dp->crit) {
-		printf("CRITICAL_FAULT");
-		if (dp->non_crit)
-			printf(" | NON_CRITICAL_FAULT");
-	} else if (dp->non_crit)
-		printf("NON_CRITICAL_FAULT");
-	else if (dp->unrecov)
-		printf("UNRECOVERABLE_FAULT");
-	else
-		printf("ok");
-
-	/* Print slider drawer element status */
-	print_slider_disk_status(dp->disk_status, SLIDER_NR_SFF_DISK);
-	print_slider_power_supply_status
-		((dp->ps_status), dp->voltage_sensor_sets);
-	print_slider_fan_status(dp->fan_sets);
-	print_slider_temp_sensor_sets(&(dp->temp_sensor_sets));
-	print_esc_status(dp->enc_service_ctrl_element);
-	print_slider_enclosure_status(&(dp->encl_element));
-	print_slider_sas_expander_status(dp->sas_expander_element);
-	print_slider_sas_connector_status(dp->sas_connector_status);
-	print_slider_midplane_status(&(dp->midplane_element_status));
-	print_slider_phy_status(dp->phy_sets);
-	print_slider_ssb_status(dp->ssb_element);
-	print_slider_cpld_status(dp->cpld_element);
-	print_slider_input_power_status(dp->input_power_element);
-
-	if (cmd_opts.verbose) {
-		printf("\n\nRaw diagnostic page:\n");
-		print_raw_data(stdout, (char *) dp,
-				sizeof(struct slider_sff_diag_page2));
-	}
-	printf("\n\n");
-
-	/*
-	 * Report faults to servicelog, and turn on LEDs as appropriate.
-	 * LED status reported previously may not be accurate after we
-	 * do this, but the alternative is to report faults first and then
-	 * read the diagnostic page a second time.  And unfortunately, the
-	 * changes to LED settings don't always show up immediately in
-	 * the next query of the SES.
-	 */
-	if (cmd_opts.serv_event) {
-		rc = report_slider_sff_faults_to_svclog(vpd, dp, fd);
-		if (rc != 0)
-			goto err_out;
-	}
-
-	/* -l is not supported for fake path */
-	if (fd != -1 && cmd_opts.leds)
-		rc = slider_sff_turn_on_fault_leds(dp, fd);
-
-err_out:
-	free(buffer);
-	return (rc != 0);
+	return 0;
 }

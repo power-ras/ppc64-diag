@@ -820,10 +820,7 @@ static int slider_turn_on_fault_leds(void *dp, int fd)
 	}
 
 	/* Enclosure */
-	for (i = 0; i < SLIDER_NR_ENCLOSURE; i++) {
-		SLIDER_FAULT_LED(poked_leds, dp, ctrl_page,
-				 encl_element, encl_element);
-	}
+	SLIDER_FAULT_LED(poked_leds, dp, ctrl_page, encl_element, encl_element);
 
 	if (poked_leds) {
 		SLIDER_ASSIGN_CTRL_PAGE(ctrl_page);

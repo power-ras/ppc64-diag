@@ -497,7 +497,7 @@ static void report_slider_sas_connector_fault_to_svclog(
 				sas_connector_names[j],
 				left_right[i], ref_svc_doc);
 			snprintf(loc_suffix_code,
-				 LOCATION_LENGTH, "-P1-C%u", i+1);
+				 LOCATION_LENGTH, "-C%u-T%u", i+1, j+1);
 			get_location_code(vpd, loc_suffix_code);
 			callouts = NULL;
 			/* No VPD for SAS connectors in the SES. */

@@ -150,7 +150,7 @@ static void get_location_code(struct dev_vpd *vpd, char *loc_suffix_code)
 	static char *loc_suffix = NULL;
 	static int loc_suffix_size;
 
-	if (location_code == NULL) {
+	if (location_code[0] == '\0') {
 		strncpy(location_code, vpd->location, LOCATION_LENGTH - 1);
 		location_code[LOCATION_LENGTH - 1] = '\0';
 		loc_suffix_size = LOCATION_LENGTH - strlen(location_code);

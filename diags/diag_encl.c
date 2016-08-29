@@ -291,12 +291,6 @@ main(int argc, char *argv[])
 	struct dev_vpd *diagnosed = NULL;
 
 	platform = get_platform();
-	if (platform != PLATFORM_PSERIES_LPAR) {
-		fprintf(stderr, "%s is not supported on the %s platform\n",
-				argv[0], __power_platform_name(platform));
-		return -1;
-	}
-
 	memset(&cmd_opts, 0, sizeof(cmd_opts));
 
 	for (;;) {

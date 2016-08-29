@@ -659,10 +659,10 @@ servevent(const char *refcode, int sev, const char *text,
 
 	switch (platform) {
 	case PLATFORM_PSERIES_LPAR:
+	case PLATFORM_POWERKVM_GUEST:
 		return servicelog_log_event(refcode, sev, text, vpd, callouts);
 	case PLATFORM_POWERNV:
 		return syslog_log_event(refcode, sev, vpd);
-	case PLATFORM_POWERKVM_GUEST: /* Fall through */
 	default:
 		break;
 	}

@@ -792,7 +792,7 @@ static int slider_turn_on_fault_leds(void *dp, int fd)
 {
 	int i, result;
 	void *ctrl_page;
-	int poked_leds;
+	int poked_leds = 0;
 
 	ctrl_page = calloc(1, slider_v_ctrl_page2_size);
 	if (!ctrl_page) {

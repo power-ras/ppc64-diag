@@ -552,7 +552,7 @@ static void report_slider_phy_fault_to_svclog(
 			if (sev == 0)
 				continue;
 			snprintf(description, EVENT_DESC_SIZE,
-				"%s fault in phy element[%d] of %s SAS"
+				"%s fault in physical link[%d] of %s SAS"
 				" expander.%s",	crit, j + 1, left_right[i],
 				ref_svc_doc);
 			snprintf(loc_suffix_code,
@@ -1245,7 +1245,7 @@ static void print_slider_phy_status(struct slider_phy_set *phy_sets)
 		for (j = 0; j < SLIDER_NR_PHY_PER_SAS_EXPANDER; j++) {
 			s = &(phy_sets[i].phy_element[j]);
 			if (s->enable) {
-				printf("      Phy Element %2d: ", j + 1);
+				printf("      Physical link %2d: ", j + 1);
 				sc = (enum element_status_code)s->byte0.status;
 				printf("%s", status_string(sc, valid_codes));
 			}

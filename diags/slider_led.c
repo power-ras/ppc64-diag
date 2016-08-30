@@ -32,6 +32,8 @@
 enum slider_component_type {
 	SLIDER_DISK,
 	SLIDER_ESC,
+	SLIDER_PS,
+	SLIDER_SAS_CONNECTOR,
 	SLIDER_ENCLOSURE,
 };
 
@@ -50,7 +52,7 @@ slider_decode_component_loc(struct slider_disk_status *disk_status,
 	int nr_disk, const char *loc, enum slider_component_type *type,
 	unsigned int *index)
 {
-	unsigned int n;
+	unsigned int n, n2;
 	char g;		/* catch trailing garbage */
 
 	if (!loc || !strcmp(loc, "-")) { /* Enclosure */
@@ -71,6 +73,17 @@ slider_decode_component_loc(struct slider_disk_status *disk_status,
 		element_check_range(n, 1, SLIDER_NR_ESC, loc);
 		*type = SLIDER_ESC;
 		*index = n-1;
+	} else if (sscanf(loc, "P1-E%u%c", &n, &g) == 1) { /* PS */
+		element_check_range(n, 1, SLIDER_NR_POWER_SUPPLY, loc);
+		*type = SLIDER_PS;
+		*index = n-1;
+	} else if (sscanf(loc, "P1-C%u-T%u%c", &n, &n2, &g) == 2) { /* SAS connector */
+		element_check_range(n, 1, SLIDER_NR_ESC, loc);
+		element_check_range(n2, 1,
+				    SLIDER_NR_SAS_CONNECTOR_PER_EXPANDER, loc);
+		*type = SLIDER_SAS_CONNECTOR;
+		*index = (((n - 1) * SLIDER_NR_SAS_CONNECTOR_PER_EXPANDER))
+			+ (n2 - 1);
 	} else {
 		fprintf(stderr, "%s: unrecognized location code: %s\n",
 			progname, loc);
@@ -107,6 +120,24 @@ slider_lff_report_component(struct slider_lff_diag_page2 *dp, int fault,
 		REPORT_COMPONENT(dp, enc_service_ctrl_element[i],
 				 fault, ident, loc_code, desc, verbose);
 		break;
+	case SLIDER_PS:
+		snprintf(loc_code, COMP_LOC_CODE, "P1-E%u", i+1);
+		snprintf(desc, COMP_DESC_SIZE,
+			 "%s Power supply", left_right[i]);
+		REPORT_COMPONENT(dp, ps_status[i],
+				 fault, ident, loc_code, desc, verbose);
+		break;
+	case SLIDER_SAS_CONNECTOR:
+		snprintf(loc_code, COMP_LOC_CODE, "P1-C%u-T%u",
+			i/SLIDER_NR_SAS_CONNECTOR_PER_EXPANDER + 1,
+			i - ((i/SLIDER_NR_SAS_CONNECTOR_PER_EXPANDER)
+				* SLIDER_NR_SAS_CONNECTOR_PER_EXPANDER) + 1);
+		snprintf(desc, COMP_DESC_SIZE,
+			"SAS CONNECTOR on %s ESC ",
+			left_right[i/SLIDER_NR_SAS_CONNECTOR_PER_EXPANDER]);
+		REPORT_COMPONENT(dp, sas_connector_status[i],
+				 fault, ident, loc_code, desc, verbose);
+		break;
 	default:
 		fprintf(stderr,
 			"%s internal error: unexpected component type %u\n",
@@ -139,6 +170,24 @@ slider_sff_report_component(struct slider_sff_diag_page2 *dp, int fault,
 		snprintf(desc, COMP_DESC_SIZE,
 			 "%s Enclosure RAID Module", left_right[i]);
 		REPORT_COMPONENT(dp, enc_service_ctrl_element[i],
+				 fault, ident, loc_code, desc, verbose);
+		break;
+	case SLIDER_PS:
+		snprintf(loc_code, COMP_LOC_CODE, "P1-E%u", i+1);
+		snprintf(desc, COMP_DESC_SIZE,
+			 "%s Power supply", left_right[i]);
+		REPORT_COMPONENT(dp, ps_status[i],
+				 fault, ident, loc_code, desc, verbose);
+		break;
+	case SLIDER_SAS_CONNECTOR:
+		snprintf(loc_code, COMP_LOC_CODE, "P1-C%u-T%u",
+			i/SLIDER_NR_SAS_CONNECTOR_PER_EXPANDER + 1,
+			i - ((i/SLIDER_NR_SAS_CONNECTOR_PER_EXPANDER)
+				* SLIDER_NR_SAS_CONNECTOR_PER_EXPANDER) + 1);
+		snprintf(desc, COMP_DESC_SIZE,
+			"SAS CONNECTOR on %s ESC ",
+			left_right[i/SLIDER_NR_SAS_CONNECTOR_PER_EXPANDER]);
+		REPORT_COMPONENT(dp, sas_connector_status[i],
 				 fault, ident, loc_code, desc, verbose);
 		break;
 	default:
@@ -232,6 +281,16 @@ slider_lff_list_leds(const char *enclosure, const char *component, int verbose)
 		for (i = 0; i < SLIDER_NR_ESC; i++)
 			slider_lff_report_component_from_ses(&dp, SLIDER_ESC,
 				i, verbose);
+
+		/* PS LED */
+		for (i = 0; i < SLIDER_NR_POWER_SUPPLY; i++)
+			slider_lff_report_component_from_ses(&dp, SLIDER_PS,
+							     i, verbose);
+
+		/* SAS connector LED */
+		for (i = 0; i < SLIDER_NR_SAS_CONNECTOR; i++)
+			slider_lff_report_component_from_ses
+				(&dp, SLIDER_SAS_CONNECTOR, i, verbose);
 	}
 
 	close(fd);
@@ -284,6 +343,16 @@ slider_sff_list_leds(const char *enclosure, const char *component, int verbose)
 		for (i = 0; i < SLIDER_NR_ESC; i++)
 			slider_sff_report_component_from_ses(&dp, SLIDER_ESC,
 				i, verbose);
+
+		/* PS LED */
+		for (i = 0; i < SLIDER_NR_POWER_SUPPLY; i++)
+			slider_lff_report_component_from_ses(&dp, SLIDER_PS,
+							     i, verbose);
+
+		/* SAS connector LED */
+		for (i = 0; i < SLIDER_NR_SAS_CONNECTOR; i++)
+			slider_sff_report_component_from_ses
+				(&dp, SLIDER_SAS_CONNECTOR, i, verbose);
 	}
 
 	close(fd);
@@ -331,6 +400,21 @@ slider_lff_set_led(const char *enclosure,
 		SET_LED(&cp, &dp, fault, ident,
 			enc_service_ctrl_element[index],
 			enc_service_ctrl_element[index]);
+		break;
+	case SLIDER_PS:
+		if (fault == LED_ON) {
+			fprintf(stderr, "%s: Power supply fault indicator is not "
+				"supported.\n", enclosure);
+			close(fd);
+			return -1;
+		}
+		SET_LED(&cp, &dp, fault, ident,
+			ps_ctrl[index], ps_status[index]);
+		break;
+	case SLIDER_SAS_CONNECTOR:
+		SET_LED(&cp, &dp, fault, ident,
+			sas_connector_ctrl[index],
+			sas_connector_status[index]);
 		break;
 	default:
 		fprintf(stderr,
@@ -403,6 +487,21 @@ slider_sff_set_led(const char *enclosure,
 		SET_LED(&cp, &dp, fault, ident,
 			enc_service_ctrl_element[index],
 			enc_service_ctrl_element[index]);
+		break;
+	case SLIDER_PS:
+		if (fault == LED_ON) {
+			fprintf(stderr, "%s: Power supply fault indicator is not "
+				"supported.\n", enclosure);
+			close(fd);
+			return -1;
+		}
+		SET_LED(&cp, &dp, fault, ident,
+			ps_ctrl[index], ps_status[index]);
+		break;
+	case SLIDER_SAS_CONNECTOR:
+		SET_LED(&cp, &dp, fault, ident,
+			sas_connector_ctrl[index],
+			sas_connector_status[index]);
 		break;
 	default:
 		fprintf(stderr,

@@ -801,22 +801,25 @@ static int slider_turn_on_fault_leds(void *dp, int fd)
 		return 1;
 	}
 
+	/* Disk */
 	for (i = 0; i < slider_v_nr_disk; i++) {
 		SLIDER_FAULT_LED(poked_leds, dp, ctrl_page,
 				 disk_ctrl[i], disk_status[i]);
 	}
 
-	/* No LEDs for power supply */
-
-	/* No LEDs for voltage sensors */
-
-	/* No LEDs for temperature sensors */
+	/* No fault LED for power supply */
 
 	/* ERM/ESM electronics */
 	for (i = 0; i < SLIDER_NR_ESC; i++) {
 		SLIDER_FAULT_LED(poked_leds, dp, ctrl_page,
 				 enc_service_ctrl_element[i],
 				 enc_service_ctrl_element[i]);
+	}
+
+	/* SAS Connector*/
+	for (i = 0; i < SLIDER_NR_SAS_CONNECTOR; i++) {
+		SLIDER_FAULT_LED(poked_leds, dp, ctrl_page,
+			sas_connector_ctrl[i], sas_connector_status[i]);
 	}
 
 	/* Enclosure */
@@ -1227,6 +1230,7 @@ static void print_slider_sas_connector_status(
 			printf("%s", status_string(sc, valid_codes));
 
 			CHK_IDENT_LED(s);
+			CHK_FAULT_LED(s);
 			printf("\n");
 		}
 	}

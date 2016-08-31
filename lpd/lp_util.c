@@ -46,6 +46,9 @@ static struct {
 } supported_ses_enclosure[] = {
 	{"5888"},	/* Bluehawk */
 	{"EDR1"},	/* Bluehawk */
+	{"5887"},	/* Homerun */
+	{"ESLL"},	/* Slider - LFF */
+	{"ESLS"},	/* Slider - SFF */
 	{NULL}
 };
 

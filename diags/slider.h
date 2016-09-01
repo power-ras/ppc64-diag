@@ -84,9 +84,10 @@
 struct slider_disk_status {
 	struct element_status_byte0 byte0;
 
-	uint8_t slot_number;
-
 #if defined (__BIG_ENDIAN_BITFIELD)
+	uint8_t hot_swap:1;
+	uint8_t slot_number:7;
+
 	uint8_t app_client_bypassed_a:1;
 	uint8_t do_not_remove:1;
 	uint8_t enclosure_bypassed_a:1;
@@ -105,6 +106,9 @@ struct slider_disk_status {
 	uint8_t device_bypassed_a:1;
 	uint8_t device_bypassed_b:1;
 #elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t slot_number:7;
+	uint8_t hot_swap:1;
+
 	uint8_t report:1;
 	uint8_t ident:1;
 	uint8_t rmv:1;

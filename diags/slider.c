@@ -901,6 +901,8 @@ static void print_slider_drive_status(struct slider_disk_status *s)
 		return;
 	}
 
+	if (s->hot_swap)
+		printf(" | Hotswap enabled");
 	if (s->app_client_bypassed_a)
 		printf(" | APP_CLIENT_BYPASSED_A");
 	if (s->app_client_bypassed_b)

@@ -203,8 +203,8 @@ static void report_slider_power_supply_fault_to_svclog(
 	char loc_suffix_code[LOCATION_LENGTH];
 	int i, sev, rc;
 	struct sl_callout *callouts;
-	struct power_supply_status *ps_status =
-		(struct power_supply_status *)(dp + element_offset(ps_status));
+	struct slider_power_supply_status *ps_status =
+		(struct slider_power_supply_status *)(dp + element_offset(ps_status));
 
 	for (i = 0; i < SLIDER_NR_POWER_SUPPLY; i++) {
 		sev = svclog_element_status(&(ps_status[i].byte0),
@@ -944,13 +944,15 @@ static void print_slider_disk_status(struct slider_disk_status *disk_status)
 	}
 }
 
-static void slider_print_power_supply_status(struct power_supply_status *s)
+static void slider_print_power_supply_status(struct slider_power_supply_status *s)
 {
 	enum element_status_code sc =
 		(enum element_status_code) s->byte0.status;
 
 	printf("%s", status_string(sc, valid_codes));
 
+	if (s->cycled)
+		printf(" | CYCLED");
 	if (s->dc_fail)
 		printf(" | DC_FAIL");
 	if (s->dc_over_voltage)
@@ -972,7 +974,7 @@ static void slider_print_power_supply_status(struct power_supply_status *s)
 
 /* Print slider power supply status */
 static void print_slider_power_supply_status(
-	struct power_supply_status *ps_status,
+	struct slider_power_supply_status *ps_status,
 	struct slider_voltage_sensor_set *voltage_sensor_sets)
 {
 	int i;
@@ -1406,7 +1408,7 @@ static void diag_print_slider_status(void *dp)
 		(dp + element_offset(disk_status)));
 
 	print_slider_power_supply_status
-		((struct power_supply_status *)
+		((struct slider_power_supply_status *)
 		(dp + element_offset(ps_status)),
 		(struct slider_voltage_sensor_set *)
 		(dp + element_offset(voltage_sensor_sets)));

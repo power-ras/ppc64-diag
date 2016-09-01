@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 {
 	int i;
 	struct fan_status *fs;
-	struct power_supply_status *ps;
+	struct slider_power_supply_status *ps;
 	struct slider_voltage_sensor_status *vs;
 	struct slider_temperature_sensor_status *ts;
 

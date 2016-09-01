@@ -53,6 +53,7 @@
  *
  * ******************Status Registers:********************************
  *	- slider_disk_status			: sec - 5.4.2,  table - 48
+ *      - slider_power_supply_status            : sec - 6.3.4.2,table -5.19
  *	- slider_temperature_sensor_status	: sec - 5.4.6,  table - 52
  *	- slider_enc_serv_ctrl_status		: sec - 5.4.7,  table - 53
  *	- slider_encl_status			: sec - 5.4.8,  table - 54
@@ -126,6 +127,50 @@ struct slider_disk_status {
 	uint8_t fail:1;		/* AKA fault_reqstd */
 	uint8_t fault_sensed:1;
 	uint8_t app_client_bypassed_b:1;
+#endif
+};
+
+/* Slider power supply status */
+struct slider_power_supply_status {
+	struct element_status_byte0 byte0;
+
+#if defined (__BIG_ENDIAN_BITFIELD)
+	uint8_t ident:1;
+	uint8_t reserved2:7;
+
+	uint8_t reserved3:4;
+	uint8_t dc_over_voltage:1;
+	uint8_t dc_under_voltage:1;
+	uint8_t dc_over_current:1;
+	uint8_t cycled:1;
+
+	uint8_t hot_swap:1;
+	uint8_t fail:1;
+	uint8_t rqsted_on:1;
+	uint8_t off:1;
+	uint8_t ovrtmp_fail:1;
+	uint8_t temp_warn:1;
+	uint8_t ac_fail:1;
+	uint8_t dc_fail:1;
+
+#elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved2:7;
+	uint8_t ident:1;
+
+	uint8_t cycled:1;
+	uint8_t dc_over_current:1;
+	uint8_t dc_under_voltage:1;
+	uint8_t dc_over_voltage:1;
+	uint8_t reserved3:4;
+
+	uint8_t dc_fail:1;
+	uint8_t ac_fail:1;
+	uint8_t temp_warn:1;
+	uint8_t ovrtmp_fail:1;
+	uint8_t off:1;
+	uint8_t rqsted_on:1;
+	uint8_t fail:1;
+	uint8_t hot_swap:1;
 #endif
 };
 
@@ -443,8 +488,8 @@ struct slider_lff_diag_page2 {
 	struct slider_disk_status disk_status[SLIDER_NR_LFF_DISK];
 
 	/* Power supply */
-	struct power_supply_status overall_power_status;
-	struct power_supply_status ps_status[SLIDER_NR_POWER_SUPPLY];
+	struct slider_power_supply_status overall_power_status;
+	struct slider_power_supply_status ps_status[SLIDER_NR_POWER_SUPPLY];
 
 	/* Cooling element */
 	struct fan_status overall_fan_status;
@@ -532,8 +577,8 @@ struct slider_sff_diag_page2 {
 	struct slider_disk_status disk_status[SLIDER_NR_SFF_DISK];
 
 	/* Power supply */
-	struct power_supply_status overall_power_status;
-	struct power_supply_status ps_status[SLIDER_NR_POWER_SUPPLY];
+	struct slider_power_supply_status overall_power_status;
+	struct slider_power_supply_status ps_status[SLIDER_NR_POWER_SUPPLY];
 
 	/* Cooling element */
 	struct fan_status overall_fan_status;

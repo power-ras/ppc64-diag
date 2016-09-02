@@ -346,7 +346,7 @@ slider_sff_list_leds(const char *enclosure, const char *component, int verbose)
 
 		/* PS LED */
 		for (i = 0; i < SLIDER_NR_POWER_SUPPLY; i++)
-			slider_lff_report_component_from_ses(&dp, SLIDER_PS,
+			slider_sff_report_component_from_ses(&dp, SLIDER_PS,
 							     i, verbose);
 
 		/* SAS connector LED */

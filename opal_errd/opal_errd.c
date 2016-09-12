@@ -81,7 +81,7 @@
 
 #define ELOG_DATE_OFFSET	0x8
 #define ELOG_TIME_OFFSET	0xc
-#define ELOG_ID_OFFESET		0x2c
+#define ELOG_ID_OFFSET		0x2c
 #define ELOG_SEVERITY_OFFSET	0x3a
 #define ELOG_SUBSYSTEM_OFFSET	0x38
 #define ELOG_ACTION_OFFSET	0x42
@@ -285,7 +285,7 @@ static int parse_log(char *buffer, size_t bufsz)
 		return -1;
 	}
 
-	logid = be32toh(*(uint32_t*)(buffer + ELOG_ID_OFFESET));
+	logid = be32toh(*(uint32_t*)(buffer + ELOG_ID_OFFSET));
 
 	memcpy(src, (buffer + ELOG_SRC_OFFSET), ELOG_SRC_SIZE);
 	src[ELOG_SRC_SIZE] = '\0';

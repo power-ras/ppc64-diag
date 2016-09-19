@@ -1,5 +1,5 @@
 Name:	ppc64-diag
-Version:	2.7.1
+Version:	2.7.2
 Release:	1
 Summary:	PowerLinux Platform Diagnostics
 Group:		System Environment/Base
@@ -100,6 +100,10 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Mon Sep 19 2016 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.7.2
+- Added slider enclosure diagnostics support
+- Added support for eSEL parsing
+
 * Mon May 9 2016 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.7.1
 - Fixed endianness issues in diagnostics code
 

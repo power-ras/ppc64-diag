@@ -1082,21 +1082,21 @@ struct slider_sff_ctrl_page2 {
 #define SLIDER_NR_PS_ELEMENT_DES_PAGE_SIZE		122
 
 /* Power supply start offset in element descriptor page */
-#define SLIDER_NR_LFF_PS_ELEMENT_DES_PAGE_START_OFFSET	259
-#define SLIDER_NR_SFF_PS_ELEMENT_DES_PAGE_START_OFFSET	499
+#define SLIDER_NR_LFF_PS_ELEMENT_DES_PAGE_START_OFFSET	258
+#define SLIDER_NR_SFF_PS_ELEMENT_DES_PAGE_START_OFFSET	498
 
 /*
  * Slider LFF element descriptor page layout
  * Used only for power supply, so ignored other elements
  */
 struct slider_lff_element_descriptor_page {
-	char ignored1[SLIDER_NR_LFF_PS_ELEMENT_DES_PAGE_START_OFFSET - 1];
+	char ignored1[SLIDER_NR_LFF_PS_ELEMENT_DES_PAGE_START_OFFSET];
 	struct power_supply_descriptor ps0_vpd;
 	uint16_t reserved;
 	struct power_supply_descriptor ps1_vpd;
 	char ignored2[SLIDER_NR_LFF_ELEMENT_DES_PAGE_SIZE -
 			SLIDER_NR_LFF_PS_ELEMENT_DES_PAGE_START_OFFSET -
-			SLIDER_NR_PS_ELEMENT_DES_PAGE_SIZE]; /* 811 */
+			SLIDER_NR_PS_ELEMENT_DES_PAGE_SIZE]; /* 572 */
 } __attribute__((packed));
 
 /*
@@ -1104,13 +1104,13 @@ struct slider_lff_element_descriptor_page {
  * Used only for power supply, so ignored other elements
  */
 struct slider_sff_element_descriptor_page {
-	char ignored1[SLIDER_NR_SFF_PS_ELEMENT_DES_PAGE_START_OFFSET - 1];
+	char ignored1[SLIDER_NR_SFF_PS_ELEMENT_DES_PAGE_START_OFFSET];
 	struct power_supply_descriptor ps0_vpd;
 	uint16_t reserved;
 	struct power_supply_descriptor ps1_vpd;
 	char ignored2[SLIDER_NR_SFF_ELEMENT_DES_PAGE_SIZE -
 			SLIDER_NR_SFF_PS_ELEMENT_DES_PAGE_START_OFFSET -
-			SLIDER_NR_PS_ELEMENT_DES_PAGE_SIZE]; /* 811 */
+			SLIDER_NR_PS_ELEMENT_DES_PAGE_SIZE]; /* 812 */
 } __attribute__((packed));
 
 #endif /* __SLIDER_H__ */

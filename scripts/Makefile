@@ -15,13 +15,13 @@ all: $(SCRIPTS) $(INIT_FILES) $(CFG_FILES)
 install: all
 	@$(call install_files,$(SCRIPTS),744,$(DESTDIR)/etc/ppc64-diag)
 	@$(call install_files,$(INIT_FILES),755,$(DESTDIR)/$(LIBEXEC_DIR))
-	@$(call install_files,$(SERVICE_SCRIPT),755,$(DESTDIR)/$(SYSTEMD_DIR))
+	@$(call install_files,$(SERVICE_SCRIPT),644,$(DESTDIR)/$(SYSTEMD_DIR))
 	@$(call install_files,$(CFG_FILES),644,$(DESTDIR)/etc/ppc64-diag)
 
 uninstall: 
 	@$(call uninstall_files,$(SCRIPTS),$(DESTDIR)/etc/ppc64-diag)
 	@$(call uninstall_files,$(INIT_FILES),$(DESTDIR)/$(LIBEXEC_DIR))
-	@$(call uninstall_files,$(SERVICE_SCRIPT),755,$(DESTDIR)/$(SYSTEMD_DIR))
+	@$(call uninstall_files,$(SERVICE_SCRIPT),644,$(DESTDIR)/$(SYSTEMD_DIR))
 	@$(call uninstall_files,$(CFG_FILES),$(DESTDIR)/etc/ppc64-diag)
 
 clean:

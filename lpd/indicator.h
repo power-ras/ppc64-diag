@@ -43,7 +43,8 @@
 #define TYPE_SES                2
 #define TYPE_OS			3
 #define TYPE_OPAL		4
-#define TYPE_EOL		5
+#define TYPE_MARVELL		5
+#define TYPE_EOL		6
 
 /* Indicator state */
 #define LED_STATE_SAME		-1

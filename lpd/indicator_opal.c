@@ -33,6 +33,7 @@
 
 #include "indicator.h"
 #include "indicator_ses.h"
+#include "indicator_marvell.h"
 
 /* LED directory */
 #define OPAL_LED_SYSFS_PATH	"/sys/class/leds"
@@ -400,6 +401,9 @@ opal_get_indicator_list(int indicator, struct loc_code **list)
 	/* SES indicators */
 	get_ses_indices(indicator, list);
 
+	/* Marvell HDD LEDs (indicators) */
+	get_mv_indices(indicator, list);
+
 	return rc;
 }
 
@@ -421,6 +425,8 @@ opal_get_indicator_state(int indicator, struct loc_code *loc, int *state)
 		return opal_get_indicator(loc, state);
 	case TYPE_SES:
 		return get_ses_indicator(indicator, loc, state);
+	case TYPE_MARVELL:
+		return get_mv_indicator(indicator, loc, state);
 	default:
 		break;
 	}
@@ -449,6 +455,8 @@ opal_set_indicator_state(int indicator, struct loc_code *loc, int new_value)
 		return opal_set_indicator(loc, new_value);
 	case TYPE_SES:
 		return set_ses_indicator(indicator, loc, new_value);
+	case TYPE_MARVELL:
+		return set_mv_indicator(indicator, loc, new_value);
 	default:
 		break;
 	}

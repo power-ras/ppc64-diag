@@ -113,6 +113,7 @@ main(int argc, char **argv)
 	char	*othervalue = NULL;
 	struct	loc_code *current;
 	struct	loc_code *list = NULL;
+	struct	loc_code *list_start = NULL;
 
 	program_name = argv[0];
 	if (probe_indicator() != 0)
@@ -345,12 +346,14 @@ main(int argc, char **argv)
 		strncpy(temp, lvalue, LOCATION_LENGTH);
 		temp[LOCATION_LENGTH - 1] = '\0';
 
+	list_start = list;
 retry:
-		current = get_indicator_for_loc_code(list, lvalue);
+		current = get_indicator_for_loc_code(list_start, lvalue);
 		if (!current) {
 			if (trunc) {
 				if (truncate_loc_code(lvalue)) {
 					truncated = 1;
+					list_start = list; /* start again */
 					goto retry;
 				}
 			}
@@ -362,6 +365,48 @@ retry:
 			if (truncated)
 				fprintf(stdout, "Truncated location code : "
 					"%s\n", lvalue);
+
+			if (current->type == TYPE_MARVELL) {
+
+				/*
+				 * On some systems...
+				 * The Marvell SATA HDD controller may have one location code
+				 * for all disks. So, in order to uniquely identify a disk in
+				 * the list, the -d <dev_name> (dvalue) option must be used.
+				 *
+				 * eg, if the -l <loc_code> (lvalue) option is used then the
+				 * first disk in that location code will match, and it might
+				 * be the wrong disk!
+				 *
+				 * So, check if there is another list entry in this system
+				 * with the same location code as the current entry; if so,
+				 * only handle Marvell devices if '-d <dev_name>' is used.
+				 */
+				if (!dvalue &&
+				    get_indicator_for_loc_code(current->next, lvalue)) {
+					fprintf(stdout, "The Marvell HDD LEDs must be "
+						"specified by device name (-d option);"
+						" non-unique location codes found.\n");
+					rc = 1;
+					goto no_retry;
+				}
+
+				/*
+				 * At this point, after the check for "if (dvalue && lvalue)",
+				 * if dvalue is non-NULL then lvalue is from get_loc_code_dev()
+				 * (based on device name: dvalue), and dvalue is from cmdline.
+				 *
+				 * So, if dvalue is non-NULL and doesn't match the device name
+				 * specified in 'current' (found location code), let's try the
+				 * next elements in the list (which may match the device name);
+				 * for this we need to retry, re-starting on the next element.
+				 */
+				if (dvalue && current->devname &&
+				    strncmp(dvalue, current->devname, DEV_LENGTH)) {
+					list_start = current->next;
+					goto retry;
+				}
+			}
 
 			if (svalue) {
 				rc = get_indicator_state(indicator, current,
@@ -388,6 +433,7 @@ retry:
 			}
 		} /* if-else end */
 	} /* lvalue end */
+no_retry:
 
 	/* Turn on/off all indicators */
 	if (othervalue) {

@@ -280,15 +280,15 @@ opal_set_indicator(struct loc_code *loc, int new_value)
 	return 0;
 }
 
-
 /*
- * opal_indicator_probe - Probe indicator support on OPAL based platform
+ * opal_indicator_probe_led_class - Probe LED class (/sys/class/leds)
+ *                                  indicator support on OPAL based platform
  *
  * Returns:
  *   0 if indicator is supported, else -1
  */
 static int
-opal_indicator_probe(void)
+opal_indicator_probe_led_class(void)
 {
 	int rc = -1;
 	DIR *led_dir;
@@ -314,9 +314,56 @@ opal_indicator_probe(void)
 		return 0;
 	}
 
-	fprintf(stderr, "Service indicators are not supported on this system."
+	fprintf(stderr, "Some service indicators are not supported on this system."
 		"\nMake sure 'leds_powernv' kernel module is loaded.\n");
 	close_sysfs_led_dir(led_dir);
+	return rc;
+}
+
+/*
+ * opal_indicator_probe_marvell - Probe Marvell indicator support on
+ *                                OPAL based platform
+ *
+ * Returns:
+ *   0 if indicator is supported, else -1
+ */
+static int
+opal_indicator_probe_marvell(void)
+{
+	struct loc_code *list = NULL;
+
+	get_mv_indices(LED_TYPE_IDENT, &list);
+	if (list) {
+		free_indicator_list(list);
+		return 0;
+	}
+
+	return -1;
+}
+
+/*
+ * opal_indicator_probe - Probe indicator support on OPAL based platform
+ *
+ * Returns:
+ *   0 if indicator is supported, else -1
+ */
+static int
+opal_indicator_probe(void)
+{
+	int rc = -1;
+
+	if (!opal_indicator_probe_led_class())
+		rc = 0;
+
+	/*
+	 * Marvell HDD LEDs are not presented/controlled via kernel LEDs
+	 * (i.e., /sys/class/leds), and some OPAL systems might not have
+	 * any kernel LEDs (e.g., modules not loaded) but still have the
+	 * Marvell SATA controller with LEDs available, and able to work.
+	 */
+	if (!opal_indicator_probe_marvell())
+		rc = 0;
+
 	return rc;
 }
 

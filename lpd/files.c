@@ -154,10 +154,20 @@ insert_time(char *buf, int size)
 void
 _dbg(const char *fmt, ...)
 {
-#ifdef LPD_DEBUG
 	int     len = 0;
 	char    buf[LP_ERROR_LOG_MAX];
 	va_list	ap;
+
+/*
+ * If LPD_DEBUG is set at compile time (e.g., make CFLAGS='-DLPD_DEBUG'),
+ * then always write the messages at runtime.
+ * If it's not (default), check if the LPD_DEBUG environment variable
+ * is set at runtime (e.g., export LPD_DEBUG=1), and only write if it is.
+ */
+#ifndef LPD_DEBUG
+	if (!getenv("LPD_DEBUG"))
+		return;
+#endif
 
 	va_start(ap, fmt);
 	len = snprintf(buf, LP_ERROR_LOG_MAX, "DEBUG: ");
@@ -167,10 +177,9 @@ _dbg(const char *fmt, ...)
 	if (len < 0 || len >= LP_ERROR_LOG_MAX)
 		return;	/* Insufficient buffer size */
 
-	fprintf(stdout, buf);
+	fprintf(stdout, "%s", buf);
 	fprintf(stdout, "\n");
 	fflush(stdout);
-#endif
 }
 
 /**

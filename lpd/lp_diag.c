@@ -758,6 +758,14 @@ UI_commit(WINDOW *my_menu_win, MENU *my_menu,
 		if (!strcmp(desc, "loc")) {
 			name = (char *)item_name(items[i]);
 			loc = get_indicator_for_loc_code(ident_list, name);
+			if (!loc) {
+				 if (cur_state[i] == '+') {
+					 cur_state[i] = prev_state[i];
+					 err = 1;
+				 }
+				continue;
+			}
+
 			rc = get_indicator_state(LED_TYPE_IDENT, loc, &ident);
 			if (rc) {
 				if (cur_state[i] == '+') {

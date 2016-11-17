@@ -423,27 +423,20 @@ opal_get_indicator_mode(void)
 static int
 opal_get_indicator_list(int indicator, struct loc_code **list)
 {
-	int	rc;
-
 	/*
 	 * We treat first indicator in fault indicator list as
 	 * check log indicator. Hence parse attention indicator.
 	 */
-	if (indicator == LED_TYPE_FAULT) {
-		rc = opal_get_indices(LED_TYPE_ATTN, list);
-		if (rc)
-			return rc;
-	}
-
-	/* Get OPAL indicator list */
-	rc = opal_get_indices(indicator, list);
-	if (rc)
-		return rc;
+	if (indicator == LED_TYPE_FAULT)
+		opal_get_indices(LED_TYPE_ATTN, list);
 
 	/* FRU fault indicators are not supported in Guiding Light mode */
 	if (indicator == LED_TYPE_FAULT &&
 	    operating_mode == LED_MODE_GUIDING_LIGHT)
-		return rc;
+		return 0;
+
+	/* Get OPAL indicator list */
+	opal_get_indices(indicator, list);
 
 	/* SES indicators */
 	get_ses_indices(indicator, list);
@@ -451,7 +444,11 @@ opal_get_indicator_list(int indicator, struct loc_code **list)
 	/* Marvell HDD LEDs (indicators) */
 	get_mv_indices(indicator, list);
 
-	return rc;
+	/*
+	 * The list pointer (*list) is initially NULL.
+	 * If it's not-NULL here, we found indicators.
+	 */
+	return !(*list);
 }
 
 /**

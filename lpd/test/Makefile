@@ -16,7 +16,7 @@ LPD_DIR = $(ROOT_DIR)/lpd
 COMMON_OBJS = $(COMMON_DIR)/utils.o $(COMMON_DIR)/platform.o
 LPD_OBJS = $(COMMON_OBJS) ../files.o ../lp_util.o ../indicator_ses.o \
 	   ../indicator_rtas.o ../indicator_opal.o ../indicator.o \
-	   ../servicelog.o
+	   ../servicelog.o ../indicator_marvell.o
 
 LED_TOOL_OBJS =  ledtool.o
 SES_TOOL_OBJS = sesdevices.o

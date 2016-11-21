@@ -702,12 +702,9 @@ int main(int argc, char **argv)
 	progname = argv[0];
 
 	platform = get_platform();
-	if (platform != PLATFORM_PSERIES_LPAR) {
-		cerr << progname << ": is not supported on the "
+	cerr << progname << ": is not supported on the "
 		<< __power_platform_name(platform) << " platform" << endl;
-
-		exit(1);
-	}
+	exit(1);
 
 	syslog_path = "/var/log/messages";
 	if (access(syslog_path, R_OK)) {

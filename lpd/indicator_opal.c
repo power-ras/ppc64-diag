@@ -378,6 +378,13 @@ opal_get_indicator_mode(void)
 	int	rc = 0;
 	int	fd;
 	int	readsz;
+	struct stat sbuf;
+
+	rc = stat(OPAL_LED_MODE_PROPERTY, &sbuf);
+	if (rc) {
+		operating_mode = LED_MODE_LIGHT_PATH;
+		return 0;
+	}
 
 	fd = open(OPAL_LED_MODE_PROPERTY, O_RDONLY);
 	if (fd == -1) {

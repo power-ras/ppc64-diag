@@ -77,7 +77,7 @@ bh_print_fan_status(struct fan_status *s)
 }
 
 static void
-print_sas_connector_status(struct sas_connector_status *s)
+bh_print_sas_connector_status(struct sas_connector_status *s)
 {
 	enum element_status_code sc =
 				(enum element_status_code) s->byte0.status;
@@ -93,7 +93,7 @@ print_sas_connector_status(struct sas_connector_status *s)
 }
 
 static void
-print_scc_controller_status(struct scc_controller_element_status *s)
+bh_print_scc_controller_status(struct scc_controller_element_status *s)
 {
 	enum element_status_code sc =
 				(enum element_status_code) s->byte0.status;
@@ -111,7 +111,7 @@ print_scc_controller_status(struct scc_controller_element_status *s)
 }
 
 static void
-print_midplane_status(struct midplane_status *s)
+bh_print_midplane_status(struct midplane_status *s)
 {
 	enum element_status_code sc =
 				(enum element_status_code) s->byte0.status;
@@ -129,7 +129,7 @@ print_midplane_status(struct midplane_status *s)
 
 /* Create a callout for power supply i (i = 0 or 1). */
 static int
-create_ps_callout(struct sl_callout **callouts, char *location,
+bh_create_ps_callout(struct sl_callout **callouts, char *location,
 						unsigned int i, int fd)
 {
 	char fru_number[FRU_NUMBER_LEN + 1];
@@ -170,7 +170,7 @@ out:
 }
 
 static int
-report_faults_to_svclog(struct dev_vpd *vpd,
+bh_report_faults_to_svclog(struct dev_vpd *vpd,
 			struct bluehawk_diag_page2 *dp, int fd)
 {
 	char location[LOCATION_LENGTH], *loc_suffix;
@@ -234,7 +234,7 @@ report_faults_to_svclog(struct dev_vpd *vpd,
 		snprintf(loc_suffix, loc_suffix_size, "-P1-E%u", i+1);
 		build_srn(srn, SRN_RC_CRIT_PS);
 		callouts = NULL;
-		if (create_ps_callout(&callouts, location, i, fd))
+		if (bh_create_ps_callout(&callouts, location, i, fd))
 			goto err_out;
 		servevent(srn, sev, description, vpd, callouts);
 	}
@@ -252,7 +252,7 @@ report_faults_to_svclog(struct dev_vpd *vpd,
 		snprintf(loc_suffix, loc_suffix_size, "-P1-E%u", i+1);
 		build_srn(srn, SRN_RC_VOLTAGE_THRESHOLD);
 		callouts = NULL;
-		if (create_ps_callout(&callouts, location, i, fd))
+		if (bh_create_ps_callout(&callouts, location, i, fd))
 			goto err_out;
 		servevent(srn, sev, description, vpd, callouts);
 	}
@@ -270,7 +270,7 @@ report_faults_to_svclog(struct dev_vpd *vpd,
 		snprintf(loc_suffix, loc_suffix_size, "-P1-E%u", i+1);
 		build_srn(srn, SRN_RC_CRIT_PS);
 		callouts = NULL;
-		if (create_ps_callout(&callouts, location, i, fd))
+		if (bh_create_ps_callout(&callouts, location, i, fd))
 			goto err_out;
 		servevent(srn, sev, description, vpd, callouts);
 	}
@@ -309,7 +309,7 @@ report_faults_to_svclog(struct dev_vpd *vpd,
 		snprintf(loc_suffix, loc_suffix_size, "-P1-E%u", i+1);
 		build_srn(srn, SRN_RC_PS_TEMP_THRESHOLD);
 		callouts = NULL;
-		if (create_ps_callout(&callouts, location, i, fd))
+		if (bh_create_ps_callout(&callouts, location, i, fd))
 			goto err_out;
 		servevent(srn, sev, description, vpd, callouts);
 	}
@@ -413,7 +413,7 @@ err_out:
 
 
 static int
-turn_on_fault_leds(struct bluehawk_diag_page2 *dp, int fd)
+bh_turn_on_fault_leds(struct bluehawk_diag_page2 *dp, int fd)
 {
 	int i;
 	int poked_leds = 0;
@@ -614,17 +614,17 @@ diag_bluehawk(int fd, struct dev_vpd *vpd)
 	printf("\n  SAS Connector Status\n");
 	for (i = 0; i < 4; i++) {
 		printf("    %s:  ", sas_connector_names[i]);
-		print_sas_connector_status(&(dp->sas_connector_status[i]));
+		bh_print_sas_connector_status(&(dp->sas_connector_status[i]));
 	}
 
 	printf("\n  PCIe Controller Status\n");
 	for (i = 0; i < 2; i++) {
 		printf("    %s:  ", scc_controller_names[i]);
-		print_scc_controller_status(&(dp->scc_controller_status[i]));
+		bh_print_scc_controller_status(&(dp->scc_controller_status[i]));
 	}
 
 	printf("\n  Midplane Status:  ");
-	print_midplane_status(&(dp->midplane_element_status));
+	bh_print_midplane_status(&(dp->midplane_element_status));
 
 	if (cmd_opts.verbose) {
 		printf("\n\nRaw diagnostic page:\n");
@@ -643,14 +643,14 @@ diag_bluehawk(int fd, struct dev_vpd *vpd)
 	 * the next query of the SES.
 	 */
 	if (cmd_opts.serv_event) {
-		rc = report_faults_to_svclog(vpd, dp, fd);
+		rc = bh_report_faults_to_svclog(vpd, dp, fd);
 		if (rc != 0)
 			goto err_out;
 	}
 
 	/* -l is not supported for fake path */
 	if (fd != -1 && cmd_opts.leds)
-		rc = turn_on_fault_leds(dp, fd);
+		rc = bh_turn_on_fault_leds(dp, fd);
 
 err_out:
 	free(dp);

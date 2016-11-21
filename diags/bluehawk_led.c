@@ -47,8 +47,8 @@ enum bh_component_type {
 };
 
 static int
-decode_component_loc(const char *loc, enum bh_component_type *type,
-		     unsigned int *index)
+bh_decode_component_loc(const char *loc, enum bh_component_type *type,
+			unsigned int *index)
 {
 	unsigned int n, n2;
 	char g;		/* catch trailing garbage */
@@ -97,8 +97,8 @@ decode_component_loc(const char *loc, enum bh_component_type *type,
 static const char *on_off_string[] = { "off", "on" };
 
 static void
-report_component(struct bluehawk_diag_page2 *dp, int fault, int ident,
-		 enum bh_component_type type, unsigned int i, int verbose)
+bh_report_component(struct bluehawk_diag_page2 *dp, int fault, int ident,
+		    enum bh_component_type type, unsigned int i, int verbose)
 {
 	char loc_code[COMP_LOC_CODE];
 	char desc[COMP_DESC_SIZE];
@@ -163,11 +163,11 @@ report_component(struct bluehawk_diag_page2 *dp, int fault, int ident,
 }
 
 static void
-report_component_from_ses(struct bluehawk_diag_page2 *dp,
-			  enum bh_component_type type, unsigned int i,
-			  int verbose)
+bh_report_component_from_ses(struct bluehawk_diag_page2 *dp,
+			     enum bh_component_type type, unsigned int i,
+			     int verbose)
 {
-	report_component(dp, LED_SAME, LED_SAME, type, i, verbose);
+	bh_report_component(dp, LED_SAME, LED_SAME, type, i, verbose);
 }
 
 int
@@ -193,33 +193,33 @@ bluehawk_list_leds(const char *enclosure, const char *component, int verbose)
 	if (component) {
 		unsigned int cindex;
 		enum bh_component_type ctype;
-		rc = decode_component_loc(component, &ctype, &cindex);
+		rc = bh_decode_component_loc(component, &ctype, &cindex);
 		if (rc != 0) {
 			close(fd);
 			return -1;
 		}
 
-		report_component_from_ses(&dp, ctype, cindex, verbose);
+		bh_report_component_from_ses(&dp, ctype, cindex, verbose);
 	} else {
 		unsigned int i;
 
-		report_component_from_ses(&dp, BHC_ENCLOSURE, 0, verbose);
-		report_component_from_ses(&dp, BHC_MIDPLANE, 0, verbose);
+		bh_report_component_from_ses(&dp, BHC_ENCLOSURE, 0, verbose);
+		bh_report_component_from_ses(&dp, BHC_MIDPLANE, 0, verbose);
 		for (i = 0; i < NR_DISKS_PER_BLUEHAWK; i++)
-			report_component_from_ses(&dp, BHC_DISK, i, verbose);
+			bh_report_component_from_ses(&dp, BHC_DISK, i, verbose);
 		for (i = 0; i < 2; i++)
-			report_component_from_ses(&dp, BHC_POWER_SUPPLY, i,
+			bh_report_component_from_ses(&dp, BHC_POWER_SUPPLY, i,
 								verbose);
 		for (i = 0; i < 2; i++)
-			report_component_from_ses(&dp, BHC_ERM, i, verbose);
+			bh_report_component_from_ses(&dp, BHC_ERM, i, verbose);
 		for (i = 0; i < 2; i++)
-			report_component_from_ses(&dp, BHC_PCI_CONTROLLER, i,
+			bh_report_component_from_ses(&dp, BHC_PCI_CONTROLLER, i,
 								verbose);
 		for (i = 0; i < 4; i++)
-			report_component_from_ses(&dp, BHC_SAS_CONNECTOR, i,
+			bh_report_component_from_ses(&dp, BHC_SAS_CONNECTOR, i,
 								verbose);
 		for (i = 0; i < 2; i++)
-			report_component_from_ses(&dp, BHC_FAN_ASSEMBLY, i,
+			bh_report_component_from_ses(&dp, BHC_FAN_ASSEMBLY, i,
 								verbose);
 	}
 
@@ -241,7 +241,7 @@ bluehawk_set_led(const char *enclosure, const char *component, int fault,
 	if (fd < 0)
 		return -1;
 
-	rc = decode_component_loc(component, &type, &index);
+	rc = bh_decode_component_loc(component, &type, &index);
 	if (rc != 0)
 		return -1;
 
@@ -317,6 +317,6 @@ bluehawk_set_led(const char *enclosure, const char *component, int fault,
 	}
 
 	if (verbose)
-		report_component(&dp, fault, ident, type, index, verbose);
+		bh_report_component(&dp, fault, ident, type, index, verbose);
 	return 0;
 }

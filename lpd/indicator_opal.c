@@ -314,8 +314,6 @@ opal_indicator_probe_led_class(void)
 		return 0;
 	}
 
-	fprintf(stderr, "Some service indicators are not supported on this system."
-		"\nMake sure 'leds_powernv' kernel module is loaded.\n");
 	close_sysfs_led_dir(led_dir);
 	return rc;
 }

@@ -31,10 +31,6 @@
 #include "bluehawk.h"
 
 
-static struct element_descriptor_page *edp;	/* for power supply VPD */
-
-static int poked_leds;
-
 static void
 bh_print_drive_status(struct disk_status *s)
 {
@@ -140,6 +136,7 @@ create_ps_callout(struct sl_callout **callouts, char *location,
 	char serial_number[SERIAL_NUMBER_LEN + 1];
 	int rc;
 	struct power_supply_descriptor *ps_vpd[2];
+	struct element_descriptor_page *edp;
 
 	if (fd < 0) {
 		add_location_callout(callouts, location);
@@ -419,9 +416,8 @@ static int
 turn_on_fault_leds(struct bluehawk_diag_page2 *dp, int fd)
 {
 	int i;
+	int poked_leds = 0;
 	struct bluehawk_ctrl_page2 *ctrl_page;
-
-	poked_leds = 0;
 
 	ctrl_page = calloc(1, sizeof(struct bluehawk_ctrl_page2));
 	if (!ctrl_page) {

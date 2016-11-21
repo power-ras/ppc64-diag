@@ -86,7 +86,8 @@ get_enclosure_scsi_id(struct pearl_diag_page2 *dp)
 static int
 pearl_print_drive_status(uint32_t status)
 {
-	int fail = 0, printed = 0, rc = OK;
+	int printed = 0, rc = OK;
+	int __attribute__((__unused__)) fail;
 
 	if ((status & 0x0F000000) == 0x05000000) {
 		printf("(empty)  ");
@@ -184,7 +185,8 @@ print_ps_fan_status(uint32_t status)
 static int
 print_repeater_status(uint32_t status)
 {
-	int printed = 0, fail = 0, rc = OK;
+	int printed = 0, rc = OK;
+	int __attribute__((__unused__)) fail;
 
 	if ((status & 0x0F000000) == 0x01000000)
 		printf("ok  ");
@@ -386,6 +388,11 @@ diag_7031_D24_T24(int fd, struct dev_vpd *vpd)
 	/* the necessary data is on diagnostic page 2 */
 	rc = get_diagnostic_page(fd, RECEIVE_DIAGNOSTIC, 2, (void *)&dp,
 								buf_len);
+	if (rc != 0) {
+		fprintf(stderr, "Failed to read SES diagnostic page; "
+				"cannot report status.\n");
+		return 1;
+	}
 
 	encl_id = get_enclosure_scsi_id(&dp);
 

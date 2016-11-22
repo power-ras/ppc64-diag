@@ -1,0 +1,74 @@
+ppc64-diag
+----------
+This package contains various diagnostic tools for PowerLinux. These tools
+captures the diagnostic events from Power Systems platform firmware, SES
+enclosures and logs serviceable event. It also provides automated responses
+to urgent events such as environmental conditions and predictive failures.
+
+Source
+------
+http://linux-diag.sf.net/ppc64-diag
+
+Mailing list
+------------
+linux-diag-devel@lists.sourceforge.net
+Info/subscribe : https://lists.sourceforge.net/lists/listinfo/linux-diag-devel
+
+License
+-------
+See 'COPYING' file.
+
+Compilation dependencies
+------------------------
+- C and C++ compiler (gcc, g++)
+- GNU build tools (automake, autoconf, libtool, etc)
+- ncurses-devel
+- systemd-devel
+- librtas-devel
+- libvpd-devel
+- libservicelog-devel
+
+Note:
+  Package name may differ slightly between Linux distributors. Ex: RedHat and
+  SLES ships development packages as "-devel" while Ubuntu ships it as "-dev"
+  package. Please check your linux distribution package naming convention and
+  make sure you have installed right packages.
+
+Building
+---------
+You can build on Power Linux System.
+
+$ make
+$ make install
+
+Building rpms
+-------------
+To build a tarball to feed to rpmbuild, do
+
+$ make tarball
+
+As an example, we use a command similar to the following:
+
+$ rpmbuild -ba <path-to-spec-file>
+
+Hacking
+--------
+All patches should be sent to the mailing list with linux-kernel style
+'Signed-Off-By'. The following git commands are your friends:
+- git commit -s
+- git format-patch
+
+You probably want to read the linux kernel Documentation/SubmittingPatches
+as much of it applies to lsvpd.
+
+Submitting patch
+----------------
+We use same mailing list for all Power Linux VPD and diagnostics projects
+(ppc64-diag, libvpd, lsvpd, [lib]servicelog). It is common convention to
+prefix your subject line with project name. This lets maintainer and other
+developers more easily identify patches from patches targeted to other
+projects. For example,
+
+  Subject: [ppc64-diag PATCH 01/10] Summary phrase
+
+--

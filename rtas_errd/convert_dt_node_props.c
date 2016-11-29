@@ -20,6 +20,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 #include <getopt.h>
 #include <sys/types.h>
@@ -60,6 +61,8 @@ static struct drc_info_search_config cpu_to_name = {
 
 static int search_drcindex_to_drcname(struct drc_info_search_config *,
 					uint32_t, char *, int);
+static int search_drcname_to_drcindex(struct drc_info_search_config *,
+					char *, uint32_t *);
 
 static int mem_drcindex_to_drcname(uint32_t, char *, int);
 
@@ -121,12 +124,16 @@ search_drcindex_to_drcname(struct drc_info_search_config *sr,
 	}
 	fd = open(sr->v1_tree_address, O_RDONLY);
 	if (fd < 0) {
-		fprintf(stderr, "error opening %s", sr->v1_tree_address);
+		fprintf(stderr, "Error: error opening %s:\n%s\n",
+			sr->v1_tree_address, strerror(errno));
 		return 0;
 	}
 
 	/* skip this counter value; not needed to process the property here */
-	read(fd, &num, 4);
+	if (read(fd, &num, 4) != 4) {
+		close(fd);
+		return 0;
+	}
 
 	while ((read(fd, &index, 4)) != 0) {
 		if (be32toh(index) == drc_idx) {
@@ -140,13 +147,16 @@ search_drcindex_to_drcname(struct drc_info_search_config *sr,
 	if (found) {
 		fd = open(sr->v1_tree_name_address, O_RDONLY);
 		if (fd < 0) {
-			fprintf(stderr, "error opening %s",
-				sr->v1_tree_name_address);
+			fprintf(stderr, "Error: error opening %s:\n%s\n",
+				sr->v1_tree_name_address, strerror(errno));
 			return 0;
 		}
 
 		/* skip the first one; it indicates how many are in the file */
-		read(fd, &index, 4);
+		if (read(fd, &index, 4) != 4) {
+			close(fd);
+			return 0;
+		}
 
 		while (offset > 0) {
 			/* skip to (and one past) the next null char */
@@ -195,6 +205,84 @@ cpu_drcindex_to_drcname(uint32_t drc_idx, char *drc_name, int buf_size)
 {
 	return search_drcindex_to_drcname(&cpu_to_name, drc_idx, drc_name,
 					buf_size);
+}
+
+static int
+search_drcname_to_drcindex(struct drc_info_search_config *sr,
+				char *drc_name, uint32_t *drc_idx)
+{
+	struct stat sbuf;
+	int fd, offset = 0, found = 0;
+	uint32_t index, num = 0;
+	char buffer[64];
+
+	if (stat(sr->v1_tree_address, &sbuf) < 0) {
+		fprintf(stderr, "Error: property %s not found",
+			sr->v1_tree_name_address);
+		return 0;
+	}
+	fd = open(sr->v1_tree_name_address, O_RDONLY);
+	if (fd < 0) {
+		fprintf(stderr, "Error: error opening %s:\n%s\n",
+			sr->v1_tree_name_address, strerror(errno));
+		return 0;
+	}
+
+	/* skip the first prop word; it indicates how many are in the file */
+	if (read(fd, &num, 4) != 4) {
+		close(fd);
+		return 0;
+	}
+
+	do {
+		read_char_name(fd, buffer, sizeof(buffer));
+		if (!strcmp(buffer, drc_name)) {
+			found = 1;
+			break;
+		}
+		offset++;
+	} while (!found);
+	close(fd);
+
+	if (found) {
+		fd = open(sr->v1_tree_address, O_RDONLY);
+		if (fd < 0) {
+			fprintf(stderr, "Error: error opening %s:\n%s\n",
+				sr->v1_tree_address, strerror(errno));
+			return 0;
+		}
+
+		/*
+		 * skip the first one (indicating the number of entries)
+		 * + offset number of indices
+		 */
+		if (lseek(fd, (1 + offset) * 4, SEEK_SET) !=
+				(1 + offset) * 4) {
+			close(fd);
+			return 0;
+		}
+
+		if ((read(fd, &index, 4)) == 4)
+			*drc_idx = be32toh(index);
+		else
+			found = 0;
+		close(fd);
+	}
+
+	return found;
+}
+
+/**
+ * cpu_drcname_to_drcindex
+ * @brief converts mem type drcname to drcindex
+ *
+ * @param drc_idx - drc index whose drc name is to be found.
+ * @param drc_name - buffer for drc_name
+ */
+int
+cpu_drcname_to_drcindex(char *drc_name, uint32_t *drc_idx)
+{
+	return search_drcname_to_drcindex(&cpu_to_name, drc_name, drc_idx);
 }
 
 int
@@ -432,7 +520,8 @@ cpu_interruptserver_to_drcindex(uint32_t int_serv, uint32_t *drc_idx) {
 			snprintf(buffer, 1024, "/proc/device-tree/cpus/%s/"
 				"ibm,ppc-interrupt-server#s", entry->d_name);
 			if ((fd = open(buffer, O_RDONLY)) < 0) {
-				fprintf(stderr, "error opening %s\n", buffer);
+				fprintf(stderr, "Error: error opening %s:\n"
+					"%s\n", buffer, strerror(errno));
 				goto cleanup;
 			}
 			while ((read(fd, &temp, 4)) != 0) {
@@ -442,8 +531,10 @@ cpu_interruptserver_to_drcindex(uint32_t int_serv, uint32_t *drc_idx) {
 						"tree/cpus/%s/ibm,my-drc-index",
 						entry->d_name);
 					if ((fd = open(buffer, O_RDONLY)) < 0) {
-						fprintf(stderr, "error opening"
-							" %s\n", buffer);
+						fprintf(stderr, "Error: error "
+							"opening %s:\n%s\n",
+							buffer,
+							strerror(errno));
 						goto cleanup;
 					}
 					if ((read(fd, &temp, 4)) == 4)  {
@@ -481,7 +572,8 @@ cpu_drcindex_to_interruptserver(uint32_t drc_idx, uint32_t *int_servs,
 			snprintf(buffer, 1024, "/proc/device-tree/cpus/%s/"
 				"ibm,my-drc-index", entry->d_name);
 			if ((drc_fd = open(buffer, O_RDONLY)) < 0) {
-				fprintf(stderr, "error opening %s\n", buffer);
+				fprintf(stderr, "Error: error opening %s:\n"
+					"%s\n", buffer, strerror(errno));
 				closedir(dir);
 				return 0;
 			}
@@ -492,8 +584,10 @@ cpu_drcindex_to_interruptserver(uint32_t drc_idx, uint32_t *int_servs,
 						"ibm,ppc-interrupt-server#s",
 						entry->d_name);
 					if ((intr_fd = open(buffer, O_RDONLY)) < 0) {
-						fprintf(stderr, "error opening"
-							" %s\n", buffer);
+						fprintf(stderr, "Error: error "
+							"opening %s:\n%s\n",
+							buffer,
+							strerror(errno));
 						closedir(dir);
 						return 0;
 					}
@@ -511,64 +605,3 @@ cpu_drcindex_to_interruptserver(uint32_t drc_idx, uint32_t *int_servs,
 	closedir(dir);
 	return found;
 }
-
-int
-cpu_drcname_to_drcindex(char *drc_name, uint32_t *drc_idx) {
-	int fd, offset=0, found=0, i, rc;
-	uint32_t index;
-	uint8_t ch;
-	char buffer[64];
-
-	if ((fd = open("/proc/device-tree/cpus/ibm,drc-names",
-				O_RDONLY)) < 0) {
-		fprintf(stderr, "error opening /proc/device-tree/cpus/"
-			"ibm,drc-names");
-		return 0;
-	}
-
-	/* skip the first one; it indicates how many are in the file */
-	read(fd, &index, 4);
-
-	do {
-		i = 0;
-		while ((rc = read(fd, &ch, 1)) == 1) {
-			buffer[i++] = ch;
-			if (ch == 0)
-				break;
-		}
-		if (!strcmp(buffer, drc_name)) {
-			found = 1;
-			break;
-		}
-		offset++;
-	} while (rc);
-	close(fd);
-
-	if (found) {
-		if ((fd = open("/proc/device-tree/cpus/ibm,drc-indexes",
-				O_RDONLY)) < 0) {
-			fprintf(stderr, "error opening /proc/device-tree/cpus/"
-				"ibm,drc-indexes");
-			return 0;
-		}
-
-		/*
-		 * skip the first one (indicating the number of entries)
-		 * + offset number of indices
-		 */
-		if (lseek(fd, (1 + offset) * 4, SEEK_SET) !=
-				(1 + offset ) * 4) {
-			close(fd);
-			return 0;
-		}
-
-		if ((read(fd, &index, 4)) == 4)
-			*drc_idx = be32toh(index);
-		else
-			found = 0;
-		close(fd);
-	}
-
-	return found;
-}
-

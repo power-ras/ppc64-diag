@@ -702,9 +702,9 @@ int main(int argc, char **argv)
 	progname = argv[0];
 
 	platform = get_platform();
-	cerr << progname << ": is not supported on the "
+	cout << progname << ": is not supported on the "
 		<< __power_platform_name(platform) << " platform" << endl;
-	exit(1);
+	exit(0);
 
 	syslog_path = "/var/log/messages";
 	if (access(syslog_path, R_OK)) {

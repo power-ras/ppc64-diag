@@ -40,6 +40,23 @@ static struct option long_options[] = {
 	{0,0,0,0}
 };
 
+struct drc_info_search_config {
+	char *drc_type;		/* device kind sought e.g. "MEM" "PHB" "CPU" */
+	char *v1_tree_address;
+	char *v1_tree_name_address;
+};
+
+static struct drc_info_search_config mem_to_name = {
+	"MEM",
+	"/proc/device-tree/ibm,drc-indexes",
+	"/proc/device-tree/ibm,drc-names",
+};
+
+static int search_drcindex_to_drcname(struct drc_info_search_config *,
+					uint32_t, char *, int);
+
+static int mem_drcindex_to_drcname(uint32_t, char *, int);
+
 int cpu_interruptserver_to_drcindex(uint32_t, uint32_t *);
 int cpu_drcindex_to_drcname(uint32_t, char *, int);
 int cpu_drcindex_to_interruptserver(uint32_t, uint32_t *, int);
@@ -59,30 +76,45 @@ print_usage(char *command) {
 	return;
 }
 
-/**
- * mem_drcindex_to_drcname
- * @brief converts drcindex of mem type to drcname
- *
- * @param drc_idx - drc index whose drc name is to be found.
- * @param drc_name - buffer for drc_name
- * @param buf_size - size of buffer.
- */
 static int
-mem_drcindex_to_drcname(uint32_t drc_idx, char *drc_name, int buf_size)
-{
-	int fd, offset=0, found=0;
-	uint32_t index;
+read_char_name(int fd, char *propname, int buf_size) {
+	int offset = 0;
 	uint8_t ch;
 
-	if ((fd = open("/proc/device-tree/ibm,drc-indexes",
-				O_RDONLY)) < 0) {
-		fprintf(stderr, "error opening /proc/device-tree/"
-			"ibm,drc-indexes");
+	/* Copy the property string at the current location to the buffer */
+	while ((read(fd, &ch, 1)) == 1) {
+		if (propname) {
+			if (offset+1 == buf_size) {
+				propname[offset] = '\0';
+				break;
+			}
+			propname[offset++] = ch;
+		} else {
+			offset++;
+		}
+		if (ch == 0)
+			break;
+	}
+
+	return offset;
+}
+
+static int
+search_drcindex_to_drcname(struct drc_info_search_config *sr,
+				uint32_t drc_idx, char *drc_name, int buf_size)
+{
+	int fd, offset=0, found=0;
+	uint32_t index, num = 0;
+	uint8_t ch;
+
+	fd = open(sr->v1_tree_address, O_RDONLY);
+	if (fd < 0) {
+		fprintf(stderr, "error opening %s", sr->v1_tree_address);
 		return 0;
 	}
 
-	/* skip the first one; it indicates how many are in the file */
-	read(fd, &index, 4);
+	/* skip this counter value; not needed to process the property here */
+	read(fd, &num, 4);
 
 	while ((read(fd, &index, 4)) != 0) {
 		if (be32toh(index) == drc_idx) {
@@ -94,10 +126,10 @@ mem_drcindex_to_drcname(uint32_t drc_idx, char *drc_name, int buf_size)
 	close(fd);
 
 	if (found) {
-		if ((fd = open("/proc/device-tree/ibm,drc-names",
-				O_RDONLY)) < 0) {
-			fprintf(stderr, "error opening /proc/device-tree/"
-				"ibm,drc-names");
+		fd = open(sr->v1_tree_name_address, O_RDONLY);
+		if (fd < 0) {
+			fprintf(stderr, "error opening %s",
+				sr->v1_tree_name_address);
 			return 0;
 		}
 
@@ -116,19 +148,26 @@ mem_drcindex_to_drcname(uint32_t drc_idx, char *drc_name, int buf_size)
 		}
 
 		/* copy the drc-name at the current location to the buffer */
-		while ((read(fd, &ch, 1)) == 1) {
-			if (offset+1 == buf_size) {
-				drc_name[offset] = '\0';
-				break;
-			}
-			drc_name[offset++] = ch;
-			if (ch == 0)
-				break;
-		}
+		read_char_name(fd, drc_name, buf_size);
 	}
 	close(fd);
 
 	return found;
+}
+
+/**
+ * mem_drcindex_to_drcname
+ * @brief converts drcindex of mem type to drcname
+ *
+ * @param drc_idx - drc index whose drc name is to be found.
+ * @param drc_name - buffer for drc_name
+ * @param buf_size - size of buffer.
+ */
+static int
+mem_drcindex_to_drcname(uint32_t drc_idx, char *drc_name, int buf_size)
+{
+	return search_drcindex_to_drcname(&mem_to_name, drc_idx, drc_name,
+					buf_size);
 }
 
 int

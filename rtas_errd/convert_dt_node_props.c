@@ -52,6 +52,12 @@ static struct drc_info_search_config mem_to_name = {
 	"/proc/device-tree/ibm,drc-names",
 };
 
+static struct drc_info_search_config cpu_to_name = {
+	"CPU",
+	"/proc/device-tree/cpus/ibm,drc-indexes",
+	"/proc/device-tree/cpus/ibm,drc-names",
+};
+
 static int search_drcindex_to_drcname(struct drc_info_search_config *,
 					uint32_t, char *, int);
 
@@ -103,10 +109,16 @@ static int
 search_drcindex_to_drcname(struct drc_info_search_config *sr,
 				uint32_t drc_idx, char *drc_name, int buf_size)
 {
+	struct stat sbuf;
 	int fd, offset=0, found=0;
 	uint32_t index, num = 0;
 	uint8_t ch;
 
+	if (stat(sr->v1_tree_address, &sbuf) < 0) {
+		fprintf(stderr, "Error: property %s not found",
+			sr->v1_tree_name_address);
+		return 0;
+	}
 	fd = open(sr->v1_tree_address, O_RDONLY);
 	if (fd < 0) {
 		fprintf(stderr, "error opening %s", sr->v1_tree_address);
@@ -167,6 +179,21 @@ static int
 mem_drcindex_to_drcname(uint32_t drc_idx, char *drc_name, int buf_size)
 {
 	return search_drcindex_to_drcname(&mem_to_name, drc_idx, drc_name,
+					buf_size);
+}
+
+/**
+ * cpu_drcindex_to_drcname
+ * @brief converts drcindex of cpu type to drcname
+ *
+ * @param drc_idx - drc index whose drc name is to be found.
+ * @param drc_name - buffer for drc_name
+ * @param buf_size - size of buffer.
+ */
+int
+cpu_drcindex_to_drcname(uint32_t drc_idx, char *drc_name, int buf_size)
+{
+	return search_drcindex_to_drcname(&cpu_to_name, drc_idx, drc_name,
 					buf_size);
 }
 
@@ -432,69 +459,6 @@ cpu_interruptserver_to_drcindex(uint32_t int_serv, uint32_t *drc_idx) {
 
 cleanup:
 	closedir(dir);
-	return found;
-}
-
-int
-cpu_drcindex_to_drcname(uint32_t drc_idx, char *drc_name, int buf_size) {
-	int fd, offset=0, found=0;
-	uint32_t index;
-	uint8_t ch;
-
-	if ((fd = open("/proc/device-tree/cpus/ibm,drc-indexes",
-				O_RDONLY)) < 0) {
-		fprintf(stderr, "error opening /proc/device-tree/cpus/"
-			"ibm,drc-indexes");
-		return 0;
-	}
-
-	/* skip the first one; it indicates how many are in the file */
-	read(fd, &index, 4);
-
-	while ((read(fd, &index, 4)) != 0) {
-		if (be32toh(index) == drc_idx) {
-			found = 1;
-			break;
-		}
-		offset++;
-	}
-	close(fd);
-
-	if (found) {
-		if ((fd = open("/proc/device-tree/cpus/ibm,drc-names",
-				O_RDONLY)) < 0) {
-			fprintf(stderr, "error opening /proc/device-tree/cpus/"
-				"ibm,drc-names");
-			return 0;
-		}
-
-		/* skip the first one; it indicates how many are in the file */
-		read(fd, &index, 4);
-
-		while (offset > 0) {
-			/* skip to (and one past) the next null char */
-			do {
-				if ((read(fd, &ch, 1)) != 1) {
-					close(fd);
-					return 0;
-				}
-			} while (ch != 0);
-			offset--;
-		}
-
-		/* copy the drc-name at the current location to the buffer */
-		while ((read(fd, &ch, 1)) == 1) {
-			if (offset+1 == buf_size) {
-				drc_name[offset] = '\0';
-				break;
-			}
-			drc_name[offset++] = ch;
-			if (ch == 0)
-				break;
-		}
-	}
-	close(fd);
-
 	return found;
 }
 

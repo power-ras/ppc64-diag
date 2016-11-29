@@ -338,7 +338,7 @@ cpu_drcindex_to_drcname(uint32_t drc_idx, char *drc_name, int buf_size)
 }
 
 static int
-search_drcname_to_drcindex(struct drc_info_search_config *sr,
+search_drcname_to_drcindex_v1(struct drc_info_search_config *sr,
 				char *drc_name, uint32_t *drc_idx)
 {
 	struct stat sbuf;
@@ -402,6 +402,82 @@ search_drcname_to_drcindex(struct drc_info_search_config *sr,
 	return found;
 }
 
+static int
+search_drcname_to_drcindex(struct drc_info_search_config *sr, char *drc_name,
+			uint32_t *drc_idx)
+{
+	struct stat sbuf;
+	int fd, i, found = 0;
+	uint32_t num = 0;
+
+	if (stat(sr->v2_tree_address, &sbuf) < 0)
+		return search_drcname_to_drcindex_v1(sr, drc_name, drc_idx);
+	fd = open(sr->v2_tree_address, O_RDONLY);
+	if (fd < 0) {
+		fprintf(stderr, "Error: property %s not found",
+			sr->v2_tree_address);
+		return 0;
+	}
+
+	/*
+	 * Now we process the entries of the 'ibm,drc-info' property.
+	 */
+	read(fd, &num, 4);
+
+	num = be32toh(num);
+	for (i = 0; i < num; i++) {
+		char drc_type[DRC_TYPE_LEN];
+		char drc_name_base[DRC_NAME_LEN];
+		char name_compare[DRC_NAME_LEN];
+		uint32_t drc_start_index;
+		uint32_t drc_name_start_index;
+		uint32_t num_seq_elems;
+		uint32_t seq_incr;
+		uint32_t power_domain;
+		uint32_t read_idx, ndx, tst_drc_idx;
+		int rc;
+
+		read_char_name(fd, drc_type, sizeof(drc_type)-1);
+		read_char_name(fd, drc_name_base, sizeof(drc_name_base)-1);
+
+		read(fd, &drc_start_index, 4);
+		drc_start_index = be32toh(drc_start_index);
+		read(fd, &drc_name_start_index, 4);
+		drc_name_start_index = be32toh(drc_name_start_index);
+		read(fd, &num_seq_elems, 4);
+		num_seq_elems = be32toh(num_seq_elems);
+		read(fd, &seq_incr, 4);
+		seq_incr = be32toh(seq_incr);
+		read(fd, &power_domain, 4);
+		power_domain = be32toh(power_domain);
+
+		/* Drc-type sought match current entry? */
+		if (strcmp(drc_type, sr->drc_type))
+			continue;
+
+		strcat(drc_name_base, "%d");
+		rc = sscanf(drc_name, drc_name_base, drc_name_base,
+			&read_idx);
+		if (rc)
+			continue;
+
+		/* Make sure that we can convert to/from the name */
+		ndx = ((read_idx - drc_name_start_index) / seq_incr);
+		tst_drc_idx = drc_name_start_index +
+			      ((ndx-drc_name_start_index)*seq_incr);
+		sprintf(name_compare, "%s%d", drc_name_base, tst_drc_idx);
+		if (strcmp(drc_name, name_compare))
+			continue;
+
+		*drc_idx = drc_start_index + ndx;
+		found = 1;
+		break;
+	}
+
+	close(fd);
+	return found;
+}
+
 /**
  * cpu_drcname_to_drcindex
  * @brief converts mem type drcname to drcindex
@@ -423,7 +499,7 @@ main(int argc, char *argv[]) {
 	uint32_t interruptserver, drcindex;
 	unsigned long drc_tmp_idx;
 	uint32_t intservs_array[MAX_IRQ_SERVERS_PER_CPU];
-	char drcname[20];
+	char drcname[DRC_NAME_LEN];
 
 	platform = get_platform();
 	switch (platform) {
@@ -505,7 +581,7 @@ main(int argc, char *argv[]) {
 					return 4;
 				}
 				if (!cpu_drcindex_to_drcname(drcindex,
-						drcname, 20)) {
+						drcname, DRC_NAME_LEN)) {
 					fprintf(stderr, "could not find the "
 						"drc-name corresponding to "
 						"drc-index 0x%08x\n", drcindex);
@@ -522,7 +598,7 @@ main(int argc, char *argv[]) {
 			drcindex = strtol(argv[argc-1], NULL, 0);
 			if (!strcmp(to, "drc-name")) {
 				if (!cpu_drcindex_to_drcname(drcindex,
-						drcname, 20)) {
+						drcname, DRC_NAME_LEN)) {
 					fprintf(stderr, "could not find the "
 						"drc-name corresponding to "
 						"drc-index 0x%08x\n", drcindex);
@@ -558,7 +634,7 @@ main(int argc, char *argv[]) {
 			}
 		}
 		else if (!strcmp(from, "drc-name")) {
-			strncpy(drcname, argv[argc-1], 20);
+			strncpy(drcname, argv[argc-1], DRC_NAME_LEN);
 			if (!strcmp(to, "drc-index")) {
 				if (!cpu_drcname_to_drcindex(drcname,
 						&drcindex)) {
@@ -613,7 +689,7 @@ main(int argc, char *argv[]) {
 			drc_tmp_idx = strtoul(argv[argc-1], NULL, 0);
 			if (!strcmp(to, "drc-name")) {
 				if (!mem_drcindex_to_drcname(drc_tmp_idx,
-						drcname, 20)) {
+						drcname, DRC_NAME_LEN)) {
 					fprintf(stderr, "could not find the "
 						"drc-name corresponding to "
 						"drc-index 0x%08x\n", drcindex);

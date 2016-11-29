@@ -41,24 +41,70 @@ static struct option long_options[] = {
 	{0,0,0,0}
 };
 
+
+/*
+ * The original version of this code processed 4 property arrays whose value
+ * at any specific array index described a single system entity.
+ *
+ *   ibm,drc-names: <num entries>; Array of name <encode-string>
+ *   ibm,drc-types: <num entries>; Array of entity 'type' <encode-string>
+ *   ibm,drc-indexes: <num entries>; Array of <encode-int> values
+ *   ibm,drc-power-domains: Array of <encode-int> values
+ *
+ * In a later version of the system firmware, a compressed representation
+ * of this information property was added named 'ibm,drc-info'.  Here is
+ * a summary of the representation of the property.
+ *
+ * <int word: num drc-info entries>
+ * Each entry has the following fields in sequential order:
+ *     <encode-string: drc-type e.g. "MEM" "PHB" "CPU">
+ *     <encode-string: drc-name-prefix >
+ *     <encode-int:    drc-index-start >
+ *     <encode-int:    drc-name-suffix-start >
+ *     <encode-int:    number-sequential-elements >
+ *     <encode-int:    sequential-increment >
+ *     <encode-int:    drc-power-domain >
+ * Each entry describes a subset of all of the 'ibm,drc-info'
+ * values.
+ */
+
+#define DRC_TYPE_LEN		16
+#define DRC_NAME_LEN		256   /* Worst case length to expect */
+
+/*
+ * Association between older and newer 'drc info' structions
+ * used to drive search routines.
+ */
 struct drc_info_search_config {
 	char *drc_type;		/* device kind sought e.g. "MEM" "PHB" "CPU" */
 	char *v1_tree_address;
 	char *v1_tree_name_address;
+	char *v2_tree_address;
 };
 
+/*
+ * Configuration of 'drc info' structures for memory-to-name association
+ */
 static struct drc_info_search_config mem_to_name = {
 	"MEM",
 	"/proc/device-tree/ibm,drc-indexes",
 	"/proc/device-tree/ibm,drc-names",
+	"/proc/device-tree/ibm,drc-info",
 };
 
+/*
+ * Configuration of 'drc info' structures for cpu-to-name association
+ */
 static struct drc_info_search_config cpu_to_name = {
 	"CPU",
 	"/proc/device-tree/cpus/ibm,drc-indexes",
 	"/proc/device-tree/cpus/ibm,drc-names",
+	"/proc/device-tree/cpus/ibm,drc-info",
 };
 
+/*
+ * Function prototypes supporting search across the 'drc info' structures
+ */
 static int search_drcindex_to_drcname(struct drc_info_search_config *,
 					uint32_t, char *, int);
 static int search_drcname_to_drcindex(struct drc_info_search_config *,
@@ -70,6 +116,7 @@ int cpu_interruptserver_to_drcindex(uint32_t, uint32_t *);
 int cpu_drcindex_to_drcname(uint32_t, char *, int);
 int cpu_drcindex_to_interruptserver(uint32_t, uint32_t *, int);
 int cpu_drcname_to_drcindex(char *, uint32_t *);
+
 
 void
 print_usage(char *command) {
@@ -109,7 +156,7 @@ read_char_name(int fd, char *propname, int buf_size) {
 }
 
 static int
-search_drcindex_to_drcname(struct drc_info_search_config *sr,
+search_drcindex_to_drcname_v1(struct drc_info_search_config *sr,
 				uint32_t drc_idx, char *drc_name, int buf_size)
 {
 	struct stat sbuf;
@@ -177,6 +224,89 @@ search_drcindex_to_drcname(struct drc_info_search_config *sr,
 	return found;
 }
 
+static int
+search_drcindex_to_drcname(struct drc_info_search_config *sr, uint32_t drc_idx,
+			char *drc_name, int buf_size)
+{
+	struct stat sbuf;
+	int fd, found = 0;
+	uint32_t num;
+	int rc, i;
+
+	if (stat(sr->v2_tree_address, &sbuf))
+		return search_drcindex_to_drcname_v1(sr, drc_idx, drc_name,
+							buf_size);
+
+	fd = open(sr->v2_tree_address, O_RDONLY);
+	if (fd < 0) {
+		fprintf(stderr, "Error: error opening %s:\n%s\n",
+			sr->v2_tree_address, strerror(errno));
+		return 0;
+	}
+
+	/* drc-info: need the first word to process the subsets */
+	rc = read(fd, &num, 4);
+	if (rc < 4)
+		return 0;
+
+	num = be32toh(num);
+	for (i = 0; i < num; i++) {
+		char drc_type[DRC_TYPE_LEN];
+		char drc_name_base[DRC_NAME_LEN];
+		uint32_t drc_start_index, drc_end_index;
+		uint32_t drc_name_start_index;
+		uint32_t num_seq_elems;
+		uint32_t seq_incr;
+		uint32_t power_domain;
+		int ndx_delta;
+
+		read_char_name(fd, drc_type, sizeof(drc_type));
+		read_char_name(fd, drc_name_base, sizeof(drc_name_base));
+
+		rc = read(fd, &drc_start_index, 4);
+		if (rc < 4)
+			return 0;
+		drc_start_index = be32toh(drc_start_index);
+		rc = read(fd, &drc_name_start_index, 4);
+		if (rc < 4)
+			return 0;
+		drc_name_start_index = be32toh(drc_name_start_index);
+		rc = read(fd, &num_seq_elems, 4);
+		if (rc < 4)
+			return 0;
+		num_seq_elems = be32toh(num_seq_elems);
+		rc = read(fd, &seq_incr, 4);
+		if (rc < 4)
+			return 0;
+		seq_incr = be32toh(seq_incr);
+		rc = read(fd, &power_domain, 4);
+		if (rc < 4)
+			return 0;
+		power_domain = be32toh(power_domain);
+
+		/* Drc-type sought match current entry? */
+		if (strcmp(drc_type, sr->drc_type))
+			continue;
+
+		drc_end_index = drc_start_index +
+				((num_seq_elems-1) * seq_incr);
+
+		if (drc_idx < drc_start_index)
+			continue;
+		if (drc_idx > drc_end_index)
+			continue;
+		ndx_delta = drc_idx - drc_start_index;
+
+		snprintf(drc_name, buf_size, "%s%d", drc_name_base,
+			drc_name_start_index + ndx_delta);
+		found = 1;
+		break;
+	}
+
+	close(fd);
+	return found;
+}
+
 /**
  * mem_drcindex_to_drcname
  * @brief converts drcindex of mem type to drcname
@@ -214,7 +344,7 @@ search_drcname_to_drcindex(struct drc_info_search_config *sr,
 	struct stat sbuf;
 	int fd, offset = 0, found = 0;
 	uint32_t index, num = 0;
-	char buffer[64];
+	char buffer[DRC_NAME_LEN];
 
 	if (stat(sr->v1_tree_address, &sbuf) < 0) {
 		fprintf(stderr, "Error: property %s not found",

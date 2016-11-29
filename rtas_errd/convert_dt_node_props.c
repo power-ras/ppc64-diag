@@ -156,6 +156,19 @@ read_char_name(int fd, char *propname, int buf_size) {
 }
 
 static int
+read_uint32(int fd, uint32_t *retval) {
+	uint32_t val;
+	int rc = 0;
+	rc = read(fd, &val, 4);
+	if (rc < 4) {
+		perror("Error: read_uint32: ");
+		return -1;
+	}
+	(*retval) = be32toh(val);
+	return 0;
+}
+
+static int
 search_drcindex_to_drcname_v1(struct drc_info_search_config *sr,
 				uint32_t drc_idx, char *drc_name, int buf_size)
 {
@@ -177,10 +190,8 @@ search_drcindex_to_drcname_v1(struct drc_info_search_config *sr,
 	}
 
 	/* skip this counter value; not needed to process the property here */
-	if (read(fd, &num, 4) != 4) {
-		close(fd);
-		return 0;
-	}
+	if (read_uint32(fd, &num) < 0)
+		goto err;
 
 	while ((read(fd, &index, 4)) != 0) {
 		if (be32toh(index) == drc_idx) {
@@ -200,10 +211,8 @@ search_drcindex_to_drcname_v1(struct drc_info_search_config *sr,
 		}
 
 		/* skip the first one; it indicates how many are in the file */
-		if (read(fd, &index, 4) != 4) {
-			close(fd);
-			return 0;
-		}
+		if (read_uint32(fd, &index) < 0)
+			goto err;
 
 		while (offset > 0) {
 			/* skip to (and one past) the next null char */
@@ -222,6 +231,10 @@ search_drcindex_to_drcname_v1(struct drc_info_search_config *sr,
 	close(fd);
 
 	return found;
+
+err:
+	close(fd);
+	return 0;
 }
 
 static int
@@ -244,12 +257,10 @@ search_drcindex_to_drcname(struct drc_info_search_config *sr, uint32_t drc_idx,
 		return 0;
 	}
 
-	/* drc-info: need the first word to process the subsets */
-	rc = read(fd, &num, 4);
-	if (rc < 4)
-		return 0;
+	/* drc-info: need the first word to iterate over the subsets */
+	if (read_uint32(fd, &num) < 0)
+		goto err;
 
-	num = be32toh(num);
 	for (i = 0; i < num; i++) {
 		char drc_type[DRC_TYPE_LEN];
 		char drc_name_base[DRC_NAME_LEN];
@@ -263,26 +274,16 @@ search_drcindex_to_drcname(struct drc_info_search_config *sr, uint32_t drc_idx,
 		read_char_name(fd, drc_type, sizeof(drc_type));
 		read_char_name(fd, drc_name_base, sizeof(drc_name_base));
 
-		rc = read(fd, &drc_start_index, 4);
-		if (rc < 4)
-			return 0;
-		drc_start_index = be32toh(drc_start_index);
-		rc = read(fd, &drc_name_start_index, 4);
-		if (rc < 4)
-			return 0;
-		drc_name_start_index = be32toh(drc_name_start_index);
-		rc = read(fd, &num_seq_elems, 4);
-		if (rc < 4)
-			return 0;
-		num_seq_elems = be32toh(num_seq_elems);
-		rc = read(fd, &seq_incr, 4);
-		if (rc < 4)
-			return 0;
-		seq_incr = be32toh(seq_incr);
-		rc = read(fd, &power_domain, 4);
-		if (rc < 4)
-			return 0;
-		power_domain = be32toh(power_domain);
+		if (read_uint32(fd, &drc_start_index) < 0)
+			goto err;
+		if (read_uint32(fd, &drc_name_start_index) < 0)
+			goto err;
+		if (read_uint32(fd, &num_seq_elems) < 0)
+			goto err;
+		if (read_uint32(fd, &seq_incr) < 0)
+			goto err;
+		if (read_uint32(fd, &power_domain) < 0)
+			goto err;
 
 		/* Drc-type sought match current entry? */
 		if (strcmp(drc_type, sr->drc_type))
@@ -305,6 +306,10 @@ search_drcindex_to_drcname(struct drc_info_search_config *sr, uint32_t drc_idx,
 
 	close(fd);
 	return found;
+
+err:
+	close(fd);
+	return 0;
 }
 
 /**
@@ -422,9 +427,9 @@ search_drcname_to_drcindex(struct drc_info_search_config *sr, char *drc_name,
 	/*
 	 * Now we process the entries of the 'ibm,drc-info' property.
 	 */
-	read(fd, &num, 4);
+	if (read_uint32(fd, &num) < 0)
+		goto err;
 
-	num = be32toh(num);
 	for (i = 0; i < num; i++) {
 		char drc_type[DRC_TYPE_LEN];
 		char drc_name_base[DRC_NAME_LEN];
@@ -435,37 +440,38 @@ search_drcname_to_drcindex(struct drc_info_search_config *sr, char *drc_name,
 		uint32_t seq_incr;
 		uint32_t power_domain;
 		uint32_t read_idx, ndx, tst_drc_idx;
-		int rc;
+		int rc2;
 
 		read_char_name(fd, drc_type, sizeof(drc_type)-1);
 		read_char_name(fd, drc_name_base, sizeof(drc_name_base)-1);
 
-		read(fd, &drc_start_index, 4);
-		drc_start_index = be32toh(drc_start_index);
-		read(fd, &drc_name_start_index, 4);
-		drc_name_start_index = be32toh(drc_name_start_index);
-		read(fd, &num_seq_elems, 4);
-		num_seq_elems = be32toh(num_seq_elems);
-		read(fd, &seq_incr, 4);
-		seq_incr = be32toh(seq_incr);
-		read(fd, &power_domain, 4);
-		power_domain = be32toh(power_domain);
+		if (read_uint32(fd, &drc_start_index) < 0)
+			goto err;
+		if (read_uint32(fd, &drc_name_start_index) < 0)
+			goto err;
+		if (read_uint32(fd, &num_seq_elems) < 0)
+			goto err;
+		if (read_uint32(fd, &seq_incr) < 0)
+			goto err;
+		if (read_uint32(fd, &power_domain) < 0)
+			goto err;
 
 		/* Drc-type sought match current entry? */
 		if (strcmp(drc_type, sr->drc_type))
 			continue;
 
 		strcat(drc_name_base, "%d");
-		rc = sscanf(drc_name, drc_name_base, drc_name_base,
+		rc2 = sscanf(drc_name, drc_name_base, drc_name_base,
 			&read_idx);
-		if (rc)
+		if (rc2)
 			continue;
 
 		/* Make sure that we can convert to/from the name */
 		ndx = ((read_idx - drc_name_start_index) / seq_incr);
 		tst_drc_idx = drc_name_start_index +
 			      ((ndx-drc_name_start_index)*seq_incr);
-		sprintf(name_compare, "%s%d", drc_name_base, tst_drc_idx);
+		snprintf(name_compare, DRC_NAME_LEN, "%s%d", drc_name_base,
+			tst_drc_idx);
 		if (strcmp(drc_name, name_compare))
 			continue;
 
@@ -476,6 +482,10 @@ search_drcname_to_drcindex(struct drc_info_search_config *sr, char *drc_name,
 
 	close(fd);
 	return found;
+
+err:
+	close(fd);
+	return 0;
 }
 
 /**
@@ -490,6 +500,7 @@ cpu_drcname_to_drcindex(char *drc_name, uint32_t *drc_idx)
 {
 	return search_drcname_to_drcindex(&cpu_to_name, drc_name, drc_idx);
 }
+
 
 int
 main(int argc, char *argv[]) {

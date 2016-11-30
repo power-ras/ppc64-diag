@@ -105,9 +105,6 @@ static const uint32_t mv_gpio_port_active_sel = 0x07071058;
 static const uint32_t mv_port_number_offset = 2;
 static const uint32_t mv_port_number_max = 9;
 
-static const uint32_t mv_port_mode_gpio = 0x5;
-static const uint32_t mv_port_mode_max = 0x7;
-
 static char *mv_port_mode[] = {
 	"All SATAx LINK and ACT",	// 0x0
 	"SATA0 LINK and ACT",		// 0x1

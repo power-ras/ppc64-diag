@@ -55,7 +55,7 @@ run_drmgr(enum resource_dealloc_type resource_type, char *drc_name,
 	  unsigned int value, int wait)
 {
 	pid_t child;
-	int status, rc;
+	int status;
 	char capacity[6], quant_str[5];
 	char *drmgr_args[] = {DRMGR_PROGRAM_NOPATH, "-r", "-c", NULL,
 			NULL, NULL, NULL, NULL, NULL};
@@ -111,7 +111,7 @@ run_drmgr(enum resource_dealloc_type resource_type, char *drc_name,
 	}
 	else if (child == 0) {
 		/* child process */
-		rc = execv(DRMGR_PROGRAM, drmgr_args);
+		execv(DRMGR_PROGRAM, drmgr_args);
 
 		/* shouldn't get here */
 		log_msg(NULL, "Could not exec %s to in response to a "

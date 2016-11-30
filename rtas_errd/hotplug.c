@@ -36,7 +36,7 @@ void handle_hotplug_event(struct event *re)
         struct rtas_event_hdr *rtas_hdr = re->rtas_hdr;
         struct rtas_hotplug_scn *hotplug;
         pid_t child;
-        int status, rc;
+        int status;
         char drc_index[11];
 	char count[4];
         char *drmgr_args[] = { DRMGR_PROGRAM_NOPATH, "-c", NULL, NULL, NULL,
@@ -116,7 +116,7 @@ void handle_hotplug_event(struct event *re)
                         return;
                 } else if (child == 0) {
                         /* child process */
-                        rc = execv(DRMGR_PROGRAM, drmgr_args);
+                        execv(DRMGR_PROGRAM, drmgr_args);
 
                         /* shouldn't get here */
                         log_msg(NULL, "Couldn not exec %s in response to hotplug event, %s",

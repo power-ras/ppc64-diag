@@ -1490,19 +1490,6 @@ get_ext_epow(struct event *event)
 	return (*extepow >> 16);
 }
 
-/**
- * get_fan_number
- */
-int
-get_fan_number(int ext_epow)
-{
-	int fan;
-
-	fan = ext_epow & SENSOR_MASK;
-	fan = fan >> 8;
-
-	return fan;
-}
 
 /**
  * report_menugoal
@@ -1837,7 +1824,6 @@ process_v1_epow(struct event *event, int error_type)
 	int class;
 	int ext_epow;
 	int ext_epow_nofan;
-	int fan_num;
 
 	/*
 	 * The following EPOW error logs found in CHRP, Ver. 1
@@ -1860,12 +1846,10 @@ process_v1_epow(struct event *event, int error_type)
 	}
 	else switch (ext_epow_nofan) {
 		case XEPOW1n11: /* Fan turning slow */
-			fan_num = get_fan_number(ext_epow);
 			report_srn(event, 0, epow800);
 			break;
 
 		case XEPOW1n64: /* Fan stop was detected */
-			fan_num = get_fan_number(ext_epow);
 			report_srn(event, 0, epow801);
 			break;
 

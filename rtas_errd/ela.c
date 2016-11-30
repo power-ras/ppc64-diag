@@ -2021,10 +2021,11 @@ process_v2_epow(struct event *event, int error_type)
 		/* look for loss of redundancy, without any other indication */
 		/* Loss of redundant power supply */
 		report_srn(event, 0, epow652810);
-	} else
+	} else {
 		/* This error log is unknown */
 		unknown_epow_ela(event, class);
 		rc = -1;
+	}
 
 	return rc;
 }

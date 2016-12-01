@@ -1841,7 +1841,7 @@ process_v1_epow(struct event *event, int error_type)
 		} else {
 			/* This error log is unknow to ELA */
 			unknown_epow_ela(event, class);
-			rc = -1;
+			rc = 0;
 		}
 	}
 	else switch (ext_epow_nofan) {
@@ -1871,7 +1871,7 @@ process_v1_epow(struct event *event, int error_type)
 
 		default:	/* This error log is unknow to ELA */
 			unknown_epow_ela(event, class);
-			rc = -1;
+			rc = 0;
 	}
 
 	return rc;
@@ -1982,7 +1982,7 @@ process_v2_epow(struct event *event, int error_type)
 			/* Reserved bits in EPOW log */
 			/* This error log is unknow to ELA */
 			unknown_epow_ela(event, class);
-			rc = -1;
+			rc = 0;
 		}
 	} else if (error_type & EPOWB16b2) {
 		if (error_type & EPOWB16b4) {
@@ -2008,7 +2008,7 @@ process_v2_epow(struct event *event, int error_type)
 	} else {
 		/* This error log is unknown */
 		unknown_epow_ela(event, class);
-		rc = -1;
+		rc = 0;
 	}
 
 	return rc;

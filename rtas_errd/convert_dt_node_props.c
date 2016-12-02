@@ -1,7 +1,7 @@
 /**
  * @file convert_dt_node_props.c
  *
- * Copyright (C) 2005 IBM Corporation
+ * Copyright (C) 2005 - 2016 IBM Corporation
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -118,7 +118,7 @@ int cpu_drcindex_to_interruptserver(uint32_t, uint32_t *, int);
 int cpu_drcname_to_drcindex(char *, uint32_t *);
 
 
-void
+static void
 print_usage(char *command) {
 	printf ("Usage: %s --context <x> --from <y> --to <z> <value>\n"
 		"\t--context: currently, <x> must be cpu\n"
@@ -129,7 +129,6 @@ print_usage(char *command) {
 		"\t(with a leading 0); if it is a drc-name, it should be\n"
 		"\tspecified as a string in double quotes\n\n",
 		command);
-	return;
 }
 
 static int
@@ -159,11 +158,13 @@ static int
 read_uint32(int fd, uint32_t *retval) {
 	uint32_t val;
 	int rc = 0;
+
 	rc = read(fd, &val, 4);
 	if (rc < 4) {
 		perror("Error: read_uint32: ");
 		return -1;
 	}
+
 	(*retval) = be32toh(val);
 	return 0;
 }
@@ -182,9 +183,10 @@ search_drcindex_to_drcname_v1(struct drc_info_search_config *sr,
 			sr->v1_tree_name_address);
 		return 0;
 	}
+
 	fd = open(sr->v1_tree_address, O_RDONLY);
 	if (fd < 0) {
-		fprintf(stderr, "Error: error opening %s:\n%s\n",
+		fprintf(stderr, "Error opening %s:\n%s\n",
 			sr->v1_tree_address, strerror(errno));
 		return 0;
 	}
@@ -205,7 +207,7 @@ search_drcindex_to_drcname_v1(struct drc_info_search_config *sr,
 	if (found) {
 		fd = open(sr->v1_tree_name_address, O_RDONLY);
 		if (fd < 0) {
-			fprintf(stderr, "Error: error opening %s:\n%s\n",
+			fprintf(stderr, "Error opening %s:\n%s\n",
 				sr->v1_tree_name_address, strerror(errno));
 			return 0;
 		}
@@ -217,10 +219,8 @@ search_drcindex_to_drcname_v1(struct drc_info_search_config *sr,
 		while (offset > 0) {
 			/* skip to (and one past) the next null char */
 			do {
-				if ((read(fd, &ch, 1)) != 1) {
-					close(fd);
-					return 0;
-				}
+				if ((read(fd, &ch, 1)) != 1)
+					goto err;
 			} while (ch != 0);
 			offset--;
 		}
@@ -245,7 +245,7 @@ search_drcindex_to_drcname(struct drc_info_search_config *sr, uint32_t drc_idx,
 	struct stat sbuf;
 	int fd, found = 0;
 	uint32_t num;
-	int rc, i;
+	int i;
 
 	if (stat(sr->v2_tree_address, &sbuf))
 		return search_drcindex_to_drcname_v1(sr, drc_idx, drc_name,
@@ -253,7 +253,7 @@ search_drcindex_to_drcname(struct drc_info_search_config *sr, uint32_t drc_idx,
 
 	fd = open(sr->v2_tree_address, O_RDONLY);
 	if (fd < 0) {
-		fprintf(stderr, "Error: error opening %s:\n%s\n",
+		fprintf(stderr, "Error opening %s:\n%s\n",
 			sr->v2_tree_address, strerror(errno));
 		return 0;
 	}
@@ -307,12 +307,9 @@ search_drcindex_to_drcname(struct drc_info_search_config *sr, uint32_t drc_idx,
 		break;
 	}
 
-	close(fd);
-	return found;
-
 err:
 	close(fd);
-	return 0;
+	return found;
 }
 
 /**
@@ -361,7 +358,7 @@ search_drcname_to_drcindex_v1(struct drc_info_search_config *sr,
 	}
 	fd = open(sr->v1_tree_name_address, O_RDONLY);
 	if (fd < 0) {
-		fprintf(stderr, "Error: error opening %s:\n%s\n",
+		fprintf(stderr, "Error opening %s:\n%s\n",
 			sr->v1_tree_name_address, strerror(errno));
 		return 0;
 	}
@@ -388,7 +385,7 @@ search_drcname_to_drcindex_v1(struct drc_info_search_config *sr,
 	if (found) {
 		fd = open(sr->v1_tree_address, O_RDONLY);
 		if (fd < 0) {
-			fprintf(stderr, "Error: error opening %s:\n%s\n",
+			fprintf(stderr, "Error opening %s:\n%s\n",
 				sr->v1_tree_address, strerror(errno));
 			return 0;
 		}
@@ -407,6 +404,7 @@ search_drcname_to_drcindex_v1(struct drc_info_search_config *sr,
 			*drc_idx = be32toh(index);
 		else
 			found = 0;
+
 		close(fd);
 	}
 
@@ -423,6 +421,7 @@ search_drcname_to_drcindex(struct drc_info_search_config *sr, char *drc_name,
 
 	if (stat(sr->v2_tree_address, &sbuf) < 0)
 		return search_drcname_to_drcindex_v1(sr, drc_name, drc_idx);
+
 	fd = open(sr->v2_tree_address, O_RDONLY);
 	if (fd < 0) {
 		fprintf(stderr, "Error: property %s not found",
@@ -446,7 +445,7 @@ search_drcname_to_drcindex(struct drc_info_search_config *sr, char *drc_name,
 		uint32_t seq_incr;
 		uint32_t power_domain;
 		uint32_t read_idx, ndx, tst_drc_idx;
-		int rc2;
+		int rc;
 
 		if (!read_char_name(fd, drc_type, sizeof(drc_type)))
 			goto err;
@@ -469,8 +468,8 @@ search_drcname_to_drcindex(struct drc_info_search_config *sr, char *drc_name,
 			continue;
 
 		strcat(drc_name_base, "%d");
-		rc2 = sscanf(drc_name, drc_name_base, &read_idx);
-		if (rc2)
+		rc = sscanf(drc_name, drc_name_base, &read_idx);
+		if (rc)
 			continue;
 
 		/* Make sure that we can convert to/from the name */
@@ -487,12 +486,9 @@ search_drcname_to_drcindex(struct drc_info_search_config *sr, char *drc_name,
 		break;
 	}
 
-	close(fd);
-	return found;
-
 err:
 	close(fd);
-	return 0;
+	return found;
 }
 
 /**
@@ -755,7 +751,7 @@ cpu_interruptserver_to_drcindex(uint32_t int_serv, uint32_t *drc_idx) {
 						"tree/cpus/%s/ibm,my-drc-index",
 						entry->d_name);
 					if ((fd = open(buffer, O_RDONLY)) < 0) {
-						fprintf(stderr, "Error: error "
+						fprintf(stderr, "Error "
 							"opening %s:\n%s\n",
 							buffer,
 							strerror(errno));
@@ -796,7 +792,7 @@ cpu_drcindex_to_interruptserver(uint32_t drc_idx, uint32_t *int_servs,
 			snprintf(buffer, 1024, "/proc/device-tree/cpus/%s/"
 				"ibm,my-drc-index", entry->d_name);
 			if ((drc_fd = open(buffer, O_RDONLY)) < 0) {
-				fprintf(stderr, "Error: error opening %s:\n"
+				fprintf(stderr, "Error opening %s:\n"
 					"%s\n", buffer, strerror(errno));
 				closedir(dir);
 				return 0;
@@ -808,7 +804,7 @@ cpu_drcindex_to_interruptserver(uint32_t drc_idx, uint32_t *int_servs,
 						"ibm,ppc-interrupt-server#s",
 						entry->d_name);
 					if ((intr_fd = open(buffer, O_RDONLY)) < 0) {
-						fprintf(stderr, "Error: error "
+						fprintf(stderr, "Error "
 							"opening %s:\n%s\n",
 							buffer,
 							strerror(errno));

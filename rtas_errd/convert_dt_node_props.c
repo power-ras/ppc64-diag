@@ -477,7 +477,7 @@ search_drcname_to_drcindex(struct drc_info_search_config *sr, char *drc_name,
 		ndx = ((read_idx - drc_name_start_index) / seq_incr);
 		tst_drc_idx = drc_name_start_index +
 			      ((ndx-drc_name_start_index)*seq_incr);
-		snprintf(name_compare, DRC_NAME_LEN, "%s%d", drc_name_base,
+		snprintf(name_compare, DRC_NAME_LEN, drc_name_base,
 			tst_drc_idx);
 		if (strcmp(drc_name, name_compare))
 			continue;

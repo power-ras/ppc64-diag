@@ -226,7 +226,8 @@ search_drcindex_to_drcname_v1(struct drc_info_search_config *sr,
 		}
 
 		/* copy the drc-name at the current location to the buffer */
-		read_char_name(fd, drc_name, buf_size);
+		if (!read_char_name(fd, drc_name, buf_size))
+			goto err;
 	}
 	close(fd);
 
@@ -271,8 +272,10 @@ search_drcindex_to_drcname(struct drc_info_search_config *sr, uint32_t drc_idx,
 		uint32_t power_domain;
 		int ndx_delta;
 
-		read_char_name(fd, drc_type, sizeof(drc_type));
-		read_char_name(fd, drc_name_base, sizeof(drc_name_base));
+		if (!read_char_name(fd, drc_type, sizeof(drc_type)))
+			goto err;
+		if (!read_char_name(fd, drc_name_base, sizeof(drc_name_base)))
+			goto err;
 
 		if (read_uint32(fd, &drc_start_index) < 0)
 			goto err;
@@ -370,7 +373,10 @@ search_drcname_to_drcindex_v1(struct drc_info_search_config *sr,
 	}
 
 	do {
-		read_char_name(fd, buffer, sizeof(buffer));
+		if (!read_char_name(fd, buffer, sizeof(buffer))) {
+			close(fd);
+			return 0;
+		}
 		if (!strcmp(buffer, drc_name)) {
 			found = 1;
 			break;
@@ -442,8 +448,10 @@ search_drcname_to_drcindex(struct drc_info_search_config *sr, char *drc_name,
 		uint32_t read_idx, ndx, tst_drc_idx;
 		int rc2;
 
-		read_char_name(fd, drc_type, sizeof(drc_type)-1);
-		read_char_name(fd, drc_name_base, sizeof(drc_name_base)-1);
+		if (!read_char_name(fd, drc_type, sizeof(drc_type)))
+			goto err;
+		if (!read_char_name(fd, drc_name_base, sizeof(drc_name_base)))
+			goto err;
 
 		if (read_uint32(fd, &drc_start_index) < 0)
 			goto err;

@@ -469,8 +469,7 @@ search_drcname_to_drcindex(struct drc_info_search_config *sr, char *drc_name,
 			continue;
 
 		strcat(drc_name_base, "%d");
-		rc2 = sscanf(drc_name, drc_name_base, drc_name_base,
-			&read_idx);
+		rc2 = sscanf(drc_name, drc_name_base, &read_idx);
 		if (rc2)
 			continue;
 

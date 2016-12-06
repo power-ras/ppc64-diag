@@ -1,5 +1,5 @@
 Name:	ppc64-diag
-Version:	2.7.2
+Version:	2.7.3
 Release:	1
 Summary:	PowerLinux Platform Diagnostics
 Group:		System Environment/Base
@@ -100,6 +100,11 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Tue Dec 6 2016 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.7.3
+- LED support for Marvell HDD
+- Added support to parse new drc-index device tree property
+- ela: remove support on PowerVM LPAR
+
 * Mon Sep 19 2016 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.7.2
 - Added slider enclosure diagnostics support
 - Added support for eSEL parsing

@@ -183,8 +183,8 @@ mv_munmap_bar5(void *bar5, int fd)
 static uint32_t
 mv_vsr_read(void* bar5, uint32_t vsr_addr)
 {
-	uint32_t *addr = (uint32_t *)(bar5 + mv_pci_bar5_vsr_addr);
-	uint32_t *data = (uint32_t *)(bar5 + mv_pci_bar5_vsr_data);
+	volatile uint32_t *addr = (uint32_t *)(bar5 + mv_pci_bar5_vsr_addr);
+	volatile uint32_t *data = (uint32_t *)(bar5 + mv_pci_bar5_vsr_data);
 
 	/* set address and read data */
 	*addr = vsr_addr;
@@ -204,8 +204,8 @@ mv_vsr_read(void* bar5, uint32_t vsr_addr)
 static void
 mv_vsr_write(void* bar5, uint32_t vsr_addr, uint32_t vsr_data)
 {
-	uint32_t *addr = (uint32_t *)(bar5 + mv_pci_bar5_vsr_addr);
-	uint32_t *data = (uint32_t *)(bar5 + mv_pci_bar5_vsr_data);
+	volatile uint32_t *addr = (uint32_t *)(bar5 + mv_pci_bar5_vsr_addr);
+	volatile uint32_t *data = (uint32_t *)(bar5 + mv_pci_bar5_vsr_data);
 
 	/* set address and write data */
 	*addr = vsr_addr;

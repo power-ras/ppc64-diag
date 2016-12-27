@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 	snprintf(dev_sg, 20, "/dev/%s", sg);
 
 	/* Validate enclosure device */
-	if (valid_enclosure_device(dev_sg))
+	if (valid_enclosure_device(sg))
 		exit(1);
 
 	/* Read enclosure vpd */

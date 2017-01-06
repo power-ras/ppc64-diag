@@ -79,8 +79,7 @@ epow_timer_handler(int sig, siginfo_t siginfo, void *context)
 	}
 
 	rc = rtas_get_sensor(SENSOR_TOKEN_EPOW_SENSOR, 0, &state);
-
-	if (state < RTAS_EPOW_ACTION_SYSTEM_SHUTDOWN) {
+	if (!rc && state < RTAS_EPOW_ACTION_SYSTEM_SHUTDOWN) {
 		/* 
 		 * Problem resolved; disable the interval timer and
 		 * update the epow status file.
@@ -172,6 +171,10 @@ parse_epow(struct event *event)
 	 * problem (e.g. the power cable was yanked).
 	 */
 	rc = rtas_get_sensor(SENSOR_TOKEN_EPOW_SENSOR, 0, &state);
+	if (rc) {
+		log_epow(event, "Failed to read EPOW sensor state\n");
+		return 0;
+	}
 
         if (rtas_hdr->extended == 0) {
 		if (state > 0) {
@@ -394,7 +397,7 @@ check_epow(struct event *event)
 {
 	pid_t	child;
 	char	*childargs[2];
-	int	rc, current_status;
+	int	current_status;
 
 	/*
 	 * Dissect the EPOW extended error information;
@@ -415,7 +418,7 @@ check_epow(struct event *event)
 		}
 		else if (child == 0) {
 			/* child process */
-			rc = execv(EPOW_PROGRAM, childargs);
+			execv(EPOW_PROGRAM, childargs);
 
 			/* shouldn't get here */
 			log_msg(event, "Could not exec %s, %s.  Could not "

@@ -589,18 +589,15 @@ process_pre_v6(struct event *event)
 	event->sl_entry->severity = servicelog_sev(event->rtas_hdr->severity);
 	event->sl_entry->serviceable = 1;
 
-	exthdr = rtas_get_event_exthdr_scn(event->rtas_event);
-	if (exthdr) {
-		if (exthdr->predictive)
-			event->sl_entry->predictive = 1;
+	if (exthdr->predictive)
+		event->sl_entry->predictive = 1;
 
-		if (exthdr->recoverable)
-			event->sl_entry->disposition = SL_DISP_RECOVERABLE;
-		else if (exthdr->unrecoverable_bypassed)
-			event->sl_entry->disposition = SL_DISP_BYPASSED;
-		else if (exthdr->unrecoverable)
-			event->sl_entry->disposition = SL_DISP_UNRECOVERABLE;
-	}
+	if (exthdr->recoverable)
+		event->sl_entry->disposition = SL_DISP_RECOVERABLE;
+	else if (exthdr->unrecoverable_bypassed)
+		event->sl_entry->disposition = SL_DISP_BYPASSED;
+	else if (exthdr->unrecoverable)
+		event->sl_entry->disposition = SL_DISP_UNRECOVERABLE;
 
 	event->sl_entry->raw_data_len = event->length;
 	event->sl_entry->raw_data = malloc(event->length);

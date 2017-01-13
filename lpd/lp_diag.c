@@ -585,6 +585,8 @@ parse_repair_event(int repair_id)
 	if (rc)
 		log_msg("Unable to disable fault indicator");
 
+	free_fru_loc_code(o_frus);
+	free_fru_loc_code(r_frus);
 	/* free indicator list */
 	free_indicator_list(list);
 

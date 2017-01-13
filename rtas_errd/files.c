@@ -424,6 +424,7 @@ read_proc_error_log(char *buf, int buflen)
 			buf[k++] = ch;
 			if (k >= buflen) { /* Buffer overflow */
 				log_msg(NULL, "Invalid test file");
+				munmap(tf_mmap, tf_sbuf.st_size);
 				return -1;
 			}
 		}
@@ -669,6 +670,8 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 					S_IRUSR | S_IWUSR | S_IRGRP);
 		if (rtas_errd_log_fd == -1)
 			dbg("Could not re-open %s", rtas_errd_log);
+
+		free(rtas_errd_log_c);
 	}
 
 	return;

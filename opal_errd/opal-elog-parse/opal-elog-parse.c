@@ -213,7 +213,9 @@ int read_elog(char path[], char **buf){
 	ret = sz;
 
 out:
-	close(platform_log_fd);
+	if (platform_log_fd != -1)
+		close(platform_log_fd);
+
 	if(ret == -1)
 		free(*buf);
 	return ret;

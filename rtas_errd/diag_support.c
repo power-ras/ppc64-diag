@@ -334,6 +334,7 @@ get_dt_status(char *dev)
 		}
 
 		fclose(fp2);
+		fp2 = NULL;
 
 		/* read the loc-code file to determine if found dev */
 		ptr = strstr(loc_file, "status");
@@ -360,6 +361,9 @@ get_dt_status(char *dev)
 			fprintf(stderr, "read failed on %s\n", loc_file);
 			goto out;
 		}
+
+		fclose(fp2);
+		fp2 = NULL;
 	}
 
 	fprintf(stderr, "error: status NOT FOUND\n");

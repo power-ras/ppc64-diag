@@ -808,6 +808,7 @@ cpu_drcindex_to_interruptserver(uint32_t drc_idx, uint32_t *int_servs,
 							"opening %s:\n%s\n",
 							buffer,
 							strerror(errno));
+						close(drc_fd);
 						closedir(dir);
 						return 0;
 					}

@@ -216,12 +216,15 @@ homerun_set_led(const char *enclosure,
 	if (rc != 0) {
 		fprintf(stderr, "%s: cannot read diagnostic page"
 			" from SES for %s\n", progname, enclosure);
+		close(fd);
 		return -1;
 	}
 
 	rc = hr_decode_component_loc(&dp, component, &type, &index);
-	if (rc != 0)
+	if (rc != 0) {
+		close(fd);
 		return -1;
+	}
 
 	memset(&cp, 0, sizeof(cp));
 
@@ -230,6 +233,7 @@ homerun_set_led(const char *enclosure,
 		if (fault == LED_ON) {
 			fprintf(stderr, "%s: Cannot directly enable enclosure"
 					" fault indicator\n", enclosure);
+			close(fd);
 			return -1;
 		}
 		SET_LED(&cp, &dp, fault, ident,
@@ -251,6 +255,7 @@ homerun_set_led(const char *enclosure,
 		fprintf(stderr,
 			"%s internal error: unexpected component type %u\n",
 			progname, type);
+		close(fd);
 		exit(3);
 	}
 
@@ -264,10 +269,13 @@ homerun_set_led(const char *enclosure,
 	if (rc != 0) {
 		fprintf(stderr,"%s: failed to set LED(s) via SES for %s.\n",
 			progname, enclosure);
+		close(fd);
 		exit(2);
 	}
 
 	if (verbose)
 		hr_report_component(&dp, fault, ident, type, index, verbose);
+
+	close(fd);
 	return 0;
 }

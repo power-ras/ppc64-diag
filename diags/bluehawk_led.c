@@ -242,8 +242,10 @@ bluehawk_set_led(const char *enclosure, const char *component, int fault,
 		return -1;
 
 	rc = bh_decode_component_loc(component, &type, &index);
-	if (rc != 0)
+	if (rc != 0) {
+		close(fd);
 		return -1;
+	}
 
 	if (fault == LED_SAME || ident == LED_SAME) {
 		memset(&dp, 0, sizeof(dp));
@@ -252,6 +254,7 @@ bluehawk_set_led(const char *enclosure, const char *component, int fault,
 		if (rc != 0) {
 			fprintf(stderr, "%s: cannot read diagnostic page"
 				" from SES for %s\n", progname, enclosure);
+			close(fd);
 			return -1;
 		}
 	}
@@ -263,6 +266,7 @@ bluehawk_set_led(const char *enclosure, const char *component, int fault,
 		if (fault == LED_ON) {
 			fprintf(stderr, "%s: Cannot directly enable enclosure"
 					" fault indicator\n", enclosure);
+			close(fd);
 			return -1;
 		}
 		SET_LED(&cp, &dp, fault, ident, enclosure_element_ctrl,
@@ -300,6 +304,7 @@ bluehawk_set_led(const char *enclosure, const char *component, int fault,
 		fprintf(stderr,
 			"%s internal error: unexpected component type %u\n",
 			progname, type);
+		close(fd);
 		exit(3);
 	}
 
@@ -313,10 +318,13 @@ bluehawk_set_led(const char *enclosure, const char *component, int fault,
 	if (rc != 0) {
 		fprintf(stderr, "%s: failed to set LED(s) via SES for %s.\n",
 						progname, enclosure);
+		close(fd);
 		exit(2);
 	}
 
 	if (verbose)
 		bh_report_component(&dp, fault, ident, type, index, verbose);
+
+	close(fd);
 	return 0;
 }

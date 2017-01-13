@@ -97,8 +97,14 @@ daemonize(void)
 		close(i);
 
 	i = open("/dev/null", O_RDWR);
-	dup(i);
-	dup(i);
+	if (i == -1)
+		goto daemonize_error;
+
+	if (dup(i) == -1)
+		goto daemonize_error;
+
+	if (dup(i) == -1)
+		goto daemonize_error;
 
 	return;
 

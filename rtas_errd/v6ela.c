@@ -611,6 +611,7 @@ process_v6(struct event *event)
 	if (usrhdr == NULL) {
 		log_msg(event, "No UH (user header) section in this v6 "
 			"RTAS event; strange, but not an error.");
+		goto raw_data;
 	} else {
 		rtas_data->action_flags = usrhdr->action;
 		rtas_data->subsystem_id = usrhdr->subsystem_id;

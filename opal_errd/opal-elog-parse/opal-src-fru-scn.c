@@ -273,27 +273,27 @@ static int print_fru_mr_scn(const struct opal_fru_mr_sub_scn mr)
 	return 0;
 }
 
-int print_fru_scn(const struct opal_fru_scn fru)
+int print_fru_scn(const struct opal_fru_scn *fru)
 {
 	/* FIXME This printing was to roughly confirm the correctness
 	 * of the parsing. Improve here.
 	 */
 	print_center(" ");
-	if (fru.type & OPAL_FRU_ID_SUB)
-		print_center(get_fru_component_desc(fru.id.hdr.flags & 0xF0));
+	if (fru->type & OPAL_FRU_ID_SUB)
+		print_center(get_fru_component_desc(fru->id.hdr.flags & 0xF0));
 
-	print_line("Priority", "%s", get_fru_priority_desc(fru.priority));
-	if (fru.location_code[0] != '\0')
-		print_line("Location Code","%s", fru.location_code);
+	print_line("Priority", "%s", get_fru_priority_desc(fru->priority));
+	if (fru->location_code[0] != '\0')
+		print_line("Location Code","%s", fru->location_code);
 
-	if (fru.type & OPAL_FRU_ID_SUB)
-		print_fru_id_scn(fru.id);
+	if (fru->type & OPAL_FRU_ID_SUB)
+		print_fru_id_scn(fru->id);
 
-	if(fru.type & OPAL_FRU_PE_SUB)
-		print_fru_pe_scn(fru.pe);
+	if(fru->type & OPAL_FRU_PE_SUB)
+		print_fru_pe_scn(fru->pe);
 
-	if(fru.type & OPAL_FRU_MR_SUB)
-		print_fru_mr_scn(fru.mr);
+	if(fru->type & OPAL_FRU_MR_SUB)
+		print_fru_mr_scn(fru->mr);
 
 	return 0;
 }

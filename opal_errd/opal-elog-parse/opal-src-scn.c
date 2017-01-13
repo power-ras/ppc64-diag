@@ -125,7 +125,7 @@ int print_opal_src_scn(const struct opal_src_scn *src)
 		print_line("Callout Count", "%d", src->fru_count);
 		int i;
 		for (i = 0; i < src->fru_count; i++)
-			print_fru_scn(src->fru[i]);
+			print_fru_scn(&src->fru[i]);
 	}
 	print_center(" ");
 	print_bar();

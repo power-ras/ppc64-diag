@@ -34,7 +34,7 @@ int print_fru_pe_scn(const struct opal_fru_pe_sub_scn pe);
 
 int print_fru_mr_scn(const struct opal_fru_mr_sub_scn mr);
 
-int print_fru_scn(const struct opal_fru_scn fru);
+int print_fru_scn(const struct opal_fru_scn *fru);
 
 int print_opal_src_scn(const struct opal_src_scn *src);
 

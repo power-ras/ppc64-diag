@@ -87,6 +87,6 @@ struct opal_fru_scn {
 int parse_fru_scn(struct opal_fru_scn *fru_scn, const char *buf,
                   int buflen);
 
-int print_fru_scn(const struct opal_fru_scn fru);
+int print_fru_scn(const struct opal_fru_scn *fru);
 
 #endif /* _H_OPAL_SRC_FRU_SCN */

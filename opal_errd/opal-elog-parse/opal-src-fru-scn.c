@@ -205,21 +205,27 @@ int parse_fru_scn(struct opal_fru_scn *fru_scn, const char *buf, int buflen)
 	memcpy(fru_scn->location_code, bufsrc->location_code, fru_scn->loc_code_len);
 
 	if (fru_scn->type & OPAL_FRU_ID_SUB) {
-		offset += parse_src_fru_id_scn(&(fru_scn->id), buf + offset, buflen - offset);
-		if (error)
+		error = parse_src_fru_id_scn(&(fru_scn->id), buf + offset, buflen - offset);
+		if (error < 0)
 			return error;
+
+		offset += error;
 	}
 
 	if (fru_scn->type & OPAL_FRU_PE_SUB) {
-		offset += parse_src_fru_pe_scn(&(fru_scn->pe), buf + offset, buflen - offset);
-		if (error)
+		error = parse_src_fru_pe_scn(&(fru_scn->pe), buf + offset, buflen - offset);
+		if (error < 0)
 			return error;
+
+		offset += error;
 	}
 
 	if (fru_scn->type & OPAL_FRU_MR_SUB) {
-		offset += parse_src_fru_mr_scn(&(fru_scn->mr), buf + offset, buflen - offset);
-		if (error)
+		error = parse_src_fru_mr_scn(&(fru_scn->mr), buf + offset, buflen - offset);
+		if (error < 0)
 			return error;
+
+		offset += error;
 	}
 
 	if (offset != fru_scn->length) {

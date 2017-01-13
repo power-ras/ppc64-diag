@@ -189,7 +189,7 @@ int read_elog(char path[], char **buf){
 	}
 
 	platform_log_fd = open(path, O_RDONLY);
-	if (platform_log_fd <= 0) {
+	if (platform_log_fd < 0) {
 		fprintf(stderr, "Could not open error log file : %s (%s).\n "
 			"Skipping....\n", path, strerror(errno));
 		ret = -1;

@@ -338,7 +338,11 @@ rotate_log_file(char *lp_log_file)
 	}
 
 	/* sync log directory */
-	fsync(dir_fd);
+	rc = fsync(dir_fd);
+	if (rc == -1)
+		dbg("Could not sync log directory %s (%d: %s)",
+		    dir_name, errno, strerror(errno));
+
 	close(dir_fd);
 }
 

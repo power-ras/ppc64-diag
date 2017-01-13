@@ -364,6 +364,12 @@ static int find_and_process_dumps(const char *opal_dump_dir,
 		} else {
 			/* Fall back to stat() */
 			rc = stat(dump_path, &sbuf);
+			if (rc == -1) {
+				/* skip on stat error */
+				free(namelist[i]);
+				continue;
+			}
+
 			if (S_ISDIR(sbuf.st_mode)) {
 				is_dir = 1;
 			}

@@ -325,7 +325,7 @@ get_dt_status(char *dev)
 			goto out;
 		}
 
-		if (fscanf(fp2, "%s", target_status)) {
+		if (fscanf(fp2, "%s", target_status) != EOF) {
 			dbg("target_status = \"%s\", loc_file = \"%s\"",
 			    target_status, loc_file);
 		} else {
@@ -337,6 +337,9 @@ get_dt_status(char *dev)
 
 		/* read the loc-code file to determine if found dev */
 		ptr = strstr(loc_file, "status");
+		if (!ptr)
+			continue;
+
 		strcpy(ptr, "ibm,loc-code");
 		fp2 = fopen(loc_file, "r");
 		if (fp2 == 0) {
@@ -344,7 +347,7 @@ get_dt_status(char *dev)
 			goto out;
 		}
 
-		if (fscanf(fp2, "%s", target)) {
+		if (fscanf(fp2, "%s", target) != EOF) {
 			dbg("target = \"%s\", loc_file = \"%s\"",
 			    target, loc_file);
 			if (strcmp(dev, target) == 0) {

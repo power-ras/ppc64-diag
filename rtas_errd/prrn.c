@@ -242,7 +242,7 @@ static int add_drconf_phandles()
 		return -1;
 	}
 
-	fread(membuf, sbuf.st_size, 1, fd);
+	(void)fread(membuf, sbuf.st_size, 1, fd);
 	if (ferror(fd)) {
 		fclose(fd);
 		free(membuf);
@@ -315,7 +315,7 @@ static int do_update(char *cmd, int len)
 	int i, fd;
 
 	fd = open(OFDTPATH, O_WRONLY);
-	if (fd <= 0) {
+	if (fd < 0) {
 		dbg("Failed to open %s: %s", OFDTPATH, strerror(errno));
 		rc = errno;
 		return rc;

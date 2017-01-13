@@ -145,6 +145,8 @@ can_delete_lmb(void)
 	ret_val = 0; /* default state is false, unless count is positive */
 
 	dir = opendir("/sys/devices/system/memory");
+	if (!dir)
+		return 0;
 
 	while ((entry = readdir(dir)) != NULL) {
 
@@ -162,7 +164,7 @@ can_delete_lmb(void)
 					buffer, strerror(errno));
 				continue;
 			}
-			if ((read(fd, state, 6)) != 0 ) {
+			if ((read(fd, state, 6)) == 6) {
 				if(!strncmp(state, "online", 6))
 					ctr++;
 				/* make sure its not the last lmb */

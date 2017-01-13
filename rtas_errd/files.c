@@ -280,10 +280,10 @@ init_files(void)
 		return rc;
 #endif
 	proc_error_log_fd = open(proc_error_log1, O_RDONLY);
-	if (proc_error_log_fd <= 0)
+	if (proc_error_log_fd < 0)
 		proc_error_log_fd = open(proc_error_log2, O_RDONLY);
 
-	if (proc_error_log_fd <= 0) {
+	if (proc_error_log_fd < 0) {
 		log_msg(NULL, "Could not open error log file at either %s or "
 			"%s, %s\nThe rtas_errd daemon cannot continue and will "
 			"exit", proc_error_log1, proc_error_log2,
@@ -294,7 +294,7 @@ init_files(void)
 	/* Next, open /var/log/platform */
 	platform_log_fd = open(platform_log, O_RDWR | O_SYNC | O_CREAT,
 			       S_IRUSR | S_IWUSR | S_IRGRP /*0640*/);
-	if (platform_log_fd <= 0) {
+	if (platform_log_fd < 0) {
 		log_msg(NULL, "Could not open log file %s, %s\nThe daemon "
 			"cannot continue and will exit", platform_log,
 			strerror(errno));
@@ -418,7 +418,9 @@ read_proc_error_log(char *buf, int buflen)
 			str[0] = data[j];
 			str[1] = data[j + 1];
 			j += 2;
-			sscanf(str, "%02x", &ch);
+			if (sscanf(str, "%02x", &ch) != 1)
+				continue;
+
 			buf[k++] = ch;
 			if (k >= buflen) { /* Buffer overflow */
 				log_msg(NULL, "Invalid test file");
@@ -434,7 +436,7 @@ read_proc_error_log(char *buf, int buflen)
 				close(proc_error_log_fd);
 				tmp = scenario_files[scenario_index++];
 				proc_error_log_fd = open(tmp, O_RDONLY);
-				if (proc_error_log_fd <= 0)
+				if (proc_error_log_fd < 0)
 					log_msg(NULL, "Could not open scenario "
 						"file %s, %s", tmp,
 						strerror(errno));
@@ -648,14 +650,19 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 			return;
 
 		}
+
 		dir_name = dirname(rtas_errd_log_c);
 		dir_fd = open(dir_name, O_RDONLY|O_DIRECTORY);
-		rc = fsync(dir_fd);
-		if (rc == -1) {
-			log_msg(NULL, "fsync failed, on %s\nexit status: %d",
-					dir_name, errno);
+		if (dir_fd == -1) {
+			log_msg(NULL, "Could not open directory %s (%s:%d)",
+					dir_name, strerror(errno), errno);
+		} else {
+			rc = fsync(dir_fd);
+			if (rc == -1)
+				log_msg(NULL, "fsync failed, on %s\nexit status:"
+						" %d", dir_name, errno);
+			close(dir_fd);
 		}
-		close(dir_fd);
 
 		rtas_errd_log_fd = open(rtas_errd_log,
 					O_RDWR | O_CREAT | O_TRUNC,

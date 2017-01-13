@@ -310,7 +310,7 @@ get_dt_status(char *dev)
 
 	/* results of the find command */
 	fp1 = fopen(tmp_file, "r");
-	if (fp1 == 0) {
+	if (fp1 == NULL) {
 		fprintf(stderr, "open failed on %s\n", tmp_file);
 		return NULL;
 	}
@@ -320,7 +320,7 @@ get_dt_status(char *dev)
 
 		/* read the status in case this is the one */
 		fp2 = fopen(loc_file, "r");
-		if (fp2 == 0) {
+		if (fp2 == NULL) {
 			fprintf(stderr, "open failed on %s\n", loc_file);
 			goto out;
 		}
@@ -343,7 +343,7 @@ get_dt_status(char *dev)
 
 		strcpy(ptr, "ibm,loc-code");
 		fp2 = fopen(loc_file, "r");
-		if (fp2 == 0) {
+		if (fp2 == NULL) {
 			fprintf(stderr, "open failed on %s\n", loc_file);
 			goto out;
 		}

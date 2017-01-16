@@ -81,17 +81,6 @@ hr_print_fan_status(struct fan_status *s)
 	return print_fan_status(s, valid_codes, speed);
 }
 
-
-/*
- * The fru_label should be "P1-C1" or "P1-C2" (without the terminating null).
- * i is 0 or 1.
- */
-static int
-hr_esm_location_match(int i, const char *fru_label)
-{
-	return ('0'+i+1 == fru_label[4]);
-}
-
 /* Create a callout for power supply i (i = 0 or 1). */
 static int
 hr_create_ps_callout(struct sl_callout **callouts,
@@ -131,28 +120,6 @@ hr_create_ps_callout(struct sl_callout **callouts,
 out:
 	free(edp);
 	return 0;
-}
-
-/**
- * Create a callout for ESM i (left=0, right=1). VPD page 1 contains
- * VPD for only one of the ESM. If it's the wrong one, just do without
- * the VPD.
- */
-static void
-hr_create_esm_callout(struct sl_callout **callouts,
-		      char *location, unsigned int i, int fd)
-{
-	int rc = -1;
-	struct vpd_page esm;
-
-	/* Enclosure is opened for RW */
-	if (fd >= 0)
-		rc = get_diagnostic_page(fd, INQUIRY, 1, &esm, sizeof(esm));
-
-	if (rc == 0 && hr_esm_location_match(i, esm.fru_label))
-		add_callout_from_vpd_page(callouts, location, &esm);
-	else
-		add_location_callout(callouts, location);
 }
 
 static int
@@ -306,7 +273,7 @@ hr_report_faults_to_svclog(int fd, struct dev_vpd *vpd,
 		snprintf(loc_suffix, loc_suffix_size, "-P1-C%u", i+1);
 		build_srn(srn, SRN_RC_TEMP_THRESHOLD);
 		callouts = NULL;
-		hr_create_esm_callout(&callouts, location, i, fd);
+		create_esm_callout(&callouts, location, i, fd);
 		if (rc == 0)
 			servevent(srn, sev, description, vpd, callouts);
 	}
@@ -324,7 +291,7 @@ hr_report_faults_to_svclog(int fd, struct dev_vpd *vpd,
 		snprintf(loc_suffix, loc_suffix_size, "-P1-C%u", i+1);
 		build_srn(srn, SRN_RC_CRIT_ESM);
 		callouts = NULL;
-		hr_create_esm_callout(&callouts, location, i, fd);
+		create_esm_callout(&callouts, location, i, fd);
 		servevent(srn, sev, description, vpd, callouts);
 	}
 

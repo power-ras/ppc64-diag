@@ -68,6 +68,8 @@ int parse_opal_event_log(char *buf, int buflen, struct opal_event_log_scn **r_lo
 							(isgraph(*(buf+i)) | isspace(*(buf+i))) ?
 							*(buf+i) : '.');
 				}
+
+				continue;
 		}
 
 		hdr_data = &elog_hdr_id[header_pos];

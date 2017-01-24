@@ -744,8 +744,9 @@ cpu_interruptserver_to_drcindex(uint32_t int_serv, uint32_t *drc_idx) {
 					"%s\n", buffer, strerror(errno));
 				goto cleanup;
 			}
-			while ((read(fd, &temp, 4)) != 0) {
-				if (be32toh(temp) == int_serv) {
+
+			while (read_uint32(fd, &temp) == 0) {
+				if (temp == int_serv) {
 					close(fd);
 					snprintf(buffer, 1024, "/proc/device-"
 						"tree/cpus/%s/ibm,my-drc-index",
@@ -797,8 +798,9 @@ cpu_drcindex_to_interruptserver(uint32_t drc_idx, uint32_t *int_servs,
 				closedir(dir);
 				return 0;
 			}
-			while ((read(drc_fd, &temp, 4)) != 0) {
-				if (be32toh(temp) == drc_idx) {
+
+			while (read_uint32(drc_fd, &temp) == 0) {
+				if (temp == drc_idx) {
 					snprintf(buffer, 1024, "/proc/device-"
 						"tree/cpus/%s/"
 						"ibm,ppc-interrupt-server#s",

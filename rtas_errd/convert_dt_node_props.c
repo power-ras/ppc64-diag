@@ -648,7 +648,8 @@ main(int argc, char *argv[]) {
 			}
 		}
 		else if (!strcmp(from, "drc-name")) {
-			strncpy(drcname, argv[argc-1], DRC_NAME_LEN);
+			strncpy(drcname, argv[argc-1], DRC_NAME_LEN - 1);
+			drcname[DRC_NAME_LEN - 1] = '\0';
 			if (!strcmp(to, "drc-index")) {
 				if (!cpu_drcname_to_drcindex(drcname,
 						&drcindex)) {

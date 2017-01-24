@@ -1098,8 +1098,10 @@ process_pre_v6(struct event *event)
 			loc = get_loc_code(event, FIRST_LOC, NULL);
 			i = 0;
 			while (loc && i < 4) {
-				strcpy(e_desc->frus[i++].floc, loc);
+				strncpy(e_desc->frus[i].floc, loc, LOCSIZE - 1);
+				e_desc->frus[i].floc[LOCSIZE - 1] = '\0';
 				loc = get_loc_code(event, NEXT_LOC, NULL);
+				i++;
 			}
 
 			set_fru_percentages(e_desc, i);
@@ -1322,7 +1324,7 @@ report_srn(struct event *event, int nlocs,
 		/* Prepare to add more FRUs */
 		while (i < MAXFRUS) {
 			if (loc != NULL) {
-				strcpy(temp_event->frus[i].floc, loc);
+				strncpy(temp_event->frus[i].floc, loc, LOCSIZE - 1);
 				loc = get_loc_code(event, NEXT_LOC, NULL);
 			}
 
@@ -1674,15 +1676,19 @@ report_io_error_frus(struct event *event, int sn,
 				/* 1st loc code goes in 2nd fru */
 				/* but also putting loc in 1st fru */
 				/* in case  there is only 1 loc. */
-				strcpy(e_desc->frus[0].floc, loc);
-				strcpy(e_desc->frus[1].floc, loc);
+				strncpy(e_desc->frus[0].floc, loc, LOCSIZE - 1);
+				e_desc->frus[0].floc[LOCSIZE - 1] = '\0';
+				strncpy(e_desc->frus[1].floc, loc, LOCSIZE - 1);
+				e_desc->frus[1].floc[LOCSIZE - 1] = '\0';
 			} else if ( i == 1 ) {
 				/* 2nd loc code goes in 1st fru */
-				strcpy(e_desc->frus[0].floc, loc);
+				strncpy(e_desc->frus[0].floc, loc, LOCSIZE - 1);
+				e_desc->frus[0].floc[LOCSIZE - 1] = '\0';
 			}
 		} else {
 			/* Here if not swap_locs */
-			strcpy(e_desc->frus[i].floc, loc);
+			strncpy(e_desc->frus[i].floc, loc, LOCSIZE - 1);
+			e_desc->frus[i].floc[LOCSIZE - 1] = '\0';
 		}
 		i++;
 		loc = get_loc_code(event, NEXT_LOC, NULL);
@@ -2062,8 +2068,12 @@ sensor_epow(struct event *event, int error_type, int version)
 				e_desc->rcode = 0x30;
 			} else {
 				e_desc = volt_epow;
-				strcpy(e_desc->frus[0].fname, fru_name);
-				strcpy(e_desc->frus[1].fname, sensor_name);
+				strncpy(e_desc->frus[0].fname, fru_name,
+								NAMESIZE - 1);
+				e_desc->frus[0].fname[NAMESIZE - 1] = '\0';
+				strncpy(e_desc->frus[1].fname, sensor_name,
+								NAMESIZE - 1);
+				e_desc->frus[1].fname[NAMESIZE - 1] = '\0';
 				e_desc->rcode = 0x831;
 			}
                         break;
@@ -2077,7 +2087,9 @@ sensor_epow(struct event *event, int error_type, int version)
 				e_desc->rcode = 0x50;
 			} else {
 				e_desc = therm_epow;
-				strcpy(e_desc->frus[0].fname, sensor_name);
+				strncpy(e_desc->frus[0].fname, sensor_name,
+								NAMESIZE - 1);
+				e_desc->frus[0].fname[NAMESIZE - 1] = '\0';
 				e_desc->rcode = 0x832;
 			}
 			break;
@@ -2093,8 +2105,12 @@ sensor_epow(struct event *event, int error_type, int version)
 				e_desc->rcode = 0x70;
 			} else {
 				e_desc = pow_epow;
-				strcpy(e_desc->frus[0].fname, fru_name);
-				strcpy(e_desc->frus[1].fname, sensor_name);
+				strncpy(e_desc->frus[0].fname, fru_name,
+								NAMESIZE - 1);
+				e_desc->frus[0].fname[NAMESIZE - 1] = '\0';
+				strncpy(e_desc->frus[1].fname, sensor_name,
+								NAMESIZE - 1);
+				e_desc->frus[1].fname[NAMESIZE - 1] = '\0';
 				e_desc->rcode = 0x833;
 			}
                         break;
@@ -3131,10 +3147,12 @@ process_refcodes(struct event *event, short *refc, int rlen)
 
 		while (nlocs) {
 			/* Put loc code into fru */
-			if (loc != NULL)
-				strcpy(e_desc->frus[j].floc, loc);
-			else
+			if (loc != NULL) {
+				strncpy(e_desc->frus[j].floc, loc, LOCSIZE - 1);
+				e_desc->frus[j].floc[LOCSIZE - 1] = '\0';
+			} else {
 				e_desc->frus[j].floc[0] = '\0';
+			}
 
 			/* Get ready with next location code */
 			loc = get_loc_code(event, NEXT_LOC, NULL);

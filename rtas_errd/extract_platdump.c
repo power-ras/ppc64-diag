@@ -212,7 +212,7 @@ extract_platform_dump(uint64_t dump_tag)
 	uint16_t prefix_size = 7;
 	char	*dump_buf = NULL;
 	char	filename[DUMP_MAX_FNAME_LEN + 1];
-	char	pathname[DUMP_MAX_FNAME_LEN + 40];
+	char	pathname[PATH_MAX];
 	char	dump_err[RTAS_ERROR_LOG_MAX];
 	char	dumpid[5];
 	int	out=-1, rc, librtas_rc, dump_complete=0, ret=0;

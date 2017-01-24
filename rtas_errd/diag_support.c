@@ -252,6 +252,7 @@ get_dt_status(char *dev)
 	pid_t cpid;					/* child pid		*/
 	int rc;						/* return value		*/
 	int status;					/* child exit status	*/
+	int len = 0;
 
 	system_args[0] = "/usr/bin/find";
 	system_args[1] = "/proc/device-tree";
@@ -341,7 +342,13 @@ get_dt_status(char *dev)
 		if (!ptr)
 			continue;
 
-		strcpy(ptr, "ibm,loc-code");
+		len = strlen("ibm,loc-code");
+		if ((ptr - loc_file + len + 1) > sizeof(loc_file))
+			continue;
+
+		strncpy(ptr, "ibm,loc-code", len);
+		ptr[len] = '\0';
+
 		fp2 = fopen(loc_file, "r");
 		if (fp2 == NULL) {
 			fprintf(stderr, "open failed on %s\n", loc_file);

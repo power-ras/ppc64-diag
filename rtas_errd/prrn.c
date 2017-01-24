@@ -165,10 +165,11 @@ static int add_std_phandles(char *parent, char *p)
 	char *pend;
 	FILE *fd;
 
-	strcpy(path, parent);
+	strncpy(path, parent, PATH_MAX - 1);
+	path[PATH_MAX - 1] = '\0';
 	if (p) {
 		strcat(path, "/");
-		strcat(path, p);
+		strncat(path, p, sizeof(path) - strlen(path) - 1);
 	}
 	pend = path + strlen(path);
 

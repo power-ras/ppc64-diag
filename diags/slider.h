@@ -25,6 +25,38 @@
 
 #include "encl_common.h"
 
+/* Get slider element offset */
+#define lff_offset(element) ((unsigned long) &((struct slider_lff_diag_page2 *)0)->element)
+#define sff_offset(element) ((unsigned long) &((struct slider_sff_diag_page2 *)0)->element)
+
+#define element_offset(element) ((slider_variant_flag == SLIDER_V_LFF) ? \
+				 lff_offset(element) : sff_offset(element))
+
+#define SLIDER_ASSIGN_CTRL_PAGE(ctrl_page) \
+	do { \
+		if (slider_variant_flag == SLIDER_V_LFF) { \
+			struct slider_lff_ctrl_page2 *c \
+			= (struct slider_lff_ctrl_page2 *)ctrl_page; \
+			c->page_code = 2; \
+			c->page_length = slider_v_ctrl_page2_size - 4; \
+			c->page_length = htons(c->page_length); \
+			c->generation_code = 0; \
+		} else { \
+			struct slider_sff_ctrl_page2 *c \
+			= (struct slider_sff_ctrl_page2 *)ctrl_page; \
+			c->page_code = 2; \
+			c->page_length = slider_v_ctrl_page2_size - 4; \
+			c->page_length = htons(c->page_length); \
+			c->generation_code = 0; \
+		} \
+	} while (0);
+
+/* Slider variant flag */
+enum slider_variant {
+	SLIDER_V_LFF,
+	SLIDER_V_SFF
+};
+
 #define SLIDER_NR_LFF_DISK			12
 #define SLIDER_NR_SFF_DISK			24
 #define SLIDER_NR_ESC				2

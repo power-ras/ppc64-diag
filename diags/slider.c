@@ -31,13 +31,6 @@
 #include "encl_util.h"
 #include "slider.h"
 
-/* Get slider element offset */
-#define lff_offset(element) ((unsigned long) &((struct slider_lff_diag_page2 *)0)->element)
-#define sff_offset(element) ((unsigned long) &((struct slider_sff_diag_page2 *)0)->element)
-
-#define element_offset(element) ((slider_variant_flag == SLIDER_V_LFF) ? \
-				 lff_offset(element) : sff_offset(element))
-
 /* Global definition, as it is used by multiple caller */
 static const char * const sas_connector_names[] = {
 	"Upstream",
@@ -78,11 +71,6 @@ static enum element_status_code valid_codes[] = {
 	ES_EOL
 };
 
-/* Slider variant flag */
-enum slider_variant {
-	SLIDER_V_LFF,
-	SLIDER_V_SFF
-};
 enum slider_variant slider_variant_flag;
 
 /* Slider variant page size/number of disk */
@@ -766,26 +754,6 @@ static int report_slider_fault_to_svclog(void *dp, struct dev_vpd *vpd, int fd)
 					status_element); \
 		} \
 	} while (0)
-
-#define SLIDER_ASSIGN_CTRL_PAGE(ctrl_page) \
-	do { \
-		if (slider_variant_flag == SLIDER_V_LFF) { \
-			struct slider_lff_ctrl_page2 *c \
-			= (struct slider_lff_ctrl_page2 *)ctrl_page; \
-			c->page_code = 2; \
-			c->page_length = slider_v_ctrl_page2_size - 4; \
-			c->page_length = htons(c->page_length); \
-			c->generation_code = 0; \
-		} else { \
-			struct slider_sff_ctrl_page2 *c \
-			= (struct slider_sff_ctrl_page2 *)ctrl_page; \
-			c->page_code = 2; \
-			c->page_length = slider_v_ctrl_page2_size - 4; \
-			c->page_length = htons(c->page_length); \
-			c->generation_code = 0; \
-		} \
-	} while (0);
-
 
 /* Turn on led in case of failure of any element of enclosure */
 static int slider_turn_on_fault_leds(void *dp, int fd)

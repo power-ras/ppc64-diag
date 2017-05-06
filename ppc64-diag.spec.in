@@ -1,6 +1,10 @@
-Name:	ppc64-diag
-Version:	2.7.3
-Release:	1
+%define name	@PACKAGE_NAME@
+%define version	@PACKAGE_VERSION@
+%define release	1
+
+Name:		%{name}
+Version:	%{version}
+Release:	%{release}
 Summary:	PowerLinux Platform Diagnostics
 Group:		System Environment/Base
 License:	GNU General Public License (GPL)
@@ -37,6 +41,8 @@ administrators or connected service frameworks.
 %setup -q
 
 %build
+./autogen.sh
+%configure
 make
 
 %install
@@ -47,11 +53,11 @@ mkdir -p $RPM_BUILD_ROOT/%{_libexecdir}/%{name}
 mkdir -p $RPM_BUILD_ROOT/%{_unitdir}
 mkdir -p $RPM_BUILD_ROOT/var/log/dump
 mkdir -p $RPM_BUILD_ROOT/var/log/opal-elog
-ln -sfv /usr/sbin/usysattn $RPM_BUILD_ROOT/usr/sbin/usysfault
 
 %files
 %defattr (-,root,root,-)
-%doc /usr/share/doc/packages/ppc64-diag/COPYING
+%doc /usr/share/doc/ppc64-diag/COPYING
+%doc /usr/share/doc/ppc64-diag/README
 %doc /usr/share/man/man8/*
 /usr/sbin/*
 %dir /etc/ppc64-diag

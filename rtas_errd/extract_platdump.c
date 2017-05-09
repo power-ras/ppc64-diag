@@ -31,8 +31,9 @@
 #include <stdint.h>
 #include <librtas.h>
 #include <sys/stat.h>
+
 #include "rtas_errd.h"
-#include "platform.c"
+#include "platform.h"
 
 #define DUMP_HDR_PREFIX_OFFSET	0x16	/* prefix size in dump header */
 #define DUMP_HDR_FNAME_OFFSET	0x18	/* suggested filename in dump header */

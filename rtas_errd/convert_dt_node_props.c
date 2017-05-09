@@ -29,7 +29,8 @@
 #include <stdint.h>
 #include <dirent.h>
 #include <fcntl.h>
-#include "platform.c"
+
+#include "platform.h"
 
 #define MAX_IRQ_SERVERS_PER_CPU	16
 

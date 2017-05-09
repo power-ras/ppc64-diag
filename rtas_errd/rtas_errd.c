@@ -30,8 +30,9 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <librtas.h>
+
 #include "rtas_errd.h"
-#include "platform.c"
+#include "platform.h"
 
 /**
  * @var debug

@@ -5,16 +5,20 @@ rtas_errd_h_files = rtas_errd/config.h \
 		    rtas_errd/fru_prev6.h \
 		    rtas_errd/rtas_errd.h
 
+rtas_errd_common_source = common/platform.c
+
 sbin_PROGRAMS += rtas_errd/convert_dt_node_props \
 		 rtas_errd/extract_platdump \
 		 rtas_errd/rtas_errd
 
-rtas_errd_convert_dt_node_props_SOURCES = rtas_errd/convert_dt_node_props.c
+rtas_errd_convert_dt_node_props_SOURCES = rtas_errd/convert_dt_node_props.c \
+					  $(rtas_errd_common_source)
 
 rtas_errd_extract_platdump_SOURCES = \
 		rtas_errd/extract_platdump.c \
 		rtas_errd/config.c \
-		rtas_errd/rtas_errd.h
+		rtas_errd/rtas_errd.h \
+		$(rtas_errd_common_source)
 rtas_errd_extract_platdump_LDADD = -lrtas
 
 rtas_errd_rtas_errd_SOURCES = \
@@ -34,6 +38,7 @@ rtas_errd_rtas_errd_SOURCES = \
 		rtas_errd/prrn.c \
 		rtas_errd/hotplug.c \
 		common/utils.c \
+		$(rtas_errd_common_source) \
 		$(rtas_errd_h_files)
 rtas_errd_rtas_errd_LDADD = -lrtas -lrtasevent -lservicelog
 

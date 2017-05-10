@@ -1,11 +1,12 @@
 [Unit]
 Description=opal_errd (PowerNV platform error handling) Service
+ConditionPathExists=/sys/firmware/opal/elog
+ConditionVirtualization=false
 After=syslog.target
 
 [Service]
 Type=forking
-ExecStart=/usr/libexec/ppc64-diag/opal_errd start
-ExecStop=/usr/libexec/ppc64-diag/opal_errd stop
+ExecStart=/usr/sbin/opal_errd
 StandardOutput=syslog
 StandardError=syslog
 Restart=always

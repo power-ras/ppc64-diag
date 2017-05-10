@@ -1,11 +1,12 @@
 [Unit]
 Description=ppc64-diag rtas_errd (platform error handling) Service
+ConditionPathExists=|!/proc/ppc64/rtas/error_log
+ConditionPathExists=|!/proc/ppc64/error_log
 After=syslog.target
 
 [Service]
 Type=forking
-ExecStart=/usr/libexec/ppc64-diag/rtas_errd start
-ExecStop=/usr/libexec/ppc64-diag/rtas_errd stop
+ExecStart=/usr/sbin/rtas_errd
 StandardOutput=syslog
 StandardError=syslog
 Restart=always

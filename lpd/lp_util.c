@@ -200,7 +200,7 @@ read_vpd_from_lsvpd(struct dev_vpd *vpd, const char *device)
 
 	rc = spclose(fp, cpid);
 	if (rc) {
-		log_msg("spclose() failed [rc=%d]\n", rc);
+		log_msg("%s: spclose() failed [rc=%d]\n", __func__, rc);
 		return -1;
 	}
 

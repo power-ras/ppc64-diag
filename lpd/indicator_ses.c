@@ -282,7 +282,8 @@ ses_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 
 			rc = spclose(fp, cpid);
 			if (rc)
-				log_msg("spclose failed [rc=%d]\n", rc);
+				log_msg("%s: spclose failed [rc=%d]\n",
+					__func__, rc);
 
 			return -1;
 		}
@@ -311,7 +312,7 @@ ses_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 
 	rc = spclose(fp, cpid);
 	if (rc) {
-		log_msg("spclose failed [rc=%d]\n", rc);
+		log_msg("%s: spclose failed [rc=%d]\n", __func__, rc);
 		return -1;
 	}
 	return 0;
@@ -415,7 +416,7 @@ get_ses_indicator(int indicator, struct loc_code *loc, int *state)
 
 	rc = spclose(fp, cpid);
 	if (rc) {
-		log_msg("spclose failed [rc=%d]\n", rc);
+		log_msg("%s: spclose failed [rc=%d]\n", __func__, rc);
 		return -1;
 	}
 

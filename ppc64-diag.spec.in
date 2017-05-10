@@ -24,8 +24,7 @@ Requires:	systemd
 Requires:	powerpc-utils >= 1.3.2
 # Light Path Diagnostics depends on below lsvpd version.
 Requires:	lsvpd >= 1.7.1
-BuildRoot:	%{_tmppath}/%{name}-%{version}-build
-Source0:	ppc64-diag-%{version}.tar.gz
+Source0:	%{name}-%{version}.tar.gz
 
 %description
 This package contains various diagnostic tools for PowerLinux.
@@ -47,8 +46,8 @@ make
 
 %install
 make install DESTDIR=$RPM_BUILD_ROOT
-chmod 644 $RPM_BUILD_ROOT/etc/ppc64-diag/servevent_parse.pl
-mkdir -p $RPM_BUILD_ROOT/etc/ppc64-diag/ses_pages
+chmod 644 $RPM_BUILD_ROOT/etc/%{name}/servevent_parse.pl
+mkdir -p $RPM_BUILD_ROOT/etc/%{name}/ses_pages
 mkdir -p $RPM_BUILD_ROOT/%{_libexecdir}/%{name}
 mkdir -p $RPM_BUILD_ROOT/%{_unitdir}
 mkdir -p $RPM_BUILD_ROOT/var/log/dump
@@ -56,15 +55,15 @@ mkdir -p $RPM_BUILD_ROOT/var/log/opal-elog
 
 %files
 %defattr (-,root,root,-)
-%doc /usr/share/doc/ppc64-diag/COPYING
-%doc /usr/share/doc/ppc64-diag/README
+%doc /usr/share/doc/%{name}/COPYING
+%doc /usr/share/doc/%{name}/README
 %doc /usr/share/man/man8/*
 /usr/sbin/*
-%dir /etc/ppc64-diag
-%dir /etc/ppc64-diag/ses_pages
+%dir /etc/%{name}
+%dir /etc/%{name}/ses_pages
 %dir /var/log/dump
 %dir /var/log/opal-elog
-%config /etc/ppc64-diag/*
+%config /etc/%{name}/*
 %config /etc/rc.powerfail
 %attr(755,root,root) %{_libexecdir}/%{name}/rtas_errd
 %attr(755,root,root) %{_libexecdir}/%{name}/opal_errd
@@ -101,7 +100,6 @@ fi
 %triggerin -- librtas
 # trigger on librtas upgrades ------------------------------------------
 if [ "$2" = "2" ]; then
-    systemctl restart opal_errd.service >/dev/null
     systemctl restart rtas_errd.service >/dev/null
 fi
 

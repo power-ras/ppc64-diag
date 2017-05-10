@@ -22,6 +22,7 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 #include <getopt.h>
 #include <stdlib.h>
 
@@ -132,7 +133,7 @@ int main(int argc, char **argv)
 	}
 
 	program_name = argv[0];
-	lp_error_log_fd = 1; /* log message to stdout */
+	lp_error_log_fd = STDOUT_FILENO; /* log message to stdout */
 	rc = init_files();
 	if (rc) {
 		fprintf(stderr, "Unable to open log file.\n");

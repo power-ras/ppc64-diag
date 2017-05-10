@@ -296,7 +296,7 @@ main(int argc, char **argv)
 		return 1;
 
 	/* initialize */
-	lp_error_log_fd = 1; /* log message to stdout */
+	lp_error_log_fd = STDOUT_FILENO; /* log message to stdout */
 	rc = init_files();
 	if (rc) {
 		fprintf(stderr, "Unable to open log file.\n");

@@ -200,8 +200,10 @@ log_msg(const char *fmt, ...)
 	/* In order to make testing easier we will not print time in
 	 * debug version of lp_diag.
 	 */
-	len = insert_time(buf, LP_ERROR_LOG_MAX);
-	len += snprintf(buf + len, LP_ERROR_LOG_MAX - len, ": ");
+	if (lp_error_log_fd != STDOUT_FILENO) {
+		len = insert_time(buf, LP_ERROR_LOG_MAX);
+		len += snprintf(buf + len, LP_ERROR_LOG_MAX - len, ": ");
+	}
 #endif
 
 	/* Add the actual message */
@@ -358,7 +360,7 @@ init_files(void)
 	int rc = 0;
 
 	/* lp_diag log file */
-	if (lp_error_log_fd != 1) { /* 1 = stdout */
+	if (lp_error_log_fd != STDOUT_FILENO) { /* 1 = stdout */
 		rotate_log_file(lp_error_log_file);
 
 		lp_error_log_fd = open(lp_error_log_file,
@@ -396,7 +398,7 @@ init_files(void)
 void
 close_files(void)
 {
-	if (lp_error_log_fd > 1) /* don't close stdout */
+	if (lp_error_log_fd > STDOUT_FILENO) /* don't close stdout */
 		close(lp_error_log_fd);
 	if (lp_event_log_fd != -1)
 		close(lp_event_log_fd);

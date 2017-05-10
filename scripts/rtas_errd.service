@@ -8,6 +8,7 @@ ExecStart=/usr/libexec/ppc64-diag/rtas_errd start
 ExecStop=/usr/libexec/ppc64-diag/rtas_errd stop
 StandardOutput=syslog
 StandardError=syslog
+Restart=always
 
 [Install]
 WantedBy=multi-user.target

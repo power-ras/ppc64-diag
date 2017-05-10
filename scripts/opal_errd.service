@@ -8,6 +8,7 @@ ExecStart=/usr/libexec/ppc64-diag/opal_errd start
 ExecStop=/usr/libexec/ppc64-diag/opal_errd stop
 StandardOutput=syslog
 StandardError=syslog
+Restart=always
 
 [Install]
 WantedBy=multi-user.target

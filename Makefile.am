@@ -33,12 +33,12 @@ include common/Makefile.am
 
 if WITH_LIBRTAS
 include rtas_errd/Makefile.am
-include ela/Makefile.am
 include lpd/Makefile.am
 include diags/Makefile.am
 include diags/test/Makefile.am
 endif
 
+include ela/Makefile.am
 include opal-dump-parse/Makefile.am
 include opal_errd/Makefile.am
 include scripts/Makefile.am

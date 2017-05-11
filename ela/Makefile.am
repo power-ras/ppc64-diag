@@ -33,7 +33,7 @@ ela/lex.ev.cc: ela/event_lex.l
 	flex -Pev ela/event_lex.l
 	mv lex.ev.c ela/lex.ev.cc
 
-sbin_PROGRAMS += ela/explain_syslog ela/add_regex ela/syslog_to_svclog
+sbin_PROGRAMS += ela/explain_syslog ela/add_regex
 
 ela_explain_syslog_SOURCES = ela/explain_syslog.cpp \
 			     ela/catalogs.cpp \
@@ -42,6 +42,8 @@ ela_explain_syslog_SOURCES = ela/explain_syslog.cpp \
 			     $(ela_h_files)
 ela_explain_syslog_LDADD = -lstdc++
 
+if WITH_LIBRTAS
+sbin_PROGRAMS += ela/syslog_to_svclog
 ela_syslog_to_svclog_SOURCES = ela/syslog_to_svclog.cpp \
 			       ela/catalogs.cpp \
 			       ela/date.c \
@@ -49,13 +51,16 @@ ela_syslog_to_svclog_SOURCES = ela/syslog_to_svclog.cpp \
 			       $(ela_h_files)
 ela_syslog_to_svclog_LDADD = -lservicelog -lvpd -lvpd_cxx -lrtasevent
 
+ dist_man_MANS += ela/man/syslog_to_svclog.8
+endif
+
 ela_add_regex_SOURCES = ela/add_regex.cpp \
 			ela/catalogs.cpp \
 			ela/date.c \
 			$(BUILT_SOURCE) \
 			$(ela_h_files)
 
-dist_man_MANS += ela/man/explain_syslog.8 ela/man/syslog_to_svclog.8
+dist_man_MANS += ela/man/explain_syslog.8
 
 clean-local-ela:
 	rm -f $(BUILT_SOURCE)

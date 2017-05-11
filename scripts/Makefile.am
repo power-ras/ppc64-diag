@@ -11,6 +11,7 @@ INIT_FILES = scripts/rtas_errd scripts/opal_errd
 SERVICE_SCRIPT = scripts/rtas_errd.service scripts/opal_errd.service
 
 install-exec-hook-scripts:
+	install -d --mode=755 $(DESTDIR)/etc/ppc64-diag/
 	install -D --mode=744 $(PPC64_DIAG_SCRIPT) $(DESTDIR)/etc/ppc64-diag/
 	install -D --mode=644 $(CONFIG_FILE) $(DESTDIR)/etc/ppc64-diag
 	install -d --mode=755 $(DESTDIR)/usr/libexec/ppc64-diag/

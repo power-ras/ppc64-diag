@@ -116,8 +116,11 @@ main(int argc, char **argv)
 	struct	loc_code *list_start = NULL;
 
 	program_name = argv[0];
-	if (probe_indicator() != 0)
-		return 1;
+	if (probe_indicator() != 0) {
+		fprintf(stderr,
+			"%s is not supported on this platform\n", argv[0]);
+		return 0;
+	}
 
 	opterr = 0;
 	while ((c = getopt(argc, argv, CMD_LINE_OPTIONS)) != -1) {

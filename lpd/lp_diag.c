@@ -1181,8 +1181,11 @@ main(int argc, char *argv[])
 	char	*next_char;
 
 	program_name = argv[0];
-	if (probe_indicator() != 0)
-		return 1;
+	if (probe_indicator() != 0) {
+		fprintf(stderr,
+			"%s is not supported on this platform\n", argv[0]);
+		return 0;
+	}
 
 	opterr = 0;
 	while ((c = getopt_long(argc, argv, LP_DIAG_ARGS,

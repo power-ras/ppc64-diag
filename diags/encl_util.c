@@ -236,17 +236,34 @@ int
 do_ses_cmd(int fd, uint8_t cmd, uint8_t page_nr, uint8_t flags,
 	   uint8_t cmd_len, int dxfer_direction, void *buf, int buf_len)
 {
+	int data_length_start_index;
 	unsigned char scsi_cmd_buf[16] = {
 		cmd,
 		flags,
 		page_nr,
-		(buf_len >> 8) & 0xff,	/* most significant byte */
-		buf_len & 0xff,		/* least significant byte */
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	};
 	struct sense_data_t sense_data;
 	sg_io_hdr_t hdr;
 	int i, rc;
+
+	 /*
+	  * scsi_command_range command_length data_length_msb
+	  *    0x00h-0x1Fh          6              3
+	  *    0x20h-0x5Fh         10              7
+	  *
+	  *    for more details refer,
+	  *        https://en.wikipedia.org/wiki/SCSI_command
+	  */
+	if ((cmd >= 0x00) && (cmd <= 0x1F)) /* scsi opcode */
+		data_length_start_index = 3; /* msb */
+	else if ((cmd >= 0x20) && (cmd <= 0x5F))
+		data_length_start_index = 7;
+	else
+		return -1; /* not supported yet */
+
+	scsi_cmd_buf[data_length_start_index] = (buf_len >> 8) & 0xff;
+	scsi_cmd_buf[data_length_start_index + 1] = buf_len & 0xff;
 
 	for (i = 0; i < 3; i++) {
 		memset(&hdr, 0, sizeof(hdr));

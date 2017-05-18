@@ -59,6 +59,7 @@ struct sense_data_t {
 extern int print_raw_data(FILE *ostream, char *data, int data_len);
 
 extern int open_sg_device(const char *encl);
+extern int close_sg_device(int fd);
 extern int read_page2_from_file(const char *path, bool display_error_msg,
 				void *pg, int size);
 extern int write_page2_to_file(const char *path, void *pg, int size);

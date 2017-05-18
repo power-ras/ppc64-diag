@@ -110,6 +110,21 @@ open_sg_device(const char *encl)
 }
 
 /**
+ * close_sg_device
+ * @brief Close sg device
+ *
+ * @param opened encl sg device file descriptor
+ */
+int
+close_sg_device(int fd)
+{
+	if (fd < 0)
+		return 0;
+
+	return close(fd);
+}
+
+/**
  * read_page2_from_file
  * @brief Read enclosure status diagnostics structure from file
  */

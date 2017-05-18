@@ -21,6 +21,7 @@ diags_diag_encl_SOURCES = diags/diag_encl.c \
 			  diags/encl_common.c \
 			  diags/homerun.c \
 			  diags/slider.c \
+			  diags/diag_disk.c \
 			  common/platform.c \
 			  common/utils.c \
 			  $(diag_encl_h_files)
@@ -36,3 +37,8 @@ diags_encl_led_SOURCES = diags/encl_led.c \
 			 $(encl_led_h_files)
 
 dist_man_MANS += diags/man/diag_encl.8 diags/man/encl_led.8
+
+install-exec-hook-diag:
+	install -d --mode=755 $(DESTDIR)/var/log/ppc64-diag/diag_disk
+
+INSTALL_EXEC_HOOKS += install-exec-hook-diag

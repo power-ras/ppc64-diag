@@ -7,6 +7,7 @@ diag_encl - diagnose SCSI enclosures
 .SH SYNOPSIS
 .nf
 \fBdiag_encl \fR[\fB\-s\fR [\fB\-c\fR][\fB\-l\fR]] [\fB\-v\fR] [\fB\-f\fR <\fIpath\fB.pg2\fR>] [\fBsg\fIn\fR ...]
+\fBdiag_encl -d\fR
 \fBdiag_encl --version\fR
 \fBdiag_encl --help\fR
 .fi
@@ -24,6 +25,10 @@ are reported.
 currently supports a limited number of enclosure types
 and reports an error if asked to diagnose an unrecognized type.
 .SH OPTIONS
+.TP
+\fB\-d\fR or \fB\-\-disk <sgN>\fR
+Collects disk health information and populates it in an xml output file
+under destination directory (/var/log/ppc64-diag/diag_disk/).
 .TP
 \fB\-s\fR or \fB\-\-serv_event\fR
 Report any faults to the servicelog database.

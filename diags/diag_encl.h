@@ -28,6 +28,8 @@ struct cmd_opts {
 	int leds;	/* -l */
 	int serv_event;	/* -s */
 	int verbose;	/* -v */
+	int disk_health;
+	char *disk_name;
 	char *fake_path;	/* -f */
 	char *prev_path;	/* for -c */
 };
@@ -40,5 +42,6 @@ extern int diag_bluehawk(int, struct dev_vpd *);
 extern int diag_homerun(int, struct dev_vpd *);
 extern int diag_slider_lff(int, struct dev_vpd *);
 extern int diag_slider_sff(int, struct dev_vpd *);
+extern int diag_disk(char *disk_name);
 
 #endif	/* _DIAG_ENCL_H */

@@ -41,6 +41,7 @@
 
 static struct option long_options[] = {
 	{"cmp_prev",		no_argument,		NULL, 'c'},
+	{"disk",                required_argument,      NULL, 'd'},
 	{"fake",		required_argument,	NULL, 'f'},
 	{"help",		no_argument,		NULL, 'h'},
 	{"leds",		no_argument,		NULL, 'l'},
@@ -80,6 +81,7 @@ print_usage(const char *name) {
 		"\t-s: generate serviceable events for any failures and\n"
 		"\t      write events to the servicelog\n"
 		"\t-c: compare with previous status; report only new failures\n"
+		"\t-d: collect disk health information\n"
 		"\t-l: turn on fault LEDs for serviceable events\n"
 		"\t-v: verbose output\n"
 		"\t-V: print the version of the command and exit\n"
@@ -295,7 +297,7 @@ main(int argc, char *argv[])
 
 	for (;;) {
 		option_index = 0;
-		rc = getopt_long(argc, argv, "cf:hlsvV", long_options,
+		rc = getopt_long(argc, argv, "cd::f:hlsvV", long_options,
 				 &option_index);
 
 		if (rc == -1)
@@ -304,6 +306,10 @@ main(int argc, char *argv[])
 		switch (rc) {
 		case 'c':
 			cmd_opts.cmp_prev = 1;
+			break;
+		case 'd':
+			cmd_opts.disk_health = 1;
+			cmd_opts.disk_name = optarg;
 			break;
 		case 'f':
 			if (cmd_opts.fake_path) {
@@ -337,6 +343,16 @@ main(int argc, char *argv[])
 			print_usage(argv[0]);
 			return -1;
 		}
+	}
+
+	if (cmd_opts.disk_health) {
+		if (cmd_opts.cmp_prev || cmd_opts.fake_path || cmd_opts.leds
+			|| cmd_opts.serv_event ||  cmd_opts.verbose) {
+			fprintf(stderr, "-d option is exclusive to "
+					"all other options\n");
+			return -1;
+		}
+		return diag_disk(cmd_opts.disk_name);
 	}
 
 	if (cmd_opts.cmp_prev && !cmd_opts.serv_event) {

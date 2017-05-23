@@ -38,7 +38,18 @@ diags_encl_led_SOURCES = diags/encl_led.c \
 
 dist_man_MANS += diags/man/diag_encl.8 diags/man/encl_led.8
 
+DIAG_CRONTAB_SCRIPT = diags/run_diag_encl
+
 install-exec-hook-diag:
 	install -d --mode=755 $(DESTDIR)/var/log/ppc64-diag/diag_disk
+	install -d --mode=755 $(DESTDIR)/etc/cron.daily/
+	install -D --mode=744 $(DIAG_CRONTAB_SCRIPT) $(DESTDIR)/etc/cron.daily/
 
 INSTALL_EXEC_HOOKS += install-exec-hook-diag
+
+uninstall-hook-diags:
+	rm -f $(DESTDIR)/etc/cron.daily/run_diag_encl
+
+UNINSTALL_HOOKS += uninstall-hook-diags
+
+EXTRA_DIST += $(DIAG_CRONTAB_SCRIPT)

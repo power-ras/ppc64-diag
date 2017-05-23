@@ -65,6 +65,7 @@ mkdir -p $RPM_BUILD_ROOT/var/log/opal-elog
 %dir /var/log/opal-elog
 %config /etc/%{name}/*
 %config /etc/rc.powerfail
+%attr(755,root,root) /etc/cron.daily/run_diag_encl
 %attr(755,root,root) %{_libexecdir}/%{name}/rtas_errd
 %attr(755,root,root) %{_libexecdir}/%{name}/opal_errd
 %attr(644,root,root) %{_unitdir}/rtas_errd.service

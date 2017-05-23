@@ -1,0 +1,239 @@
+#!/bin/bash
+#
+# This script must be run as root.
+#
+# If testing for a particular event, add the expected event-result file under
+# rtas_errd/tests/event-results and call the script with option :
+#   "-t <path-to-event-file>".
+# In that case only that event is tested, other options like -s and -e are
+# not tested.
+
+# Make sure only root can run our script as user has to be able to access
+# servicelog database (/var/lib/servicelog/servicelog.db).
+if [[ $EUID -ne 0 ]]; then
+	echo "This script must be run as root!"
+	exit 1
+fi
+
+RED='\e[0;31m'
+GRN='\e[0;32m'
+NC='\e[0m' # No Colour
+
+hash servicelog servicelog_manage 2>/dev/null ||
+{
+	echo >&2 "Script require servicelog and servicelog_manage but some of them are not installed. Aborting.";
+	exit 1;
+}
+
+SERVICELOG=`hash -t servicelog`
+SERVICELOG_MANAGE=`hash -t servicelog_manage`
+
+SERVICELOG_DB="/var/lib/servicelog/servicelog.db"
+
+TOP_LEVEL=`dirname $0`/../..
+EVENTS=$TOP_LEVEL/rtas_errd/tests/events
+EVENT_RESULTS=$TOP_LEVEL/rtas_errd/tests/event-results
+RTAS_ERRD=$TOP_LEVEL/rtas_errd/rtas_errd
+
+SCENARIOFILE=$TOP_LEVEL/rtas_errd/tests/scenariofile.in
+SCENARIODUMP=$TOP_LEVEL/rtas_errd/tests/scenario.dump
+STDEPOWFILE=$TOP_LEVEL/rtas_errd/tests/epowfile.std
+OUTEPOWFILE=$TOP_LEVEL/rtas_errd/tests/epowfile.out
+
+function register_success {
+	/bin/true
+}
+
+function register_fail {
+	yes | mv ${SERVICELOG_DB}.bak $SERVICELOG_DB;
+	exit ${1:-1};
+}
+
+function register_event_fail {
+	echo "FAIL $CUR_TEST ";
+	register_fail ${1:-1};
+}
+
+function truncate_events {
+	# Clear all events
+	yes yes | $SERVICELOG_MANAGE  --truncate events >/dev/null 2>&1
+
+	# Retrieve logged event
+	dump=$($SERVICELOG --dump)
+
+	if [[ ! -z "$dump" ]]; then
+		register_event_fail;
+	fi
+}
+
+function diff_with_scenariodump {
+	diffy=$(diff -a -y --suppress-common-lines ${SCENARIODUMP} <(echo "$1") |  cut  -d ' ' -f1,2)
+
+	while read -r line || [[ -n "$line" ]]
+	do
+		name=$line
+		if [ -n "$name" ] && [ "$name" != "Log Timestamp:" ] && [ "$name" != "Event Timestamp:" ] && [ "$name" != "Update Timestamp:" ] && [ "$name" != "Platform:" ] && [ "$name" != "Node Name:" ]
+		then
+			echo -e "${RED}Dump with scenario file mismatches expected dump!${NC}"
+			register_fail;
+		fi
+	done <<< "$diffy"
+
+	register_success;
+}
+
+function diff_with_stdepowfile {
+	diffy=$(diff -a -y --suppress-common-lines ${STDEPOWFILE} ${OUTEPOWFILE})
+
+	if [[ ! -z "$diffy" ]]; then
+		echo -e "${RED}Generated epowfile mismatches expected epowfile!${NC}"
+		register_fail;
+	fi
+	register_success;
+}
+
+function diff_with_result_without_timestamp {
+	if [ ! -f ${RESULT} ]; then
+		echo "File ${RESULT} not found"
+		register_event_fail;
+	fi
+
+	diffy=$(diff -a -y --suppress-common-lines ${RESULT} <(echo "$1") |  cut  -d ' ' -f1,2)
+
+	while read -r line || [[ -n "$line" ]]
+	do
+		name=$line
+		if [ -n "$name" ] && [ "$name" != "Log Timestamp:" ] && [ "$name" != "Event Timestamp:" ] && [ "$name" != "Update Timestamp:" ] && [ "$name" != "Platform:" ] && [ "$name" != "Node Name:" ]
+		then
+			register_event_fail;
+		fi
+	done <<< "$diffy"
+
+	register_success;
+}
+
+function log_event {
+	if [[ -x $RTAS_ERRD ]]; then
+		$RTAS_ERRD -d -f $1 >/dev/null 2>&1
+	else
+		echo "Fatal error, cannot execute binary '$RTAS_ERRD'. Did you make?";
+		register_fail;
+	fi
+
+	R=$?
+	if [ $R -ne 0 ]; then
+		register_event_fail $R;
+	fi
+}
+
+function test_other_options {
+	if [[ -x $RTAS_ERRD ]]; then
+		if [[ $# -eq 1 && $1 -eq "s" ]]; then
+			$RTAS_ERRD -d -s $SCENARIOFILE >/dev/null 2>&1
+		else
+			$RTAS_ERRD -d -s $SCENARIOFILE -e $OUTEPOWFILE >/dev/null 2>&1
+		fi
+	else
+		echo "Fatal error, cannot execute binary '$RTAS_ERRD'. Did you make?";
+		register_fail;
+	fi
+
+	R=$?
+	if [ $R -ne 0 ]; then
+		echo "The rtas_errd command returned non-zero exit code!"
+		rm $OUTEPOWFILE
+		register_fail $R;
+	fi
+}
+
+function retrieve_and_compare_event {
+	# Retrieve logged event
+	output=$($SERVICELOG --dump 2>/dev/null)
+
+	R=$?
+	if [ $R -ne 0 ]; then
+		register_event_fail $R;
+	fi
+
+	diff_with_result_without_timestamp "$output"
+	register_success
+}
+
+function usage {
+        echo "Usage: $0[-t <event_file>]" >&2;
+        exit 1;
+}
+
+cp -a $SERVICELOG_DB ${SERVICELOG_DB}.bak
+all_tests="$EVENTS/*"
+
+while getopts ":t:" opt; do
+	option=$opt
+	case "$opt" in
+		t)
+			if [ ! -r $OPTARG ]; then
+				echo "The event-file does not exist or is not readable."
+				exit 1;
+			fi
+
+			all_tests=$OPTARG
+			;;
+		*)
+			usage
+			;;
+	esac
+done
+
+for the_test in $all_tests; do
+	truncate_events
+
+	CUR_TEST=$(basename $the_test)
+	RESULT="$EVENT_RESULTS/$CUR_TEST.out"
+
+	log_event $the_test
+
+	R=$?
+	if [[ $R -ne 0 ]] ; then
+		echo -e "${RED}$the_test FAILED with RC $R${NC}"
+		register_fail $R
+	fi
+
+	retrieve_and_compare_event
+
+	R=$?
+	if [[ $R -ne 0 ]] ; then
+		echo -e "${RED}$the_test FAILED with RC $R${NC}"
+		register_fail $R
+	fi
+
+done
+
+if [ -z $option ] ; then
+	#Check option s
+
+	truncate_events
+	test_other_options s
+        output=$($SERVICELOG --dump 2>/dev/null)
+
+        R=$?
+        if [ $R -ne 0 ]; then
+                register_fail $R;
+        fi
+
+	diff_with_scenariodump "$output"
+
+
+	#Check output files
+
+	truncate_events
+	test_other_options
+	diff_with_stdepowfile
+	rm $OUTEPOWFILE
+
+fi
+
+yes | mv ${SERVICELOG_DB}.bak $SERVICELOG_DB
+
+printf "\n\n"
+echo -e "${GRN}PASS${NC}"
+exit 0

@@ -1,0 +1,49 @@
+Servicelog ID:      1
+Log Timestamp:      Wed Apr 12 12:58:47 2017
+Event Timestamp:    Thu Jun 17 18:53:36 2004
+Update Timestamp:   Wed Apr 12 12:58:47 2017
+Type:               Basic Event
+Severity:           4 (WARNING)
+Platform:           ppc64
+Model/Serial:       8286-42A/1069B3T
+Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
+Reference Code:     A03-150
+Serviceable Event:  Yes
+Predictive Event:   No
+Disposition:        2 (Unrecoverable, Bypassed)
+Call Home Status:   1 (Call Home Candidate)
+Status:             Open
+
+Description:
+I/O Expansion Bus Connection Failure.
+
+
+<< Callout 1 >>
+Priority             
+Type                0
+Procedure Id:       n/a
+Location:           U0.2-P1.1/Q1#
+FRU:                n/a
+Serial:             
+CCIN:               
+
+
+<< Callout 2 >>
+Priority             
+Type                0
+Procedure Id:       n/a
+Location:           U0.2-P1.1
+FRU:                n/a
+Serial:             
+CCIN:               
+
+
+<< Callout 3 >>
+Priority             
+Type                0
+Procedure Id:       n/a
+Location:           U0.1-P1
+FRU:                n/a
+Serial:             
+CCIN:               
+

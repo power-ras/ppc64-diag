@@ -1,0 +1,81 @@
+Servicelog ID:      1
+Log Timestamp:      Wed Apr 12 12:58:49 2017
+Event Timestamp:    Sat Jul 31 02:32:32 2004
+Update Timestamp:   Wed Apr 12 12:58:49 2017
+Type:               Power Platform (RTAS) Event
+Severity:           4 (WARNING)
+Platform:           ppc64
+Model/Serial:       9123-300/0458891 
+Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
+Reference Code:     B7006970                        
+Serviceable Event:  Yes
+Predictive Event:   No
+Disposition:        1 (Unrecoverable)
+Call Home Status:   1 (Call Home Candidate)
+Status:             Open
+Action Flags:       a800
+Event Type:         224 - Platform Event
+Kernel ID:          1000
+Platform ID:        820006c1
+Creator ID:         H - Hypervisor
+Subsystem ID:       32 - I/O subsystem (hub, bridge, bus)
+RTAS Severity:      40 - Unrecoverable Error, general
+Event Subtype:      00 - Not applicable
+
+Extended Reference Codes:
+2: 00000062  3: 00010002  4: 24642010  5: 00030020
+6: 00000000  7: 00032000  8: 00000000  9: 00000000
+
+Description:
+I/O subsystem (hub, bridge, bus) Unrecovered Error, general. Refer to the system service documentation for more information.
+
+
+<< Callout 1 >>
+Priority            M
+Type                16
+Procedure Id:       
+Location:           U787E.001.0458891-P1
+FRU:                80P5183
+Serial:             YL30F4148001
+CCIN:               261C
+
+
+<< Callout 2 >>
+Priority            M
+Type                192
+Procedure Id:       
+Location:           
+FRU:                PRI_PCI
+Serial:             
+CCIN:               
+
+
+<< Callout 3 >>
+Priority            M
+Type                192
+Procedure Id:       
+Location:           
+FRU:                MA_BRDG
+Serial:             
+CCIN:               
+
+
+<< Callout 4 >>
+Priority            M
+Type                64
+Procedure Id:       MABIP50
+Location:           
+FRU:                
+Serial:             
+CCIN:               
+
+
+<< Callout 5 >>
+Priority            M
+Type                192
+Procedure Id:       
+Location:           
+FRU:                PIOCARD
+Serial:             
+CCIN:               
+

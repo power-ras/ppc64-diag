@@ -1,0 +1,41 @@
+Servicelog ID:      1
+Log Timestamp:      Wed Apr 12 12:58:49 2017
+Event Timestamp:    Sat Dec 11 02:37:05 2004
+Update Timestamp:   Wed Apr 12 13:58:49 2017
+Type:               Power Platform (RTAS) Event
+Severity:           4 (WARNING)
+Platform:           ppc64
+Model/Serial:       9118-575/0SQIH47
+Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
+Reference Code:     B125E500                        
+Serviceable Event:  Yes
+Predictive Event:   Yes
+Disposition:        2 (Unrecoverable, Bypassed)
+Call Home Status:   1 (Call Home Candidate)
+Status:             Open
+Action Flags:       a800
+Event Type:         224 - Platform Event
+Kernel ID:          1000
+Platform ID:        50929493
+Creator ID:         E - Service Processor
+Subsystem ID:       25 - Memory subsystem including external cache
+RTAS Severity:      41 - Unrecoverable Error, bypassed with degraded performance
+Event Subtype:      00 - Not applicable
+
+Extended Reference Codes:
+2: 030000f0  3: 28f00110  4: c13920ff  5: c1000000
+6: 00811630  7: 00000001  8: 00d6000d  9: 00000000
+
+Description:
+Memory subsystem including external cache Unrecovered Error, bypassed with degraded performance. Refer to the system service documentation for more information.
+
+
+<< Callout 1 >>
+Priority            M
+Type                16
+Procedure Id:       
+Location:           U787D.001.0481682-P2
+FRU:                80P4180
+Serial:             YH3016129997
+CCIN:               260D
+

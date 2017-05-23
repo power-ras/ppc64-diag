@@ -1,0 +1,31 @@
+Servicelog ID:      1
+Log Timestamp:      Wed Apr 12 12:58:50 2017
+Event Timestamp:    Wed Apr 14 02:40:25 2004
+Update Timestamp:   Wed Apr 12 12:58:50 2017
+Type:               Power Platform (RTAS) Event
+Severity:           3 (EVENT)
+Platform:           ppc64
+Model/Serial:       9406-520/100061A
+Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
+Reference Code:     D150FD02                        
+Serviceable Event:  No
+Predictive Event:   No
+Disposition:        0 (Recoverable)
+Call Home Status:   0 (None Needed)
+Status:             Closed
+Action Flags:       2000
+Event Type:         226 - Platform Information Event
+Kernel ID:          1000
+Platform ID:        5000043d
+Creator ID:         E - Service Processor
+Subsystem ID:       50 - CEC hardware
+RTAS Severity:      00 - Informational or non-error event
+Event Subtype:      10 - Previously reported error has been corrected by the system
+
+Extended Reference Codes:
+2: 000000f0  3: 00005000  4: d150fd02  5: 00000000
+6: 00000005  7: 00000000  8: 00000000  9: 00000000
+
+Description:
+CEC hardware Informational (non-error) Event. Refer to the system service documentation for more information.
+

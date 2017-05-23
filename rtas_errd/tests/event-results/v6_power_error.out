@@ -1,0 +1,41 @@
+Servicelog ID:      1
+Log Timestamp:      Wed Apr 12 12:58:50 2017
+Event Timestamp:    Sat Jul 31 02:33:07 2004
+Update Timestamp:   Wed Apr 12 12:58:50 2017
+Type:               Power Platform (RTAS) Event
+Severity:           4 (WARNING)
+Platform:           ppc64
+Model/Serial:       9123-300/0458891 
+Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
+Reference Code:     1000913300000000                
+Serviceable Event:  Yes
+Predictive Event:   No
+Disposition:        1 (Unrecoverable)
+Call Home Status:   0 (None Needed)
+Status:             Open
+Action Flags:       a000
+Event Type:         224 - Platform Event
+Kernel ID:          1000
+Platform ID:        820006c3
+Creator ID:         H - Hypervisor
+Subsystem ID:       60 - Power/Cooling subsystem
+RTAS Severity:      40 - Unrecoverable Error, general
+Event Subtype:      00 - Not applicable
+
+Extended Reference Codes:
+2: 00000040  3: 1000021a  4: 0000fd33  5: 00000000
+6: 20000001  7: 00000000  8: 00000000  9: 00000000
+
+Description:
+Power/Cooling subsystem Unrecovered Error, general. Refer to the system service documentation for more information.
+
+
+<< Callout 1 >>
+Priority            M
+Type                192
+Procedure Id:       
+Location:           U787E.001.0458891
+FRU:                SYSBKPL
+Serial:             
+CCIN:               
+

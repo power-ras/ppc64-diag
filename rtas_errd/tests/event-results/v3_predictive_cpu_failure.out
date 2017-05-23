@@ -1,0 +1,19 @@
+Servicelog ID:      1
+Log Timestamp:      Wed Apr 12 12:58:45 2017
+Event Timestamp:    Tue Jul 22 20:07:18 2003
+Update Timestamp:   Wed Apr 12 12:58:45 2017
+Type:               Basic Event
+Severity:           4 (WARNING)
+Platform:           ppc64
+Model/Serial:       8286-42A/1069B3T
+Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
+Reference Code:     A1F-500
+Serviceable Event:  Yes
+Predictive Event:   Yes
+Disposition:        2 (Unrecoverable, Bypassed)
+Call Home Status:   1 (Call Home Candidate)
+Status:             Open
+
+Description:
+Recoverable errors on resource indicate trend toward unrecoverable error. However the resource could not be deconfigured and is still in use.
+

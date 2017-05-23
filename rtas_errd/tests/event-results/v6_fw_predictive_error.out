@@ -1,0 +1,51 @@
+Servicelog ID:      1
+Log Timestamp:      Wed Apr 12 12:58:49 2017
+Event Timestamp:    Sat Jul 31 02:34:13 2004
+Update Timestamp:   Wed Apr 12 12:58:49 2017
+Type:               Power Platform (RTAS) Event
+Severity:           4 (WARNING)
+Platform:           ppc64
+Model/Serial:       9123-300/0458891
+Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
+Reference Code:     B181220C                        
+Serviceable Event:  Yes
+Predictive Event:   Yes
+Disposition:        0 (Recoverable)
+Call Home Status:   1 (Call Home Candidate)
+Status:             Open
+Action Flags:       a800
+Event Type:         224 - Platform Event
+Kernel ID:          1000
+Platform ID:        50004531
+Creator ID:         E - Service Processor
+Subsystem ID:       81 - Platform firmware
+RTAS Severity:      20 - Predictive Error, general
+Event Subtype:      00 - Not applicable
+
+Extended Reference Codes:
+2: 030100f0  3: 261c0410  4: c13920ff  5: 40000000
+6: 00000001  7: 00005400  8: 00000001  9: 00000000
+
+Description:
+Platform Firmware Predictive Error, general. Refer to the system service documentation for more information.
+
+
+<< Callout 1 >>
+Priority            H
+Type                64
+Procedure Id:       FSPSP04
+Location:           
+FRU:                
+Serial:             
+CCIN:               
+
+
+<< Callout 2 >>
+Priority            M
+Type                64
+Procedure Id:       FSPSP06
+Location:           
+FRU:                
+Serial:             
+CCIN:               
+

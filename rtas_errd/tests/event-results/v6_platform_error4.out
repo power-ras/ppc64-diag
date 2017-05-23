@@ -1,0 +1,31 @@
+Servicelog ID:      1
+Log Timestamp:      Wed Apr 12 12:58:49 2017
+Event Timestamp:    Fri Jan  2 22:28:34 1970
+Update Timestamp:   Wed Apr 12 13:58:49 2017
+Type:               Power Platform (RTAS) Event
+Severity:           4 (WARNING)
+Platform:           ppc64
+Model/Serial:       9406-520/100061A 
+Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
+Reference Code:     B204F004                        
+Serviceable Event:  Yes
+Predictive Event:   No
+Disposition:        1 (Unrecoverable)
+Call Home Status:   1 (Call Home Candidate)
+Status:             Open
+Action Flags:       a800
+Event Type:         224 - Platform Event
+Kernel ID:          1000
+Platform ID:        820005ed
+Creator ID:         H - Hypervisor
+Subsystem ID:       82 - Platform firmware
+RTAS Severity:      40 - Unrecoverable Error, general
+Event Subtype:      00 - Not applicable
+
+Extended Reference Codes:
+2: 0fd01000  3: 00000000  4: 00000000  5: 00000000
+6: 00000000  7: 00000000  8: 00000000  9: 00000000
+
+Description:
+Platform Firmware Unrecovered Error, general. Refer to the system service documentation for more information.
+

@@ -22,10 +22,10 @@ int main()
 	szp(power_supply_status);
 	szp(fan_status);
 	szp(slider_fan_set);
-	szp(slider_temperature_sensor_status);
+	szp(temperature_sensor_status);
 	szp(slider_enc_service_ctrl_status);
-	szp(slider_encl_status);
-	szp(slider_voltage_sensor_status);
+	szp(enclosure_status);
+	szp(voltage_sensor_status);
 	szp(slider_voltage_sensor_set);
 	szp(slider_sas_expander_status);
 	szp(slider_sas_connector_status);
@@ -48,8 +48,8 @@ int main()
 	szp(slider_fan_ctrl_set);
 	szp(slider_temperature_sensor_ctrl);
 	szp(slider_temperature_sensor_ctrl_set);
-	szp(slider_enc_service_ctrl_ctrl);
-	szp(slider_encl_ctrl);
+	szp(esm_ctrl);
+	szp(enclosure_ctrl);
 	szp(slider_voltage_sensor_ctrl);
 	szp(slider_voltage_sensor_ctrl_set);
 	szp(slider_sas_expander_ctrl);

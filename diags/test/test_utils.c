@@ -214,8 +214,8 @@ slider_roll_up_sas_connector_status(const struct slider_lff_diag_page2 *pg)
 unsigned int
 slider_mean_temperature(const struct slider_lff_diag_page2 *pg)
 {
-	struct slider_temperature_sensor_status *sensors =
-				(struct slider_temperature_sensor_status *)
+	struct temperature_sensor_status *sensors =
+				(struct temperature_sensor_status *)
 				&pg->temp_sensor_sets;
 	int sum = 0;
 	int i;

@@ -24,7 +24,7 @@ DIAGNOSING sg8
       1V0 :  ok | VOLTAGE = 1.00 volts
       1V8 :  ok | VOLTAGE = 1.80 volts
       0V92:  ok | VOLTAGE = 0.90 volts
-    PS1 (Right):  NON_CRITICAL_FAULT | DC_OVER_VOLTAGE
+    PS1 (Right):  NON_CRITICAL_FAULT | DC_OVER_VOLTAGE | FAULT_LED
       3.3V:  NON_CRITICAL_FAULT | NON_CRITICAL_OVER_VOLTAGE | VOLTAGE = 3.50 volts
       1V0 :  ok | VOLTAGE = 1.00 volts
       1V8 :  ok | VOLTAGE = 1.80 volts
@@ -41,7 +41,7 @@ DIAGNOSING sg8
       Fan Element 7:  ok | speed :11470 rpm
       Fan Element 8:  ok | speed :11470 rpm
     Right power supply fans
-      Fan Element 1:  NON_CRITICAL_FAULT | speed :11470 rpm
+      Fan Element 1:  NON_CRITICAL_FAULT | FAULT_LED | speed :11470 rpm
       Fan Element 2:  ok | speed :11470 rpm
       Fan Element 3:  ok | speed :11470 rpm
       Fan Element 4:  ok | speed :11470 rpm
@@ -71,7 +71,7 @@ DIAGNOSING sg8
     Left :  ok | First power on
     Right:  ok | First power on
 
-  Enclosure Status:  ok | Normal Mode
+  Enclosure Status:  ok
 
   SAS Expander Status
     Left :  ok
@@ -166,8 +166,8 @@ DIAGNOSING sg8
       Physical link 36: ok
 
   Statesave Buffer Status:
-    Element 1 (Left ): ok | No statesave available for retrieval
-    Element 2 (Right): ok | No statesave available for retrieval
+    Element 1 (Left ): ok | No statesave available for retrieval | A statesave
+    Element 2 (Right): ok | No statesave available for retrieval | A statesave
 
   CPLD Status:
     Left : ok

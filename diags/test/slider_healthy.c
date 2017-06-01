@@ -19,7 +19,7 @@
 
 #define HEALTHY_DISK(n) { \
 	.byte0 = HEALTHY_STATUS_BYTE0, \
-	.slot_number = n , \
+	.slot_address = n, \
 	.app_client_bypassed_a = 0, \
 	.app_client_bypassed_b = 0, \
 	.enclosure_bypassed_a = 0, \
@@ -63,8 +63,6 @@
 	.byte0 = HEALTHY_STATUS_BYTE0, \
 	.ident = 0, \
 	.fail = 0, \
-	.nebs = 0, \
-	.failure_requested = 0 \
 }
 
 #define FAN_SPEED_MSB	4

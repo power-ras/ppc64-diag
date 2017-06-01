@@ -86,10 +86,7 @@ enum slider_variant {
  * ******************Status Registers:********************************
  *	- slider_disk_status			: sec - 5.4.2,  table - 48
  *      - slider_power_supply_status            : sec - 6.3.4.2,table -5.19
- *	- slider_temperature_sensor_status	: sec - 5.4.6,  table - 52
  *	- slider_enc_serv_ctrl_status		: sec - 5.4.7,  table - 53
- *	- slider_encl_status			: sec - 5.4.8,  table - 54
- *	- slider_voltage_sensor_status		: sec - 5.4.10, table - 56
  *	- slider_sas_expander_status		: sec - 5.4.11, table - 57
  *	- slider_sas_connector_status		: sec - 5.4.12, table - 58
  *	- slider_midplane_status		: sec - 5.4.13, table - 59
@@ -102,8 +99,6 @@ enum slider_variant {
  *	- slider_disk_ctrl		: sec - 5.3.2,  table - 26
  *	- slider_power_supply_ctrl	: sec - 5.3.4,  table - 28
  *	- slider_temperature_sensor_ctrl: sec - 5.3.6,  table - 30
- *	- slider_enc_service_ctrl_ctrl	: sec - 5.3.7,  table - 31
- *	- slider_encl_ctrl		: sec - 5.3.8,  table - 32
  *	- slider_voltage_sensor_ctrl	: sec - 5.3.10, table - 34
  *	- slider_sas_expander_ctrl	: sec - 5.3.11, table - 35
  *	- slider_sas_connector_ctrl	: sec - 5.3.12, table - 36
@@ -119,7 +114,7 @@ struct slider_disk_status {
 
 #if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t hot_swap:1;
-	uint8_t slot_number:7;
+	uint8_t slot_address:7;
 
 	uint8_t app_client_bypassed_a:1;
 	uint8_t do_not_remove:1;
@@ -139,7 +134,7 @@ struct slider_disk_status {
 	uint8_t device_bypassed_a:1;
 	uint8_t device_bypassed_b:1;
 #elif defined (__LITTLE_ENDIAN_BITFIELD)
-	uint8_t slot_number:7;
+	uint8_t slot_address:7;
 	uint8_t hot_swap:1;
 
 	uint8_t report:1;
@@ -211,43 +206,12 @@ struct slider_fan_set {
 	struct fan_status fan_element[SLIDER_NR_FAN_PER_POWER_SUPPLY];
 };
 
-/* Temperature sensor status */
-struct slider_temperature_sensor_status {
-	struct element_status_byte0 byte0;
-
-#if defined (__BIG_ENDIAN_BITFIELD)
-	uint8_t ident:1;
-	uint8_t fail:1;
-	uint8_t reserved2:6;
-#elif defined (__LITTLE_ENDIAN_BITFIELD)
-	uint8_t reserved2:6;
-	uint8_t fail:1;
-	uint8_t ident:1;
-#endif
-
-	uint8_t temperature;
-
-#if defined (__BIG_ENDIAN_BITFIELD)
-	uint8_t reserved3:4;
-	uint8_t ot_failure:1;
-	uint8_t ot_warning:1;
-	uint8_t ut_failure:1;
-	uint8_t ut_warning:1;
-#elif defined (__LITTLE_ENDIAN_BITFIELD)
-	uint8_t ut_warning:1;
-	uint8_t ut_failure:1;
-	uint8_t ot_warning:1;
-	uint8_t ot_failure:1;
-	uint8_t reserved3:4;
-#endif
-};
-
 /* Temperature sensor set - per slider enclosure */
 struct slider_temperature_sensor_set {
-	struct slider_temperature_sensor_status temp_enclosure;
-	struct slider_temperature_sensor_status
+	struct temperature_sensor_status temp_enclosure;
+	struct temperature_sensor_status
 				temp_psu[SLIDER_NR_PSU_TEMP_SENSOR];
-	struct slider_temperature_sensor_status
+	struct temperature_sensor_status
 				temp_esc[SLIDER_NR_ESC_TEMP_SENSOR];
 };
 
@@ -292,70 +256,12 @@ struct slider_enc_service_ctrl_status {
 #endif
 };
 
-/* Enclosure status */
-struct slider_encl_status {
-	struct element_status_byte0 byte0;
-
-#if defined (__BIG_ENDIAN_BITFIELD)
-	uint8_t ident:1;
-	uint8_t bmc_indication:1;
-	uint8_t nebs:1;
-	uint8_t reserved2:5;
-
-	uint8_t time_until_power_cycle:6;
-	uint8_t fail:1;
-	uint8_t warning_indication:1;
-
-	uint8_t req_power_off_duration:6;
-	uint8_t failure_requested:1;
-	uint8_t warning_requested:1;
-#elif defined (__LITTLE_ENDIAN_BITFIELD)
-	uint8_t reserved2:5;
-	uint8_t nebs:1;
-	uint8_t bmc_indication:1;
-	uint8_t ident:1;
-
-	uint8_t warning_indication:1;
-	uint8_t fail:1;
-	uint8_t time_until_power_cycle:6;
-
-	uint8_t warning_requested:1;
-	uint8_t failure_requested:1;
-	uint8_t req_power_off_duration:6;
-#endif
-};
-
-/* Voltage sensor status */
-struct slider_voltage_sensor_status {
-	struct element_status_byte0 byte0;
-
-#if defined (__BIG_ENDIAN_BITFIELD)
-	uint8_t ident:1;
-	uint8_t fail:1;
-	uint8_t reserved2:2;
-	uint8_t warn_over:1;
-	uint8_t warn_under:1;
-	uint8_t crit_over:1;
-	uint8_t crit_under:1;
-#elif defined (__LITTLE_ENDIAN_BITFIELD)
-	uint8_t crit_under:1;
-	uint8_t crit_over:1;
-	uint8_t warn_under:1;
-	uint8_t warn_over:1;
-	uint8_t reserved2:2;
-	uint8_t fail:1;
-	uint8_t ident:1;
-#endif
-
-	uint16_t voltage;
-};
-
 /* Slider voltage sensor set - per esc */
 struct slider_voltage_sensor_set {
-	struct slider_voltage_sensor_status sensor_3V3;
-	struct slider_voltage_sensor_status sensor_1V0;
-	struct slider_voltage_sensor_status sensor_1V8;
-	struct slider_voltage_sensor_status sensor_0V92;
+	struct voltage_sensor_status sensor_3V3;
+	struct voltage_sensor_status sensor_1V0;
+	struct voltage_sensor_status sensor_1V8;
+	struct voltage_sensor_status sensor_0V92;
 };
 
 /* Sas expander status */
@@ -458,8 +364,9 @@ struct slider_statesave_buffer_status {
 	struct element_status_byte0 byte0;
 
 	uint8_t buffer_status;
+	uint8_t buffer_type;
 
-	uint16_t reserved2;
+	uint8_t reserved2;
 } __attribute__((packed));
 
 /* CPLD status */
@@ -528,7 +435,7 @@ struct slider_lff_diag_page2 {
 	struct slider_fan_set fan_sets[SLIDER_NR_POWER_SUPPLY];
 
 	/* Temperature sensor */
-	struct slider_temperature_sensor_status overall_temp_sensor_status;
+	struct temperature_sensor_status overall_temp_sensor_status;
 	struct slider_temperature_sensor_set temp_sensor_sets;
 
 	/* Enclosure service controller */
@@ -537,11 +444,11 @@ struct slider_lff_diag_page2 {
 		enc_service_ctrl_element[SLIDER_NR_ESC];
 
 	/* Enclosure */
-	struct slider_encl_status overall_encl_status;
-	struct slider_encl_status encl_element;
+	struct enclosure_status overall_encl_status;
+	struct enclosure_status encl_element;
 
 	/* Voltage sensor */
-	struct slider_voltage_sensor_status overall_voltage_status;
+	struct voltage_sensor_status overall_voltage_status;
 	struct slider_voltage_sensor_set voltage_sensor_sets[SLIDER_NR_ESC];
 
 	/* Sas expander */
@@ -617,7 +524,7 @@ struct slider_sff_diag_page2 {
 	struct slider_fan_set fan_sets[SLIDER_NR_POWER_SUPPLY];
 
 	/* Temperature sensor */
-	struct slider_temperature_sensor_status overall_temp_sensor_status;
+	struct temperature_sensor_status overall_temp_sensor_status;
 	struct slider_temperature_sensor_set temp_sensor_sets;
 
 	/* Enclosure service controller */
@@ -626,11 +533,11 @@ struct slider_sff_diag_page2 {
 		enc_service_ctrl_element[SLIDER_NR_ESC];
 
 	/* Enclosure */
-	struct slider_encl_status overall_encl_status;
-	struct slider_encl_status encl_element;
+	struct enclosure_status overall_encl_status;
+	struct enclosure_status encl_element;
 
 	/* Voltage sensor */
-	struct slider_voltage_sensor_status overall_voltage_status;
+	struct voltage_sensor_status overall_voltage_status;
 	struct slider_voltage_sensor_set voltage_sensor_sets[SLIDER_NR_ESC];
 
 	/* Sas expander */
@@ -714,19 +621,21 @@ struct slider_power_supply_ctrl {
 #if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t rqst_ident:1;
 	uint8_t reserved2:7;
-#elif defined (__LITTLE_ENDIAN_BITFIELD)
-	uint8_t reserved2:7;
-	uint8_t rqst_ident:1;
-#endif
 
-	uint8_t reserved3;
+	uint8_t reserved3:7;
+	uint8_t cycled:1;
 
-#if defined (__BIG_ENDIAN_BITFIELD)
 	uint8_t reserved4:1;
 	uint8_t rqst_fail:1;
 	uint8_t rqst_on:1;
 	uint8_t reserved5:5;
 #elif defined (__LITTLE_ENDIAN_BITFIELD)
+	uint8_t reserved2:7;
+	uint8_t rqst_ident:1;
+
+	uint8_t cycled:1;
+	uint8_t reserved3:7;
+
 	uint8_t reserved5:5;
 	uint8_t rqst_on:1;
 	uint8_t rqst_fail:1;
@@ -758,60 +667,6 @@ struct slider_temperature_sensor_ctrl_set {
 		temp_psu[SLIDER_NR_PSU_TEMP_SENSOR];
 	struct slider_temperature_sensor_ctrl
 		temp_esc[SLIDER_NR_ESC_TEMP_SENSOR];
-};
-
-/* Enclosure service controller ctrl register sec - 5.3.7, table - 31 */
-struct slider_enc_service_ctrl_ctrl {
-	struct common_ctrl common_ctrl;
-
-#if defined (__BIG_ENDIAN_BITFIELD)
-	uint8_t rqst_ident:1;
-	uint8_t rqst_fail:1;
-	uint8_t reserved2:6;
-
-	uint8_t reserved3:7;
-	uint8_t select_element:1;
-#elif defined (__LITTLE_ENDIAN_BITFIELD)
-	uint8_t reserved2:6;
-	uint8_t rqst_fail:1;
-	uint8_t rqst_ident:1;
-
-	uint8_t select_element:1;
-	uint8_t reserved3:7;
-#endif
-
-	uint8_t reserved4;
-};
-
-/* Enclosure ctrl register sec - 5.3.8, table - 32 */
-struct slider_encl_ctrl {
-	struct common_ctrl common_ctrl;
-
-#if defined (__BIG_ENDIAN_BITFIELD)
-	uint8_t rqst_ident:1;
-	uint8_t reserved2:1;
-	uint8_t nebs:1;
-	uint8_t reserved3:5;
-
-	uint8_t power_cycle_request:2;
-	uint8_t power_cycle_delay:6;
-
-	uint8_t power_off_duration:6;
-	uint8_t rqst_fail:1;
-	uint8_t request_warning:1;
-#elif defined (__LITTLE_ENDIAN_BITFIELD)
-	uint8_t reserved3:5;
-	uint8_t nebs:1;
-	uint8_t reserved2:1;
-	uint8_t rqst_ident:1;
-
-	uint8_t power_cycle_delay:6;
-	uint8_t power_cycle_request:2;
-
-	uint8_t request_warning:1;
-	uint8_t rqst_fail:1;
-	uint8_t power_off_duration:6;
-#endif
 };
 
 /* Voltage sensor ctrl register sec - 5.3.10, table - 34 */
@@ -978,13 +833,12 @@ struct slider_lff_ctrl_page2 {
 	struct slider_temperature_sensor_ctrl_set temp_sensor_sets;
 
 	/* Enclosure service controller */
-	struct slider_enc_service_ctrl_ctrl overall_enc_service_ctrl_ctrl;
-	struct slider_enc_service_ctrl_ctrl
-		enc_service_ctrl_element[SLIDER_NR_ESC];
+	struct esm_ctrl overall_enc_service_ctrl_ctrl;
+	struct esm_ctrl enc_service_ctrl_element[SLIDER_NR_ESC];
 
 	/* Enclosure */
-	struct slider_encl_ctrl overall_encl_ctrl;
-	struct slider_encl_ctrl encl_element;
+	struct enclosure_ctrl overall_encl_ctrl;
+	struct enclosure_ctrl encl_element;
 
 	/* Voltage sensor */
 	struct slider_voltage_sensor_ctrl overall_voltage_ctrl;
@@ -1063,13 +917,12 @@ struct slider_sff_ctrl_page2 {
 	struct slider_temperature_sensor_ctrl_set temp_sensor_sets;
 
 	/* Enclosure service controller */
-	struct slider_enc_service_ctrl_ctrl overall_enc_service_ctrl_ctrl;
-	struct slider_enc_service_ctrl_ctrl
-		enc_service_ctrl_element[SLIDER_NR_ESC];
+	struct esm_ctrl overall_enc_service_ctrl_ctrl;
+	struct esm_ctrl enc_service_ctrl_element[SLIDER_NR_ESC];
 
 	/* Enclosure */
-	struct slider_encl_ctrl overall_encl_ctrl;
-	struct slider_encl_ctrl encl_element;
+	struct enclosure_ctrl overall_encl_ctrl;
+	struct enclosure_ctrl encl_element;
 
 	/* Voltage sensor */
 	struct slider_voltage_sensor_ctrl overall_voltage_ctrl;

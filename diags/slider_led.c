@@ -389,11 +389,6 @@ static int slider_set_led(int slider_type, const char *enclosure,
 			enc_service_ctrl_element[index]);
 		break;
 	case SLIDER_PS:
-		if (fault == LED_ON) {
-			fprintf(stderr, "%s: Power supply fault indicator is not "
-				"supported.\n", enclosure);
-			goto free_alloc_cp;
-		}
 		SLIDER_SET_LED(ctrl_page, status_page, fault, ident,
 			ps_ctrl[index], ps_status[index]);
 		break;

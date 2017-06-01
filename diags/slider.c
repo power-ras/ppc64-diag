@@ -101,6 +101,8 @@ static int slider_create_ps_callout(struct sl_callout **callouts,
 		size = sizeof(struct slider_lff_element_descriptor_page);
 	else if (slider_variant_flag == SLIDER_V_SFF)
 		size = sizeof(struct slider_sff_element_descriptor_page);
+	else
+		return 1;
 
 	buffer = calloc(1, size);
 	if (!buffer) {
@@ -372,8 +374,8 @@ static void report_slider_enclosure_fault_to_svclog(
 	char description[EVENT_DESC_SIZE], crit[ES_STATUS_STRING_MAXLEN];
 	struct sl_callout *callouts;
 	char loc_suffix_code[LOCATION_LENGTH];
-	struct slider_encl_status *encl_element =
-		(struct slider_encl_status *)
+	struct enclosure_status *encl_element =
+		(struct enclosure_status *)
 		(dp + element_offset(encl_element));
 
 	for (i = 0; i < SLIDER_NR_ENCLOSURE; i++) {
@@ -758,7 +760,7 @@ static int report_slider_fault_to_svclog(void *dp, struct dev_vpd *vpd, int fd)
 /* Turn on led in case of failure of any element of enclosure */
 static int slider_turn_on_fault_leds(void *dp, int fd)
 {
-	int i, result;
+	int i, j, result;
 	void *ctrl_page;
 	int poked_leds = 0;
 
@@ -775,7 +777,19 @@ static int slider_turn_on_fault_leds(void *dp, int fd)
 				 disk_ctrl[i], disk_status[i]);
 	}
 
-	/* No fault LED for power supply */
+	/* Power supply */
+	for (i = 0; i < SLIDER_NR_POWER_SUPPLY; i++) {
+		SLIDER_FAULT_LED(poked_leds, dp, ctrl_page,
+				 ps_ctrl[i], ps_status[i]);
+	}
+
+	/* Cooling element */
+	for (i = 0; i < SLIDER_NR_POWER_SUPPLY; i++) {
+		for (j = 0; j < SLIDER_NR_FAN_PER_POWER_SUPPLY; j++) {
+			SLIDER_FAULT_LED(poked_leds, dp, ctrl_page,
+			fan_sets[i].fan_element[j], fan_sets[i].fan_element[j]);
+		}
+	}
 
 	/* ERM/ESM electronics */
 	for (i = 0; i < SLIDER_NR_ESC; i++) {
@@ -814,7 +828,7 @@ static int slider_turn_on_fault_leds(void *dp, int fd)
 
 /* Print slider temperature sensor status */
 static void print_slider_temp_sensor_status(
-	struct slider_temperature_sensor_status *s)
+	struct temperature_sensor_status *s)
 {
 	enum element_status_code sc =
 		(enum element_status_code) s->byte0.status;
@@ -837,7 +851,7 @@ static void print_slider_temp_sensor_status(
 
 /* Print slider voltage sensor status */
 static void print_slider_voltage_sensor_status(
-	struct slider_voltage_sensor_status *s)
+	struct voltage_sensor_status *s)
 {
 	enum element_status_code sc =
 		(enum element_status_code) s->byte0.status;
@@ -907,7 +921,7 @@ static void print_slider_disk_status(struct slider_disk_status *disk_status)
 		if (ds->byte0.status == ES_NO_ACCESS_ALLOWED)
 			continue;
 
-		printf("    Disk %02d (Slot %02d): ", i+1, ds->slot_number);
+		printf("    Disk %02d (Slot %02d): ", i+1, ds->slot_address);
 		print_slider_drive_status(ds);
 	}
 }
@@ -937,6 +951,7 @@ static void slider_print_power_supply_status(struct slider_power_supply_status *
 		printf(" | OVER_TEMPERATURE_FAILURE");
 
 	CHK_IDENT_LED(s);
+	CHK_FAULT_LED(s);
 	printf("\n");
 }
 
@@ -967,24 +982,10 @@ static void print_slider_power_supply_status(
 }
 
 /* Print slider enclosure status */
-static void print_slider_enclosure_status(struct slider_encl_status *s)
+static void print_slider_enclosure_status(struct enclosure_status *s)
 {
-	enum element_status_code sc =
-		(enum element_status_code) s->byte0.status;
-
 	printf("\n  Enclosure Status:  ");
-	printf("%s", status_string(sc, valid_codes));
-
-	if (s->nebs)
-		printf(" | NEBS Mode");
-	else
-		printf(" | Normal Mode");
-	if (s->fail)
-		printf(" | Failure indication");
-
-	CHK_IDENT_LED(s);
-	CHK_FAULT_LED(s);
-	printf("\n");
+	return print_enclosure_status(s, valid_codes);
 }
 
 /* Print slider midplane status */
@@ -1026,6 +1027,8 @@ static void print_slider_fan_status(struct slider_fan_set *fan_sets)
 			s = &(fan_sets[i].fan_element[j]);
 			sc = (enum element_status_code) s->byte0.status;
 			printf("%s", status_string(sc, valid_codes));
+			CHK_IDENT_LED(s);
+			CHK_FAULT_LED(s);
 
 			if (cmd_opts.verbose)
 				printf(" | speed :%d rpm",
@@ -1265,6 +1268,20 @@ static void print_slider_ssb_status(
 				printf(" | Unknown buffer status");
 				break;
 			}
+			if (s->buffer_type == 0x00)
+				printf(" | A statesave");
+			else if (s->buffer_type == 0x01)
+				printf(" | Host");
+			else if (s->buffer_type == 0x02)
+				printf(" | Self informational");
+			else if ((s->buffer_type >= 0x03) &&
+					(s->buffer_type <= 0x7F))
+				printf(" | Future host type");
+			else if (s->buffer_type == 0x80)
+				printf(" | Self");
+			else if ((s->buffer_type >= 0x81) &&
+					(s->buffer_type <= 0xFF))
+				printf(" | Future self type");
 		}
 		printf("\n");
 	}
@@ -1394,7 +1411,7 @@ static void diag_print_slider_status(void *dp)
 		(dp + element_offset(enc_service_ctrl_element)));
 
 	print_slider_enclosure_status
-		((struct slider_encl_status *)
+		((struct enclosure_status *)
 		(dp + element_offset(encl_element)));
 
 	print_slider_sas_expander_status

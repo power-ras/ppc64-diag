@@ -16,8 +16,8 @@ int main(int argc, char **argv)
 	int i;
 	struct fan_status *fs;
 	struct slider_power_supply_status *ps;
-	struct slider_voltage_sensor_status *vs;
-	struct slider_temperature_sensor_status *ts;
+	struct voltage_sensor_status *vs;
+	struct temperature_sensor_status *ts;
 
 	if (argc != 2) {
 		fprintf(stderr, "usage: %s pathname\n", argv[0]);

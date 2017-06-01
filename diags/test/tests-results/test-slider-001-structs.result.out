@@ -6,10 +6,10 @@ slider_disk_status 4
 power_supply_status 4
 fan_status 4
 slider_fan_set 32
-slider_temperature_sensor_status 4
+temperature_sensor_status 4
 slider_enc_service_ctrl_status 4
-slider_encl_status 4
-slider_voltage_sensor_status 4
+enclosure_status 4
+voltage_sensor_status 4
 slider_voltage_sensor_set 16
 slider_sas_expander_status 4
 slider_sas_connector_status 4
@@ -31,8 +31,8 @@ fan_ctrl 4
 slider_fan_ctrl_set 32
 slider_temperature_sensor_ctrl 4
 slider_temperature_sensor_ctrl_set 44
-slider_enc_service_ctrl_ctrl 4
-slider_encl_ctrl 4
+esm_ctrl 4
+enclosure_ctrl 4
 slider_voltage_sensor_ctrl 4
 slider_voltage_sensor_ctrl_set 16
 slider_sas_expander_ctrl 4

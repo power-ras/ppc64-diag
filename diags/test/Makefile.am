@@ -29,8 +29,7 @@ check_PROGRAMS += diags/test/bh_structs \
 		  diags/test/bh_dump_pg2 \
 		  diags/test/hr_dump_pg2 \
 		  diags/test/slider_dump_pg2 \
-		  diags/test/bh_vpd \
-		  diags/test/slider_vpd
+		  diags/test/encl_vpd
 
 diags_test_bh_structs_SOURCES = diags/test/bh_structs.c \
 				diags/encl_common.h \
@@ -86,15 +85,13 @@ diags_test_slider_mk_hot_power_SOURCES = diags/test/slider_mk_hot_power.c \
 					 $(diags_test_common_obj_files) \
 					 $(diags_test_slider_h_files)
 
-diags_test_bh_vpd_SOURCES = diags/test/bh_vpd.c \
-			    diags/encl_util.c \
-			    common/utils.c \
-			    $(diags_test_bh_h_files)
-
-diags_test_slider_vpd_SOURCES = diags/test/slider_vpd.c \
-				diags/encl_util.c \
-				common/utils.c \
-				$(diags_test_slider_h_files)
+diags_test_encl_vpd_SOURCES = diags/test/encl_vpd.c \
+			     diags/encl_util.c \
+			     common/utils.c \
+			     diags/homerun.h \
+			     diags/bluehawk.h \
+			     diags/slider.h \
+			     $(diags_test_common_h_files)
 
 EXTRA_DIST += diags/test/bluehawk.vpd \
 	      diags/test/homerun.vpd \

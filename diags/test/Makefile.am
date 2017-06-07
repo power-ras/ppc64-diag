@@ -26,9 +26,7 @@ check_PROGRAMS += diags/test/bh_structs \
 		  diags/test/bh_mk_hot_power \
 		  diags/test/hr_mk_hot_power \
 		  diags/test/slider_mk_hot_power \
-		  diags/test/bh_dump_pg2 \
-		  diags/test/hr_dump_pg2 \
-		  diags/test/slider_dump_pg2 \
+		  diags/test/encl_dump_pg2 \
 		  diags/test/encl_vpd
 
 diags_test_bh_structs_SOURCES = diags/test/bh_structs.c \
@@ -43,17 +41,12 @@ diags_test_slider_structs_SOURCES = diags/test/slider_structs.c \
 				    diags/encl_common.h \
 				    diags/slider.h
 
-diags_test_bh_dump_pg2_SOURCES = diags/test/bh_dump_pg2.c \
-				 $(diags_test_common_obj_files) \
-				 $(diags_test_bh_h_files)
-
-diags_test_hr_dump_pg2_SOURCES = diags/test/hr_dump_pg2.c \
-				 $(diags_test_common_obj_files) \
-				 $(diags_test_hr_h_files)
-
-diags_test_slider_dump_pg2_SOURCES = diags/test/slider_dump_pg2.c \
-				     $(diags_test_common_obj_files) \
-				     $(diags_test_slider_h_files)
+diags_test_encl_dump_pg2_SOURCES = diags/test/encl_dump_pg2.c \
+				   diags/homerun.h \
+				   diags/bluehawk.h \
+				   diags/slider.h \
+				   $(diags_test_common_obj_files) \
+				   $(diags_test_common_h_files)
 
 diags_test_bh_mk_healthy_SOURCES = diags/test/bh_mk_healthy.c \
 				   diags/test/bh_healthy.c \

@@ -77,7 +77,7 @@ main(int argc, char **argv)
 	char dev_sg[20];
 	int fd;
 	struct vpd_page vp;
-	struct element_descriptor_page edp;
+	struct bh_element_descriptor_page edp;
 	int result;
 	char temp[20];
 

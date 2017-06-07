@@ -136,14 +136,14 @@ bh_create_ps_callout(struct sl_callout **callouts, char *location,
 	char serial_number[SERIAL_NUMBER_LEN + 1];
 	int rc;
 	struct power_supply_descriptor *ps_vpd[2];
-	struct element_descriptor_page *edp;
+	struct bh_element_descriptor_page *edp;
 
 	if (fd < 0) {
 		add_location_callout(callouts, location);
 		return 0;
 	}
 
-	edp = calloc(1, sizeof(struct element_descriptor_page));
+	edp = calloc(1, sizeof(struct bh_element_descriptor_page));
 	if (!edp) {
 		fprintf(stderr, "Failed to allocate memory to "
 			"hold page containing VPD for PS (pg 07h).\n");
@@ -151,7 +151,7 @@ bh_create_ps_callout(struct sl_callout **callouts, char *location,
 	}
 
 	rc = get_diagnostic_page(fd, RECEIVE_DIAGNOSTIC, 7, edp,
-				 sizeof(struct element_descriptor_page));
+				 sizeof(struct bh_element_descriptor_page));
 	if (rc) {
 		add_location_callout(callouts, location);
 		goto out;

@@ -360,7 +360,7 @@ struct bluehawk_ctrl_page2 {
 } __attribute__((packed));
 
 /* Obtains VPD for power supplies (page 7) via RECEIVE_DIAGNOSTIC command */
-struct element_descriptor_page {
+struct bh_element_descriptor_page {
 	char ignored1[1074];
 	struct power_supply_descriptor ps0_vpd;
 	uint16_t reserved;

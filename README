@@ -59,7 +59,7 @@ All patches should be sent to the mailing list with linux-kernel style
 - git format-patch
 
 You probably want to read the linux kernel Documentation/SubmittingPatches
-as much of it applies to lsvpd.
+as much of it applies to ppc64-diag.
 
 Submitting patch
 ----------------

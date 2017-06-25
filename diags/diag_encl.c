@@ -272,8 +272,8 @@ diagnose(const char *sg, struct dev_vpd **diagnosed)
 		vpd->next = *diagnosed;
 		*diagnosed = vpd;
 	} else {
-		fprintf(stderr, "\tUnable to diagnose devices of machine "
-				"type/model: %s\n\n", vpd->mtm);
+		fprintf(stderr, "\tSCSI enclosure diagnostics not supported "
+				"for this model.\n");
 		free(vpd);
 	}
 	return rc;

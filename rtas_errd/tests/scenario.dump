@@ -1,75 +1,7 @@
 Servicelog ID:      1
-Log Timestamp:      Sat May 20 09:21:02 2017
-Event Timestamp:    Tue Jul 22 20:07:18 2003
-Update Timestamp:   Sat May 20 09:21:02 2017
-Type:               Basic Event
-Severity:           4 (WARNING)
-Platform:           ppc64
-Model/Serial:       8286-42A/1069B3T
-Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
-Reference Code:     A1F-500
-Serviceable Event:  Yes
-Predictive Event:   Yes
-Disposition:        2 (Unrecoverable, Bypassed)
-Call Home Status:   1 (Call Home Candidate)
-Status:             Open
-
-Description:
-Recoverable errors on resource indicate trend toward unrecoverable error. However the resource could not be deconfigured and is still in use.
-
-Servicelog ID:      2
-Log Timestamp:      Sat May 20 09:21:06 2017
-Event Timestamp:    Thu Jun 17 18:53:36 2004
-Update Timestamp:   Sat May 20 09:21:06 2017
-Type:               Basic Event
-Severity:           4 (WARNING)
-Platform:           ppc64
-Model/Serial:       8286-42A/1069B3T
-Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
-Reference Code:     A03-150
-Serviceable Event:  Yes
-Predictive Event:   No
-Disposition:        2 (Unrecoverable, Bypassed)
-Call Home Status:   1 (Call Home Candidate)
-Status:             Open
-
-Description:
-I/O Expansion Bus Connection Failure.
-
-
-<< Callout 1 >>
-Priority             
-Type                0
-Procedure Id:       n/a
-Location:           U0.2-P1.1/Q1#
-FRU:                n/a
-Serial:             
-CCIN:               
-
-
-<< Callout 2 >>
-Priority             
-Type                0
-Procedure Id:       n/a
-Location:           U0.2-P1.1
-FRU:                n/a
-Serial:             
-CCIN:               
-
-
-<< Callout 3 >>
-Priority             
-Type                0
-Procedure Id:       n/a
-Location:           U0.1-P1
-FRU:                n/a
-Serial:             
-CCIN:               
-
-Servicelog ID:      3
-Log Timestamp:      Sat May 20 09:21:06 2017
+Log Timestamp:      Sat Jul  8 09:18:01 2017
 Event Timestamp:    Mon May 10 06:01:48 2004
-Update Timestamp:   Sat May 20 09:21:06 2017
+Update Timestamp:   Sat Jul  8 09:18:01 2017
 Type:               Power Platform (RTAS) Event
 Severity:           3 (EVENT)
 Platform:           ppc64
@@ -83,7 +15,7 @@ Call Home Status:   0 (None Needed)
 Status:             Closed
 Action Flags:       0000
 Event Type:         228 - Dump Notification Event
-Kernel ID:          1004
+Kernel ID:          1001
 Platform ID:        82001f73
 Creator ID:         H - Hypervisor
 Subsystem ID:       82 - Platform firmware
@@ -99,63 +31,10 @@ Platform Firmware Informational (non-error) Event. Refer to the system service d
 
 Platform Dump (could not be retrieved to filesystem)
 
-Servicelog ID:      4
-Log Timestamp:      Sat May 20 09:21:06 2017
-Event Timestamp:    Fri Mar 16 03:54:10 2007
-Update Timestamp:   Sat May 20 09:21:06 2017
-Type:               Power Platform (RTAS) Event
-Severity:           4 (WARNING)
-Platform:           ppc64
-Model/Serial:       9111-520/10D3D2C
-Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
-Reference Code:     BA188002                        
-Serviceable Event:  Yes
-Predictive Event:   Yes
-Disposition:        0 (Recoverable)
-Call Home Status:   1 (Call Home Candidate)
-Status:             Open
-Action Flags:       b800
-Event Type:         224 - Platform Event
-Kernel ID:          1005
-Platform ID:        00000583
-Creator ID:         L - Partition Firmware
-Subsystem ID:       83 - Platform firmware
-RTAS Severity:      20 - Predictive Error, general
-Event Subtype:      00 - Not applicable
-
-Extended Reference Codes:
-2: 20202020  3: 20202020  4: 20202020  5: 20202020
-6: 20202020  7: 20202020  8: 20202020  9: 20202020
-
-Description:
-Platform Firmware Predictive Error, general. Refer to the system service documentation for more information.
-
-EEH could not recover the failed I/O adapter, Location U787A.001.DNZ00Z5-P1-C3
-
-
-<< Callout 1 >>
-Priority            H
-Type                16
-Procedure Id:       
-Location:           U787A.001.DNZ00Z5-P1-C3
-FRU:                
-Serial:             
-CCIN:               
-
-
-<< Callout 2 >>
-Priority            L
-Type                16
-Procedure Id:       
-Location:           U787A.001.DNZ00Z5-P1
-FRU:                
-Serial:             
-CCIN:               
-
-Servicelog ID:      5
-Log Timestamp:      Sat May 20 09:21:06 2017
+Servicelog ID:      2
+Log Timestamp:      Sat Jul  8 09:18:01 2017
 Event Timestamp:    Fri Nov 19 02:14:51 2004
-Update Timestamp:   Sat May 20 10:21:06 2017
+Update Timestamp:   Sat Jul  8 10:18:01 2017
 Type:               Power Platform (RTAS) Event
 Severity:           4 (WARNING)
 Platform:           ppc64
@@ -169,7 +48,7 @@ Call Home Status:   1 (Call Home Candidate)
 Status:             Open
 Action Flags:       a800
 Event Type:         224 - Platform Event
-Kernel ID:          1007
+Kernel ID:          1003
 Platform ID:        500262d0
 Creator ID:         E - Service Processor
 Subsystem ID:       12 - Processor subsystem including internal cache
@@ -203,43 +82,10 @@ FRU:                80P4142
 Serial:             YL31F4197003
 CCIN:               261C
 
-Servicelog ID:      6
-Log Timestamp:      Sat May 20 09:21:06 2017
-Event Timestamp:    Thu Jan  1 06:39:04 1970
-Update Timestamp:   Sat May 20 10:21:06 2017
-Type:               Power Platform (RTAS) Event
-Severity:           3 (EVENT)
-Platform:           ppc64
-Model/Serial:       9111-520/10D3D2C 
-Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
-Reference Code:     B7004400                        
-Serviceable Event:  No
-Predictive Event:   No
-Disposition:        0 (Recoverable)
-Call Home Status:   0 (None Needed)
-Status:             Closed
-Action Flags:       0000
-Event Type:         228 - Dump Notification Event
-Kernel ID:          1008
-Platform ID:        82000096
-Creator ID:         H - Hypervisor
-Subsystem ID:       82 - Platform firmware
-RTAS Severity:      00 - Informational or non-error event
-Event Subtype:      08 - Dump Notification
-
-Extended Reference Codes:
-2: 00000000  3: 00000000  4: 00000000  5: 00000000
-6: 00000000  7: 00000000  8: 00000000  9: 00000000
-
-Description:
-Platform Firmware Informational (non-error) Event. Refer to the system service documentation for more information.
-
-Platform Dump (could not be retrieved to filesystem)
-
-Servicelog ID:      7
-Log Timestamp:      Sat May 20 09:21:06 2017
+Servicelog ID:      3
+Log Timestamp:      Sat Jul  8 09:18:01 2017
 Event Timestamp:    Sat Jul 31 02:34:13 2004
-Update Timestamp:   Sat May 20 09:21:06 2017
+Update Timestamp:   Sat Jul  8 09:18:01 2017
 Type:               Power Platform (RTAS) Event
 Severity:           4 (WARNING)
 Platform:           ppc64
@@ -253,7 +99,7 @@ Call Home Status:   1 (Call Home Candidate)
 Status:             Open
 Action Flags:       a800
 Event Type:         224 - Platform Event
-Kernel ID:          1009
+Kernel ID:          1004
 Platform ID:        50004531
 Creator ID:         E - Service Processor
 Subsystem ID:       81 - Platform firmware
@@ -287,91 +133,10 @@ FRU:
 Serial:             
 CCIN:               
 
-Servicelog ID:      8
-Log Timestamp:      Sat May 20 09:21:06 2017
-Event Timestamp:    Sat Jul 31 02:32:32 2004
-Update Timestamp:   Sat May 20 09:21:06 2017
-Type:               Power Platform (RTAS) Event
-Severity:           4 (WARNING)
-Platform:           ppc64
-Model/Serial:       9123-300/0458891 
-Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
-Reference Code:     B7006970                        
-Serviceable Event:  Yes
-Predictive Event:   No
-Disposition:        1 (Unrecoverable)
-Call Home Status:   1 (Call Home Candidate)
-Status:             Open
-Action Flags:       a800
-Event Type:         224 - Platform Event
-Kernel ID:          1010
-Platform ID:        820006c1
-Creator ID:         H - Hypervisor
-Subsystem ID:       32 - I/O subsystem (hub, bridge, bus)
-RTAS Severity:      40 - Unrecoverable Error, general
-Event Subtype:      00 - Not applicable
-
-Extended Reference Codes:
-2: 00000062  3: 00010002  4: 24642010  5: 00030020
-6: 00000000  7: 00032000  8: 00000000  9: 00000000
-
-Description:
-I/O subsystem (hub, bridge, bus) Unrecovered Error, general. Refer to the system service documentation for more information.
-
-
-<< Callout 1 >>
-Priority            M
-Type                16
-Procedure Id:       
-Location:           U787E.001.0458891-P1
-FRU:                80P5183
-Serial:             YL30F4148001
-CCIN:               261C
-
-
-<< Callout 2 >>
-Priority            M
-Type                192
-Procedure Id:       
-Location:           
-FRU:                PRI_PCI
-Serial:             
-CCIN:               
-
-
-<< Callout 3 >>
-Priority            M
-Type                192
-Procedure Id:       
-Location:           
-FRU:                MA_BRDG
-Serial:             
-CCIN:               
-
-
-<< Callout 4 >>
-Priority            M
-Type                64
-Procedure Id:       MABIP50
-Location:           
-FRU:                
-Serial:             
-CCIN:               
-
-
-<< Callout 5 >>
-Priority            M
-Type                192
-Procedure Id:       
-Location:           
-FRU:                PIOCARD
-Serial:             
-CCIN:               
-
-Servicelog ID:      9
-Log Timestamp:      Sat May 20 09:21:07 2017
+Servicelog ID:      4
+Log Timestamp:      Sat Jul  8 09:18:01 2017
 Event Timestamp:    Sat Dec 11 02:37:05 2004
-Update Timestamp:   Sat May 20 10:21:07 2017
+Update Timestamp:   Sat Jul  8 10:18:01 2017
 Type:               Power Platform (RTAS) Event
 Severity:           4 (WARNING)
 Platform:           ppc64
@@ -385,7 +150,7 @@ Call Home Status:   1 (Call Home Candidate)
 Status:             Open
 Action Flags:       a800
 Event Type:         224 - Platform Event
-Kernel ID:          1011
+Kernel ID:          1005
 Platform ID:        50929493
 Creator ID:         E - Service Processor
 Subsystem ID:       25 - Memory subsystem including external cache
@@ -409,10 +174,10 @@ FRU:                80P4180
 Serial:             YH3016129997
 CCIN:               260D
 
-Servicelog ID:      10
-Log Timestamp:      Sat May 20 09:21:07 2017
+Servicelog ID:      5
+Log Timestamp:      Sat Jul  8 09:18:01 2017
 Event Timestamp:    Wed Apr 14 08:29:09 2004
-Update Timestamp:   Sat May 20 09:21:07 2017
+Update Timestamp:   Sat Jul  8 09:18:01 2017
 Type:               Power Platform (RTAS) Event
 Severity:           4 (WARNING)
 Platform:           ppc64
@@ -426,7 +191,7 @@ Call Home Status:   0 (None Needed)
 Status:             Closed
 Action Flags:       3000
 Event Type:         224 - Platform Event
-Kernel ID:          1012
+Kernel ID:          1006
 Platform ID:        0010e083
 Creator ID:         L - Partition Firmware
 Subsystem ID:       83 - Platform firmware
@@ -440,41 +205,10 @@ Extended Reference Codes:
 Description:
 Platform Firmware Predictive Error, fault may be corrected after platform re-IPL. Refer to the system service documentation for more information.
 
-Servicelog ID:      11
-Log Timestamp:      Sat May 20 09:21:07 2017
-Event Timestamp:    Fri Jan  2 22:28:34 1970
-Update Timestamp:   Sat May 20 10:21:07 2017
-Type:               Power Platform (RTAS) Event
-Severity:           4 (WARNING)
-Platform:           ppc64
-Model/Serial:       9406-520/100061A 
-Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
-Reference Code:     B204F004                        
-Serviceable Event:  Yes
-Predictive Event:   No
-Disposition:        1 (Unrecoverable)
-Call Home Status:   1 (Call Home Candidate)
-Status:             Open
-Action Flags:       a800
-Event Type:         224 - Platform Event
-Kernel ID:          1013
-Platform ID:        820005ed
-Creator ID:         H - Hypervisor
-Subsystem ID:       82 - Platform firmware
-RTAS Severity:      40 - Unrecoverable Error, general
-Event Subtype:      00 - Not applicable
-
-Extended Reference Codes:
-2: 0fd01000  3: 00000000  4: 00000000  5: 00000000
-6: 00000000  7: 00000000  8: 00000000  9: 00000000
-
-Description:
-Platform Firmware Unrecovered Error, general. Refer to the system service documentation for more information.
-
-Servicelog ID:      12
-Log Timestamp:      Sat May 20 09:21:07 2017
+Servicelog ID:      6
+Log Timestamp:      Sat Jul  8 09:18:01 2017
 Event Timestamp:    Wed Apr 14 02:40:25 2004
-Update Timestamp:   Sat May 20 09:21:07 2017
+Update Timestamp:   Sat Jul  8 09:18:01 2017
 Type:               Power Platform (RTAS) Event
 Severity:           3 (EVENT)
 Platform:           ppc64
@@ -488,7 +222,7 @@ Call Home Status:   0 (None Needed)
 Status:             Closed
 Action Flags:       2000
 Event Type:         226 - Platform Information Event
-Kernel ID:          1014
+Kernel ID:          1007
 Platform ID:        5000043d
 Creator ID:         E - Service Processor
 Subsystem ID:       50 - CEC hardware
@@ -502,51 +236,10 @@ Extended Reference Codes:
 Description:
 CEC hardware Informational (non-error) Event. Refer to the system service documentation for more information.
 
-Servicelog ID:      13
-Log Timestamp:      Sat May 20 09:21:07 2017
-Event Timestamp:    Sat Jul 31 02:33:07 2004
-Update Timestamp:   Sat May 20 09:21:07 2017
-Type:               Power Platform (RTAS) Event
-Severity:           4 (WARNING)
-Platform:           ppc64
-Model/Serial:       9123-300/0458891 
-Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
-Reference Code:     1000913300000000                
-Serviceable Event:  Yes
-Predictive Event:   No
-Disposition:        1 (Unrecoverable)
-Call Home Status:   0 (None Needed)
-Status:             Open
-Action Flags:       a000
-Event Type:         224 - Platform Event
-Kernel ID:          1015
-Platform ID:        820006c3
-Creator ID:         H - Hypervisor
-Subsystem ID:       60 - Power/Cooling subsystem
-RTAS Severity:      40 - Unrecoverable Error, general
-Event Subtype:      00 - Not applicable
-
-Extended Reference Codes:
-2: 00000040  3: 1000021a  4: 0000fd33  5: 00000000
-6: 20000001  7: 00000000  8: 00000000  9: 00000000
-
-Description:
-Power/Cooling subsystem Unrecovered Error, general. Refer to the system service documentation for more information.
-
-
-<< Callout 1 >>
-Priority            M
-Type                192
-Procedure Id:       
-Location:           U787E.001.0458891
-FRU:                SYSBKPL
-Serial:             
-CCIN:               
-
-Servicelog ID:      14
-Log Timestamp:      Sat May 20 09:21:07 2017
+Servicelog ID:      7
+Log Timestamp:      Sat Jul  8 09:18:01 2017
 Event Timestamp:    Mon Aug  9 16:50:52 2004
-Update Timestamp:   Sat May 20 09:21:07 2017
+Update Timestamp:   Sat Jul  8 09:18:01 2017
 Type:               Power Platform (RTAS) Event
 Severity:           4 (WARNING)
 Platform:           ppc64
@@ -560,7 +253,7 @@ Call Home Status:   1 (Call Home Candidate)
 Status:             Open
 Action Flags:       a800
 Event Type:         224 - Platform Event
-Kernel ID:          1016
+Kernel ID:          1008
 Platform ID:        5002e21c
 Creator ID:         E - Service Processor
 Subsystem ID:       61 - Power/Cooling subsystem
@@ -594,10 +287,10 @@ FRU:                80P3897
 Serial:             YL10F4021042
 CCIN:               28D7
 
-Servicelog ID:      15
-Log Timestamp:      Sat May 20 09:21:08 2017
+Servicelog ID:      8
+Log Timestamp:      Sat Jul  8 09:18:01 2017
 Event Timestamp:    Mon Oct  4 21:39:25 2004
-Update Timestamp:   Sat May 20 09:21:08 2017
+Update Timestamp:   Sat Jul  8 09:18:01 2017
 Type:               Power Platform (RTAS) Event
 Severity:           4 (WARNING)
 Platform:           ppc64
@@ -611,7 +304,7 @@ Call Home Status:   1 (Call Home Candidate)
 Status:             Open
 Action Flags:       a800
 Event Type:         224 - Platform Event
-Kernel ID:          1017
+Kernel ID:          1009
 Platform ID:        50005a35
 Creator ID:         E - Service Processor
 Subsystem ID:       12 - Processor subsystem including internal cache
@@ -645,10 +338,10 @@ FRU:                80P5642
 Serial:             YL30F4148008
 CCIN:               261C
 
-Servicelog ID:      16
-Log Timestamp:      Sat May 20 09:21:08 2017
+Servicelog ID:      9
+Log Timestamp:      Sat Jul  8 09:18:01 2017
 Event Timestamp:    Thu Jan 20 03:03:13 2005
-Update Timestamp:   Sat May 20 10:21:08 2017
+Update Timestamp:   Sat Jul  8 10:18:01 2017
 Type:               Power Platform (RTAS) Event
 Severity:           4 (WARNING)
 Platform:           ppc64
@@ -662,7 +355,7 @@ Call Home Status:   0 (None Needed)
 Status:             Closed
 Action Flags:       0100
 Event Type:         227 - Resource Deallocation Event
-Kernel ID:          1018
+Kernel ID:          1010
 Platform ID:        00000083
 Creator ID:         L - Partition Firmware
 Subsystem ID:       83 - Platform firmware

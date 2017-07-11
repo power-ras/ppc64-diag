@@ -87,7 +87,7 @@ function diff_with_result_without_timestamp {
 	while read -r line || [[ -n "$line" ]]
 	do
 		name=$line
-		if [[ -n "$name" ]] && [[ "$name" != "Log Timestamp:" ]] && [[ "$name" != "Event Timestamp:" ]] && [[ "$name" != "Update Timestamp:" ]] && [[ "$name" != "Platform:" ]] && [[ "$name" != "Node Name:" ]] && [[ "$name" =~ "Model\/Serial" ]]
+		if [[ -n "$name" ]] && [[ "$name" != "Log Timestamp:" ]] && [[ "$name" != "Event Timestamp:" ]] && [[ "$name" != "Update Timestamp:" ]] && [[ "$name" != "Platform:" ]] && [[ "$name" != "Node Name:" ]] && [[ "$name" != "Model/Serial:" ]]
 		then
 			register_event_fail;
 		fi
@@ -133,7 +133,7 @@ function usage {
 cp -a $SERVICELOG_DB ${SERVICELOG_DB}.bak
 all_tests="$EVENTS/*"
 
-while getopts ":th:" opt; do
+while getopts ":t:h" opt; do
 	option=$opt
 	case "$opt" in
 		t)

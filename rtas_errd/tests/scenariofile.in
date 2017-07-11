@@ -7,4 +7,3 @@ events/v6_platform_error2
 events/v6_platform_info
 events/v6_power_error2
 events/v6_predictive_cpu_failure
-events/v6_shared_cpu

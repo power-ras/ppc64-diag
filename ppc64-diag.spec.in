@@ -105,6 +105,13 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Mon Jul 24 2017 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.7.4
+- Move to autotools based build environment
+- Run diag_encl automatically (via crontab)
+- Added disk diagnostics support
+- Test case improvement
+- Service script improvement
+
 * Tue Dec 6 2016 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.7.3
 - LED support for Marvell HDD
 - Added support to parse new drc-index device tree property

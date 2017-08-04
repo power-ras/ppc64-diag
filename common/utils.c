@@ -165,5 +165,8 @@ int spclose(FILE *stream, pid_t cpid)
 	if (status == -1)
 		errno = SIGCHLD;
 
-	return status;
+	if (pid != cpid)
+		return -1;
+
+	return 0;
 }

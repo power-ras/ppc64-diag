@@ -1,7 +1,7 @@
 [Unit]
 Description=ppc64-diag rtas_errd (platform error handling) Service
-ConditionPathExists=|!/proc/ppc64/rtas/error_log
-ConditionPathExists=|!/proc/ppc64/error_log
+ConditionPathExists=|/proc/ppc64/rtas/error_log
+ConditionPathExists=|/proc/ppc64/error_log
 After=syslog.target
 
 [Service]

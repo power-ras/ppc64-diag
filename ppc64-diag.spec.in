@@ -61,6 +61,7 @@ mkdir -p $RPM_BUILD_ROOT/var/log/opal-elog
 /usr/sbin/*
 %dir /etc/%{name}
 %dir /etc/%{name}/ses_pages
+%dir /var/log/ppc64-diag/diag_disk
 %dir /var/log/dump
 %dir /var/log/opal-elog
 %config /etc/%{name}/*

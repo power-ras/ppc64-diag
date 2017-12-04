@@ -315,7 +315,12 @@ check_platform_dump(struct event *event)
 		setup_sigchld_handler();
 		return;
 	}
-	fgets(filename, DUMP_MAX_FNAME_LEN + 20, f);
+	if (!fgets(filename, DUMP_MAX_FNAME_LEN + 20, f)) {
+		dbg("Failed to collect filename info");
+		spclose(f, cpid);
+		setup_sigchld_handler();
+		return;
+	}
 	rc = spclose(f, cpid);
 
 	setup_sigchld_handler();

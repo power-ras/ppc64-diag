@@ -274,8 +274,7 @@ hr_report_faults_to_svclog(int fd, struct dev_vpd *vpd,
 		build_srn(srn, SRN_RC_TEMP_THRESHOLD);
 		callouts = NULL;
 		create_esm_callout(&callouts, location, i, fd);
-		if (rc == 0)
-			servevent(srn, sev, description, vpd, callouts);
+		servevent(srn, sev, description, vpd, callouts);
 	}
 
 	/* ESM electronics */

@@ -1922,7 +1922,7 @@ process_v2_epow(struct event *event, int error_type)
 {
 	int rc = 1;
 	int class;
-	int *reg, rlen, ext_epow;
+	int *reg, rlen, ext_epow = 0;
 
 	class = error_type & 0xFF;
 

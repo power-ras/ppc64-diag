@@ -210,7 +210,10 @@ static int get_system_vpd(char *machine_serial,
 	if (rc <= 0)
 		return -1;
 
-	/* Last 5 bytes contains serial number */
+	/*
+	 * We are interested in last 5 bytes of serial number not complete
+	 * string read from system-id property.
+	 */
 	if (strlen(serial) > 5)
 		start_index = strlen(serial) - 5;
 	strncpy(machine_serial, serial + start_index, SERIAL_NUM_LEN);

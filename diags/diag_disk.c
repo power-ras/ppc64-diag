@@ -344,7 +344,7 @@ static int sysfs_sg_disk_scan(const char *dir_name, char *disk_name)
 	return rc;
 }
 
-static int remove_old_log_file(char *xml_filename)
+static int remove_old_log_file(void)
 {
 	DIR *d;
 	struct dirent *namelist;
@@ -357,9 +357,6 @@ static int remove_old_log_file(char *xml_filename)
 
 	while ((namelist = readdir(d)) != NULL) {
 		if (namelist->d_name[0] == '.')
-			continue;
-
-		if (!strcmp(xml_filename, namelist->d_name))
 			continue;
 
 		snprintf(filename, sizeof(filename) - 1, "%s/%s", OUTPUT_PATH,
@@ -416,10 +413,11 @@ int diag_disk(char *disk_name)
 
 	/* file format */
 	snprintf(xml_filename, sizeof(xml_filename) - 1,
-		 "%s~%s~%s~diskAnalytics~%d%02d%02d%02d%02d%02d.xml",
-		 mach_type_model, mach_model, serial_num,
-		 tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
-		 tm.tm_hour, tm.tm_min, tm.tm_sec);
+		 "%s~%s~%s~diskAnalytics.xml",
+		 mach_type_model, mach_model, serial_num);
+
+	/* Try to remove old log file. We will continue even if this fails */
+	remove_old_log_file();
 
 	/* open file */
 	ret = open_output_xml_file(xml_filename);
@@ -440,13 +438,6 @@ int diag_disk(char *disk_name)
 
 	/* close output xml file descriptor */
 	close_output_xml_file();
-
-	/* remove old log file */
-	ret = remove_old_log_file(xml_filename);
-	if (ret) {
-		fprintf(stderr, "Unable to remove old output log file.\n");
-		return -1;
-	}
 
 	return 0;
 }

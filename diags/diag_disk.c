@@ -38,7 +38,8 @@
 
 #include "encl_util.h"
 
-#define OUTPUT_PATH			"/var/log/ppc64-diag/diag_disk"
+#define DIAG_OUTPUT_PATH		"/var/log/ppc64-diag/"
+#define DISK_OUTPUT_PATH		DIAG_OUTPUT_PATH"diag_disk"
 #define SYSFS_SG_PATH			"/sys/class/scsi_generic"
 #define DEVICE_TREE			"/proc/device-tree/"
 #define DEVICE_TREE_SYSTEM_ID		DEVICE_TREE"system-id"
@@ -142,12 +143,53 @@ static int get_page_34_data(int device_fd)
 	return 0;
 }
 
-static inline int open_output_xml_file(const char *xml_filename)
+static inline void dir_sync(char * path)
+{
+	int dir_fd;
+
+	dir_fd = open(path, O_RDONLY|O_DIRECTORY);
+	if (dir_fd >= 0) {
+		fsync(dir_fd);
+		close(dir_fd);
+	}
+}
+
+static int open_output_xml_file(const char *xml_filename)
 {
 	char filename[PATH_MAX];
+	int rc;
+
+	rc = access(DISK_OUTPUT_PATH, W_OK);
+	if (rc) {
+		/* Return if it fails with error code other than ENOENT */
+		if (errno != ENOENT)
+			return -1;
+
+		/* Check for the existence of parent directory */
+		rc = access(DIAG_OUTPUT_PATH, W_OK);
+		if (rc) {
+			if (errno != ENOENT)
+				return -1;
+
+			rc = mkdir(DIAG_OUTPUT_PATH,
+				S_IRGRP | S_IRUSR | S_IWGRP | S_IWUSR | S_IXUSR);
+			if (rc)
+				return -1;
+
+			dir_sync(DIAG_OUTPUT_PATH);
+		}
+
+		rc = mkdir(DISK_OUTPUT_PATH,
+			   S_IRGRP | S_IRUSR | S_IWGRP | S_IWUSR | S_IXUSR);
+		if (rc)
+			return -1;
+
+		dir_sync(DISK_OUTPUT_PATH);
+	}
+
 
 	snprintf(filename, sizeof(filename) - 1, "%s/%s",
-		 OUTPUT_PATH, xml_filename);
+		 DISK_OUTPUT_PATH, xml_filename);
 
 	result_file = fopen(filename, "w");
 	if (!result_file)
@@ -349,9 +391,8 @@ static int remove_old_log_file(void)
 	DIR *d;
 	struct dirent *namelist;
 	char filename[PATH_MAX];
-	int dir_fd;
 
-	d = opendir(OUTPUT_PATH);
+	d = opendir(DISK_OUTPUT_PATH);
 	if (!d)
 		return -errno;
 
@@ -359,22 +400,17 @@ static int remove_old_log_file(void)
 		if (namelist->d_name[0] == '.')
 			continue;
 
-		snprintf(filename, sizeof(filename) - 1, "%s/%s", OUTPUT_PATH,
-			namelist->d_name);
+		snprintf(filename, sizeof(filename) - 1, "%s/%s",
+				DISK_OUTPUT_PATH, namelist->d_name);
 		if (unlink(filename) < 0) {
 			fprintf(stderr,
 			"\nUnable to remove old log file[%s]. continuing.\n\n",
 			filename);
 		}
 	}
+
 	closedir(d);
-
-	dir_fd = open(OUTPUT_PATH, O_RDONLY|O_DIRECTORY);
-	if (dir_fd >= 0) {
-		fsync(dir_fd);
-		close(dir_fd);
-	}
-
+	dir_sync(DISK_OUTPUT_PATH);
 	return 0;
 }
 

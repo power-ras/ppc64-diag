@@ -44,6 +44,7 @@
 #define DEVICE_TREE_SYSTEM_ID		DEVICE_TREE"system-id"
 #define DEVICE_TREE_MODEL		DEVICE_TREE"model"
 
+#define BUFFER_LENGTH			16
 #define SERIAL_NUM_LEN			8
 #define MACHINE_MODEL_LEN		8
 
@@ -196,15 +197,15 @@ static int get_system_vpd(char *machine_serial,
 	int device_fd;
 	int rc;
 	int start_index = 0;
-	char serial[SERIAL_NUM_LEN + 1] = {0};
-	char model[MACHINE_MODEL_LEN + 1] = {0};
+	char serial[BUFFER_LENGTH] = {0};
+	char model[BUFFER_LENGTH] = {0};
 	char *temp;
 
 	device_fd = open(DEVICE_TREE_SYSTEM_ID, O_RDONLY);
 	if (device_fd < 0)
 		return -1;
 
-	rc = read(device_fd, serial, SERIAL_NUM_LEN);
+	rc = read(device_fd, serial, BUFFER_LENGTH);
 	close(device_fd);
 	if (rc <= 0)
 		return -1;
@@ -218,7 +219,7 @@ static int get_system_vpd(char *machine_serial,
 	if (device_fd < 0)
 		return -1;
 
-	rc = read(device_fd, model, MACHINE_MODEL_LEN);
+	rc = read(device_fd, model, BUFFER_LENGTH);
 	close(device_fd);
 	if (rc <= 0)
 		return -1;

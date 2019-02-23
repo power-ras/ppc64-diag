@@ -109,6 +109,14 @@ AC_COMPILE_IFELSE(
 		  [AC_MSG_ERROR([C compiler is missing])],
 		  )
 
+AC_LANG_PUSH([C++])
+AC_COMPILE_IFELSE(
+		  [AC_LANG_PROGRAM([int i;])],
+		  [],
+		  [AC_MSG_ERROR([C++ compiler is missing])],
+		  )
+AC_LANG_POP
+
 # yacc/flex check
 #  - In SLES: bison provides yacc interface
 #  - In RHEL: byacc provides yacc interface

@@ -79,8 +79,26 @@ AS_IF([test "x$with_librtas" != "xno"],
             AC_DEFINE(WITH_LIBRTAS, [], ["with librtas"])
 	],
         [AC_MSG_FAILURE(
-                [librtas test failed (--without-librtas to disable)])]
-    )]
+	 [librtas.h is required (use --without-librtas to disable)])]
+        )]
+
+	# rtas event check
+	[AC_CHECK_HEADER([librtasevent.h],
+        [],
+        [AC_MSG_FAILURE([librtasevent.h is required (use --without-librtas to disable)])]
+	)]
+
+	# servicelog check
+	[AC_CHECK_HEADER([servicelog-1/servicelog.h],
+        [],
+        [AC_MSG_FAILURE([servicelog.h is required (use --without-librtas to disable)])]
+	)]
+
+	# libvpd check
+	[AC_CHECK_HEADER([libvpd-2/lsvpd.hpp],
+	[],
+	[AC_MSG_FAILURE([libvpd header files required (use --without-librtas to disable)])]
+	)]
 )
 
 AM_CONDITIONAL([WITH_LIBRTAS], [test "x$with_librtas" = "xyes"])

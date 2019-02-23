@@ -3,7 +3,7 @@
 m4_define([ppc64_diag_version], 2.7.4)
 
 AC_PREREQ([2.69])
-AC_INIT([ppc64-diag], ppc64_diag_version, [hegdevasant@linux.vnet.ibm.com, kumar.ankit008@in.ibm.com])
+AC_INIT([ppc64-diag], ppc64_diag_version, [hegdevasant@linux.vnet.ibm.com])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([m4])
 AC_SUBST(DATE, [`date`])

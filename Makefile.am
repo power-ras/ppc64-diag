@@ -18,7 +18,6 @@ check_PROGRAMS =
 noinst_PROGRAMS =
 doc_DATA =
 EXTRA_DIST =
-DOXYGEN_CONFIG_FILE =
 INSTALL_EXEC_HOOKS =
 UNINSTALL_HOOKS =
 AM_LOCALS =
@@ -27,7 +26,6 @@ CHECK_LOCALS =
 
 doc_DATA += COPYING README
 SPECFILENAME = ppc64-diag.spec
-DOXYGEN_CONFIG_FILE += doxygen.config
 
 include common/Makefile.am
 
@@ -43,7 +41,7 @@ include opal-dump-parse/Makefile.am
 include opal_errd/Makefile.am
 include scripts/Makefile.am
 
-EXTRA_DIST += autogen.sh $(DOXYGEN_CONFIG_FILE) $(SPECFILENAME)
+EXTRA_DIST += autogen.sh $(SPECFILENAME)
 
 install-exec-hook: $(INSTALL_EXEC_HOOKS)
 

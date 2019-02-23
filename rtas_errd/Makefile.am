@@ -55,6 +55,4 @@ INSTALL_EXEC_HOOKS += install-exec-hook-rtas-errd
 
 UNINSTALL_HOOKS += uninstall-hook-rtas-errd
 
-DOXYGEN_CONFIG_FILE += rtas_errd/doxygen.config
-
 EXTRA_DIST += $(rtas_scripts)

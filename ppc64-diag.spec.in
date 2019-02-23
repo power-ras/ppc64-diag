@@ -52,6 +52,8 @@ mkdir -p $RPM_BUILD_ROOT/%{_libexecdir}/%{name}
 mkdir -p $RPM_BUILD_ROOT/%{_unitdir}
 mkdir -p $RPM_BUILD_ROOT/var/log/dump
 mkdir -p $RPM_BUILD_ROOT/var/log/opal-elog
+mkdir -p $RPM_BUILD_ROOT/var/log/ppc64_diag
+mkdir -p $RPM_BUILD_ROOT/var/log/ppc64_diag/diag_disk
 
 %files
 %defattr (-,root,root,-)
@@ -61,6 +63,7 @@ mkdir -p $RPM_BUILD_ROOT/var/log/opal-elog
 /usr/sbin/*
 %dir /etc/%{name}
 %dir /etc/%{name}/ses_pages
+%dir /var/log/ppc64-diag
 %dir /var/log/ppc64-diag/diag_disk
 %dir /var/log/dump
 %dir /var/log/opal-elog
@@ -86,6 +89,7 @@ if [ "$1" = "1" ]; then # first install
 elif [ "$1" = "2" ]; then # upgrade
     systemctl restart opal_errd.service >/dev/null
     systemctl restart rtas_errd.service >/dev/null
+    systemctl daemon-reload > /dev/null 2>&1
 fi
 
 %preun
@@ -97,6 +101,7 @@ if [ "$1" = "0" ]; then # last uninstall
     systemctl -q disable rtas_errd.service
     /etc/ppc64-diag/ppc64_diag_setup --unregister >/dev/null
     /etc/ppc64-diag/lp_diag_setup --unregister >/dev/null
+    systemctl daemon-reload > /dev/null 2>&1
 fi
 
 %triggerin -- librtas

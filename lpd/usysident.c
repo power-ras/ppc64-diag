@@ -39,7 +39,7 @@
 #include "indicator.h"
 #include "lp_util.h"
 
-#define CMD_LINE_OPTIONS	"d:l:s:-:thV"
+#define CMD_LINE_OPTIONS	"d:l:s:-:thVP"
 #define CMD_IDENTIFY		"usysident"
 #define CMD_FAULT		"usysfault"
 #define CMD_ATTN		"usysattn"
@@ -67,26 +67,30 @@ print_usage(const char *cmd)
 {
 	if (strstr(cmd, CMD_IDENTIFY)) {
 		fprintf(stdout, "Usage:\n"
-		       "  %s [-l <loc_code> [-s {identify|normal}][-t]]\n"
+		       "  %s [-P] [-l <loc_code> [-s {identify|normal}][-t]]\n"
 		       "  %s [-d <dev_name> [-s {identify|normal}][-t]]\n"
+		       "  %s [-P]\n"
 		       "  %s [-V]\n"
-		       "  %s [-h]\n\n", cmd, cmd, cmd, cmd);
+		       "  %s [-h]\n\n", cmd, cmd, cmd, cmd, cmd);
 		fprintf(stdout, "Options:\n"
 		       "  -l <loc_code>   Indicator location code\n"
 		       "  -d <dev_name>   Device name\n"
 		       "  -s identify     Turn on device/location identify indicator\n"
 		       "  -s normal       Turn off device/location identify indicator\n"
+		       "  -P              Limit the operation to only the platform indicators\n"
 		       "  -t              Truncate loc code if necessary\n"
 		       "  -V		  Print the version of the command\n"
 		       "  -h              Print this message and exit\n");
 	} else {
 		fprintf(stdout, "Usage:\n"
-		       "  %s [-l <loc_code> [-s normal][-t]]\n"
+		       "  %s [-P] [-l <loc_code> [-s normal][-t]]\n"
+		       "  %s [-P]\n"
 		       "  %s [-V]\n"
-		       "  %s [-h]\n\n", cmd, cmd, cmd);
+		       "  %s [-h]\n\n", cmd, cmd, cmd, cmd);
 		fprintf(stdout, "Options:\n"
 		       "  -l <loc_code>   Indicator location code\n"
 		       "  -s normal	  Turn off location fault indicator\n"
+		       "  -P              Limit the operation to only the platform indicators\n"
 		       "  -t              Truncate loc code if necessary\n"
 		       "  -V		  Print the version of the command\n"
 		       "  -h		  Print this message\n");
@@ -105,6 +109,8 @@ main(int argc, char **argv)
 	int	rc = 0;
 	int	trunc = 0;
 	int	truncated = 0;
+	bool	platformonly = false;
+	bool	printonly = false;
 	char	temp[LOCATION_LENGTH];
 	char	dloc[LOCATION_LENGTH];
 	char	*dvalue = NULL;
@@ -116,7 +122,7 @@ main(int argc, char **argv)
 	struct	loc_code *list_start = NULL;
 
 	program_name = argv[0];
-	if (probe_indicator() != 0) {
+	if (platform_initialize() != 0) {
 		fprintf(stderr,
 			"%s is not supported on this platform\n", argv[0]);
 		return 0;
@@ -151,6 +157,9 @@ main(int argc, char **argv)
 			/* truncate location code */
 			trunc = 1;
 			break;
+		case 'P':
+			platformonly = true;
+			break;
 		case 'V':
 			fprintf(stdout, "%s %s\n", argv[0], VERSION);
 			fflush(stdout);
@@ -175,6 +184,12 @@ main(int argc, char **argv)
 		}
 	}
 
+	if (probe_indicator(platformonly) != 0) {
+		fprintf(stderr,
+			"%s is not supported on this platform\n", argv[0]);
+		return 0;
+	}
+
 	/* Option checking */
 	if (optind < argc) {
 		fprintf(stderr,
@@ -192,6 +207,13 @@ main(int argc, char **argv)
 	if (dvalue && lvalue) {
 		fprintf(stderr,
 			"The -d and -l options cannot be used together.\n\n");
+		print_usage(argv[0]);
+		return 1;
+	}
+
+	if (dvalue && platformonly) {
+		fprintf(stderr,
+			"The -d and -P options cannot be used together.\n\n");
 		print_usage(argv[0]);
 		return 1;
 	}
@@ -295,6 +317,9 @@ main(int argc, char **argv)
 	else
 		return 1;
 
+	if (argc == 1 || ((argc == 2) && platformonly))
+		printonly = true;
+
 	/* initialize */
 	lp_error_log_fd = STDOUT_FILENO; /* log message to stdout */
 	rc = init_files();
@@ -315,7 +340,7 @@ main(int argc, char **argv)
 	if (rc)
 		goto file_cleanup;
 
-	if (argc == 1) {
+	if (printonly) {
 		current = list;
 		while (current) {
 			/* get and print all indicators current state */

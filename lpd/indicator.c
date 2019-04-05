@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <dirent.h>
 #include <sys/types.h>
@@ -35,6 +36,8 @@
 
 /* Indicator operating mode */
 uint32_t	operating_mode;
+
+uint32_t	system_scan_flag;
 
 /* points to platform structure of running platform */
 struct platform platform;
@@ -139,15 +142,36 @@ get_indicator_for_loc_code(struct loc_code *list, const char *location)
 	return NULL;
 }
 
-
 /**
- * probe_indicator - Check indicator support on running platform
+ * probe_indicator - probes for indicators on running platform
  *
  * Returns :
- *	0 on success, -1 on failure
+ *      0 on success, -1 on failure
  */
 int
-probe_indicator(void)
+probe_indicator(bool platform_only)
+{
+	if (!platform.name) {
+		fprintf(stderr,
+			"%s internal error: platform not initialized\n",
+			program_name);
+		return -1;
+        }
+
+	if (platform.probe)
+		return platform.probe(platform_only);
+
+	return 0;
+}
+
+/**
+ * platform_initialize - Check supportability on the running platform
+ *
+ * Returns :
+ *     0 on success, -1 on failure
+ */
+int
+platform_initialize()
 {
 	int p;
 	p = get_platform();
@@ -165,9 +189,6 @@ probe_indicator(void)
 				program_name, __power_platform_name(p));
 		return -1;
 	}
-
-	if (platform.probe)
-		return platform.probe();
 
 	return 0;
 }

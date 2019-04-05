@@ -1,18 +1,19 @@
 .\"
-.\" Copyright (C) 2004, 2012  International Business Machines
+.\" Copyright (C) 2004, 2019  International Business Machines
 .\"
 .\" Note:
 .\"	This man page is moved from powerpc-util package to here.
 .\"	Author : Michael Strosaker <strosake@us.ibm.com>
 .\"	Updates: Vasant Hegde <hegdevasant@linux.vnet.ibm.com>
 .\"
-.TH USYSIDENT 8 "Dec 2012" Linux "PowerLinux Service Tools"
+.TH USYSIDENT 8 "Mar 2019" Linux "PowerLinux Service Tools"
 .SH NAME
 usysident \- operate device identification indicators
 .SH SYNOPSIS
 .nf
-\fB/usr/sbin/usysident \fR[\fB-l \fI<location_code>\fR [\fB-s normal\fR|\fBidentify\fR] [\fB-t\fR]]
+\fB/usr/sbin/usysident \fR[\fB-P\fR] [\fB-l \fI<location_code>\fR [\fB-s normal\fR|\fBidentify\fR] [\fB-t\fR]]
 \fB/usr/sbin/usysident \fR[\fB-d \fI<dev_name>\fR [\fB-s normal\fR|\fBidentify\fR] [\fB-t\fR]]
+\fB/usr/sbin/usysident \fR[\fB-P\fR]
 \fB/usr/sbin/usysident \fR[\fB-V\fR]
 \fB/usr/sbin/usysident \fR[\fB-h\fR]
 .fi
@@ -49,6 +50,9 @@ turn the indicator off, while \fB\-s identify\fR will turn the indicator on.
 Truncate the location code if necessary. If an indicator is not available at
 the specified location, this option will continuously trim the last clause off
 of the location code in an attempt to find an indicator near the device.
+.TP
+.B \-P
+Limit the operations to only the platform indicators excluding the enclosures.
 .TP
 .B \-V
 Display the version of the command and exit.

@@ -140,7 +140,7 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	if (probe_indicator() != 0) {
+	if ((platform_initialize() != 0) || (probe_indicator(false) != 0)) {
 		close_files();
 		exit(1);
 	}

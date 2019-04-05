@@ -22,6 +22,7 @@
 #include <limits.h>
 #include <linux/types.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 /* Definations for indicator operating mode */
 #define LED_MODE_GUIDING_LIGHT	0x01
@@ -64,6 +65,7 @@
 
 /* External variables */
 extern uint32_t		operating_mode;
+extern uint32_t		system_scan_flag;
 extern char		*program_name;
 extern char		*lp_event_log_file;
 extern int		lp_event_log_fd;
@@ -121,7 +123,7 @@ struct platform {
 	const char	*name;
 
 	/* Probe LED support */
-	int	(*probe)(void);
+	int	(*probe)(bool platform_only);
 
 	/* Check LED operating mode (Guiding Light/Light Path) */
 	int	(*get_indicator_mode)(void);
@@ -160,7 +162,8 @@ extern int is_enclosure_loc_code(struct loc_code *);
 extern int truncate_loc_code(char *);
 extern struct loc_code *get_indicator_for_loc_code(struct loc_code *,
 						   const char *);
-extern int probe_indicator(void);
+extern int platform_initialize();
+extern int probe_indicator(bool platform_only);
 extern int get_indicator_mode(void);
 extern int get_indicator_list(int, struct loc_code **);
 extern int get_indicator_state(int , struct loc_code *, int *);

@@ -346,9 +346,15 @@ opal_indicator_probe_marvell(void)
  *   0 if indicator is supported, else -1
  */
 static int
-opal_indicator_probe(void)
+opal_indicator_probe(bool platform_only)
 {
 	int rc = -1;
+
+	if (platform_only)
+		system_scan_flag = 1 << TYPE_OPAL;
+	else
+		system_scan_flag = 1 << TYPE_ALL | 1 << TYPE_OPAL |
+				1 << TYPE_SES | 1 << TYPE_MARVELL;
 
 	if (!opal_indicator_probe_led_class())
 		rc = 0;
@@ -359,7 +365,8 @@ opal_indicator_probe(void)
 	 * any kernel LEDs (e.g., modules not loaded) but still have the
 	 * Marvell SATA controller with LEDs available, and able to work.
 	 */
-	if (!opal_indicator_probe_marvell())
+	if ((system_scan_flag & (1 << TYPE_MARVELL)) &&
+	    !opal_indicator_probe_marvell())
 		rc = 0;
 
 	return rc;
@@ -440,14 +447,20 @@ opal_get_indicator_list(int indicator, struct loc_code **list)
 	    operating_mode == LED_MODE_GUIDING_LIGHT)
 		return 0;
 
-	/* Get OPAL indicator list */
+	/*
+	 * Get OPAL indicator list
+	 * NB: Check the system_scan_flag if scanning needs to be
+	 * prevented for platform indicators
+	 */
 	opal_get_indices(indicator, list);
 
 	/* SES indicators */
-	get_ses_indices(indicator, list);
+	if (system_scan_flag & (1 << TYPE_SES))
+		get_ses_indices(indicator, list);
 
 	/* Marvell HDD LEDs (indicators) */
-	get_mv_indices(indicator, list);
+	if (system_scan_flag & (1 << TYPE_MARVELL))
+		get_mv_indices(indicator, list);
 
 	/*
 	 * The list pointer (*list) is initially NULL.

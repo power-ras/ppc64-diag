@@ -1179,9 +1179,11 @@ main(int argc, char *argv[])
 	int	event_id = 0;
 	int	repair_id = 0;
 	char	*next_char;
+	int platformonly = false;
 
 	program_name = argv[0];
-	if (probe_indicator() != 0) {
+	if ((platform_initialize() != 0) ||
+		(probe_indicator(platformonly) != 0)) {
 		fprintf(stderr,
 			"%s is not supported on this platform\n", argv[0]);
 		return 0;

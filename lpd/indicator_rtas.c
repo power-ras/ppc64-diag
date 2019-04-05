@@ -371,8 +371,13 @@ set_rtas_indicator(int indicator, struct loc_code *loc, int new_value)
  *   0 if indicator is supported, else -1
  */
 static int
-rtas_indicator_probe(void)
+rtas_indicator_probe(bool platform_only)
 {
+        if (platform_only)
+                system_scan_flag = 1 << TYPE_RTAS;
+        else
+                system_scan_flag = 1 << TYPE_ALL | 1 << TYPE_RTAS | 1 << TYPE_SES;
+
 	return 0;
 }
 
@@ -426,7 +431,11 @@ get_rtas_indicator_list(int indicator, struct loc_code **list)
 {
 	int	rc;
 
-	/* Get RTAS indicator list */
+	/*
+	 * Get RTAS indicator list
+	 * NB: Check the system_scan_flag if the scanning of platform
+	 * indicators needs to be prevented.
+	 */
 	rc = get_rtas_indices(indicator, list);
 	if (rc)
 		return rc;
@@ -437,7 +446,8 @@ get_rtas_indicator_list(int indicator, struct loc_code **list)
 		return rc;
 
 	/* SES indicators */
-	get_ses_indices(indicator, list);
+	if (system_scan_flag & (1 << TYPE_SES))
+		get_ses_indices(indicator, list);
 
 	return rc;
 }

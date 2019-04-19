@@ -191,7 +191,7 @@ static void report_slider_power_supply_fault_to_svclog(
 	char description[EVENT_DESC_SIZE], crit[ES_STATUS_STRING_MAXLEN];
 	char srn[SRN_SIZE];
 	char loc_suffix_code[LOCATION_LENGTH];
-	int i, sev, rc;
+	int i, sev;
 	struct sl_callout *callouts;
 	struct slider_power_supply_status *ps_status =
 		(struct slider_power_supply_status *)(dp + element_offset(ps_status));
@@ -208,9 +208,8 @@ static void report_slider_power_supply_fault_to_svclog(
 		get_location_code(vpd, loc_suffix_code);
 		build_srn(srn, SRN_RC_CRIT_PS);
 		callouts = NULL;
-		rc = slider_create_ps_callout(&callouts, location_code, i, fd);
-		if (rc == 0)
-			servevent(srn, sev, description, vpd, callouts);
+		slider_create_ps_callout(&callouts, location_code, i, fd);
+		servevent(srn, sev, description, vpd, callouts);
 	}
 }
 
@@ -218,7 +217,7 @@ static void report_slider_power_supply_fault_to_svclog(
 static void report_slider_cooling_element_fault_to_svclog(
 	void *dp, void *prev_dp, struct dev_vpd *vpd, int fd)
 {
-	int i, j, sev, rc;
+	int i, j, sev;
 	char description[EVENT_DESC_SIZE], crit[ES_STATUS_STRING_MAXLEN];
 	struct sl_callout *callouts;
 	char srn[SRN_SIZE];
@@ -242,10 +241,9 @@ static void report_slider_cooling_element_fault_to_svclog(
 			get_location_code(vpd, loc_suffix_code);
 			build_srn(srn, SRN_RC_CRIT_FAN);
 			callouts = NULL;
-			rc = slider_create_ps_callout(&callouts,
-						      location_code, i, fd);
-			if (rc ==  0)
-				servevent(srn, sev, description, vpd, callouts);
+			slider_create_ps_callout(&callouts,
+					location_code, i, fd);
+			servevent(srn, sev, description, vpd, callouts);
 		}
 	}
 }
@@ -254,7 +252,7 @@ static void report_slider_cooling_element_fault_to_svclog(
 static void report_slider_temp_sensor_fault_to_svclog(
 	void *dp, void *prev_dp, struct dev_vpd *vpd, int fd)
 {
-	int i, j, sev, rc;
+	int i, j, sev;
 	char description[EVENT_DESC_SIZE], crit[ES_STATUS_STRING_MAXLEN];
 	struct sl_callout *callouts;
 	char srn[SRN_SIZE];
@@ -302,10 +300,9 @@ static void report_slider_temp_sensor_fault_to_svclog(
 			get_location_code(vpd, loc_suffix_code);
 			build_srn(srn, SRN_RC_PS_TEMP_THRESHOLD);
 			callouts = NULL;
-			rc = slider_create_ps_callout(&callouts,
+			slider_create_ps_callout(&callouts,
 				location_code, i, fd);
-			if (rc ==  0)
-				servevent(srn, sev, description, vpd, callouts);
+			servevent(srn, sev, description, vpd, callouts);
 		}
 	}
 

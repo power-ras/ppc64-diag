@@ -16,22 +16,16 @@ ela/rr.tab.h: ela/rr.tab.cc
 ela/ev.tab.h: ela/ev.tab.cc
 
 ela/ev.tab.cc: ela/event_gram.y
-	yacc -dl -b ev -p ev ela/event_gram.y
-	mv ev.tab.c ela/ev.tab.cc
-	mv ev.tab.h ela/ev.tab.h
+	${YACC} -p ev --output=$*.cc --defines=$*.h $<
 
 ela/rr.tab.cc: ela/reporter_gram.y
-	yacc -dl -b rr -p rr ela/reporter_gram.y
-	mv rr.tab.c ela/rr.tab.cc
-	mv rr.tab.h ela/rr.tab.h
+	${YACC} -p rr --output=$*.cc --defines=$*.h $<
 
 ela/lex.rr.cc: ela/reporter_lex.l
-	flex -Prr ela/reporter_lex.l
-	mv lex.rr.c ela/lex.rr.cc
+	${FLEX} -Pev -o $*.cc $<
 
 ela/lex.ev.cc: ela/event_lex.l
-	flex -Pev ela/event_lex.l
-	mv lex.ev.c ela/lex.ev.cc
+	${FLEX} -Prr -o $*.cc $<
 
 sbin_PROGRAMS += ela/explain_syslog ela/add_regex
 

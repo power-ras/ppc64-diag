@@ -111,6 +111,11 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Thu Apr 25 2019 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.7.5
+- usysident: Add option to scan only the system indicators
+- scripts: Fix service scripts
+- Various enclosure diagnostics improvements
+
 * Mon Jul 24 2017 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.7.4
 - Move to autotools based build environment
 - Run diag_encl automatically (via crontab)

@@ -1,6 +1,6 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
-m4_define([ppc64_diag_version], 2.7.4)
+m4_define([ppc64_diag_version], 2.7.5)
 
 AC_PREREQ([2.69])
 AC_INIT([ppc64-diag], ppc64_diag_version, [hegdevasant@linux.vnet.ibm.com])

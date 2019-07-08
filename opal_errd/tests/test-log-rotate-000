@@ -8,20 +8,12 @@ check_suite
 copy_sysfs
 
 mkdir -p $OUT/platform
-NAME="$(expr $(date +%s) - $(expr 100 \* 24 \* 60 \* 60))-100days"
-touch $OUT/platform/$NAME
-NAME="$(expr $(date +%s) - $(expr 31 \* 24 \* 60 \* 60))-31days"
-touch $OUT/platform/$NAME
-NAME="$(expr $(date +%s) - $(expr 5 \* 24 \* 60 \* 60))-5days"
-touch $OUT/platform/$NAME
-NAME="$(expr $(date +%s) - $(expr 1 \* 24 \* 60 \* 60))-1days"
-touch $OUT/platform/$NAME
 
-run_binary "./opal_errd" "-s $SYSFS -o $OUT/platform -D -e /bin/true -n 10 -a 29"
+run_binary "./opal_errd" "-s $SYSFS -o $OUT/platform -D -e /bin/true -n 3 -c 1 -a 29"
 sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' -i $OUTSTDERR
 
 ls -1 $OUT >> $OUTSTDOUT
-(cd $OUT/platform; md5sum *) | sort  -t ' ' -k 2 | sed 's/ .*-/  /g'  >> $OUTSTDOUT
+(cd $OUT/platform; md5sum *) | sort  -t ' ' -k 2 | awk  -F'[- ]' '{print $1"  "$4}'  >> $OUTSTDOUT
 
 diff_with_result
 

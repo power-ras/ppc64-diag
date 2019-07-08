@@ -2,7 +2,7 @@
  * @file	opal_errd.c
  * @brief	Daemon to read/parse OPAL error/events
  *
- * Copyright (C) 2014 IBM Corporation
+ * Copyright (C) 2014-2019 IBM Corporation
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
@@ -67,11 +68,8 @@
 #define ELOG_STR_SIZE	11
 /**
  * ELOG retention policy
- *
- * Retain logs up to 30 days with max 1000 logs.
  */
 #define DEFAULT_MAX_ELOGS		1000
-#define DEFAULT_MAX_DAYS		30
 
 /*
  * As per PEL v6 (defined in PAPR spec) fixed offset for
@@ -102,6 +100,25 @@
 
 volatile int terminate;
 
+enum {
+	OPAL_ELOG_INVALID = -1,
+	OPAL_ELOG_INFORMATIONAL,
+	OPAL_ELOG_SERVICEABLE
+};
+
+
+/* NB: All suffixes to be of same length */
+#define ELOG_FILE_SUFFIX_SRVC		"srvc"
+#define ELOG_FILE_SUFFIX_INFO		"info"
+#define ELOG_FILE_SUFFIX_INVALID	"invl"
+
+#define ELOG_TYPE_STR(etype) \
+        ((etype) == OPAL_ELOG_SERVICEABLE) ? \
+               ELOG_FILE_SUFFIX_SRVC : ELOG_FILE_SUFFIX_INFO
+
+static bool rotate_info_logs = false;
+static bool rotate_srvc_logs = false;
+
 /* Safe to ignore sig, this only gets called on SIGTERM */
 static void term_handler(int sig)
 {
@@ -109,7 +126,7 @@ static void term_handler(int sig)
 }
 
 /* may move this into header to avoid code duplication */
-static int file_filter(const struct dirent *d)
+static bool is_regular_file(const struct dirent *d)
 {
 	struct stat sbuf;
 
@@ -197,79 +214,101 @@ static int find_extract_opal_dump_cmd(char **r_dump_path)
 	return -1;
 }
 
-static int rotate_logs(const char *elog_dir, int max_logs, int max_age)
+/*
+ * The filetype is determined by the filename format.
+ * The format is <timestamp>-<logid>-<elog_type>
+ *	- The timestamp was earlier used for determining how old the log is,
+ *	  and is no longer used by the purging logic, retained for backward
+ *	  compatibility reasons.
+ *	- logid of the particular error log.
+ *	- elog_type = (srvc|info)
+ *		- srvc : indicates the error log is serviceable log.
+ *		- info : indicates the error log is an informational log.
+ */
+static int get_elog_filetype(const char *name)
+{
+	int ret = OPAL_ELOG_INVALID;
+	int name_len= strlen(name);
+	int suffix_len = strlen(ELOG_FILE_SUFFIX_SRVC);
+	int file_type_offset = name_len -  suffix_len;
+
+	if (name_len < suffix_len)
+		return ret;
+
+	if (!strcmp(name + file_type_offset, ELOG_FILE_SUFFIX_SRVC))
+		ret = OPAL_ELOG_SERVICEABLE;
+	else if (!strcmp(name + file_type_offset, ELOG_FILE_SUFFIX_INFO))
+		ret = OPAL_ELOG_INFORMATIONAL;
+
+	return ret;
+}
+
+static int is_serviceable_elog_file(const struct dirent *d)
+{
+	if (is_regular_file(d) &&
+	    (get_elog_filetype(d->d_name) == OPAL_ELOG_SERVICEABLE))
+		return 1;
+
+	return 0;
+}
+
+static int is_informational_elog_file(const struct dirent *d)
+{
+	if (is_regular_file(d) &&
+	    (get_elog_filetype(d->d_name) == OPAL_ELOG_INFORMATIONAL))
+		return 1;
+
+	return 0;
+}
+
+static void rotate_logs(const char *elog_dir, int max_logs, int elog_type)
 {
 	int i;
 	int nfiles;
 	int ret = 0;
-	int old = 1;
 	int trim = 1;
 	struct dirent **filelist;
-	char *elog_name;
-	char *elog_date;
-	int max = max_age * 24 * 60 * 60;
-	int now = (int) time(NULL);
+	int (* filter)(const struct dirent *);
 
-	/* Retrieve file list */
-	chdir(elog_dir);
-	nfiles = scandir(elog_dir, &filelist, file_filter, alphasort);
-	if (nfiles < 0)
-		return -1;
+	if (elog_type == OPAL_ELOG_SERVICEABLE)
+		filter = &is_serviceable_elog_file;
+	else
+		filter = &is_informational_elog_file;
 
-	for (i = 0; i < nfiles; i++) {
-		if(!old && !trim){
-			free(filelist[i]);
-			continue;
-		}
+        /* Retrieve file list */
+        chdir(elog_dir);
+        nfiles = scandir(elog_dir, &filelist, filter, alphasort);
+        if (nfiles < 0) {
+		syslog(LOG_NOTICE, "Error scanning the log directory %s\n",
+					elog_dir);
+		return;
+	}
 
-		elog_name = strdup(filelist[i]->d_name);
-		if (!elog_name) {
-			syslog(LOG_NOTICE, "Failed to allocate memory\n");
+        for (i = 0; i < nfiles; i++) {
+		if (!trim){
 			free(filelist[i]);
 			continue;
 		}
 
 		/* Names are ordered 'oldest first' from scandir */
-		if(i >= (nfiles - max_logs))
+		if (i >= (nfiles - max_logs))
 			trim = 0;
 
-		/* Extract date from filename */
-		elog_date = strtok(elog_name, "-");
-		if(!elog_date){
-			syslog(LOG_NOTICE, "Failed to read file\n");
-			free(elog_name);
-			free(filelist[i]);
-			continue;
-		}
-
-		errno = 0;
-		int date = strtol(elog_date, NULL, 10);
-		if(errno || !date){
-			syslog(LOG_NOTICE, "Failed to parse file date\n");
-			free(elog_name);
-			free(filelist[i]);
-			continue;
-		}
-		if(now - date < max)
-			old = 0;
-
-		if(old || trim) {
+		if (trim) {
 			ret = remove(filelist[i]->d_name);
 			if(ret)
 				syslog(LOG_NOTICE, "Error removing %s\n",
 				       filelist[i]->d_name);
 		}
-
 		free(filelist[i]);
-		free(elog_name);
 	}
 	free(filelist);
 
-	return ret;
+	return;
 }
 
 /* Parse required fields from error log */
-static int parse_log(char *buffer, size_t bufsz)
+static int parse_log(char *buffer, size_t bufsz, int *elog_type)
 {
 	uint32_t logid;
 	char src[ELOG_SRC_SIZE+1];
@@ -315,6 +354,12 @@ static int parse_log(char *buffer, size_t bufsz)
 	    !(action & ELOG_ACTION_FLAG_CALL_HOME))
 		syslog(LOG_NOTICE, "Run \'opal-elog-parse -d 0x%x\' "
 		       "for the details.\n", logid);
+
+	if ((action & ELOG_ACTION_FLAG_SERVICE) ||
+	    (action & ELOG_ACTION_FLAG_CALL_HOME))
+		*elog_type = OPAL_ELOG_SERVICEABLE;
+	else
+		*elog_type = OPAL_ELOG_INFORMATIONAL;
 
 	return 0;
 }
@@ -409,7 +454,7 @@ static int ack_elog(const char *elog_path)
 	return 0;
 }
 
-static int process_elog(const char *elog_path, const char *output)
+static int process_elog(const char *elog_path, const char *output, int *elog_type)
 {
 	int in_fd = -1;
 	int out_fd = -1;
@@ -461,10 +506,17 @@ static int process_elog(const char *elog_path, const char *output)
 		sz += readsz;
 	} while(sz != bufsz);
 
+	*elog_type = OPAL_ELOG_INVALID;
+	if (parse_log(buf, bufsz, elog_type)) {
+		goto err;
+	}
+
 	/* Parse elog filename */
 	name = basename(dirname(elog_raw_path));
-	rc = snprintf(output_file, sizeof(output_file), "%s/%d-%s",
-			output, (int)time(NULL), name);
+
+	/* Suffix the elog type, used by purging logic */
+	rc = snprintf(output_file, sizeof(output_file), "%s/%d-%s-%s",
+		      output, (int)time(NULL), name, ELOG_TYPE_STR(*elog_type));
 	if (rc >= PATH_MAX) {
 		syslog(LOG_ERR, "Path to elog output file is too big\n");
 		goto err;
@@ -509,10 +561,10 @@ static int process_elog(const char *elog_path, const char *output)
 			       output_dir, errno, strerror(errno));
 	}
 
-	parse_log(buf, bufsz);
-
 	ret = 0;
 err:
+	if (ret)
+		*elog_type = OPAL_ELOG_INVALID;
 	if (in_fd != -1)
 		close(in_fd);
 	if (out_fd != -1)
@@ -536,6 +588,7 @@ static int find_and_read_elog_events(const char *elog_dir, const char *output_pa
 	int retval = 0;
 	int n;
 	int i;
+	int elog_type = OPAL_ELOG_INVALID;
 
 	n = scandir(elog_dir, &namelist, NULL, alphasort);
 	if (n < 0)
@@ -571,12 +624,17 @@ static int find_and_read_elog_events(const char *elog_dir, const char *output_pa
 		}
 
 		if (is_dir) {
-			rc = process_elog(elog_path, output_path);
+			rc = process_elog(elog_path, output_path, &elog_type);
 			if (rc != 0 && retval == 0)
 				retval = -1;
 			if (rc == 0 && retval >= 0)
 				retval++;
 			ack_elog(elog_path);
+
+			if (elog_type == OPAL_ELOG_INFORMATIONAL)
+				rotate_info_logs = true;
+			else if (elog_type == OPAL_ELOG_SERVICEABLE)
+				rotate_srvc_logs = true;
 		}
 
 		free(namelist[i]);
@@ -680,15 +738,16 @@ static void help(const char* argv0)
 			" to be saved\n");
 	fprintf(stderr, "-n max  - maximum number of elogs to keep (default %d)\n",
 			DEFAULT_MAX_ELOGS);
-	fprintf(stderr, "-a days - maximum age in days of elogs to keep (default %d)\n",
-			DEFAULT_MAX_DAYS);
+	fprintf(stderr, "-c max  - maximum number of serviceable elogs to keep (default %d)\n",
+			(int) 0.2 * DEFAULT_MAX_ELOGS);
+	fprintf(stderr, "-a days - maximum age in days of elogs to keep. This option is deprecated\n");
 	fprintf(stderr, "-h      - help (this message)\n");
 }
 
 int main(int argc, char *argv[])
 {
 	int rc = 0;
-	int opt;
+	int opt, elog_type;
 	char sysfs_path[PATH_MAX];
 	char elog_path[PATH_MAX];
 	char dump_path[PATH_MAX];
@@ -710,13 +769,16 @@ int main(int argc, char *argv[])
 	int opt_daemon = 1;
 	int opt_watch = 1;
 	int opt_max_logs = DEFAULT_MAX_ELOGS;
-	int opt_max_age = DEFAULT_MAX_DAYS;
+	int max_info_logs = 0;
+	int opt_max_serviceable_logs = 0;
+	int max_serviceable_logs = 0;
+	int opt_max_age = 0; /* Deprecated, so doesnt matter */
 	const char *opt_extract_opal_dump_cmd = NULL;
 	const char *opt_max_dump = NULL;
 	const char *opt_sysfs = DEFAULT_SYSFS_PATH;
 	const char *opt_output_dir = DEFAULT_OUTPUT_DIR;
 
-	while ((opt = getopt(argc, argv, "De:ho:s:m:wn:a:")) != -1) {
+	while ((opt = getopt(argc, argv, "De:ho:s:m:wn:a:c:")) != -1) {
 		switch (opt) {
 		case 'D':
 			opt_daemon = 0;
@@ -746,6 +808,14 @@ int main(int argc, char *argv[])
 				exit(EXIT_FAILURE);
 			}
 			break;
+		case 'c':
+			errno = 0;
+			opt_max_serviceable_logs = strtol(optarg, 0, 0);
+			if(errno || opt_max_serviceable_logs < 0) {
+				fprintf(stderr,"Invalid input for -c\n");
+				exit(EXIT_FAILURE);
+			}
+			break;
 		case 'a':
 			errno = 0;
 			opt_max_age = strtol(optarg,0,0);
@@ -769,6 +839,18 @@ int main(int argc, char *argv[])
 	if (!opt_daemon)
 		log_options |= LOG_PERROR;
 	openlog("ELOG", log_options, LOG_LOCAL1);
+
+	/*
+	 * By default 20% of the log counts are reserved for serviceable
+	 * logs, if the user has not specified explicitly
+	 */
+	max_info_logs = opt_max_logs;
+	if (opt_max_serviceable_logs) {
+		max_serviceable_logs = opt_max_serviceable_logs;
+	} else {
+		max_serviceable_logs = 0.2 * opt_max_logs;
+		max_info_logs = 0.8 * opt_max_logs;
+	}
 
 	/* Do we have a valid extract_opal_dump?
 	 * Confirm that what the user entered is valid
@@ -874,8 +956,17 @@ int main(int argc, char *argv[])
 	fds[UDEV_FD].events = POLLIN;
 	/* Read error/event log until we get termination signal */
 	while (!terminate) {
+		rotate_srvc_logs = rotate_info_logs = false;
 		find_and_read_elog_events(elog_path, opt_output_dir);
-		rotate_logs(opt_output_dir, opt_max_logs, opt_max_age);
+
+		if (rotate_srvc_logs) {
+			rotate_logs(opt_output_dir, max_serviceable_logs,
+				    OPAL_ELOG_SERVICEABLE);
+		}
+		if (rotate_info_logs) {
+			rotate_logs(opt_output_dir, max_info_logs,
+				    OPAL_ELOG_INFORMATIONAL);
+		}
 
 		if (extract_opal_dump_cmd)
 			check_platform_dump(extract_opal_dump_cmd,

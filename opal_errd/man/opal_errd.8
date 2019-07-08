@@ -1,4 +1,4 @@
-.TH OPAL_ERRD 8 2014-05-01 Linux ppc64-diag
+.TH OPAL_ERRD 8 2019-07-01 Linux ppc64-diag
 .SH NAME
 opal_errd \- Daemon to read/parse OPAL platform error(s)/event(s)
 .SH SYNOPSIS
@@ -29,10 +29,14 @@ Directory to save error/event logs (default: /var/log/opal-elog)
 Custom path to sysfs
 .TP
 .BR \-n " " \fImax\fR
-Maximum number of elogs to keep (default: 1000)
+Maximum number of elogs to keep (default: 1000). If -c is not specified, 20% of this
+will be used for the serviceable elogs.
+.TP
+.BR \-c " " \fImax\fR
+Maximum number of serviceable elogs to keep (default: 200)
 .TP
 .BR \-a " " \fIdays\fR
-Maximum age in days of elogs to keep (default: 30)
+Maximum age in days of elogs to keep. This option is deprecated.
 .TP
 .BR \-D
 Don't daemonize, just run once

@@ -356,10 +356,13 @@ static int parse_log(char *buffer, size_t bufsz, int *elog_type)
 		       "for the details.\n", logid);
 
 	if ((action & ELOG_ACTION_FLAG_SERVICE) ||
-	    (action & ELOG_ACTION_FLAG_CALL_HOME))
+	    (action & ELOG_ACTION_FLAG_CALL_HOME)) {
 		*elog_type = OPAL_ELOG_SERVICEABLE;
-	else
+		rotate_srvc_logs = true;
+	} else {
 		*elog_type = OPAL_ELOG_INFORMATIONAL;
+		rotate_info_logs = true;
+	}
 
 	return 0;
 }
@@ -454,7 +457,7 @@ static int ack_elog(const char *elog_path)
 	return 0;
 }
 
-static int process_elog(const char *elog_path, const char *output, int *elog_type)
+static int process_elog(const char *elog_path, const char *output)
 {
 	int in_fd = -1;
 	int out_fd = -1;
@@ -470,6 +473,7 @@ static int process_elog(const char *elog_path, const char *output, int *elog_typ
 	char *output_dir = NULL;
 	char *buf = NULL;
 	char output_file[PATH_MAX];
+	int elog_type;
 
 	rc = snprintf(elog_raw_path, sizeof(elog_raw_path),
 		      "%s/raw", elog_path);
@@ -506,8 +510,7 @@ static int process_elog(const char *elog_path, const char *output, int *elog_typ
 		sz += readsz;
 	} while(sz != bufsz);
 
-	*elog_type = OPAL_ELOG_INVALID;
-	if (parse_log(buf, bufsz, elog_type)) {
+	if (parse_log(buf, bufsz, &elog_type)) {
 		goto err;
 	}
 
@@ -516,7 +519,7 @@ static int process_elog(const char *elog_path, const char *output, int *elog_typ
 
 	/* Suffix the elog type, used by purging logic */
 	rc = snprintf(output_file, sizeof(output_file), "%s/%d-%s-%s",
-		      output, (int)time(NULL), name, ELOG_TYPE_STR(*elog_type));
+		      output, (int)time(NULL), name, ELOG_TYPE_STR(elog_type));
 	if (rc >= PATH_MAX) {
 		syslog(LOG_ERR, "Path to elog output file is too big\n");
 		goto err;
@@ -563,8 +566,6 @@ static int process_elog(const char *elog_path, const char *output, int *elog_typ
 
 	ret = 0;
 err:
-	if (ret)
-		*elog_type = OPAL_ELOG_INVALID;
 	if (in_fd != -1)
 		close(in_fd);
 	if (out_fd != -1)
@@ -588,7 +589,6 @@ static int find_and_read_elog_events(const char *elog_dir, const char *output_pa
 	int retval = 0;
 	int n;
 	int i;
-	int elog_type = OPAL_ELOG_INVALID;
 
 	n = scandir(elog_dir, &namelist, NULL, alphasort);
 	if (n < 0)
@@ -624,17 +624,12 @@ static int find_and_read_elog_events(const char *elog_dir, const char *output_pa
 		}
 
 		if (is_dir) {
-			rc = process_elog(elog_path, output_path, &elog_type);
+			rc = process_elog(elog_path, output_path);
 			if (rc != 0 && retval == 0)
 				retval = -1;
 			if (rc == 0 && retval >= 0)
 				retval++;
 			ack_elog(elog_path);
-
-			if (elog_type == OPAL_ELOG_INFORMATIONAL)
-				rotate_info_logs = true;
-			else if (elog_type == OPAL_ELOG_SERVICEABLE)
-				rotate_srvc_logs = true;
 		}
 
 		free(namelist[i]);
@@ -770,7 +765,6 @@ int main(int argc, char *argv[])
 	int opt_watch = 1;
 	int opt_max_logs = DEFAULT_MAX_ELOGS;
 	int max_info_logs = 0;
-	int opt_max_serviceable_logs = 0;
 	int max_serviceable_logs = 0;
 	int opt_max_age = 0; /* Deprecated, so doesnt matter */
 	const char *opt_extract_opal_dump_cmd = NULL;
@@ -810,8 +804,8 @@ int main(int argc, char *argv[])
 			break;
 		case 'c':
 			errno = 0;
-			opt_max_serviceable_logs = strtol(optarg, 0, 0);
-			if(errno || opt_max_serviceable_logs < 0) {
+			max_serviceable_logs = strtol(optarg, 0, 0);
+			if(errno || max_serviceable_logs < 0) {
 				fprintf(stderr,"Invalid input for -c\n");
 				exit(EXIT_FAILURE);
 			}
@@ -845,9 +839,7 @@ int main(int argc, char *argv[])
 	 * logs, if the user has not specified explicitly
 	 */
 	max_info_logs = opt_max_logs;
-	if (opt_max_serviceable_logs) {
-		max_serviceable_logs = opt_max_serviceable_logs;
-	} else {
+	if (!max_serviceable_logs) {
 		max_serviceable_logs = 0.2 * opt_max_logs;
 		max_info_logs = 0.8 * opt_max_logs;
 	}

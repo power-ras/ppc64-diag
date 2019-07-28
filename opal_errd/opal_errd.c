@@ -747,7 +747,7 @@ static void help(const char* argv0)
 int main(int argc, char *argv[])
 {
 	int rc = 0;
-	int opt, elog_type;
+	int opt;
 	char sysfs_path[PATH_MAX];
 	char elog_path[PATH_MAX];
 	char dump_path[PATH_MAX];

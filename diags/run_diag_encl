@@ -2,6 +2,7 @@
 
 if [ -x /usr/sbin/diag_encl ]; then
 	/usr/sbin/diag_encl -c -s -l > /dev/null 2>&1
+	/usr/sbin/diag_encl -d > /dev/null 2>&1
 fi
 
 # Exit gracefully

@@ -1,19 +1,9 @@
 #include <stdio.h>
 #include <endian.h>
 
-#include "parse-esel-header.h"
+#include "opal-esel-parse.h"
+
 #include "print_helpers.h"
-
-int parse_esel_header(const char *buf)
-{
-	const struct esel_header* bufhdr = (struct esel_header*)buf;
-
-	if (bufhdr->record_type == ESEL_RECORD_TYPE &&
-	    bufhdr->signature == ESEL_SIGNATURE)
-		return 1;
-
-	return 0;
-}
 
 int print_esel_header(const char *buf)
 {

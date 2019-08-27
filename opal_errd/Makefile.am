@@ -25,7 +25,7 @@ opal_elog_parse_h_files = \
 		opal_errd/opal-elog-parse/opal-ud-scn.h \
 		opal_errd/opal-elog-parse/opal-usr-scn.h \
 		opal_errd/opal-elog-parse/opal-v6-hdr.h \
-		opal_errd/opal-elog-parse/parse-esel-header.h \
+		opal_errd/opal-elog-parse/print-esel-header.h \
 		opal_errd/opal-elog-parse/parse_helpers.h \
 		opal_errd/opal-elog-parse/parse-opal-event.h \
 		opal_errd/opal-elog-parse/print_helpers.h \
@@ -70,7 +70,8 @@ opal_errd_opal_elog_parse_opal_elog_parse_SOURCES = \
 		opal_errd/opal-elog-parse/opal-dh-scn.c \
 		opal_errd/opal-elog-parse/opal-src-scn.c \
 		opal_errd/opal-elog-parse/opal-src-fru-scn.c \
-		opal_errd/opal-elog-parse/parse-esel-header.c \
+		opal_errd/opal-elog-parse/opal-esel-parse.c \
+		opal_errd/opal-elog-parse/print-esel-header.c \
 		$(opal_elog_parse_h_files)
 
 dist_man_MANS += opal_errd/man/opal-elog-parse.8 opal_errd/man/opal_errd.8

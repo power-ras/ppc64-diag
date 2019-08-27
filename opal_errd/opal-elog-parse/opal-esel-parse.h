@@ -1,7 +1,8 @@
-#ifndef _H_PARSE_ESEL_HEADER
-#define _H_PARSE_ESEL_HEADER
+#ifndef _H_OPAL_ESEL_PARSE
+#define _H_OPAL_ESEL_PARSE
 
 #include <inttypes.h>
+#include <stdbool.h>
 
 #define ESEL_RECORD_TYPE	0xDF
 #define ESEL_SIGNATURE		0xAA
@@ -19,7 +20,6 @@ struct esel_header {
 	uint8_t reserved[2];
 } __attribute__((packed));
 
-int parse_esel_header(const char* buf);
-int print_esel_header(const char* buf);
+bool is_esel_header(const char *buf);
 
-#endif /* _H_PARSE_ESEL_HEADER */
+#endif /* _H_OPAL_ESEL_PARSE */

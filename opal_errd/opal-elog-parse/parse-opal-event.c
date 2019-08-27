@@ -10,7 +10,8 @@
 #include "opal-event-data.h"
 #include "parse-opal-event.h"
 #include "parse_helpers.h"
-#include "parse-esel-header.h"
+#include "opal-esel-parse.h"
+#include "print-esel-header.h"
 
 int header_id_lookup(struct header_id *elog_hdr_id, int size, char *id) {
 	int i;
@@ -40,7 +41,7 @@ int parse_opal_event_log(char *buf, int buflen, struct opal_event_log_scn **r_lo
 
 	*r_log = NULL;
 
-	if (parse_esel_header(buf)) {
+	if (is_esel_header(buf)) {
 		print_esel_header(buf);
 		buf += sizeof(struct esel_header);
 	}

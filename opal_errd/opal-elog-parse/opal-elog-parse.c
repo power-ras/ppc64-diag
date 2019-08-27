@@ -35,8 +35,8 @@
 #include "libopalevents.h"
 #include "opal-event-data.h"
 #include "parse-opal-event.h"
-#include "parse-esel-header.h"
 #include "opal-elog.h"
+#include "opal-esel-parse.h"
 
 #define DEFAULT_opt_platform_dir "/var/log/opal-elog"
 char *opt_platform_dir = DEFAULT_opt_platform_dir;
@@ -248,7 +248,7 @@ int elogdisplayfile(char *elog_path, uint32_t eid, int display_all)
 	}
 
 	/* Looking for the logid won't work if the eSEL header isn't accounted for. */
-	if (parse_esel_header(buffer))
+	if (is_esel_header(buffer))
 		offset += sizeof(struct esel_header);
 
 	logid = be32toh(*(uint32_t*)(buffer+offset));
@@ -306,7 +306,7 @@ int elogdisplayentry(uint32_t eid, int display_all)
 			continue;
 		}
 
-		if (parse_esel_header(buffer))
+		if (is_esel_header(buffer))
 			offset += sizeof(struct esel_header);
 
 		logid = be32toh(*(uint32_t*)(buffer+offset));
@@ -345,7 +345,7 @@ int elog_summary(char *elog_path, uint32_t service_flag)
 		ret = -1;
 	} else {
 		/* If the file is an eSEL, we need to ignore the header. */
-		if (parse_esel_header(buffer))
+		if (is_esel_header(buffer))
 			print_elog_summary(buffer + sizeof(struct esel_header),
 					   sz, service_flag);
 		else
@@ -393,7 +393,7 @@ int eloglist(uint32_t service_flag)
 			fprintf(stderr, "Partially read elog, cannot parse\n");
 		} else {
 			/* If the file is an eSEL, we need to ignore the header */
-			if (parse_esel_header(buffer))
+			if (is_esel_header(buffer))
 				print_elog_summary(buffer+sizeof(struct esel_header),
 						   sz, service_flag);
 			else

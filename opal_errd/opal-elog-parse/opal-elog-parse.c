@@ -36,34 +36,10 @@
 #include "opal-event-data.h"
 #include "parse-opal-event.h"
 #include "parse-esel-header.h"
+#include "opal-elog.h"
 
 #define DEFAULT_opt_platform_dir "/var/log/opal-elog"
 char *opt_platform_dir = DEFAULT_opt_platform_dir;
-
-#define ELOG_COMMIT_TIME_OFFSET	0x10
-#define ELOG_CREATOR_ID_OFFSET	0x18
-#define ELOG_ID_OFFSET		0x2c
-#define ELOG_SEVERITY_OFFSET	0x3a
-#define ELOG_ACTION_OFFSET	0x42
-#define ELOG_SRC_OFFSET		0x78
-#define OPAL_ERROR_LOG_MAX	16384
-/* Service Action or Customer Attention Required */
-#define ELOG_ACTION_FLAG	0x8000
-
-#define ELOG_SRC_SIZE		8
-#define OPAL_ERROR_LOG_MAX	16384
-#define ELOG_BUF_MAX		OPAL_ERROR_LOG_MAX * 10
-
-#define ELOG_MIN_READ_OFFSET	ELOG_SRC_OFFSET + ELOG_SRC_SIZE
-
-/* Severity of the log */
-#define OPAL_INFORMATION_LOG    0x00
-#define OPAL_RECOVERABLE_LOG    0x10
-#define OPAL_PREDICTIVE_LOG     0x20
-#define OPAL_UNRECOVERABLE_LOG  0x40
-#define OPAL_CRITICAL_LOG	0x50
-#define OPAL_DIAGNOSTICS_LOG	0x60
-#define OPAL_SYMPTOM_LOG	0x70
 
 void print_usage(char *command)
 {
@@ -237,7 +213,7 @@ void print_elog_summary(char *buffer, int bufsz, uint32_t service_flag)
 	src[ELOG_SRC_SIZE] = '\0';
 	severity = buffer[ELOG_SEVERITY_OFFSET];
 	action = be16toh(*(uint16_t *)(buffer + ELOG_ACTION_OFFSET));
-	plus = ((action & ELOG_ACTION_FLAG) == ELOG_ACTION_FLAG);
+	plus = ((action & ELOG_ACTION_FLAG_SERVICE) == ELOG_ACTION_FLAG_SERVICE);
 	parse = get_severity_desc(severity & 0xF0);
 	/* & with 0xF0 to get only the category of severity, not the full description */
 

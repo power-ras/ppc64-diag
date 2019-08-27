@@ -50,6 +50,7 @@
 #include <libudev.h>
 #include <sys/wait.h>
 
+#include "opal-elog-parse/opal-elog.h"
 #include "opal-elog-parse/opal-event-data.h"
 #define INOTIFY_FD	0
 #define UDEV_FD		1
@@ -70,33 +71,6 @@
  * ELOG retention policy
  */
 #define DEFAULT_MAX_ELOGS		1000
-
-/*
- * As per PEL v6 (defined in PAPR spec) fixed offset for
- * error log information.
- */
-#define ELOG_SRC_SIZE		8
-
-#define ELOG_DATE_OFFSET	0x8
-#define ELOG_TIME_OFFSET	0xc
-#define ELOG_ID_OFFSET		0x2c
-#define ELOG_SEVERITY_OFFSET	0x3a
-#define ELOG_SUBSYSTEM_OFFSET	0x38
-#define ELOG_ACTION_OFFSET	0x42
-#define ELOG_SRC_OFFSET		0x78
-#define ELOG_MIN_READ_OFFSET	ELOG_SRC_OFFSET + ELOG_SRC_SIZE
-
-/* Severity of the log */
-#define OPAL_INFORMATION_LOG	0x00
-#define OPAL_RECOVERABLE_LOG	0x10
-#define OPAL_PREDICTIVE_LOG	0x20
-#define OPAL_UNRECOVERABLE_LOG	0x40
-#define OPAL_CRITICAL_LOG	0x50
-#define OPAL_DIAGNOSTICS_LOG	0x60
-#define OPAL_SYMPTOM_LOG	0x70
-
-#define ELOG_ACTION_FLAG_SERVICE	0x8000
-#define ELOG_ACTION_FLAG_CALL_HOME	0x0800
 
 volatile int terminate;
 

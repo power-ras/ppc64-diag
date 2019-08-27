@@ -38,7 +38,9 @@ sbin_PROGRAMS += opal_errd/extract_opal_dump \
 opal_errd_extract_opal_dump_SOURCES = opal_errd/extract_opal_dump.c
 
 opal_errd_opal_errd_SOURCES = opal_errd/opal_errd.c \
-			      opal_errd/opal-elog-parse/opal-event-data.c
+			      opal_errd/opal-elog-parse/opal-event-data.c \
+			      opal_errd/opal-elog-parse/opal-esel-parse.c
+
 opal_errd_opal_errd_LDADD = -ludev
 
 opal_errd_opal_elog_parse_opal_elog_parse_SOURCES = \

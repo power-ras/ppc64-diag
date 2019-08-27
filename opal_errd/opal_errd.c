@@ -52,6 +52,8 @@
 
 #include "opal-elog-parse/opal-elog.h"
 #include "opal-elog-parse/opal-event-data.h"
+#include "opal-elog-parse/opal-esel-parse.h"
+
 #define INOTIFY_FD	0
 #define UDEV_FD		1
 #define POLL_TIMEOUT	1000 /* In milliseconds */
@@ -79,7 +81,6 @@ enum {
 	OPAL_ELOG_INFORMATIONAL,
 	OPAL_ELOG_SERVICEABLE
 };
-
 
 /* NB: All suffixes to be of same length */
 #define ELOG_FILE_SUFFIX_SRVC		"srvc"
@@ -233,6 +234,130 @@ static int is_informational_elog_file(const struct dirent *d)
 		return 1;
 
 	return 0;
+}
+
+static int is_suffixless_elog_filename(const struct dirent *d)
+{
+	if (strstr(d->d_name, "-0x") && is_regular_file(d) &&
+	    (get_elog_filetype(d->d_name) == OPAL_ELOG_INVALID))
+		return 1;
+
+	return 0;
+}
+
+static int get_elog_type_from_file_data(char *path)
+{
+	struct stat sbuf;
+	struct esel_header eselhdr;
+	void *buf = &eselhdr;
+	uint16_t action;
+	int elog_type = OPAL_ELOG_INVALID;
+	int fd = -1;
+	size_t bufsz, readsz;
+	off_t seek_loc;
+
+	if (stat(path, &sbuf) == -1)
+		return elog_type;
+
+	bufsz = sbuf.st_size;
+	if (bufsz > OPAL_ERROR_LOG_MAX)
+		return elog_type;
+
+	fd = open(path, O_RDONLY);
+	if (fd < 0)
+		return elog_type;
+
+	readsz = read(fd, &eselhdr, sizeof(eselhdr));
+	if (readsz < sizeof(eselhdr))
+		goto out;
+
+	seek_loc = ELOG_ACTION_OFFSET;
+	if(is_esel_header(buf))
+		seek_loc += sizeof(eselhdr);
+
+	if(lseek(fd, seek_loc, SEEK_SET) < 0)
+		goto out;
+
+	readsz = read(fd, &action, sizeof(uint16_t));
+	if ((be16toh(action) & ELOG_ACTION_FLAG_SERVICE) ||
+	    (be16toh(action) & ELOG_ACTION_FLAG_CALL_HOME))
+		elog_type = OPAL_ELOG_SERVICEABLE;
+	else
+		elog_type = OPAL_ELOG_INFORMATIONAL;
+
+out:
+	if (fd != -1)
+		close(fd);
+
+	return elog_type;
+}
+
+/*
+ * The pruning logic depends on the file name formatting to determine the log
+ * type before considering them for pruning. The old log files which are in
+ * the naming format of <timestamp>-<logid> are renamed here to
+ * <timestamp>-<logid>-<elog_type>.
+ */
+static void rename_old_logs(const char *output_dir)
+{
+	int n;
+	int dir_fd = -1;
+	size_t i;
+	char oldname[PATH_MAX];
+	char newname[PATH_MAX];
+	int elog_type;
+	char *out_dir = NULL;
+	struct dirent **namelist;
+	struct dirent *dirent;
+
+	n = scandir(output_dir, &namelist, is_suffixless_elog_filename, alphasort);
+	if (n < 0)
+		return;
+
+	for (i = 0; i < n; i++) {
+		dirent = namelist[i];
+		if (dirent->d_name[0] == '.') {
+			free(namelist[i]);
+			continue;
+		}
+
+		snprintf(oldname, sizeof(oldname), "%s/%s",
+			 output_dir, dirent->d_name);
+
+		elog_type = get_elog_type_from_file_data(oldname);
+		if (elog_type == OPAL_ELOG_INVALID) {
+			free(namelist[i]);
+			continue; /* Delete the file here ? */
+		}
+
+		snprintf(newname, sizeof(newname), "%s-%s",
+			 oldname, ELOG_TYPE_STR(elog_type));
+
+		if (rename(oldname, newname) < 0) {
+			syslog(LOG_WARNING, "Couldn't rename logfile %s to "
+			       "%s : %s\n", oldname, newname, strerror(errno));
+		}
+		free(namelist[i]);
+	}
+	free(namelist);
+
+	out_dir = strdup(output_dir);
+	if (!out_dir)
+		return;
+
+	dir_fd = open(dirname(out_dir), O_RDONLY|O_DIRECTORY);
+	if (dir_fd == -1) {
+		syslog(LOG_NOTICE, "Failed to open platform elog directory: %s"
+		       " (%d:%s)\n", out_dir, errno, strerror(errno));
+	} else {
+		if (fsync(dir_fd) == -1)
+			syslog(LOG_NOTICE, "Failed to sync platform elog "
+			       "directory: %s (%d:%s)\n",
+			       out_dir, errno, strerror(errno));
+		close(dir_fd);
+	}
+
+	free(out_dir);
 }
 
 static void rotate_logs(const char *elog_dir, int max_logs, int elog_type)
@@ -917,6 +1042,8 @@ int main(int argc, char *argv[])
 			goto exit;
 		}
 	}
+
+	rename_old_logs(opt_output_dir);
 
 	fds[INOTIFY_FD].events = POLLIN;
 	fds[UDEV_FD].events = POLLIN;

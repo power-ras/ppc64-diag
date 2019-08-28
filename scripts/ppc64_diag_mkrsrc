@@ -149,7 +149,7 @@ if (-e "/proc/device-tree/ibm,converged-loc-codes") {
 }
 
 # Retrieve Extended Error Data (EED)
-mkdir "/tmp/diagSEsnap", 0775;
+mkdir "/tmp/diagSEsnap", 0700 || die "mkdir failed: $!";
 $general_eed_file = "/tmp/diagSEsnap/snapH.tar.gz";
 system("/usr/sbin/snap -o $general_eed_file 2>/dev/null 1>&2");
 $cstop_eed_file = "";

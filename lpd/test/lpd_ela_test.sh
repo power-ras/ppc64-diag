@@ -22,7 +22,7 @@ EXECUTION_LOG="$LOG_DIR/$SCRIPT_NAME.log"
 ERROR_LOG="$LOG_DIR/$SCRIPT_NAME.err"
 
 TMP_DIR="/var/tmp/ras"
-mkdir -p $TMP_DIR
+mkdir $TMP_DIR || exit 1
 MESSAGE_FILE="$TMP_DIR/messages"
 TMP_FILE="$TMP_DIR/$SCRIPT_NAME.tmp"
 

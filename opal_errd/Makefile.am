@@ -1,5 +1,6 @@
 opal_elog_parse_h_files = \
 		opal_errd/opal-elog-parse/libopalevents.h \
+		opal_errd/opal-elog-parse/opal-elog.h \
 		opal_errd/opal-elog-parse/opal-ch-scn.h \
 		opal_errd/opal-elog-parse/opal-datetime.h \
 		opal_errd/opal-elog-parse/opal-dh-scn.h \
@@ -26,6 +27,7 @@ opal_elog_parse_h_files = \
 		opal_errd/opal-elog-parse/opal-usr-scn.h \
 		opal_errd/opal-elog-parse/opal-v6-hdr.h \
 		opal_errd/opal-elog-parse/print-esel-header.h \
+		opal_errd/opal-elog-parse/opal-esel-parse.h \
 		opal_errd/opal-elog-parse/parse_helpers.h \
 		opal_errd/opal-elog-parse/parse-opal-event.h \
 		opal_errd/opal-elog-parse/print_helpers.h \

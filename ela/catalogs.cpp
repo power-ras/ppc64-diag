@@ -930,7 +930,11 @@ MatchVariant::compute_regex_text(void)
 		goto free_mem;
 	}
 
-	fgets(regex_cstr,REGEX_MAXLEN, in);
+	if (fgets(regex_cstr, REGEX_MAXLEN, in) == NULL) {
+		parent->parser->semantic_error("cannot read regex text");
+		spclose(in, cpid);
+		goto free_mem;
+	}
 
 	spclose(in, cpid);
 

@@ -244,8 +244,7 @@ static int add_drconf_phandles()
 		return -1;
 	}
 
-	(void)fread(membuf, sbuf.st_size, 1, fd);
-	if (ferror(fd)) {
+	if ((fread(membuf, sbuf.st_size, 1, fd) < sbuf.st_size) && ferror(fd)) {
 		fclose(fd);
 		free(membuf);
 		return -1;

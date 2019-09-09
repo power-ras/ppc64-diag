@@ -143,7 +143,12 @@ int read_elog(char path[], char **buf){
 	int ret = 0;
 	int platform_log_fd = -1;
 
-	chdir(opt_platform_dir);
+	if (chdir(opt_platform_dir) < 0) {
+		fprintf(stderr, "Failed to change to platform log directory"
+				": %s\n", opt_platform_dir);
+		return -1;
+	}
+
 	if (stat(path, &sbuf) == -1){
 		fprintf(stderr, "Error accessing %s\n",path);
 		return -1;

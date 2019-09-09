@@ -86,7 +86,8 @@ daemonize(void)
 		goto daemonize_error;
 
 	/* change to a safe dir */
-	chdir("/");
+	if (chdir("/") < 0)
+		goto daemonize_error;
 
 	/* clear file mode mask */
 	umask(0);

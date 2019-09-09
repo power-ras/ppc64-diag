@@ -374,16 +374,20 @@ static void rotate_logs(const char *elog_dir, int max_logs, int elog_type)
 	else
 		filter = &is_informational_elog_file;
 
-        /* Retrieve file list */
-        chdir(elog_dir);
-        nfiles = scandir(elog_dir, &filelist, filter, alphasort);
-        if (nfiles < 0) {
+	/* Retrieve file list */
+	if (chdir(elog_dir) < 0) {
+		syslog(LOG_NOTICE, "chdir failed\n");
+		return;
+	}
+
+	nfiles = scandir(elog_dir, &filelist, filter, alphasort);
+	if (nfiles < 0) {
 		syslog(LOG_NOTICE, "Error scanning the log directory %s\n",
 					elog_dir);
 		return;
 	}
 
-        for (i = 0; i < nfiles; i++) {
+	for (i = 0; i < nfiles; i++) {
 		if (!trim){
 			free(filelist[i]);
 			continue;
@@ -1072,8 +1076,14 @@ int main(int argc, char *argv[])
 			 * event, we'll just scan the directory anyway
 			 */
 			rc = poll(fds, sizeof(fds)/sizeof(struct pollfd), POLL_TIMEOUT);
-			if (rc > 0 && fds[INOTIFY_FD].revents)
-				read(fds[INOTIFY_FD].fd, inotifybuf, sizeof(inotifybuf));
+			if (rc > 0 && fds[INOTIFY_FD].revents) {
+				if (read(fds[INOTIFY_FD].fd, inotifybuf, sizeof(inotifybuf)) == -1) {
+					syslog(LOG_WARNING, "Can not read platform log directory:"
+					       " (%d:%s)\n", errno, strerror(errno));
+					goto exit;
+				}
+			}
+
 			if (rc > 0 && fds[UDEV_FD].revents) {
 				udev_dev = udev_monitor_receive_device(udev_mon);
 				devpath = udev_device_get_devpath(udev_dev);

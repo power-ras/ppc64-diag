@@ -434,8 +434,8 @@ int main(int argc, char *argv[])
 	int opt = 0, ret = 0;
 	int arg_cnt = 0;
 	char do_operation = '\0';
-	const char *eid_opt;
-	char *elog_path;
+	const char *eid_opt = NULL;
+	char *elog_path = NULL;
 	int opt_display_file = 0;
 	int opt_display_all = 0;
 

@@ -566,6 +566,9 @@ process_pre_v6(struct event *event)
 
 	dbg("Processing pre-v6 event");
 
+	memset(&sigdev, 0, sizeof(struct device_ela));
+	memset(&sendev, 0, sizeof(struct device_ela));
+
         /* Reset for this analysis */
         if (event->loc_codes != NULL) {
                 free(event->loc_codes);
@@ -3000,7 +3003,7 @@ process_refcodes(struct event *event, short *refc, int rlen)
 	int i, j;
 	short src_type;
 	int one2one;
-	char *lcc;
+	char *lcc = NULL;
 	int predictive_error = 0;
 	struct event_description_pre_v6 *e_desc;
 	char *loc;

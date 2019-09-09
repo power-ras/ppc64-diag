@@ -27,7 +27,7 @@ int parse_opal_event_log(char *buf, int buflen, struct opal_event_log_scn **r_lo
 				HEADER_ORDER
 	};
 
-	int rc;
+	int rc = -1;
 	struct opal_v6_hdr hdr;
 	struct opal_priv_hdr_scn *ph;
 	int header_pos;

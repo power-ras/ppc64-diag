@@ -736,7 +736,7 @@ UI_commit(WINDOW *my_menu_win, MENU *my_menu,
 	ITEM	**items;
 	ITEM	*cur;
 	WINDOW	*my_help_win;
-	struct	loc_code *loc;
+	struct	loc_code *loc = NULL;
 
 	getmaxyx(stdscr, y, x);
 	my_help_win = newwin(6, 55, y - 7, (x - 55)/2);
@@ -789,6 +789,10 @@ UI_commit(WINDOW *my_menu_win, MENU *my_menu,
 				if (rc)
 					err = 1;
 			} else {
+				if (!loc) {
+					err = 1;
+					continue;
+				}
 				rc = set_indicator_state(LED_TYPE_IDENT, loc,
 							 ident ? LED_STATE_OFF : LED_STATE_ON);
 

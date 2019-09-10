@@ -123,6 +123,11 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Tue Sep 10 2019 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.7.6
+- opal_errd: Enhance the purging logic of rotate_logs
+- diags/cronjob: Include disk diagnostics
+- CVE fixes
+
 * Thu Apr 25 2019 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.7.5
 - usysident: Add option to scan only the system indicators
 - scripts: Fix service scripts

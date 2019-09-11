@@ -12,7 +12,7 @@ URL:		http://sourceforge.net/projects/linux-diag/files/ppc64-diag/
 Packager:	IBM Corp.
 Vendor:		IBM Corp.
 ExclusiveArch:	ppc ppc64 ppc64le
-BuildRequires:	libservicelog-devel, flex, perl, /usr/bin/yacc
+BuildRequires:	libservicelog-devel, flex, perl, /usr/bin/bison
 BuildRequires:	librtas-devel >= 1.4.0
 BuildRequires:	ncurses-devel
 %if (0%{?fedora} || 0%{?rhel} || 0%{?centos})

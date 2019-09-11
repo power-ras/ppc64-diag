@@ -19,7 +19,6 @@ AC_PROG_INSTALL
 AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 AC_PROG_CXX
-AC_PROG_YACC
 AC_PROG_LEX
 AC_PROG_AWK
 AC_PROG_LN_S
@@ -117,11 +116,9 @@ AC_COMPILE_IFELSE(
 		  )
 AC_LANG_POP
 
-# yacc/flex check
-#  - In SLES: bison provides yacc interface
-#  - In RHEL: byacc provides yacc interface
-AC_CHECK_PROG(YACC, yacc, yacc)
-AS_IF([test -z "$YACC"], [AC_MSG_ERROR([yacc command is required for ppc64-diag])])
+# bison/flex check
+AC_CHECK_PROG(YACC, bison, bison)
+AS_IF([test -z "$YACC"], [AC_MSG_ERROR([bison command is required for ppc64-diag])])
 AC_CHECK_PROG(FLEX, flex, flex)
 AS_IF([test -z "$FLEX"], [AC_MSG_ERROR([flex command is required for ppc64-diag])])
 

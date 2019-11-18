@@ -1,0 +1,8 @@
+FROM fedora:rawhide
+
+
+RUN dnf -y install gcc git xz make g++ libtool perl which flex bison rpm-build
+RUN dnf -y install dtc servicelog powerpc-utils lsvpd libvpd-devel
+RUN dnf -y install libservicelog-devel librtas-devel ncurses-devel systemd-devel
+COPY . /build/
+WORKDIR /build

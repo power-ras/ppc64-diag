@@ -8,7 +8,7 @@ Release:	%{release}
 Summary:	PowerLinux Platform Diagnostics
 Group:		System Environment/Base
 License:	GNU General Public License (GPL)
-URL:		http://sourceforge.net/projects/linux-diag/files/ppc64-diag/
+URL:		https://github.com/power-ras/ppc64-diag
 Packager:	IBM Corp.
 Vendor:		IBM Corp.
 ExclusiveArch:	ppc ppc64 ppc64le

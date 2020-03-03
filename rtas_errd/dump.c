@@ -19,8 +19,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
@@ -163,8 +166,8 @@ void
 check_scanlog_dump(void)
 {
 	int rc, in = -1, out = -1, bytes;
-	char *temp;
-	char scanlog_filename[80], scanlog_filename_bak[85];
+	char *temp = NULL;
+	char *scanlog_file = NULL, *scanlog_file_bak = NULL;
 	char *dump_buf = NULL;
 
 	rc = load_scanlog_module(1);
@@ -173,27 +176,33 @@ check_scanlog_dump(void)
 
 	/* A dump exists;  copy it off to the filesystem */
 	if ((temp = get_machine_serial()) != 0) {
-		sprintf(scanlog_filename, "%sscanoutlog.%s",
-			d_cfg.scanlog_dump_path, temp);
+		if (asprintf(&scanlog_file, "%sscanoutlog.%s",
+			d_cfg.scanlog_dump_path, temp) < 0) {
+			free(temp);
+			goto scanlog_out;
+		}
 		free(temp);
 	}
 	else {
-		sprintf(scanlog_filename, "%sscanoutlog.NOSERIAL",
-			d_cfg.scanlog_dump_path);
+		if (asprintf(&scanlog_file, "%sscanoutlog.NOSERIAL",
+			     d_cfg.scanlog_dump_path) < 0)
+			goto scanlog_out;
 	}
 
-	if (!access(scanlog_filename, F_OK)) {
+	if (!access(scanlog_file, F_OK)) {
 		/* A scanlog dump already exists on the filesystem;
 		 * rename it with a .bak extension. 
 		 */
-		sprintf(scanlog_filename_bak, "%s.bak", scanlog_filename);
-		rc = rename(scanlog_filename, scanlog_filename_bak);
+		if (asprintf(&scanlog_file_bak, "%s.bak", scanlog_file) < 0)
+			goto scanlog_out;
+		rc = rename(scanlog_file, scanlog_file_bak);
 		if (rc) {
 			log_msg(NULL, "Could not rename %s, an existing "
 				"scanlog dump will be copied over by a new "
-				"dump, %s", scanlog_filename, strerror(errno));
+				"dump, %s", scanlog_file, strerror(errno));
 		}
 	}
+	free(scanlog_file_bak);
 
 	in = open(SCANLOG_DUMP_FILE, O_RDONLY);
 	if (in <= 0) {
@@ -202,11 +211,11 @@ check_scanlog_dump(void)
 		goto scanlog_error;
 	}
 
-	out = open(scanlog_filename, O_WRONLY | O_CREAT | O_TRUNC,
+	out = open(scanlog_file, O_WRONLY | O_CREAT | O_TRUNC,
 			S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 	if (out <= 0) {
 		log_msg(NULL, "Could not open %s for writing, %s",
-			scanlog_filename, strerror(errno));
+			scanlog_file, strerror(errno));
 		goto scanlog_error;
 	}
 
@@ -221,7 +230,7 @@ check_scanlog_dump(void)
 		rc = write(out, dump_buf, bytes);
 		if (rc < bytes) {
 			log_msg(NULL, "Could not write to %s, %s",
-				scanlog_filename, strerror(errno));
+				scanlog_file, strerror(errno));
 			goto scanlog_error;
 		}
 	}
@@ -230,7 +239,7 @@ check_scanlog_dump(void)
 		log_msg(NULL, "Could not read from %s, %s", SCANLOG_DUMP_FILE,
 			strerror(errno));
 
-	temp = scanlog_filename + strlen(d_cfg.scanlog_dump_path);
+	temp = scanlog_file + strlen(d_cfg.scanlog_dump_path);
 	scanlog = strdup(temp);
 	if (scanlog == NULL) {
 		log_msg(NULL, "Could not allocate space for scanlog filename, "
@@ -239,6 +248,7 @@ check_scanlog_dump(void)
 	} /* strdup(scanlog) */
 
 scanlog_out:
+	free(scanlog_file);
 	if (in != -1)
 		close(in);
 	if (out != -1)
@@ -276,7 +286,7 @@ check_platform_dump(struct event *event)
 	struct rtas_dump_scn *dump_scn;
 	uint64_t dump_tag;
 	char	filename[DUMP_MAX_FNAME_LEN + 20], *pos;
-	char	pathname[DUMP_MAX_FNAME_LEN + 40];
+	char	*pathname = NULL;
 	FILE	*f;
 	int	rc, bytes;
 	char    *system_args[3] = {NULL, };     /* execv arguments      */
@@ -344,10 +354,14 @@ check_platform_dump(struct event *event)
 		bytes += (4 - (bytes % 4));
 	dump_scn->id_len = bytes;
 
-	snprintf(pathname, DUMP_MAX_FNAME_LEN + 40, "%s/%s",
-		 d_cfg.platform_dump_path, filename);
+	if (asprintf(&pathname, "%s/%s",
+		 d_cfg.platform_dump_path, filename) < 0) {
+		dbg("%s: Failed to allocate memory", __func__);
+		return;
+	}
 	platform_log_write("Platform Dump Notification\n");
 	platform_log_write("    Dump Location: %s\n", pathname);
+	free(pathname);
 
 	return;
 }

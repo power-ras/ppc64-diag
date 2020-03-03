@@ -19,6 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -172,7 +173,7 @@ remove_old_dumpfiles(char *dumpname, int prefix_size)
 {
 	struct dirent	*entry;
 	DIR		*dir;
-	char		pathname[DUMP_MAX_FNAME_LEN + 40];
+	char		*pathname = NULL;
 
 	dir = opendir(d_cfg.platform_dump_path);
 	while ((entry = readdir(dir)) != NULL) {
@@ -182,8 +183,11 @@ remove_old_dumpfiles(char *dumpname, int prefix_size)
 			continue;
 
 		if (strncmp(dumpname, entry->d_name, prefix_size) == 0) {
-			sprintf(pathname, "%s%s", d_cfg.platform_dump_path,
-				entry->d_name);
+			if (asprintf(&pathname, "%s%s", d_cfg.platform_dump_path,
+				 entry->d_name) < 0) {
+				msg("%s:%d : Could not allocate memory", __func__, __LINE__);
+				continue;
+			}
 
 			msg("Deleting file %s", pathname);
 			if (unlink(pathname) < 0) {
@@ -193,6 +197,7 @@ remove_old_dumpfiles(char *dumpname, int prefix_size)
 					"be saved anyways.", pathname,
 					dumpname, strerror(errno));
 			}
+			free(pathname);
 		}
 	}
 

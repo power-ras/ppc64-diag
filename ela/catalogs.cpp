@@ -40,6 +40,11 @@ using namespace std;
 extern FILE *spopen(char **, pid_t *) __attribute__((weak));
 extern FILE *spclose(FILE *, pid_t)  __attribute__((weak));
 
+/* dead code, for now ignore the compiler warning */
+#if __GNUC__ >= 7
+# pragma GCC diagnostic ignored "-Wformat-overflow"
+#endif
+
 //Workaround for deprecated warning
 #pragma GCC diagnostic ignored "-Wwrite-strings"
 

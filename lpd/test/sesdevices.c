@@ -21,6 +21,8 @@
  * @author      Vasant Hegde <hegdevasant@linux.vnet.ibm.com>
  */
 
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -58,7 +60,7 @@ int main()
 {
 	int	i;
 	int	count = 0;
-	char	path[128];
+	char	*path = NULL;
 	DIR	*dir;
 	struct	dirent *dirent;
 	struct	dev_vpd *vpd = NULL;
@@ -74,15 +76,20 @@ int main()
 		trim_location_code(v1);
 
 		/* read sg name */
-		snprintf(path, 128, "%s/%s/device/scsi_generic",
-			 SCSI_SES_PATH, v1->dev);
+		if (asprintf(&path, "%s/%s/device/scsi_generic",
+			     SCSI_SES_PATH, v1->dev) < 0) {
+			fprintf(stderr, "Unable to allocate memory\n");
+			continue;
+		}
 
 		dir = opendir(path);
 		if (!dir) {
 			fprintf(stderr,
 				"Unable to open directory : %s\n", path);
+			free(path);
 			continue;
 		}
+		free(path);
 
 		/* fill sg device name */
 		while ((dirent = readdir(dir)) != NULL) {

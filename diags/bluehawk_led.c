@@ -16,6 +16,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#define _GNU_SOURCE
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -52,6 +54,11 @@ bh_decode_component_loc(const char *loc, enum bh_component_type *type,
 {
 	unsigned int n, n2;
 	char g;		/* catch trailing garbage */
+
+	/* NB: COMP_LOC_CODE is max 16 char wide, and index is formatted as
+	 *     unsigned char when the total size is suspected to go beyond 16.
+	 *     So, the value cant go above 255. Reconsider increasing the
+	 *     width when max value of range goes higher. */
 
 	if (!loc || !strcmp(loc, "-")) {
 		*type = BHC_ENCLOSURE;
@@ -141,8 +148,8 @@ bh_report_component(struct bluehawk_diag_page2 *dp, int fault, int ident,
 						loc_code, desc, verbose);
 		break;
 	case BHC_SAS_CONNECTOR:
-		snprintf(loc_code, COMP_LOC_CODE,
-			 "P1-C%u-T%u", (i/2)+1, (i%2)+1);
+		snprintf(loc_code, COMP_LOC_CODE, "P1-C%u-T%u",
+			 (unsigned char)((i/2)+1), (unsigned char)((i%2)+1));
 		snprintf(desc, COMP_DESC_SIZE,
 			 "%s SAS connector T%d", left_right[i/2], (i%2)+1);
 		REPORT_COMPONENT(dp, sas_connector_status[i], fault, ident,

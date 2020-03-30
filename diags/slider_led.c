@@ -17,6 +17,8 @@
  * USA.
  */
 
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -67,6 +69,11 @@ slider_decode_component_loc(struct slider_disk_status *disk_status,
 
 	nr_disk = ((slider_variant_flag == SLIDER_V_LFF) ?
 			 SLIDER_NR_LFF_DISK: SLIDER_NR_SFF_DISK);
+
+	/* NB: COMP_LOC_CODE is max 16 char wide, and index is formatted as
+	 *     unsigned char when the total size is suspected to go beyond 16.
+	 *     So, the value cant go above 255. Reconsider increasing the
+	 *     width when max value of the range goes higher. */
 
 	if (!loc || !strcmp(loc, "-")) { /* Enclosure */
 		*type = SLIDER_ENCLOSURE;
@@ -157,9 +164,9 @@ slider_report_component(void *dp, int fault, int ident,
 		break;
 	case SLIDER_SAS_CONNECTOR:
 		snprintf(loc_code, COMP_LOC_CODE, "P1-C%u-T%u",
-			i/SLIDER_NR_SAS_CONNECTOR_PER_EXPANDER + 1,
-			i - ((i/SLIDER_NR_SAS_CONNECTOR_PER_EXPANDER)
-				* SLIDER_NR_SAS_CONNECTOR_PER_EXPANDER) + 1);
+			(unsigned char)(i/SLIDER_NR_SAS_CONNECTOR_PER_EXPANDER + 1),
+			(unsigned char)(i - ((i/SLIDER_NR_SAS_CONNECTOR_PER_EXPANDER)
+				* SLIDER_NR_SAS_CONNECTOR_PER_EXPANDER) + 1));
 		snprintf(desc, COMP_DESC_SIZE,
 			"SAS connector on %s ESM ",
 			left_right[i/SLIDER_NR_SAS_CONNECTOR_PER_EXPANDER]);

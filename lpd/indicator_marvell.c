@@ -22,6 +22,8 @@
  * @author	Douglas Miller <dougmill@us.ibm.com>
  */
 
+#define _GNU_SOURCE
+
 #include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
@@ -288,7 +290,7 @@ static int
 mv_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 {
 	struct	loc_code *list_curr, *list_new;
-	char	path[PATH_MAX], symlink[PATH_MAX];
+	char	*block_path, path[PATH_MAX], symlink[PATH_MAX];
 	char	*ata_device, *host;
 	ssize_t	len;
 
@@ -297,13 +299,18 @@ mv_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 		return 0;
 
 	/* read the '/sys/block/sdX' symlink to '../device/pci.../sdX' */
-	snprintf(path, PATH_MAX, "%s/%s", SYS_BLOCK_PATH, vpd->dev);
-
-	len = readlink(path, symlink, PATH_MAX);
-	if (len < 0) {
-		log_msg("Unable to read the contents of symbolic link '%s'", path);
+	if (asprintf(&block_path, "%s/%s", SYS_BLOCK_PATH, vpd->dev) < 0) {
+		log_msg("Out of memory");
 		return -1;
 	}
+
+	len = readlink(block_path, symlink, PATH_MAX);
+	if (len < 0) {
+		log_msg("Unable to read the contents of symbolic link '%s'", block_path);
+		free(block_path);
+		return -1;
+	}
+	free(block_path);
 	symlink[len] = '\0';
 
 	/*

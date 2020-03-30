@@ -32,8 +32,8 @@ struct ppc64_diag_config {
 	unsigned int		flags;
 	int			min_processors;
 	int			min_entitled_capacity;
-	char			scanlog_dump_path[1024];
-	char			platform_dump_path[1024];
+	char			scanlog_dump_path[512];
+	char			platform_dump_path[512];
 	int			restart_policy;
 	void			(*log_msg)(char *, ...);
 };

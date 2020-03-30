@@ -60,7 +60,7 @@ extern char *scanlog;
 extern struct servicelog *slog;
 
 #define RTAS_ERROR_LOG_MAX	4096
-#define ADDL_TEXT_MAX		256
+#define ADDL_TEXT_MAX		1024
 
 #ifndef MAX
 #define MAX(x,y)	((x) > (y) ? (x) : (y))

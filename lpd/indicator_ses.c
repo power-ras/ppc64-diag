@@ -20,6 +20,7 @@
  *
  * @author	Vasant Hegde <hegdevasant@linux.vnet.ibm.com>
  */
+#define _GNU_SOURCE
 
 #define _GNU_SOURCE
 
@@ -246,6 +247,7 @@ ses_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 {
 	char	buf[128];
 	char	*desc;
+	char	*loc_desc;
 	char	*fru_loc;
 	char	*args[] = {SCSI_INDICATOR_CMD, "-v", "-l",
 				(char *const)vpd->dev, NULL};
@@ -311,9 +313,15 @@ ses_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 		/* lsvpd does not provide vpd data for components like power
 		 * supply inside enclosure. Lets keep the display name.
 		 */
-		if (desc)
-			snprintf(curr->ds, VPD_LENGTH, "Enclosure %s : %s",
-				 vpd->dev, desc);
+		if (desc) {
+			if (asprintf(&loc_desc, "Enclosure %s : %s",
+						vpd->dev, desc) < 0) {
+				log_msg("%s: Out of memory\n", __func__);
+				return -1;
+			}
+			strncpy(curr->ds, loc_desc, VPD_LENGTH - 1);
+			free(loc_desc);
+		}
 	}
 
 	rc = spclose(fp, cpid);

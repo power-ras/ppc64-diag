@@ -48,8 +48,8 @@ AM_LOCALS += all-local-lpd
 install-exec-hook-lpd:
 	install -d --mode=755 $(DESTDIR)/etc/ppc64-diag
 	install -D --mode=744 $(LPD_SCRIPT) $(DESTDIR)/etc/ppc64-diag/
-	$(LN_S) $(sbindir)/usysident $(DESTDIR)/$(sbindir)/usysattn
-	$(LN_S) $(sbindir)/usysident $(DESTDIR)/$(sbindir)/usysfault
+	(cd $(DESTDIR)/$(sbindir) && $(LN_S) -f usysident usysattn)
+	(cd $(DESTDIR)/$(sbindir) && $(LN_S) -f usysident usysfault)
 
 INSTALL_EXEC_HOOKS += install-exec-hook-lpd
 

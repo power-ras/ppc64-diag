@@ -134,8 +134,8 @@ char *get_elog_filename_str(const char *eid_str)
 	return get_elog_filename_int(eid);
 }
 
-int read_elog(char path[], char **buf){
-
+int read_elog(char path[], char **buf, bool skip_chdir)
+{
 	struct stat sbuf;
 	size_t bufsz;
 	ssize_t readsz = 0;
@@ -143,7 +143,7 @@ int read_elog(char path[], char **buf){
 	int ret = 0;
 	int platform_log_fd = -1;
 
-	if (chdir(opt_platform_dir) < 0) {
+	if (!skip_chdir && (chdir(opt_platform_dir) < 0)) {
 		fprintf(stderr, "Failed to change to platform log directory"
 				": %s\n", opt_platform_dir);
 		return -1;
@@ -242,7 +242,7 @@ int elogdisplayfile(char *elog_path, uint32_t eid, int display_all)
 	ssize_t sz = 0;
 	int offset = ELOG_ID_OFFSET;
 
-	sz = read_elog(elog_path, &buffer);
+	sz = read_elog(elog_path, &buffer, true);
 	if(sz < 0) {
 		return -1;
 	/* Make sure we read minimum data needed in this function */
@@ -298,7 +298,7 @@ int elogdisplayentry(uint32_t eid, int display_all)
 			continue;
 		}
 
-		sz = read_elog(filelist[i]->d_name, &buffer);
+		sz = read_elog(filelist[i]->d_name, &buffer, false);
 
 		if(sz < 0) {
 			free(filelist[i]);
@@ -341,7 +341,7 @@ int elog_summary(char *elog_path, uint32_t service_flag)
 	printf("|ID       Date       Time     SRC        Creator           Event Severity      |\n");
 	printf("|------------------------------------------------------------------------------|\n");
 
-	sz = read_elog(elog_path, &buffer);
+	sz = read_elog(elog_path, &buffer, true);
 	if (sz < 0)
 		return -1;
 
@@ -390,7 +390,7 @@ int eloglist(uint32_t service_flag)
 	}
 
 	for (i = 0; i < nfiles; i++){
-		sz = read_elog(filelist[i]->d_name, &buffer);
+		sz = read_elog(filelist[i]->d_name, &buffer, false);
 		if (sz < 0){
 			free(filelist[i]);
 			continue;

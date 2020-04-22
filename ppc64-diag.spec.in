@@ -70,7 +70,7 @@ mkdir -p $RPM_BUILD_ROOT/var/log/ppc64_diag/diag_disk
 %files
 %defattr (-,root,root,-)
 %doc /usr/share/doc/%{name}/COPYING
-%doc /usr/share/doc/%{name}/README
+%doc /usr/share/doc/%{name}/README.md
 %doc /usr/share/man/man8/*
 /usr/sbin/*
 %dir /etc/%{name}

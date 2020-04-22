@@ -82,7 +82,6 @@ lpd_test_sesdevices_SOURCES = lpd/test/sesdevices.c \
 lpd_test_sesdevices_LDADD = $(lpd_common_lib)
 
 EXTRA_DIST += $(LPD_SCRIPT) \
-	      lpd/README \
 	      lpd/test/e1000e_message \
 	      lpd/test/e1000e_message2 \
 	      lpd/test/lpd_ela_test.sh

@@ -43,6 +43,7 @@ rtas_errd_rtas_errd_SOURCES = \
 rtas_errd_rtas_errd_LDADD = -lrtas -lrtasevent -lservicelog
 
 rtas_scripts = rtas_errd/rc.powerfail
+dist_man_MANS += rtas_errd/man/rtas_errd.8
 
 install-exec-hook-rtas-errd:
 	install -d --mode=755 $(DESTDIR)/etc/

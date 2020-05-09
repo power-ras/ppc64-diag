@@ -1,0 +1,63 @@
+.TH RTAS_ERRD 8 2020-05-09 Linux ppc64-diag
+.SH NAME
+rtas_errd \- Daemon to handle the platform error(s)/event(s)
+.SH SYNOPSIS
+.nf
+\fBrtas_errd \fR[\fB\-c\fR|\fB\-\-config=\fRCONFIG_FILE]
+\fBrtas_errd \fR[\fB\-d\fR|\fB\-\-debug\fR]
+\fBrtas_errd \fR[\fB\-d\fR|\fB\-\-debug\fR [[\fB\-f\fR|\fB\-\-file=\fRTEST_FILE]|[\fB\-s\fR|\fB\-\-scenario=\fRSCENARIO_FILE]]]
+\fBrtas_errd \fR[\fB\-e\fR|\fB\-\-epowfile=\fREPOW_FILE]
+\fBrtas_errd \fR[\fB\-h\fR|\fB\-\-help\fR]
+\fBrtas_errd \fR[\fB\-l\fR|\fB\-\-logfile=\fRLOG_FILE]
+\fBrtas_errd \fR[\fB\-m\fR|\fB\-\-msgsfile=\fRMSG_FILE]
+\fBrtas_errd \fR[\fB\-p\fR|\fB\-\-platformfile=\fRPLATFORM_FILE]
+\fBrtas_errd \fR[\fB\-R\fR|\fB\-\-nodrmgr\fR]
+.fi
+
+.SH DESCRIPTION
+.P
+\fIrtas_errd\fR is a daemon that runs on pSeries platform and handles platform
+generated events/errors. It gets platform generated events via procfs. It parses
+events and takes appropriate actions like extracting platform dumps, calling
+\fBdrmgr\fR for hotplug events, etc. It also provides automated responses for
+urgent events such as environmental conditions, predictive failures, etc.
+Additionally it converts the events to human readable format and logs to
+\fIservicelog\fR database so that system administrator can view these events and
+take appropriate actions.
+.SH OPTIONS
+.TP
+\fB\-c\fR, \fB\-\-config\fR=\fI\,CONFIG_FILE\/\fR
+Path to config file (default: \fI\,/etc/ppc64\-diag/ppc64\-diag.config\/\fP).
+.TP
+\fB\-d\fR, \fB\-\-debug\fR
+Don't daemonize, used for debugging.
+.TP
+\fB\-f\fR, \fB\-\-file=\fRTEST_FILE
+The test file contains the sample PEL event that can to be proccessed by
+rtas_errd daemon.
+.TP
+\fB\-e\fR, \fB\-\-epowfile\fR=\fI\,EPOW_FILE\/\fR
+Path to EPOW status file (default: \fI\,/var/log/epow_status\/\fP). By default
+we use this path to store EPOW status, which is used by "rc.powerfail" script
+to check the EPOW status.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Help (this message).
+.TP
+\fB\-l\fR, \fB\-\-logfile\fR=\fI\,FILE\/\fR
+Path to rtas_errd debug log file (default: \fI\,/var/log/rtas_errd.log\/\fP).
+By default we log event to this file.
+.TP
+\fB\-m\fR, \fB\-\-msgsfile\fR=\fI\,MSG_FILE\/\fR
+Path to syslog. Used to read any PEL events that exists in syslog (It happens
+when we enable RTAS debug flag in kernel).
+.TP
+\fB\-p\fR, \fB\-\-platformfile\fR=\fI\,PLATFORM_FILE\/\fR
+Path to platform log (default: \fI\,/var/log/platform\/\fP). By default we log
+hex output with some description to this file.
+.TP
+\fB\-s\fR, \fB\-\-scenario=\fRSCENARIO_FILE
+Scenario file contains list of files that contains PEL logs.
+.TP
+\fB\-R\fR, \fB\-\-nodrmgr\fR
+No drmgr. Do not call \fBdrmgr\fR command to perform hotplug operations.

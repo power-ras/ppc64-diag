@@ -40,8 +40,8 @@ LPD_SCRIPT = lpd/scripts/lp_diag_setup \
 	     lpd/scripts/lp_diag_notify
 
 all-local-lpd:
-	ln -sf usysident lpd/usysattn
-	ln -sf usysident lpd/usysfault
+	$(LN_S) -f usysident lpd/usysattn
+	$(LN_S) -f usysident lpd/usysfault
 
 AM_LOCALS += all-local-lpd
 

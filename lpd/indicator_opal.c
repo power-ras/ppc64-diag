@@ -462,6 +462,11 @@ opal_get_indicator_list(int indicator, struct loc_code **list)
 	if (system_scan_flag & (1 << TYPE_MARVELL))
 		get_mv_indices(indicator, list);
 
+	if (*list == NULL) {
+		log_msg("The %s indicators are not supported on this system",
+			get_indicator_desc(indicator));
+	}
+
 	/*
 	 * The list pointer (*list) is initially NULL.
 	 * If it's not-NULL here, we found indicators.

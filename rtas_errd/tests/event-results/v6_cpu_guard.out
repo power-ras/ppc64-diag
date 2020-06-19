@@ -1,0 +1,32 @@
+Servicelog ID:      1
+Log Timestamp:      Tue Jun 16 08:36:37 2020
+Event Timestamp:    Mon Nov  1 23:52:53 2004
+Update Timestamp:   Tue Jun 16 09:36:37 2020
+Type:               Power Platform (RTAS) Event
+Severity:           4 (WARNING)
+Platform:           ppc64le
+Model/Serial:       9123-710/100035A
+Node Name:          ltc-zz14-lp8
+Reference Code:     #651300
+Serviceable Event:  No
+Predictive Event:   Yes
+Disposition:        0 (Recoverable)
+Call Home Status:   0 (None Needed)
+Status:             Closed
+Action Flags:       0100
+Event Type:         227 - Resource Deallocation Event
+Kernel ID:          1000
+Platform ID:        00000083
+Creator ID:         L - Partition Firmware
+Subsystem ID:       83 - Platform firmware
+RTAS Severity:      20 - Predictive Error, general
+Event Subtype:      80 - Dynamic Reconfiguration Event
+
+Extended Reference Codes:
+2: 00000000  3: 00000000  4: 00000000  5: 00000000
+6: 00000000  7: 00000000  8: 00000000  9: 00000000
+
+Description:
+Platform Firmware Predictive Error, general. Refer to the system service
+documentation for more information.
+

@@ -1,12 +1,12 @@
 Servicelog ID:      1
-Log Timestamp:      Wed Apr 12 12:58:50 2017
+Log Timestamp:      Wed Jun 17 04:30:12 2020
 Event Timestamp:    Mon Aug  9 16:50:52 2004
-Update Timestamp:   Wed Apr 12 12:58:50 2017
+Update Timestamp:   Wed Jun 17 04:30:12 2020
 Type:               Power Platform (RTAS) Event
 Severity:           4 (WARNING)
-Platform:           ppc64
+Platform:           ppc64le
 Model/Serial:       9406-520/100098A
-Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
+Node Name:          ltc-zz14-lp8
 Reference Code:     11001520                        
 Serviceable Event:  Yes
 Predictive Event:   No
@@ -27,7 +27,8 @@ Extended Reference Codes:
 6: 00000000  7: 00000000  8: 00000000  9: 00000000
 
 Description:
-Power/Cooling subsystem Unrecovered Error, bypassed with loss of redundancy. Refer to the system service documentation for more information.
+Power/Cooling subsystem Unrecovered Error, bypassed with loss of redundancy.
+Refer to the system service documentation for more information.
 
 
 << Callout 1 >>

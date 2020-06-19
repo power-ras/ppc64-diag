@@ -1,12 +1,12 @@
 Servicelog ID:      1
-Log Timestamp:      Wed Apr 12 12:58:48 2017
+Log Timestamp:      Tue Jun 16 10:36:32 2020
 Event Timestamp:    Fri Nov 19 02:14:51 2004
-Update Timestamp:   Wed Apr 12 13:58:48 2017
+Update Timestamp:   Tue Jun 16 11:36:32 2020
 Type:               Power Platform (RTAS) Event
 Severity:           4 (WARNING)
-Platform:           ppc64
+Platform:           ppc64le
 Model/Serial:       9123-710/100035A
-Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
+Node Name:          ltc-zz14-lp8
 Reference Code:     B112E500                        
 Serviceable Event:  Yes
 Predictive Event:   Yes
@@ -27,7 +27,8 @@ Extended Reference Codes:
 6: 00811630  7: 00000001  8: 00200030  9: 00000000
 
 Description:
-Processor subsystem including internal cache Predictive Error, general. Refer to the system service documentation for more information.
+Processor subsystem including internal cache Predictive Error, general. Refer
+to the system service documentation for more information.
 
 
 << Callout 1 >>

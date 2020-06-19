@@ -1,12 +1,12 @@
 Servicelog ID:      1
-Log Timestamp:      Wed Apr 12 12:58:47 2017
+Log Timestamp:      Tue Jun 16 08:16:17 2020
 Event Timestamp:    Thu Jun 17 18:53:36 2004
-Update Timestamp:   Wed Apr 12 12:58:47 2017
+Update Timestamp:   Tue Jun 16 08:16:17 2020
 Type:               Basic Event
 Severity:           4 (WARNING)
-Platform:           ppc64
-Model/Serial:       8286-42A/1069B3T
-Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
+Platform:           ppc64le
+Model/Serial:       9008-22L/786EC7A
+Node Name:          ltc-zz14-lp8
 Reference Code:     A03-150
 Serviceable Event:  Yes
 Predictive Event:   No

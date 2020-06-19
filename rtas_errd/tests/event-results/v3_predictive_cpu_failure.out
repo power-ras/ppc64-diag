@@ -1,12 +1,12 @@
 Servicelog ID:      1
-Log Timestamp:      Wed Apr 12 12:58:45 2017
+Log Timestamp:      Tue Jun 16 07:41:52 2020
 Event Timestamp:    Tue Jul 22 20:07:18 2003
-Update Timestamp:   Wed Apr 12 12:58:45 2017
+Update Timestamp:   Tue Jun 16 07:41:52 2020
 Type:               Basic Event
 Severity:           4 (WARNING)
-Platform:           ppc64
-Model/Serial:       8286-42A/1069B3T
-Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
+Platform:           ppc64le
+Model/Serial:       9008-22L/786EC7A
+Node Name:          ltc-zz14-lp8
 Reference Code:     A1F-500
 Serviceable Event:  Yes
 Predictive Event:   Yes
@@ -15,5 +15,6 @@ Call Home Status:   1 (Call Home Candidate)
 Status:             Open
 
 Description:
-Recoverable errors on resource indicate trend toward unrecoverable error. However the resource could not be deconfigured and is still in use.
+Recoverable errors on resource indicate trend toward unrecoverable error.
+However the resource could not be deconfigured and is still in use.
 

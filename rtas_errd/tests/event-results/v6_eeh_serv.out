@@ -1,12 +1,12 @@
 Servicelog ID:      1
-Log Timestamp:      Wed Apr 12 12:58:48 2017
+Log Timestamp:      Tue Jun 16 10:22:19 2020
 Event Timestamp:    Fri Mar 16 03:54:10 2007
-Update Timestamp:   Wed Apr 12 12:58:48 2017
+Update Timestamp:   Tue Jun 16 10:22:19 2020
 Type:               Power Platform (RTAS) Event
 Severity:           4 (WARNING)
-Platform:           ppc64
+Platform:           ppc64le
 Model/Serial:       9111-520/10D3D2C
-Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
+Node Name:          ltc-zz14-lp8
 Reference Code:     BA188002                        
 Serviceable Event:  Yes
 Predictive Event:   Yes
@@ -27,7 +27,8 @@ Extended Reference Codes:
 6: 20202020  7: 20202020  8: 20202020  9: 20202020
 
 Description:
-Platform Firmware Predictive Error, general. Refer to the system service documentation for more information.
+Platform Firmware Predictive Error, general. Refer to the system service
+documentation for more information.
 
 EEH could not recover the failed I/O adapter, Location U787A.001.DNZ00Z5-P1-C3
 

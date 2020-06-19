@@ -1,12 +1,12 @@
 Servicelog ID:      1
-Log Timestamp:      Wed Apr 12 12:58:48 2017
+Log Timestamp:      Wed Jun 17 03:06:43 2020
 Event Timestamp:    Thu Jan  1 06:39:04 1970
-Update Timestamp:   Wed Apr 12 13:58:48 2017
+Update Timestamp:   Wed Jun 17 04:06:43 2020
 Type:               Power Platform (RTAS) Event
 Severity:           3 (EVENT)
-Platform:           ppc64
+Platform:           ppc64le
 Model/Serial:       9111-520/10D3D2C 
-Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
+Node Name:          ltc-zz14-lp8
 Reference Code:     B7004400                        
 Serviceable Event:  No
 Predictive Event:   No
@@ -27,7 +27,8 @@ Extended Reference Codes:
 6: 00000000  7: 00000000  8: 00000000  9: 00000000
 
 Description:
-Platform Firmware Informational (non-error) Event. Refer to the system service documentation for more information.
+Platform Firmware Informational (non-error) Event. Refer to the system service
+documentation for more information.
 
 Platform Dump (could not be retrieved to filesystem)
 

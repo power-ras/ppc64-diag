@@ -1,12 +1,12 @@
 Servicelog ID:      1
-Log Timestamp:      Wed Apr 12 12:58:49 2017
+Log Timestamp:      Wed Jun 17 03:39:35 2020
 Event Timestamp:    Wed Apr 14 08:29:09 2004
-Update Timestamp:   Wed Apr 12 12:58:49 2017
+Update Timestamp:   Wed Jun 17 03:39:35 2020
 Type:               Power Platform (RTAS) Event
 Severity:           4 (WARNING)
-Platform:           ppc64
-Model/Serial:       8286-42A/1069B3T
-Node Name:          tuleta4u-lp13.aus.stglabs.ibm.com
+Platform:           ppc64le
+Model/Serial:       9008-22L/786EC7A
+Node Name:          ltc-zz14-lp8
 Reference Code:     BA280000                        
 Serviceable Event:  No
 Predictive Event:   Yes
@@ -19,7 +19,8 @@ Kernel ID:          1000
 Platform ID:        0010e083
 Creator ID:         L - Partition Firmware
 Subsystem ID:       83 - Platform firmware
-RTAS Severity:      22 - Predictive Error, fault may be corrected after platform reboot
+RTAS Severity:      22 - Predictive Error, fault may be corrected after
+platform reboot
 Event Subtype:      00 - Not applicable
 
 Extended Reference Codes:
@@ -27,5 +28,6 @@ Extended Reference Codes:
 6: 20202020  7: 20202020  8: 20202020  9: 20202020
 
 Description:
-Platform Firmware Predictive Error, fault may be corrected after platform re-IPL. Refer to the system service documentation for more information.
+Platform Firmware Predictive Error, fault may be corrected after platform re
+IPL. Refer to the system service documentation for more information.
 

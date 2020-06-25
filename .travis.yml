@@ -1,7 +1,7 @@
 language: c
 
 os: linux-ppc64le
-dist: xenial
+dist: bionic
 
 sudo: required
 
@@ -11,6 +11,15 @@ env:
     matrix:
     - RUN_ON_CONTAINER=fedora-rawhide
 
+install:
+    - docker build --pull -t ${RUN_ON_CONTAINER} -f ppc64-diag-ci/Dockerfile-${RUN_ON_CONTAINER} .
+
 script:
-    - sudo docker build --pull -t ${RUN_ON_CONTAINER} -f ppc64-diag-ci/Dockerfile-${RUN_ON_CONTAINER} .
-    - sudo docker run --privileged --volume $HOME/.ccache:/root/.ccache --volume `pwd`:/build --rm -t $RUN_ON_CONTAINER bash -c "./ppc64-diag-ci/build-${RUN_ON_CONTAINER}.sh";
+    - >
+      docker run
+      --security-opt seccomp=unconfined
+      --volume $HOME/.ccache:/root/.ccache
+      --volume `pwd`:/build
+      --tmpfs /tmp/
+      --rm -t $RUN_ON_CONTAINER
+      bash -c "./ppc64-diag-ci/build-${RUN_ON_CONTAINER}.sh";

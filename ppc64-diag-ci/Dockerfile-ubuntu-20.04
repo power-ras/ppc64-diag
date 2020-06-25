@@ -1,0 +1,11 @@
+FROM ubuntu:20.04
+ENV DEBIAN_FRONTEND    noninteractive
+
+RUN apt-get update -qq
+RUN apt-get update -qq && apt-get install -y gcc g++ libstdc++-7-dev git make flex bison automake libtool
+RUN apt-get update -qq && apt-get install -y debianutils xz-utils perl-base device-tree-compiler
+RUN apt-get update -qq && apt-get install -y libsqlite3-dev zlib1g-dev libvpd-dev librtas-dev librtasevent-dev
+RUN apt-get update -qq && apt-get install -y libservicelog-dev libncurses5-dev libsystemd-dev libudev-dev
+#RUN dnf -y install servicelog powerpc-utils lsvpd
+COPY . /build/
+WORKDIR /build

@@ -39,6 +39,7 @@ RTAS_ERRD=$TOP_LEVEL/rtas_errd/rtas_errd
 SCENARIOFILE=$TOP_LEVEL/rtas_errd/tests/scenariofile.in
 SCENARIODUMP=$TOP_LEVEL/rtas_errd/tests/scenario.dump
 OUTEPOWFILE=$TOP_LEVEL/rtas_errd/tests/epowfile.out
+TMP_SCENARIOFILE=`mktemp`
 
 function register_success {
 	/bin/true
@@ -46,6 +47,7 @@ function register_success {
 
 function register_fail {
 	yes | mv ${SERVICELOG_DB}.bak $SERVICELOG_DB;
+	rm $TMP_SCENARIOFILE
 	exit ${1:-1};
 }
 
@@ -176,10 +178,14 @@ for the_test in $all_tests; do
 done
 
 if [ -z $option ] ; then
+	# Create temporary scenario file
+	cp ${SCENARIOFILE} ${TMP_SCENARIOFILE}
+	sed -i "s|^|$(dirname $0)\/|" ${TMP_SCENARIOFILE}
+
 	#Check option s
 	truncate_events
 	CUR_TEST=$(basename ${SCENARIOFILE})
-	log_event "-s $SCENARIOFILE"
+	log_event "-s ${TMP_SCENARIOFILE}"
         output=$($SERVICELOG --dump 2>/dev/null)
         R=$?
         if [ $R -ne 0 ]; then
@@ -192,9 +198,10 @@ if [ -z $option ] ; then
 	#Check output files
 	truncate_events
 	CUR_TEST=$(basename ${SCENARIOFILE})
-	log_event "-s $SCENARIOFILE -e $OUTEPOWFILE"
+	log_event "-s ${TMP_SCENARIOFILE} -e $OUTEPOWFILE"
 	diff_epow_output_file
 	rm $OUTEPOWFILE
+	rm $TMP_SCENARIOFILE
 fi
 
 yes | mv ${SERVICELOG_DB}.bak $SERVICELOG_DB

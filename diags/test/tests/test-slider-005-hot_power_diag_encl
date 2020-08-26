@@ -5,23 +5,23 @@
 #  Run this file with ../run_tests -t test-slider-005-hot_power_diag_encl -q
 
 # Copying fake VPD data
-cp slider.vpd slider_hot_power.vpd
+cp $DIAG_TEST_DIR/slider.vpd $DIAG_TEST_DIR/slider_hot_power.vpd
 
 # Generate pg2 file
-run_binary "./slider_mk_hot_power" "slider_hot_power.pg2"
+run_binary "./slider_mk_hot_power" "$DIAG_TEST_DIR/slider_hot_power.pg2"
 R=$?
 if [ $R -ne 0 ]; then
 	register_fail $R;
 fi
 
-run_binary "./../diag_encl" "-v -f slider_hot_power.pg2 sg8"
+run_binary "./../diag_encl" "-v -f $DIAG_TEST_DIR/slider_hot_power.pg2 sg8"
 R=$?
 if [ $R -ne 0 ]; then
 	register_fail $R;
 fi
 
 diff_with_result
-rm slider_hot_power.vpd
-rm slider_hot_power.pg2
+rm $DIAG_TEST_DIR/slider_hot_power.vpd
+rm $DIAG_TEST_DIR/slider_hot_power.pg2
 
 register_success

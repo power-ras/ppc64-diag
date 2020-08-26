@@ -6,16 +6,16 @@
 
 
 #copying vpd file
-cp slider.vpd slider_healthy.vpd
+cp $DIAG_TEST_DIR/slider.vpd $DIAG_TEST_DIR/slider_healthy.vpd
 
 # Generate pg2 file
-run_binary "./slider_mk_healthy" "slider_healthy.pg2"
+run_binary "./slider_mk_healthy" "$DIAG_TEST_DIR/slider_healthy.pg2"
 R=$?
 if [ $R -ne 0 ]; then
 	register_fail $R;
 fi
 
-run_binary "./../diag_encl" "-v -f slider_healthy.pg2 sg8"
+run_binary "./../diag_encl" "-v -f $DIAG_TEST_DIR/slider_healthy.pg2 sg8"
 R=$?
 if [ $R -ne 0 ]; then
 	register_fail $R;
@@ -23,7 +23,7 @@ fi
 
 diff_with_result
 
-rm slider_healthy.vpd
-rm slider_healthy.pg2
+rm $DIAG_TEST_DIR/slider_healthy.vpd
+rm $DIAG_TEST_DIR/slider_healthy.pg2
 
 register_success

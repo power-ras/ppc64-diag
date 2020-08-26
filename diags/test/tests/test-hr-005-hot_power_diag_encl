@@ -5,23 +5,23 @@
 #  Run this file with ../run_tests -t test-hr-005-hot_power_diag_encl -q
 
 # Copying fake VPD data
-cp homerun.vpd homerun_hot_power.vpd
+cp $DIAG_TEST_DIR/homerun.vpd $DIAG_TEST_DIR/homerun_hot_power.vpd
 
 # Generate pg2 file
-run_binary "./hr_mk_hot_power" "homerun_hot_power.pg2"
+run_binary "./hr_mk_hot_power" "$DIAG_TEST_DIR/homerun_hot_power.pg2"
 R=$?
 if [ $R -ne 0 ]; then
 	register_fail $R;
 fi
 
-run_binary "./../diag_encl" "-v -f homerun_hot_power.pg2 sg8"
+run_binary "./../diag_encl" "-v -f $DIAG_TEST_DIR/homerun_hot_power.pg2 sg8"
 R=$?
 if [ $R -ne 0 ]; then
 	register_fail $R;
 fi
 
 diff_with_result
-rm homerun_hot_power.vpd
-rm homerun_hot_power.pg2
+rm $DIAG_TEST_DIR/homerun_hot_power.vpd
+rm $DIAG_TEST_DIR/homerun_hot_power.pg2
 
 register_success

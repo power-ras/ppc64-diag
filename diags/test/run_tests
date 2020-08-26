@@ -4,12 +4,17 @@ export GRN='\e[0;32m'
 export YLW='\e[0;33m'
 export NC='\e[0m' # No Colour
 
+TOP_LEVEL=`dirname $0`/../..
+export DIAG_TEST_DIR=$TOP_LEVEL/diags/test
+
+ALL_TESTS=$TOP_LEVEL/diags/test/tests/*
+TEST_RESULTS=$TOP_LEVEL/diags/test/tests-results
 export TSTDERR=`mktemp -d --tmpdir diag-run_tests.stderr.XXXXXXXXXX`
 export TSTDOUT=`mktemp -d --tmpdir diag-run_tests.stdout.XXXXXXXXXX`
 
 function run_binary {
-	if [[ -x $1 ]] ; then
-		$VALGRIND $1 $2 2>> $TSTDERR/$CUR_TEST.err 1>> $TSTDOUT/$CUR_TEST.out
+	if [[ -x $DIAG_TEST_DIR/$1 ]] ; then
+		$VALGRIND $DIAG_TEST_DIR/$1 $2 2>> $TSTDERR/$CUR_TEST.err 1>> $TSTDOUT/$CUR_TEST.out
 	else
 		echo "Fatal error, cannot execute binary '$1'. Did you make?";
 		rm -rf $TSTDERR $TSTDOUT
@@ -52,7 +57,7 @@ function register_fail {
 }
 
 Q=0
-all_tests="tests/*"
+all_tests=$ALL_TESTS
 
 while getopts ":qt:" opt; do
 	case "$opt" in
@@ -66,7 +71,7 @@ done
 
 for the_test in $all_tests; do
 	export CUR_TEST=$(basename $the_test)
-	export RESULT="tests-results/$CUR_TEST.result"
+	export RESULT="$TEST_RESULTS/$CUR_TEST.result"
 	if [[ $q -eq 1 ]] ; then
 		source "$the_test"
 	else

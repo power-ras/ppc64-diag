@@ -6,16 +6,16 @@
 
 
 #copying vpd file
-cp bluehawk.vpd bluehawk_healthy.vpd
+cp $DIAG_TEST_DIR/bluehawk.vpd $DIAG_TEST_DIR/bluehawk_healthy.vpd
 
 # Generate pg2 file
-run_binary "./bh_mk_healthy" "bluehawk_healthy.pg2"
+run_binary "./bh_mk_healthy" "$DIAG_TEST_DIR/bluehawk_healthy.pg2"
 R=$?
 if [ $R -ne 0 ]; then
 	register_fail $R;
 fi
 
-run_binary "./../diag_encl" "-v -f bluehawk_healthy.pg2 sg8"
+run_binary "./../diag_encl" "-v -f $DIAG_TEST_DIR/bluehawk_healthy.pg2 sg8"
 R=$?
 if [ $R -ne 0 ]; then
 	register_fail $R;
@@ -23,7 +23,7 @@ fi
 
 diff_with_result
 
-rm bluehawk_healthy.vpd
-rm bluehawk_healthy.pg2
+rm $DIAG_TEST_DIR/bluehawk_healthy.vpd
+rm $DIAG_TEST_DIR/bluehawk_healthy.pg2
 
 register_success

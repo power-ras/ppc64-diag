@@ -4,18 +4,17 @@
 #  This file expects to be a part of ppc64-diag test suite
 #  Run this file with ../run_tests -t test-hr-003-healthy_diag_encl -q
 
-
 #copying vpd file
-cp homerun.vpd homerun_healthy.vpd
+cp $DIAG_TEST_DIR/homerun.vpd $DIAG_TEST_DIR/homerun_healthy.vpd
 
 # Generate pg2 file
-run_binary "./hr_mk_healthy" "homerun_healthy.pg2"
+run_binary "./hr_mk_healthy" "$DIAG_TEST_DIR/homerun_healthy.pg2"
 R=$?
 if [ $R -ne 0 ]; then
 	register_fail $R;
 fi
 
-run_binary "./../diag_encl" "-v -f homerun_healthy.pg2 sg8"
+run_binary "./../diag_encl" "-v -f $DIAG_TEST_DIR/homerun_healthy.pg2 sg8"
 R=$?
 if [ $R -ne 0 ]; then
 	register_fail $R;
@@ -23,7 +22,7 @@ fi
 
 diff_with_result
 
-rm homerun_healthy.vpd
-rm homerun_healthy.pg2
+rm $DIAG_TEST_DIR/homerun_healthy.vpd
+rm $DIAG_TEST_DIR/homerun_healthy.pg2
 
 register_success

@@ -7,7 +7,7 @@
 check_suite
 copy_sysfs
 
-$VALGRIND ./opal-elog-parse/opal-elog-parse -d 2 -f $SYSFS/firmware/opal/elog/0x02/raw &>> /dev/null 1>&2
+$VALGRIND ./$OPAL_ERRD_DIR/opal-elog-parse/opal-elog-parse -d 2 -f $SYSFS/firmware/opal/elog/0x02/raw &>> /dev/null 1>&2
 R=$?
 if [ $R -ne 234 ]; then
 	register_fail $R;

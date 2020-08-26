@@ -7,12 +7,12 @@
 check_suite
 copy_sysfs
 
-./opal_errd -s $SYSFS -o /cant/mkdir/here -D -e /bin/true > /dev/null 2>&1
+./$OPAL_ERRD_DIR/opal_errd -s $SYSFS -o /cant/mkdir/here -D -e /bin/true > /dev/null 2>&1
 
 RC=$?
 if [ "$RC" -ne 255 ] ; then
 	echo FAIL;
-	register_failure $RC;
+	register_fail $RC;
 fi
 
 register_success

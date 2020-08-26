@@ -8,7 +8,7 @@ check_suite
 copy_sysfs
 
 
-./opal_errd -s /not/a/sysfs -o $OUT/platform -D -e /bin/true > /dev/null 2>&1
+./$OPAL_ERRD_DIR/opal_errd -s /not/a/sysfs -o $OUT/platform -D -e /bin/true > /dev/null 2>&1
 
 RC=$?
 if [ "$RC" -ne 255 ] ; then

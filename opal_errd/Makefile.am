@@ -87,3 +87,5 @@ EXTRA_DIST += opal_errd/run_tests \
 	      opal_errd/sysfs-test \
 	      opal_errd/tests \
 	      opal_errd/tests-results
+
+TESTS += opal_errd/run_tests

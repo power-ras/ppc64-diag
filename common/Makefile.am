@@ -7,3 +7,5 @@ common_tests_spopen_SOURCES = common/tests/spopen.c common/utils.c \
 
 EXTRA_DIST += common/run_tests \
 	      common/tests/test-spopen-001
+
+TESTS += common/run_tests

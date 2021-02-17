@@ -53,3 +53,5 @@ uninstall-hook-diags:
 UNINSTALL_HOOKS += uninstall-hook-diags
 
 EXTRA_DIST += $(DIAG_CRONTAB_SCRIPT)
+
+TESTS += diags/test/run_tests

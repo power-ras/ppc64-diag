@@ -1,4 +1,4 @@
-FROM fedora:rawhide
+FROM fedora:33
 
 
 RUN dnf -y install gcc git xz make g++ libtool perl which flex bison rpm-build

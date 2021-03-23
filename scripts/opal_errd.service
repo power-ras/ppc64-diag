@@ -7,8 +7,6 @@ After=syslog.target
 [Service]
 Type=forking
 ExecStart=/usr/sbin/opal_errd
-StandardOutput=syslog
-StandardError=syslog
 Restart=always
 
 [Install]

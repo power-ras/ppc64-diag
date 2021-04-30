@@ -123,6 +123,12 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Fri Apr 30 2021 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.7.7
+- Add travis build support
+- rtas_errd: Don't run the service in LXC
+- Drop obsolete logging options from systemd service files
+- Unit test case improvements
+
 * Tue Sep 10 2019 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.7.6
 - opal_errd: Enhance the purging logic of rotate_logs
 - diags/cronjob: Include disk diagnostics

@@ -708,7 +708,8 @@ main(int argc, char *argv[]) {
 						drcname, DRC_NAME_LEN)) {
 					fprintf(stderr, "could not find the "
 						"drc-name corresponding to "
-						"drc-index 0x%08x\n", drcindex);
+						"drc-index 0x%08lx\n",
+						drc_tmp_idx);
 					return 4;
 				}
 				printf("%s\n", drcname);

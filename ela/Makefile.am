@@ -62,7 +62,7 @@ clean-local-ela:
 CLEAN_LOCALS += clean-local-ela
 
 install-exec-hook-ela:
-	install -d --mode=655 $(DESTDIR)/etc/ppc64-diag/message_catalog/with_regex/
+	install -d --mode=755 $(DESTDIR)/etc/ppc64-diag/message_catalog/with_regex/
 	install -D --mode=644 $(CATALOG) $(DESTDIR)/etc/ppc64-diag/message_catalog/
 	install -D --mode=644 $(CATALOG_REGEX) \
 		$(DESTDIR)/etc/ppc64-diag/message_catalog/with_regex/

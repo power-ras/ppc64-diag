@@ -34,6 +34,8 @@
 #include <dirent.h>
 #include <endian.h>
 #include <syslog.h>
+#include <libgen.h>
+#include "platform.c"
 
 #define DEFAULT_SYSFS_PATH	"/sys"
 #define DEFAULT_DUMP_PATH	"firmware/opal/dump"
@@ -398,7 +400,15 @@ int main(int argc, char *argv[])
 	char sysfs_path[PATH_MAX];
 	int rc;
 	int fd;
+	int platform = 0;
 	fd_set exceptfds;
+
+	platform = get_platform();
+	if (platform != PLATFORM_POWERNV) {
+		fprintf(stderr, "%s is not supported on the %s platform\n",
+				basename(argv[0]), __power_platform_name(platform));
+		exit(0);
+	}
 
 	setlogmask(LOG_UPTO(LOG_NOTICE));
 	openlog("OPAL_DUMP", LOG_CONS | LOG_PID | LOG_NDELAY | LOG_PERROR,

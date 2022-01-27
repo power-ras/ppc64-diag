@@ -9,6 +9,9 @@ copy_sysfs
 
 run_binary "./extract_opal_dump" "-s $SYSFS -o $OUT"
 sed -e 's%/tmp/.*/%%;s/OPAL_DUMP\[[0-9]*\]/OPAL_DUMP[XXXX]/' -i $OUTSTDERR
+# On qemu pseries it prints PowerKVM Guest. Make travis CI happy
+sed -e 's/PowerKVM/PowerVM/' -i $OUTSTDERR
+sed -e 's/Guest/LPAR/' -i $OUTSTDERR
 
 ls -1 $OUT >> $OUTSTDOUT
 (cd $OUT; md5sum *) >> $OUTSTDOUT

@@ -652,11 +652,11 @@ UI_help(MENU *my_menu)
 	}
 
 	if (!strcmp(desc, "ident"))
-		mvwprintw(my_text_win, 0, 0, help1);
+		mvwprintw(my_text_win, 0, 0, "%s", help1);
 	else if (!strcmp(desc, "attn"))
-		mvwprintw(my_text_win, 0, 0, help2);
+		mvwprintw(my_text_win, 0, 0, "%s", help2);
 	else
-		mvwprintw(my_text_win, 0, 0, help3);
+		mvwprintw(my_text_win, 0, 0, "%s", help3);
 
 	wrefresh(my_text_win);
 
@@ -1126,8 +1126,8 @@ startup_window(void)
 	}
 
 	mvprintw(0, 0, "SERVICE INDICATORS VERSION %s", VERSION);
-	mvprintw(2, 0, msg1);
-	mvprintw(5, 0, msg2);
+	mvprintw(2, 0, "%s", msg1);
+	mvprintw(5, 0, "%s", msg2);
 	mvprintw(9, 0, "Press the F3 key to exit or press Enter to continue.");
 
 	while ((c = getch()) !=  KEY_F(3)) {

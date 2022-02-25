@@ -59,6 +59,7 @@ void print_usage(char *command)
 
 static int file_filter(const struct dirent *d)
 {
+	int rc;
 	struct stat sbuf;
 	char filename[PATH_MAX];
 
@@ -67,7 +68,13 @@ static int file_filter(const struct dirent *d)
 	if (d->d_type == DT_REG)
 		return 1;
 
-	snprintf(filename, PATH_MAX, "%s/%s", opt_platform_dir, d->d_name);
+	rc = snprintf(filename, PATH_MAX, "%s/%s", opt_platform_dir, d->d_name);
+	if (rc < 0 || rc >= PATH_MAX) {
+		fprintf(stderr, "%s:%d - Unable to format %s\n",
+				__func__, __LINE__, d->d_name);
+		return 0;
+	}
+
 	if (stat(filename, &sbuf))
 		return 0;
 	if (S_ISREG(sbuf.st_mode))

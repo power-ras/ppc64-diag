@@ -158,8 +158,8 @@ make_prev_path(const char *encl_loc)
 		return;
 
 	memset(cmd_opts.prev_path, 0, path_len);
-	strncpy(cmd_opts.prev_path, DIAG_ENCL_PREV_PAGES_DIR,
-		strlen(DIAG_ENCL_PREV_PAGES_DIR));
+	if (strlen(DIAG_ENCL_PREV_PAGES_DIR) < path_len)
+		strcpy(cmd_opts.prev_path, DIAG_ENCL_PREV_PAGES_DIR);
 
 	path_len -= strlen(DIAG_ENCL_PREV_PAGES_DIR);
 	strncat(cmd_opts.prev_path, encl_loc, path_len - 1);
@@ -403,8 +403,13 @@ main(int argc, char *argv[])
 			    !strcmp(edirent->d_name, ".."))
 				continue;
 
-			snprintf(path, PATH_MAX, "%s/%s/device/scsi_generic",
-				 SCSI_SES_PATH, edirent->d_name);
+			rc = snprintf(path, PATH_MAX, "%s/%s/device/scsi_generic",
+					SCSI_SES_PATH, edirent->d_name);
+			if (rc <  0 || rc >= PATH_MAX) {
+				fprintf(stderr, "%s:%d - Unable to format %s\n",
+						__func__, __LINE__, edirent->d_name);
+				continue;
+			}
 
 			sdir = opendir(path);
 			if (!sdir)

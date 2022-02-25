@@ -91,7 +91,12 @@ static void ack_dump(const char* dump_dir_path)
 	int fd;
 	int rc;
 
-	snprintf(ack_file, sizeof(ack_file), "%s/acknowledge", dump_dir_path);
+	rc = snprintf(ack_file, sizeof(ack_file), "%s/acknowledge", dump_dir_path);
+	if (rc < 0 || rc >= sizeof(ack_file)) {
+		syslog(LOG_ERR, "%s:%d - Unable to format %s\n",
+				__func__, __LINE__, dump_dir_path);
+		return;
+	}
 
 	fd = open(ack_file, O_WRONLY);
 
@@ -144,11 +149,21 @@ static int timesort(const struct dirent **file1, const struct dirent **file2)
 	char dump_path2[PATH_MAX];
 	int rc;
 
-	snprintf(dump_path1, PATH_MAX, "%s/%s",
-		 opt_output_dir, (*file1)->d_name);
+	rc = snprintf(dump_path1, PATH_MAX, "%s/%s",
+			opt_output_dir, (*file1)->d_name);
+	if (rc < 0 || rc >= PATH_MAX) {
+		syslog(LOG_ERR, "%s:%d - Unable to format %s\n",
+				__func__, __LINE__, (*file1)->d_name);
+		return -1;
+	}
 
-	snprintf(dump_path2, PATH_MAX, "%s/%s",
-		 opt_output_dir, (*file2)->d_name);
+	rc = snprintf(dump_path2, PATH_MAX, "%s/%s",
+			opt_output_dir, (*file2)->d_name);
+	if (rc < 0 || rc >= PATH_MAX) {
+		syslog(LOG_ERR, "%s:%d - Unable to format %s\n",
+				__func__, __LINE__, (*file2)->d_name);
+		return -1;
+	}
 
 	rc = stat(dump_path1, &sbuf1);
 	if (rc < 0)
@@ -178,6 +193,7 @@ static void remove_dump_files(char *dumpname)
 	int i;
 	int n;
 	int count = 0;
+	int rc;
 
 	check_dup_dump_file(dumpname);
 
@@ -196,8 +212,14 @@ static void remove_dump_files(char *dumpname)
 		}
 
 		count++;
-		snprintf(dump_path, PATH_MAX, "%s/%s",
-			 opt_output_dir, dirent->d_name);
+		rc = snprintf(dump_path, PATH_MAX, "%s/%s",
+				opt_output_dir, dirent->d_name);
+		if (rc < 0 || rc >= PATH_MAX) {
+			syslog(LOG_ERR, "%s:%d - Unable to format %s\n",
+					__func__, __LINE__, dirent->d_name);
+			free(namelist[i]);
+			continue;
+		}
 
 		free(namelist[i]);
 
@@ -231,7 +253,12 @@ static int process_dump(const char* dump_dir_path, const char *output_dir)
 	uint16_t prefix_size;
 	int rc;
 
-	snprintf(dump_path, sizeof(dump_path), "%s/dump", dump_dir_path);
+	rc = snprintf(dump_path, sizeof(dump_path), "%s/dump", dump_dir_path);
+	if (rc < 0 || rc >= sizeof(dump_path)) {
+		syslog(LOG_ERR, "%s:%d - Unable to format %s\n",
+				__func__, __LINE__, dump_dir_path);
+		return -1;
+	}
 
 	if (stat(dump_path,&sbuf) == -1)
 		return -1;
@@ -356,8 +383,14 @@ static int find_and_process_dumps(const char *opal_dump_dir,
 			continue;
 		}
 
-		snprintf(dump_path, sizeof(dump_path), "%s/%s",
-			 opal_dump_dir, dirent->d_name);
+		rc = snprintf(dump_path, sizeof(dump_path), "%s/%s",
+				opal_dump_dir, dirent->d_name);
+		if (rc < 0 || rc >= sizeof(dump_path)) {
+			syslog(LOG_ERR, "%s:%d - Unable to format %s\n",
+					__func__, __LINE__, dirent->d_name);
+			free(namelist[i]);
+			continue;
+		}
 
 		is_dir = 0;
 

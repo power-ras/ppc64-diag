@@ -141,6 +141,7 @@ can_delete_lmb(void)
 	struct dirent *entry;
 	int ret_val, fd, ctr=0;
 	char buffer[1024], state[7];
+	int rc;
 
 	ret_val = 0; /* default state is false, unless count is positive */
 
@@ -156,8 +157,13 @@ can_delete_lmb(void)
 
 		if (!strncmp(entry->d_name, "memory", 6)) {
 
-			snprintf(buffer, 1024, "/sys/devices/system/memory/%s/"
-				"state", entry->d_name);
+			rc = snprintf(buffer, 1024, "/sys/devices/system/memory/%s/"
+					"state", entry->d_name);
+			if (rc < 0 || rc >= 1024) {
+				log_msg(NULL, "%s:%d - Unable to format %s\n",
+						__func__, __LINE__, entry->d_name);
+				continue;
+			}
 
 			if ((fd = open(buffer, O_RDONLY)) < 0 ) {
 				log_msg(NULL, "Could not open %s, %s",

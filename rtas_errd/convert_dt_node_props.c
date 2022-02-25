@@ -735,13 +735,20 @@ cpu_interruptserver_to_drcindex(uint32_t int_serv, uint32_t *drc_idx) {
 	int found=0, fd;
 	char buffer[1024];
 	uint32_t temp;
+	int rc;
 
 	dir = opendir("/proc/device-tree/cpus");
 
 	while (!found && (entry = readdir(dir)) != NULL) {
 		if (!strncmp(entry->d_name, "PowerPC,POWER", 13)) {
-			snprintf(buffer, 1024, "/proc/device-tree/cpus/%s/"
-				"ibm,ppc-interrupt-server#s", entry->d_name);
+			rc = snprintf(buffer, 1024, "/proc/device-tree/cpus/%s/ibm"
+						",ppc-interrupt-server#s", entry->d_name);
+			if (rc < 0 || rc >= 1024) {
+				fprintf(stderr, "%s:%d - Unable to format %s\n",
+						__func__, __LINE__, entry->d_name);
+				goto cleanup;
+			}
+
 			if ((fd = open(buffer, O_RDONLY)) < 0) {
 				fprintf(stderr, "Error: error opening %s:\n"
 					"%s\n", buffer, strerror(errno));
@@ -751,9 +758,13 @@ cpu_interruptserver_to_drcindex(uint32_t int_serv, uint32_t *drc_idx) {
 			while (read_uint32(fd, &temp) == 0) {
 				if (temp == int_serv) {
 					close(fd);
-					snprintf(buffer, 1024, "/proc/device-"
-						"tree/cpus/%s/ibm,my-drc-index",
-						entry->d_name);
+					rc = snprintf(buffer, 1024, "/proc/device-tree/cpus/%s/"
+							"ibm,my-drc-index", entry->d_name);
+					if (rc < 0 || rc >= 1024) {
+						fprintf(stderr, "%s:%d - Unable to format %s\n",
+								__func__, __LINE__, entry->d_name);
+						goto cleanup;
+					}
 					if ((fd = open(buffer, O_RDONLY)) < 0) {
 						fprintf(stderr, "Error "
 							"opening %s:\n%s\n",
@@ -786,6 +797,7 @@ cpu_drcindex_to_interruptserver(uint32_t drc_idx, uint32_t *int_servs,
 	int intr_fd, drc_fd, found=0;
 	char buffer[1024];
 	uint32_t temp;
+	int rc;
 
 	dir = opendir("/proc/device-tree/cpus");
 	if (!dir)
@@ -793,8 +805,14 @@ cpu_drcindex_to_interruptserver(uint32_t drc_idx, uint32_t *int_servs,
 
 	while (!found && (entry = readdir(dir)) != NULL) {
 		if (!strncmp(entry->d_name, "PowerPC,POWER", 13)) {
-			snprintf(buffer, 1024, "/proc/device-tree/cpus/%s/"
-				"ibm,my-drc-index", entry->d_name);
+			rc = snprintf(buffer, 1024, "/proc/device-tree/cpus/%s/ibm,my-drc-index",
+					entry->d_name);
+			if (rc < 0 || rc >= 1024) {
+				fprintf(stderr, "%s:%d - Unable to format %s\n",
+						__func__, __LINE__, entry->d_name);
+				closedir(dir);
+				return 0;
+			}
 			if ((drc_fd = open(buffer, O_RDONLY)) < 0) {
 				fprintf(stderr, "Error opening %s:\n"
 					"%s\n", buffer, strerror(errno));
@@ -804,10 +822,16 @@ cpu_drcindex_to_interruptserver(uint32_t drc_idx, uint32_t *int_servs,
 
 			while (read_uint32(drc_fd, &temp) == 0) {
 				if (temp == drc_idx) {
-					snprintf(buffer, 1024, "/proc/device-"
-						"tree/cpus/%s/"
-						"ibm,ppc-interrupt-server#s",
-						entry->d_name);
+					rc = snprintf(buffer, 1024, "/proc/device-tree/cpus/%s/"
+							"ibm,ppc-interrupt-server#s",
+							entry->d_name);
+					if (rc < 0 || rc >= 1024) {
+						fprintf(stderr, "%s:%d - Unable to format %s\n",
+								__func__, __LINE__, entry->d_name);
+						close(drc_fd);
+						closedir(dir);
+						return 0;
+					}
 					if ((intr_fd = open(buffer, O_RDONLY)) < 0) {
 						fprintf(stderr, "Error "
 							"opening %s:\n%s\n",

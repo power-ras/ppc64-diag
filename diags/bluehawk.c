@@ -559,14 +559,16 @@ diag_bluehawk(int fd, struct dev_vpd *vpd)
 
 	printf("\n  Power Supply Status\n");
 	for (i = 0; i < 2; i++) {
+		struct voltage_sensor_status p, q;
+
+		memcpy(&p, &(dp->voltage_sensor_sets[i].sensor_12V), sizeof(p));
+		memcpy(&q, &(dp->voltage_sensor_sets[i].sensor_3_3VA), sizeof(q));
 		printf("    %s:  ", power_supply_names[i]);
 		print_power_supply_status(&(dp->ps_status[i]));
 		printf("      12V:  ");
-		print_voltage_sensor_status(
-				&(dp->voltage_sensor_sets[i].sensor_12V));
+		print_voltage_sensor_status(&p);
 		printf("      3.3VA:  ");
-		print_voltage_sensor_status(
-				&(dp->voltage_sensor_sets[i].sensor_3_3VA));
+		print_voltage_sensor_status(&q);
 	}
 
 	printf("\n  Fan Status\n");

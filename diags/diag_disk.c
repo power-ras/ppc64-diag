@@ -188,8 +188,13 @@ static int open_output_xml_file(const char *xml_filename)
 	}
 
 
-	snprintf(filename, sizeof(filename) - 1, "%s/%s",
-		 DISK_OUTPUT_PATH, xml_filename);
+	rc = snprintf(filename, sizeof(filename) - 1, "%s/%s",
+			DISK_OUTPUT_PATH, xml_filename);
+	if (rc < 0 || (rc >= sizeof(filename) - 1)) {
+		fprintf(stderr, "%s:%d - Unable to format %s\n",
+				__func__, __LINE__, xml_filename);
+		return -1;
+	}
 
 	result_file = fopen(filename, "w");
 	if (!result_file)
@@ -258,7 +263,8 @@ static int get_system_vpd(char *machine_serial,
 	 */
 	if (strlen(serial) > 5)
 		start_index = strlen(serial) - 5;
-	strncpy(machine_serial, serial + start_index, SERIAL_NUM_LEN);
+	memcpy(machine_serial, serial + start_index, SERIAL_NUM_LEN);
+	machine_serial[SERIAL_NUM_LEN - 1] = '\0';
 
 	device_fd = open(DEVICE_TREE_MODEL, O_RDONLY);
 	if (device_fd < 0)
@@ -274,7 +280,8 @@ static int get_system_vpd(char *machine_serial,
 	if (strchr(model, ',') != NULL)
 		temp = strchr(model, ',') + 1;
 
-	strncpy(machine_type, temp, MACHINE_MODEL_LEN + 1);
+	memcpy(machine_type, temp, MACHINE_MODEL_LEN + 1);
+	machine_type[MACHINE_MODEL_LEN] = '\0';
 	*machine_model = strchr(machine_type, '-');
 	if (*machine_model == NULL) /* Failed to get model name */
 		return -1;
@@ -391,6 +398,7 @@ static int remove_old_log_file(void)
 	DIR *d;
 	struct dirent *namelist;
 	char filename[PATH_MAX];
+	int rc;
 
 	d = opendir(DISK_OUTPUT_PATH);
 	if (!d)
@@ -400,8 +408,14 @@ static int remove_old_log_file(void)
 		if (namelist->d_name[0] == '.')
 			continue;
 
-		snprintf(filename, sizeof(filename) - 1, "%s/%s",
+		rc = snprintf(filename, sizeof(filename) - 1, "%s/%s",
 				DISK_OUTPUT_PATH, namelist->d_name);
+		if (rc < 0 || rc >= (sizeof(filename) - 1)) {
+			fprintf(stderr, "%s:%d - Unable to format %s\n",
+				__func__, __LINE__, namelist->d_name);
+			continue;
+		}
+
 		if (unlink(filename) < 0) {
 			fprintf(stderr,
 			"\nUnable to remove old log file[%s]. continuing.\n\n",

@@ -473,6 +473,7 @@ valid_enclosure_device(const char *sg)
 	struct dirent *edirent, *sdirent;
 	DIR *edir, *sdir;
 	char path[PATH_MAX];
+	int rc;
 
 	edir = opendir(SCSI_SES_PATH);
 	if (!edir) {
@@ -486,8 +487,13 @@ valid_enclosure_device(const char *sg)
 		    !strcmp(edirent->d_name, ".."))
 			continue;
 
-		snprintf(path, PATH_MAX, "%s/%s/device/scsi_generic",
-			 SCSI_SES_PATH, edirent->d_name);
+		rc = snprintf(path, PATH_MAX, "%s/%s/device/scsi_generic",
+				SCSI_SES_PATH, edirent->d_name);
+		if (rc < 0 || rc >= PATH_MAX) {
+			fprintf(stderr, "%s:%d - Unable to format %s\n",
+					__func__, __LINE__, edirent->d_name);
+			continue;
+		}
 
 		sdir = opendir(path);
 		if (!sdir)

@@ -202,7 +202,8 @@ static int write_log(char path[], int flag,
 		dump_suffix[DUMP_FILE_SUFFIX_SIZE] = '\0';
 		if ((sz + strlen(dump_suffix)) >= PATH_MAX)
 			return rc;
-		strncat(dump_path, dump_suffix, strlen(dump_suffix));
+		strncat(dump_path, dump_suffix,
+				PATH_MAX - (strlen(dump_path)));
 	}
 
 	fd = open(dump_path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP);

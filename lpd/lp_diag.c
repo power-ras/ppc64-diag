@@ -300,6 +300,7 @@ build_callout_loc_code(struct sl_event *event, struct loc_code *list,
 			}
 
 			strncpy(fru->location, location, LOCATION_LENGTH - 1);
+			fru->location[LOCATION_LENGTH - 1] = '\0';
 		}
 	}
 

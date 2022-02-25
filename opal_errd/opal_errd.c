@@ -309,6 +309,7 @@ static void rename_old_logs(const char *output_dir)
 	char *out_dir = NULL;
 	struct dirent **namelist;
 	struct dirent *dirent;
+	int rc;
 
 	n = scandir(output_dir, &namelist, is_suffixless_elog_filename, alphasort);
 	if (n < 0)
@@ -321,8 +322,14 @@ static void rename_old_logs(const char *output_dir)
 			continue;
 		}
 
-		snprintf(oldname, sizeof(oldname), "%s/%s",
-			 output_dir, dirent->d_name);
+		rc = snprintf(oldname, sizeof(oldname), "%s/%s",
+				output_dir, dirent->d_name);
+		if (rc < 0 || rc >= sizeof(oldname)) {
+			syslog(LOG_ERR, "%s:%d - Unable to format %s\n",
+					__func__, __LINE__, dirent->d_name);
+			free(namelist[i]);
+			continue;
+		}
 
 		elog_type = get_elog_type_from_file_data(oldname);
 		if (elog_type == OPAL_ELOG_INVALID) {
@@ -330,8 +337,14 @@ static void rename_old_logs(const char *output_dir)
 			continue; /* Delete the file here ? */
 		}
 
-		snprintf(newname, sizeof(newname), "%s-%s",
-			 oldname, ELOG_TYPE_STR(elog_type));
+		rc = snprintf(newname, sizeof(newname), "%s-%s",
+				oldname, ELOG_TYPE_STR(elog_type));
+		if (rc < 0 || rc >= sizeof(newname)) {
+			syslog(LOG_ERR, "%s:%d - Unable to format %s\n",
+					__func__, __LINE__, ELOG_TYPE_STR(elog_type));
+			free(namelist[i]);
+			continue;
+		}
 
 		if (rename(oldname, newname) < 0) {
 			syslog(LOG_WARNING, "Couldn't rename logfile %s to "
@@ -705,8 +718,14 @@ static int find_and_read_elog_events(const char *elog_dir, const char *output_pa
 			continue;
 		}
 
-		snprintf(elog_path, sizeof(elog_path), "%s/%s",
-			 elog_dir, dirent->d_name);
+		rc = snprintf(elog_path, sizeof(elog_path), "%s/%s",
+				elog_dir, dirent->d_name);
+		if (rc < 0 || rc >= sizeof(elog_path)) {
+			syslog(LOG_ERR, "%s:%d - Unable to format %s\n",
+					__func__, __LINE__, dirent->d_name);
+			free(namelist[i]);
+			continue;
+		}
 
 		is_dir = 0;
 
@@ -1087,8 +1106,10 @@ int main(int argc, char *argv[])
 			if (rc > 0 && fds[UDEV_FD].revents) {
 				udev_dev = udev_monitor_receive_device(udev_mon);
 				devpath = udev_device_get_devpath(udev_dev);
-				if (devpath && strrchr(devpath, '/'))
+				if (devpath && strrchr(devpath, '/')) {
 					strncpy(elog_str_name, strrchr(devpath, '/'), ELOG_STR_SIZE);
+					elog_str_name[sizeof(elog_str_name) - 1] = '\0';
+				}
 				udev_device_unref(udev_dev);
 				/* The id of the elog should be in elog_str_name
 				 * Perhaps more can be done with the udev information

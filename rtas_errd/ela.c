@@ -2071,10 +2071,10 @@ sensor_epow(struct event *event, int error_type, int version)
 				e_desc->rcode = 0x30;
 			} else {
 				e_desc = volt_epow;
-				strncpy(e_desc->frus[0].fname, fru_name,
+				memcpy(e_desc->frus[0].fname, fru_name,
 								NAMESIZE - 1);
 				e_desc->frus[0].fname[NAMESIZE - 1] = '\0';
-				strncpy(e_desc->frus[1].fname, sensor_name,
+				memcpy(e_desc->frus[1].fname, sensor_name,
 								NAMESIZE - 1);
 				e_desc->frus[1].fname[NAMESIZE - 1] = '\0';
 				e_desc->rcode = 0x831;
@@ -2090,7 +2090,7 @@ sensor_epow(struct event *event, int error_type, int version)
 				e_desc->rcode = 0x50;
 			} else {
 				e_desc = therm_epow;
-				strncpy(e_desc->frus[0].fname, sensor_name,
+				memcpy(e_desc->frus[0].fname, sensor_name,
 								NAMESIZE - 1);
 				e_desc->frus[0].fname[NAMESIZE - 1] = '\0';
 				e_desc->rcode = 0x832;
@@ -2108,10 +2108,10 @@ sensor_epow(struct event *event, int error_type, int version)
 				e_desc->rcode = 0x70;
 			} else {
 				e_desc = pow_epow;
-				strncpy(e_desc->frus[0].fname, fru_name,
+				memcpy(e_desc->frus[0].fname, fru_name,
 								NAMESIZE - 1);
 				e_desc->frus[0].fname[NAMESIZE - 1] = '\0';
-				strncpy(e_desc->frus[1].fname, sensor_name,
+				memcpy(e_desc->frus[1].fname, sensor_name,
 								NAMESIZE - 1);
 				e_desc->frus[1].fname[NAMESIZE - 1] = '\0';
 				e_desc->rcode = 0x833;

@@ -268,13 +268,11 @@ log_event(struct event *event)
 			free(event->sl_entry->description);
 			event->sl_entry->description = new_desc;
 		} else {
-			event->sl_entry->description = malloc(txtlen+1);
+			event->sl_entry->description = strdup(event->addl_text);
 			if (event->sl_entry->description == NULL) {
 				log_msg(event, "Memory allocation failed");
 				return;
 			}
-			snprintf(event->sl_entry->description, txtlen,
-				 "%s", event->addl_text);
 		}
 	}
 

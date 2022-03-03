@@ -16,12 +16,12 @@ BuildRequires:	libservicelog-devel, flex, perl, /usr/bin/bison
 BuildRequires:	librtas-devel >= 1.4.0
 BuildRequires:	ncurses-devel
 %if (0%{?fedora} || 0%{?rhel} || 0%{?centos})
-BuildRequires:	libvpd-devel
+BuildRequires:	libvpd-devel >= 2.2.9
 BuildRequires:	systemd-devel
 %else
     %if 0%{?sle_version}
 BuildRequires:	libudev-devel
-BuildRequires:	libvpd2-devel
+BuildRequires:	libvpd2-devel >= 2.2.9
     %endif
 %endif
 
@@ -123,6 +123,11 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Thu Mar 3  2022 - Mahesh Salgaonkar <mahesh@linux.ibm.com> - 2.7.8
+- Update build dependency to use libvpd >= v2.2.9
+- Fix extract_opal_dump error message on unsupported platform
+- Fix build warning with GCC-8.5 and GCC-11
+
 * Fri Apr 30 2021 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 2.7.7
 - Add travis build support
 - rtas_errd: Don't run the service in LXC

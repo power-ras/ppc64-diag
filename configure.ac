@@ -98,6 +98,12 @@ AS_IF([test "x$with_librtas" != "xno"],
 	[],
 	[AC_MSG_FAILURE([libvpd header files required (use --without-librtas to disable)])]
 	)]
+
+	# libvpd >= 2.2.9 check
+	[PKG_CHECK_MODULES([LIBVPD], [libvpd_cxx-2 >= 2.2.9],
+	[],
+	[AC_MSG_FAILURE([VPD library(libvpd) version 2.2.9 is required for lsvpd)])]
+	)]
 )
 
 AM_CONDITIONAL([WITH_LIBRTAS], [test "x$with_librtas" = "xyes"])

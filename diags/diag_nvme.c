@@ -140,6 +140,56 @@ extern int get_smart_log_page(int fd, uint32_t nsid, struct nvme_smart_log_page 
 	return ioctl(fd, NVME_IOCTL_ADMIN_CMD, &admin_cmd);
 }
 
+/* location_code_nvme - Get location code of NVMe controller
+ * @location - Address to store the NVMe controller location code, max length is LOCATION_LENGTH
+ * @controller_name -  Name of the device to retrieve location code, expected format is nvme[0-9]+
+ *
+ * Retrieve location code from device tree for the NVMe controller specified, in order to map the
+ * device to the proper device tree path we need to look into the device devspec file in sysfs.
+ *
+ * Return - Return 0 on success, -1 on error
+ */
+extern int location_code_nvme(char *location, char *controller_name) {
+	int fd;
+	char sysfs_devspec_path[PATH_MAX], dt_location_path[PATH_MAX];
+	char devspec[2*NAME_MAX]= { '\0' }, *newline;
+
+	snprintf(sysfs_devspec_path,sizeof(sysfs_devspec_path), "%s/%s/device/devspec",
+			NVME_SYS_PATH, controller_name);
+	fd = open(sysfs_devspec_path, O_RDONLY);
+	if (fd < 0) {
+		fprintf(stderr, "%s open failed: %s\n", sysfs_devspec_path, strerror(errno));
+		return -1;
+	}
+	if (read(fd, devspec, sizeof(devspec)) <= 0)
+		goto read_error;
+	close(fd);
+
+	/* devspec might be reported with a trailing newline in case the kernel running contains
+	 * commit 14c19b2a40b6 ("PCI/sysfs: Add 'devspec' newline"), so remove it if present */
+	newline = strchr(devspec, '\n');
+	if (newline)
+		*newline = '\0';
+
+	snprintf(dt_location_path, sizeof(dt_location_path), "%s%s/ibm,loc-code",
+			DEVICE_TREE_PATH, devspec);
+	fd = open(dt_location_path, O_RDONLY);
+	if (fd < 0) {
+		fprintf(stderr, "%s open failed: %s\n", dt_location_path, strerror(errno));
+		return -1;
+	}
+	if (read(fd, location, LOCATION_LENGTH) <= 0)
+		goto read_error;
+	close(fd);
+
+	return 0;
+
+read_error:
+	fprintf(stderr, "Failed to read any data from file, location code not retrieved\n");
+	close(fd);
+	return -1;
+}
+
 /* set_vpd_pcie_field - Set the appropriate field with VPD information collected
  * @keyword - Address of keyword string extracted from PCIe VPD for a device
  * @vpd_data - Address of vpd data string extracted from PCIe VPD for a device

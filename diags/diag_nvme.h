@@ -30,6 +30,8 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#define DEVICE_TREE_PATH		"/sys/firmware/devicetree/base"
+#define LOCATION_LENGTH			80
 #define NVME_SYS_PATH			"/sys/class/nvme"
 #define OPCODE_ADMIN_GET_LOG_PAGE	0x02
 
@@ -122,6 +124,7 @@ struct nvme_smart_log_page {
 extern int get_ibm_vpd_log_page(int fd, struct nvme_ibm_vpd *vpd);
 extern int get_ibm_vpd_pcie(char *controller_name, struct nvme_ibm_vpd *vpd);
 extern int get_smart_log_page(int fd, uint32_t nsid, struct nvme_smart_log_page *log);
+extern int location_code_nvme(char *location, char *controller_name);
 extern void set_vpd_pcie_field(const char *keyword, const char *vpd_data, struct nvme_ibm_vpd *vpd);
 
 #endif /* _DIAG_NVME_H */

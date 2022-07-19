@@ -26,6 +26,42 @@
 
 #define OPCODE_ADMIN_GET_LOG_PAGE	0x02
 
+/* Struct representing IBM VPD information retrieved from Log Page 0xF1. */
+struct nvme_ibm_vpd {
+	char version[4];
+	char description[40];
+	char master_pn[12];
+	char ec_level[10];
+	char fru_pn[12];
+	char final_asm_pn[12];
+	char feature_code[4];
+	char ccin[4];
+	char sn_11s[8];
+	char pcie_ssid[8];
+	char endurance[4];
+	char capacity[10];
+	char warranty[12];
+	char encryption[1];
+	char rctt[2];
+	char load_id[8];
+	char mfg_location[3];
+	char ffc_led[5];
+	char system_io_cmd_timeout[2];
+	char format_cmd_timeout[4];
+	char number_io_queues[4];
+	char flash_type[2];
+	char manufacture_sn[20];
+	char firmware_level[8];
+	uint8_t async_firmware_commit;
+	uint8_t query_lba_map_status;
+	uint8_t query_storage_usage;
+	uint8_t async_format_nvm;
+	uint16_t endurance_value;
+	uint16_t sanitize_cmd_timeout;
+	uint8_t dsm_io_hints_supported;
+	uint8_t reserved[816];
+} __attribute__((packed));
+
 /* Struct representing the SMART / health information log page as defined in NVMe base specification */
 struct nvme_smart_log_page {
 	uint8_t critical_warning;
@@ -71,6 +107,7 @@ struct nvme_smart_log_page {
 	uint8_t reserved232[280];
 } __attribute__((packed));
 
+extern int get_ibm_vpd_log_page(int fd, struct nvme_ibm_vpd *vpd);
 extern int get_smart_log_page(int fd, uint32_t nsid, struct nvme_smart_log_page *log);
 
 #endif /* _DIAG_NVME_H */

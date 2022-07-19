@@ -20,13 +20,25 @@
 #ifndef _DIAG_NVME_H
 #define _DIAG_NVME_H
 
+#include <errno.h>
+#include <fcntl.h>
+#include <linux/limits.h>
 #include <linux/nvme_ioctl.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
 
+#define NVME_SYS_PATH			"/sys/class/nvme"
 #define OPCODE_ADMIN_GET_LOG_PAGE	0x02
 
-/* Struct representing IBM VPD information retrieved from Log Page 0xF1. */
+/* Struct representing IBM VPD information retrieved from Log Page 0xF1.
+ * This struct is also reutilized for PCIe VPD information in case Log Page 0xF1 is not supported.
+ * PCIe VPD according to internal specification is a subset of VPD from Log Page 0xF1, meaning that
+ * PCIe VPD has fewer fields and their maximum lengths are lower than those from Log Page 0xF1.
+ * So reutilizing this structure shouldn't lead to any loss of information.
+ */
 struct nvme_ibm_vpd {
 	char version[4];
 	char description[40];
@@ -108,6 +120,8 @@ struct nvme_smart_log_page {
 } __attribute__((packed));
 
 extern int get_ibm_vpd_log_page(int fd, struct nvme_ibm_vpd *vpd);
+extern int get_ibm_vpd_pcie(char *controller_name, struct nvme_ibm_vpd *vpd);
 extern int get_smart_log_page(int fd, uint32_t nsid, struct nvme_smart_log_page *log);
+extern void set_vpd_pcie_field(const char *keyword, const char *vpd_data, struct nvme_ibm_vpd *vpd);
 
 #endif /* _DIAG_NVME_H */

@@ -17,7 +17,101 @@
  * USA.
  */
 
+#include <getopt.h>
+#include <regex.h>
+#include <servicelog-1/servicelog.h>
+#include <stdlib.h>
+#include <sys/utsname.h>
 #include "diag_nvme.h"
+
+static int diagnose_nvme(char *device_name);
+static int log_event(uint64_t *event_id, struct nvme_ibm_vpd *vpd, char *controller_name, uint8_t severity, char *description, unsigned char *raw_data, uint32_t raw_data_len);
+static void print_usage(char *command);
+static int regex_controller(char *controller_name, char *device_name);
+
+int main(int argc, char *argv[]) {
+	int opt, rc = 0;
+
+	static struct option long_options[] = {
+		{"help", no_argument, NULL, 'h'},
+		{0, 0, 0, 0}
+	};
+
+	while ((opt = getopt_long(argc, argv, "h", long_options, NULL)) != -1) {
+		switch (opt) {
+		case 'h':
+			print_usage(argv[0]);
+			return 0;
+			break;
+		case '?':
+			print_usage(argv[0]);
+			return -1;
+		default:
+			print_usage(argv[0]);
+			return -1;
+		}
+	}
+
+	while (optind < argc) {
+		rc += diagnose_nvme(argv[optind]);
+		fprintf(stdout, "\n");
+		optind++;
+	}
+
+	return rc;
+}
+
+/* diagnose_nvme - Diagnose NVMe device health status
+ * @device_name - Name of the device to be diagnosed, expected format is nvme[0-9]+
+ *
+ * Diagnose will check SMART data retrieved and identify any failures that need to be reported in
+ * the servicelog database.
+ *
+ * Return - Return 0 on success, negative number on failure
+ */
+static int diagnose_nvme(char *device_name) {
+	char dev_path[PATH_MAX], controller_name[NAME_MAX] = { '\0' }, description[DESCR_LENGTH];
+	int fd, rc = 0, tmp_rc, time = 0, interval = 5;
+	struct nvme_smart_log_page smart_log = { 0 };
+	struct nvme_ibm_vpd vpd = { 0 };
+        uint64_t event_id;
+	uint8_t severity;
+
+	tmp_rc = regex_controller(controller_name, device_name);
+	if (tmp_rc != 0)
+		return -1;
+	snprintf(dev_path,sizeof(dev_path), "/dev/%s", device_name);
+	fd = open_nvme(dev_path);
+	if (fd < 0)
+		return -1;
+	fprintf(stdout, "Running diagnostics for %s\n", device_name);
+
+	/* After system boot VPD data might not be ready yet, so wait until VPD log page is ready */
+	while ((tmp_rc = get_ibm_vpd_log_page(fd, &vpd)) == VPD_NOT_READY && time <= MAX_TIME) {
+	       sleep(interval);
+	       time += interval;
+	}
+
+	/* If VPD log page fails to be collected fallback to PCIe VPD */
+	if (tmp_rc != 0) {
+		fprintf(stdout, "Warn: %s VPD log page ioctl failed: 0x%x, fallback to PCIe VPD\n", controller_name, tmp_rc);
+		tmp_rc = get_ibm_vpd_pcie(controller_name, &vpd);
+        }
+
+	if (tmp_rc != 0)
+		fprintf(stdout, "Warn: %s PCIe VPD failed: 0x%x, proceed without device VPD data\n", controller_name, tmp_rc);
+
+	/* If SMART data can't be retrieved assume device is in a bad state and report an event */
+	if ((tmp_rc = get_smart_log_page(fd, 0xffffffff, &smart_log)) != 0) {
+		fprintf(stderr, "Smart Log ioctl failed: 0x%x\n", tmp_rc);
+		severity = SL_SEV_ERROR;
+		snprintf(description, sizeof(description), "SMART log data could not be retrieved for device. Device is assumed to be in a bad state.");
+		rc += log_event(&event_id, &vpd, controller_name, severity, description, NULL, 0);
+	}
+	close(fd);
+
+	return rc;
+}
 
 /* get_ibm_vpd_log_page - Get IBM VPD data from NVMe device log page
  * @fd - File descriptor index of NVMe device
@@ -188,6 +282,197 @@ read_error:
 	fprintf(stderr, "Failed to read any data from file, location code not retrieved\n");
 	close(fd);
 	return -1;
+}
+
+/* log_event - Create event in servicelog database
+ * @event_id - Address to store the event identifier created in the servicelog database
+ * @vpd - Address of vpd struct containing IBM VPD data to fill relevant event fields
+ * @controller_name - Name of the device to log event against, expected format is nvme[0-9]+
+ * @severity - severity to set for the event, one of the SL_SEV_* defined in servicelog.h
+ * @description - String to be used as the description for the event, max length is DESCR_LENGTH
+ * @raw_data - Address of binary data to be logged along with the event, NULL if not needed
+ * @raw_data_len - Length of the raw_data information, 0 if not needed
+ *
+ * Log an event into the servicelog database by setting all the sl_event, sl_data_os and sl_callout
+ * structures with relevant data for the NVMe device
+ *
+ * Return - Return 0 on success, -1 on error
+ */
+static int log_event(uint64_t *event_id, struct nvme_ibm_vpd *vpd, char *controller_name, uint8_t severity, char *description, unsigned char *raw_data, uint32_t raw_data_len) {
+	char location[LOCATION_LENGTH] = { '\0' };
+	int rc = -1, tmp_rc;
+	struct servicelog *slog;
+	struct sl_event *entry = NULL;
+	struct sl_data_os *os = NULL;
+	struct utsname uname_data;
+
+	if (!(entry = calloc(1, sizeof(struct sl_event))))
+		goto err_out;
+
+	/* Fill sl_data_os struct */
+	if (!(os = calloc(1, sizeof(struct sl_data_os))))
+		goto err_out;
+	entry->addl_data = os;
+
+	tmp_rc = uname(&uname_data);
+	if (tmp_rc) {
+		fprintf(stderr, "uname error: %d\n", tmp_rc);
+		goto out;
+	}
+	if (!(os->version = strdup(uname_data.release)))
+		goto err_out;
+	if (!(os->driver = strdup("nvme")))
+		goto err_out;
+	if (!(os->subsystem = strdup("storage")))
+		goto err_out;
+	if (!(os->device = strndup(controller_name, NAME_MAX)))
+		goto err_out;
+
+	/* Fill sl_callout struct */
+        if (!(entry->callouts = calloc(1, sizeof(struct sl_callout))))
+                goto err_out;
+
+	if (location_code_nvme(location, controller_name) < 0)
+		goto out;
+	entry->callouts->priority = 'M';
+	if (!(entry->callouts->location = strndup(location, sizeof(location))))
+		goto err_out;
+	if (!(entry->callouts->fru = strndup(vpd->fru_pn, sizeof(vpd->fru_pn))))
+		goto err_out;
+	if (!(entry->callouts->ccin = strndup(vpd->ccin, sizeof(vpd->ccin))))
+		goto err_out;
+	if (!(entry->callouts->serial = strndup(vpd->manufacture_sn, sizeof(vpd->manufacture_sn))))
+		goto err_out;
+
+	/* Fill sl_event struct */
+	time(&entry->time_event);
+	entry->type = SL_TYPE_OS;
+	entry->severity = severity;
+
+	if (severity >= SL_SEV_ERROR_LOCAL) {
+		entry->disposition = SL_DISP_UNRECOVERABLE;
+		entry->serviceable = 1;
+		entry->call_home_status = SL_CALLHOME_CANDIDATE;
+	}
+	else {
+		entry->disposition = SL_DISP_RECOVERABLE;
+		entry->serviceable = 0;
+		entry->call_home_status = SL_CALLHOME_NONE;
+	}
+	if (!(entry->description = strndup(description, DESCR_LENGTH)))
+		goto err_out;
+        if (!(entry->refcode = strdup("0000000")))
+		goto err_out;
+
+	if (raw_data && raw_data_len) {
+		if (!(entry->raw_data = malloc(raw_data_len)))
+			goto err_out;
+		entry->raw_data_len = raw_data_len;
+		memcpy(entry->raw_data, raw_data, raw_data_len);
+	}
+
+	tmp_rc = servicelog_open(&slog, 0);
+	if (tmp_rc) {
+		fprintf(stderr, "Log open error: %s\n", servicelog_error(slog));
+		goto out;
+	}
+	tmp_rc = servicelog_event_log(slog, entry, event_id);
+	servicelog_close(slog);
+	if (tmp_rc) {
+		fprintf(stderr, "Event logging error: %s\n", servicelog_error(slog));
+		goto out;
+	}
+	else
+		fprintf(stdout, "Event ID %lu has been logged for device %s at %s, please check servicelog for more information\n", *event_id, controller_name, location);
+
+	rc = 0;
+	goto out;
+
+err_out:
+	fprintf(stderr, "Memory allocation failed in %s\n", __func__);
+out:
+	servicelog_event_free(entry);
+	return rc;
+}
+
+/* open_nvme - Open NVMe device
+ * @dev_path - Full path to NVMe device, expected format is /dev/nvme*
+ *
+ * The function tries to do some sanity check to make sure the device opened is at least a block or
+ * character device prior to return the file descriptor index
+ *
+ * Return - Return file descriptor index on success, -1 on error
+ */
+extern int open_nvme(char *dev_path) {
+	int fd;
+        struct stat stat;
+
+	if (strncmp(dev_path, NVME_DEV_PATH, strlen(NVME_DEV_PATH)) != 0) {
+		fprintf(stderr, "%s not a NVMe device\n", dev_path);
+		return -1;
+	}
+
+	fd = open(dev_path, O_RDONLY);
+	if (fd < 0) {
+		fprintf(stderr, "%s open failed: %s\n", dev_path, strerror(errno));
+		return -1;
+	}
+	if (fstat(fd, &stat) < 0) {
+		fprintf(stderr, "%s fstat failed: %s\n", dev_path, strerror(errno));
+		close(fd);
+		return -1;
+	}
+	switch (stat.st_mode & S_IFMT) {
+		case S_IFBLK:
+		case S_IFCHR:
+			return fd;
+		default:
+			fprintf(stderr, "%s is not a block or character device\n", dev_path);
+			close(fd);
+			return -1;
+	}
+}
+
+static void print_usage(char *command) {
+	printf("Usage: %s [-h] <nvme_devices>\n"
+		"\t-h: print this help message\n"
+		"\t<nvme_devices>: the NVMe devices on which to operate, for\n"
+		"\t                  example nvme0\n", command);
+}
+
+/* regex_controller - Extract controller name from device name
+ * @device_name - Name of the NVMe device submitted by user or extracted from sysfs
+ * @controller_name - Address to store the NVMe controller string extracted from regex, format is
+ * nvme[0-9]+
+ *
+ * A user might submit the NVMe device name pointing to a namespace or partitition, so attempt to
+ * sanitize the input and extract the actual NVMe controller of the string.
+ *
+ * Return - Return zero on success, otherwise a failure ocurred.
+ */
+static int regex_controller(char *controller_name, char *device_name) {
+	int rc = 0;
+	regex_t regex;
+	char *re = "nvme[0-9]+";
+	regmatch_t  match[1];
+
+	if ((rc = regcomp(&regex, re, REG_EXTENDED))) {
+		fprintf(stderr, "regcomp failed with return code %d\n", rc);
+		return rc;
+	}
+	if ((rc = regexec(&regex, device_name, 1, match, 0))) {
+		fprintf(stderr, "Controller regex failed for %s, with return code %d, expected format to be encountered is %s\n", device_name, rc, re);
+		regfree(&regex);
+		return rc;
+	}
+	if (match[0].rm_eo - match[0].rm_so >= NAME_MAX) {
+		fprintf(stderr, "Name of NVMe controller is longer than maximum expected name of %d\n", NAME_MAX);
+		regfree(&regex);
+		return -1;
+	}
+	strncpy(controller_name, device_name + match[0].rm_so, match[0].rm_eo - match[0].rm_so);
+	regfree(&regex);
+	return rc;
 }
 
 /* set_vpd_pcie_field - Set the appropriate field with VPD information collected

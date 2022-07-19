@@ -28,12 +28,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
+#define DESCR_LENGTH			1024
 #define DEVICE_TREE_PATH		"/sys/firmware/devicetree/base"
 #define LOCATION_LENGTH			80
+#define MAX_TIME			127
+#define NVME_DEV_PATH			"/dev/nvme"
 #define NVME_SYS_PATH			"/sys/class/nvme"
 #define OPCODE_ADMIN_GET_LOG_PAGE	0x02
+#define VPD_NOT_READY			0x00F3
 
 /* Struct representing IBM VPD information retrieved from Log Page 0xF1.
  * This struct is also reutilized for PCIe VPD information in case Log Page 0xF1 is not supported.
@@ -125,6 +130,7 @@ extern int get_ibm_vpd_log_page(int fd, struct nvme_ibm_vpd *vpd);
 extern int get_ibm_vpd_pcie(char *controller_name, struct nvme_ibm_vpd *vpd);
 extern int get_smart_log_page(int fd, uint32_t nsid, struct nvme_smart_log_page *log);
 extern int location_code_nvme(char *location, char *controller_name);
+extern int open_nvme(char *dev_path);
 extern void set_vpd_pcie_field(const char *keyword, const char *vpd_data, struct nvme_ibm_vpd *vpd);
 
 #endif /* _DIAG_NVME_H */

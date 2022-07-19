@@ -24,6 +24,7 @@
 #include <sys/utsname.h>
 #include "diag_nvme.h"
 
+static int check_open_serv_event(char *location);
 static int diagnose_nvme(char *device_name);
 static int log_event(uint64_t *event_id, struct nvme_ibm_vpd *vpd, char *controller_name, uint8_t severity, char *description, unsigned char *raw_data, uint32_t raw_data_len);
 static void print_usage(char *command);
@@ -59,6 +60,43 @@ int main(int argc, char *argv[]) {
 	}
 
 	return rc;
+}
+
+/* check_open_serv_event - Check existent serviceable event in open state for device
+ * @location - location code of the device
+ *
+ * Query the servicelog for any existent serviceable events in open state that contains a callout to
+ * the location code passed as a parameter.
+ *
+ * Return - Return 0 if there is no existent open serviceable event, -1 in case there is
+ */
+static int check_open_serv_event(char *location) {
+	int rc;
+	struct servicelog *slog;
+	struct sl_event *event, *e;
+	struct sl_callout *c;
+
+	rc = servicelog_open(&slog, 0);
+	if (rc) {
+		fprintf(stderr, "Log open error: %s\n", servicelog_error(slog));
+		return 0;
+	}
+	servicelog_event_query(slog, "serviceable = 1 AND closed = 0", &event);
+
+	for (e = event; e; e = e->next) {
+		for (c = e->callouts; c; c = c->next) {
+			if(!strcmp(c->location, location)) {
+				fprintf(stdout, "Event ID %lu in servicelog matched location found for %s\n",
+						e->id, location);
+				servicelog_event_free(event);
+				servicelog_close(slog);
+				return -1;
+			}
+		}
+	}
+	servicelog_event_free(event);
+	servicelog_close(slog);
+	return 0;
 }
 
 /* diagnose_nvme - Diagnose NVMe device health status
@@ -353,6 +391,11 @@ static int log_event(uint64_t *event_id, struct nvme_ibm_vpd *vpd, char *control
 		entry->disposition = SL_DISP_UNRECOVERABLE;
 		entry->serviceable = 1;
 		entry->call_home_status = SL_CALLHOME_CANDIDATE;
+		if (check_open_serv_event(location)) {
+			fprintf(stdout, "There is an open serviceable event for %s at %s, no new serviceable event will be reported for this device, when open event is solved use log_repair_action to close the event\n", controller_name, location);
+			rc = 0;
+			goto out;
+		}
 	}
 	else {
 		entry->disposition = SL_DISP_RECOVERABLE;

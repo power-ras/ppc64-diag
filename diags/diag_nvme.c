@@ -35,16 +35,19 @@ struct notify {
 };
 
 static int check_open_serv_event(char *location);
-static int diagnose_nvme(char *device_name, struct notify *notify);
+static int diagnose_nvme(char *device_name, struct notify *notify, char *file_path);
+static bool in_range_max (long double value, long double max, char *key);
+static bool is_positive (long double value, char *key);
 static int log_event(uint64_t *event_id, struct nvme_ibm_vpd *vpd, char *controller_name, uint8_t severity, char *description, unsigned char *raw_data, uint32_t raw_data_len);
+static void long_double_to_uint128(long double value, uint8_t *data);
 static void print_usage(char *command);
 static int regex_controller(char *controller_name, char *device_name);
 static void set_notify(struct notify *notify, struct dictionary *dict, int num_elements);
 static long double uint128_to_long_double(uint8_t *data);
 
 int main(int argc, char *argv[]) {
-	bool dump_opt = false;
-	char *dump_path = NULL;
+	bool dump_opt = false, file_opt = false;
+	char *dump_path = NULL, *file_path = NULL;
 	int opt, rc = 0, num_elements;
 
 	struct dictionary dict[MAX_DICT_ELEMENTS];
@@ -55,20 +58,24 @@ int main(int argc, char *argv[]) {
 
 	static struct option long_options[] = {
 		{"dump", required_argument, NULL, 'd'},
+		{"file", required_argument, NULL, 'f'},
 		{"help", no_argument, NULL, 'h'},
 		{0, 0, 0, 0}
 	};
 
-	while ((opt = getopt_long(argc, argv, "d:h", long_options, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "d:f:h", long_options, NULL)) != -1) {
 		switch (opt) {
 		case 'd':
 			dump_opt = true;
 			dump_path = optarg;
 			break;
+		case 'f':
+			file_opt = true;
+			file_path = optarg;
+			break;
 		case 'h':
 			print_usage(argv[0]);
 			return 0;
-			break;
 		case '?':
 			print_usage(argv[0]);
 			return -1;
@@ -78,18 +85,26 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	if ((dump_opt || file_opt) && optind + 1 != argc) {
+		fprintf(stderr, "Specify one NVMe device with -d / -f option\n");
+		return -1;
+	}
 	if (dump_opt) {
-		if (optind + 1 != argc) {
-			fprintf(stderr, "Specify one NVMe device to dump the SMART data into specified file\n");
+		if (dump_smart_data(argv[optind], dump_path)) {
+			fprintf(stderr, "Dump SMART data failed, aborting\n");
 			return -1;
 		}
-		return dump_smart_data(argv[optind], dump_path);
+		if (!file_opt)
+			return 0;
 	}
 
 	if ((num_elements = read_file_dict(CONFIG_FILE, dict, MAX_DICT_ELEMENTS)) >= 0)
 		set_notify(&notify, dict, num_elements);
 	else
 		return -1;
+
+	if (file_opt)
+		return diagnose_nvme(argv[optind], &notify, file_path);
 
 	/* No devices have been specified, look for all NVMe devices in sysfs */
 	if (optind == argc) {
@@ -102,7 +117,7 @@ int main(int argc, char *argv[]) {
 			while ((dirent = readdir(dir)) != NULL) {
 				if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
 					continue;
-				rc += diagnose_nvme(dirent->d_name, &notify);
+				rc += diagnose_nvme(dirent->d_name, &notify, NULL);
 				fprintf(stdout, "\n");
 			}
 			closedir(dir);
@@ -111,7 +126,7 @@ int main(int argc, char *argv[]) {
 
 	/* Only go through the devices specified */
 	while (optind < argc) {
-		rc += diagnose_nvme(argv[optind], &notify);
+		rc += diagnose_nvme(argv[optind], &notify, NULL);
 		fprintf(stdout, "\n");
 		optind++;
 	}
@@ -202,13 +217,15 @@ extern int dump_smart_data(char *device_name, char *dump_path) {
 /* diagnose_nvme - Diagnose NVMe device health status
  * @device_name - Name of the device to be diagnosed, expected format is nvme[0-9]+
  * @notify - Struct containing which events are to be notified based on diag_nvme.config parsing
+ * @file_path - Read SMART data from a file instead of device for testing purpose, set to NULL if
+ * 	data should be read from the device.
  *
  * Diagnose will check SMART data retrieved and identify any failures that need to be reported in
  * the servicelog database.
  *
  * Return - Return 0 on success, negative number on failure
  */
-static int diagnose_nvme(char *device_name, struct notify *notify) {
+static int diagnose_nvme(char *device_name, struct notify *notify, char *file_path) {
 	char dev_path[PATH_MAX], controller_name[NAME_MAX] = { '\0' }, description[DESCR_LENGTH];
 	double endurance;
 	int fd, rc = 0, tmp_rc, time = 0, interval = 5;
@@ -244,9 +261,17 @@ static int diagnose_nvme(char *device_name, struct notify *notify) {
 	if (tmp_rc != 0)
 		fprintf(stdout, "Warn: %s PCIe VPD failed: 0x%x, proceed without device VPD data\n", controller_name, tmp_rc);
 
-	/* If SMART data can't be retrieved assume device is in a bad state and report an event */
-	if ((tmp_rc = get_smart_log_page(fd, 0xffffffff, &smart_log)) != 0 && notify->smart_missing) {
-		fprintf(stderr, "Smart Log ioctl failed: 0x%x\n", tmp_rc);
+	if(!file_path)
+		tmp_rc = get_smart_log_page(fd, 0xffffffff, &smart_log);
+	else {
+		if ((tmp_rc = get_smart_file(file_path, &smart_log)) == -1)
+			return -1;
+	}
+	/* If SMART data can't be retrieved assume device is in a bad state and report an event
+	 * SMART file open failure (return code -2 from get_smart_file) will trigger this event
+	 */
+	if (tmp_rc && notify->smart_missing) {
+		fprintf(stderr, "Smart Log retrieve failed: %d\n", tmp_rc);
 		severity = SL_SEV_ERROR;
 		snprintf(description, sizeof(description), "SMART log data could not be retrieved for device. Device is assumed to be in a bad state.");
 		rc += log_event(&event_id, &vpd, controller_name, severity, description, NULL, 0);
@@ -402,6 +427,23 @@ read_error:
 	return -1;
 }
 
+/* get_smart_file - Process SMART data from a file
+ * @file_path - Null terminated pathname of file which SMART data will be retrived from
+ * @log - Address of log struct to store the SMART data
+ *
+ * Read SMART data from file and fill the nvme_smart_log_page struct with its content
+ *
+ * Return - Return 0 on success, -1 on SMART file error, -2 open error
+ */
+extern int get_smart_file(char *file_path, struct nvme_smart_log_page *log) {
+	int num_elements = 0;
+	struct dictionary dict[MAX_DICT_ELEMENTS];
+
+	if ((num_elements = read_file_dict(file_path, dict, MAX_DICT_ELEMENTS)) < 0)
+		return num_elements;
+	return set_smart_log_field(log, dict, num_elements);
+}
+
 /* get_smart_log_page - Get SMART data for NVMe device
  * @fd - File descriptor index of NVMe device
  * @nsid - Namespace ID, use 0xFFFFFFFF or 0x0 to get controller data, former is preferred
@@ -421,6 +463,21 @@ extern int get_smart_log_page(int fd, uint32_t nsid, struct nvme_smart_log_page 
 	};
 
 	return ioctl(fd, NVME_IOCTL_ADMIN_CMD, &admin_cmd);
+}
+
+static bool in_range_max (long double value, long double max, char *key) {
+	bool rc;
+	if (!(rc = (0 <= value && value <= max)))
+		fprintf(stderr, "Value %.0Lf for key %s is not in expected range of 0 - %.0Lf\n",
+				value, key, max);
+	return rc;
+}
+
+static bool is_positive (long double value, char *key) {
+	bool rc;
+	if (!(rc = (0 <= value)))
+		fprintf(stderr, "Value %.0Lf for key %s should be positive\n", value, key);
+	return rc;
 }
 
 /* location_code_nvme - Get location code of NVMe controller
@@ -589,6 +646,15 @@ out:
 	return rc;
 }
 
+static void long_double_to_uint128(long double value, uint8_t *data) {
+	int i;
+
+	for (i = 0; i < 16; i++) {
+		data[i] = fmodl(value, 256);
+		value /= 256;
+	}
+}
+
 /* open_nvme - Open NVMe device
  * @dev_path - Full path to NVMe device, expected format is /dev/nvme*
  *
@@ -628,10 +694,13 @@ extern int open_nvme(char *dev_path) {
 }
 
 static void print_usage(char *command) {
-	printf("Usage: %s [-h] [-d <file>] [<nvme_devices>]\n"
+	printf("Usage: %s [-h] [-d <file>] [-f <file>] [<nvme_devices>]\n"
 		"\t-h or --help: print this help message\n"
 		"\t-d or --dump: dump SMART data to the specified path and file name <file>\n"
 		"\t                  one <nvme_device> is expected with this option\n"
+		"\t-f or --file: use SMART data from the specified path and file name <file>\n"
+		"\t                  instead of device, one <nvme_device> is expected with\n"
+		"\t                  this option\n"
 		"\t<nvme_devices>: the NVMe devices on which to operate, for\n"
 		"\t                  example nvme0; if not specified, all detected\n"
 		"\t                  nvme devices will be diagnosed\n", command);
@@ -645,7 +714,7 @@ static void print_usage(char *command) {
  * This function reads a file and extracts the key=value elements found in it and fill the dict
  * array.
  *
- * Return - Return number of elements filled in the array, -1 on error
+ * Return - Return number of elements filled in the array, -1 config file error, -2 open failure
  */
 extern int read_file_dict(char *file_name, struct dictionary *dict, int max_elements) {
 	FILE *fp;
@@ -656,7 +725,7 @@ extern int read_file_dict(char *file_name, struct dictionary *dict, int max_elem
 	fp = fopen(file_name, "r");
 	if (fp == NULL) {
 		fprintf(stderr, "%s open failed: %s\n", file_name, strerror(errno));
-		return -1;
+		return -2;
 	}
 	for (line = 1; getline(&line_string, &length, fp) != -1 &&
 			num_elements < max_elements; line++) {
@@ -731,6 +800,134 @@ static void set_notify(struct notify *notify, struct dictionary *dict, int num_e
 			notify->crit_warn &= ~(CRIT_WARN_PMR_RO);
 		dict++;
 	}
+}
+
+extern int set_smart_log_field(struct nvme_smart_log_page *log, struct dictionary *dict, int num_elements) {
+	for (int counter = 1; counter <= num_elements; counter++) {
+		if (!strcmp(dict->key, "CRIT_WARN")) {
+			if (!in_range_max(dict->value, UINT8_MAX, dict->key))
+				return -1;
+			log->critical_warning = dict->value;
+		} else if (!strcmp(dict->key, "COMP_TEMP")) {
+			if (!in_range_max(dict->value, UINT16_MAX, dict->key))
+				return -1;
+			log->composite_temp = htole16(dict->value);
+		} else if (!strcmp(dict->key, "AVAIL_SPARE")) {
+			if (!in_range_max(dict->value, UINT8_MAX, dict->key))
+				return -1;
+			log->avail_spare = dict->value;
+		} else if (!strcmp(dict->key, "AVAIL_SPARE_THRES")) {
+			if (!in_range_max(dict->value, UINT8_MAX, dict->key))
+				return -1;
+			log->avail_spare_threshold = dict->value;
+		} else if (!strcmp(dict->key, "PCT_USED")) {
+			if (!in_range_max(dict->value, UINT8_MAX, dict->key))
+				return -1;
+			log->percentage_used = dict->value;
+		} else if (!strcmp(dict->key, "END_GRP_CRIT_WARN")) {
+			if (!in_range_max(dict->value, UINT8_MAX, dict->key))
+				return -1;
+			log->endurance_group_crit_warn_summary = dict->value;
+		} else if (!strcmp(dict->key, "UNITS_READ")) {
+			if (!is_positive(dict->value, dict->key))
+				return -1;
+			long_double_to_uint128(dict->value, log->data_units_read);
+		} else if (!strcmp(dict->key, "UNITS_WRITTEN")) {
+			if (!is_positive(dict->value, dict->key))
+				return -1;
+			long_double_to_uint128(dict->value, log->data_units_written);
+		} else if (!strcmp(dict->key, "HOST_READ_CMD")) {
+			if (!is_positive(dict->value, dict->key))
+				return -1;
+			long_double_to_uint128(dict->value, log->host_reads_cmd);
+		} else if (!strcmp(dict->key, "HOST_WRITE_CMD")) {
+			if (!is_positive(dict->value, dict->key))
+				return -1;
+			long_double_to_uint128(dict->value, log->host_writes_cmd);
+		} else if (!strcmp(dict->key, "CTRL_BUSY_TIME")) {
+			if (!is_positive(dict->value, dict->key))
+				return -1;
+			long_double_to_uint128(dict->value, log->ctrl_busy_time);
+		} else if (!strcmp(dict->key, "PWR_CYCLES")) {
+			if (!is_positive(dict->value, dict->key))
+				return -1;
+			long_double_to_uint128(dict->value, log->power_cycles);
+		} else if (!strcmp(dict->key, "PWR_ON_HOURS")) {
+			if (!is_positive(dict->value, dict->key))
+				return -1;
+			long_double_to_uint128(dict->value, log->power_on_hours);
+		} else if (!strcmp(dict->key, "UNSAFE_SHUTDOWN")) {
+			if (!is_positive(dict->value, dict->key))
+				return -1;
+			long_double_to_uint128(dict->value, log->unsafe_shutdowns);
+		} else if (!strcmp(dict->key, "MEDIA_ERR")) {
+			if (!is_positive(dict->value, dict->key))
+				return -1;
+			long_double_to_uint128(dict->value, log->media_data_integrity_err);
+		} else if (!strcmp(dict->key, "ERR_LOG")) {
+			if (!is_positive(dict->value, dict->key))
+				return -1;
+			long_double_to_uint128(dict->value, log->num_err_info_log_entries);
+		} else if (!strcmp(dict->key, "WARN_TEMP_TIME")) {
+			if (!in_range_max(dict->value, UINT32_MAX, dict->key))
+				return -1;
+			log->warn_composite_temp_time = htole32(dict->value);
+		} else if (!strcmp(dict->key, "CRIT_TEMP_TIME")) {
+			if (!in_range_max(dict->value, UINT32_MAX, dict->key))
+				return -1;
+			log->crit_composite_temp_time = htole32(dict->value);
+		} else if (!strcmp(dict->key, "TEMP_SENSOR1")) {
+			if (!in_range_max(dict->value, UINT16_MAX, dict->key))
+				return -1;
+			log->temp_sensor1 = htole16(dict->value);
+		} else if (!strcmp(dict->key, "TEMP_SENSOR2")) {
+			if (!in_range_max(dict->value, UINT16_MAX, dict->key))
+				return -1;
+			log->temp_sensor2 = htole16(dict->value);
+		} else if (!strcmp(dict->key, "TEMP_SENSOR3")) {
+			if (!in_range_max(dict->value, UINT16_MAX, dict->key))
+				return -1;
+			log->temp_sensor3 = htole16(dict->value);
+		} else if (!strcmp(dict->key, "TEMP_SENSOR4")) {
+			if (!in_range_max(dict->value, UINT16_MAX, dict->key))
+				return -1;
+			log->temp_sensor4 = htole16(dict->value);
+		} else if (!strcmp(dict->key, "TEMP_SENSOR5")) {
+			if (!in_range_max(dict->value, UINT16_MAX, dict->key))
+				return -1;
+			log->temp_sensor5 = htole16(dict->value);
+		} else if (!strcmp(dict->key, "TEMP_SENSOR6")) {
+			if (!in_range_max(dict->value, UINT16_MAX, dict->key))
+				return -1;
+			log->temp_sensor6 = htole16(dict->value);
+		} else if (!strcmp(dict->key, "TEMP_SENSOR7")) {
+			if (!in_range_max(dict->value, UINT16_MAX, dict->key))
+				return -1;
+			log->temp_sensor7 = htole16(dict->value);
+		} else if (!strcmp(dict->key, "TEMP_SENSOR8")) {
+			if (!in_range_max(dict->value, UINT16_MAX, dict->key))
+				return -1;
+			log->temp_sensor8 = htole16(dict->value);
+		} else if (!strcmp(dict->key, "THRM_TEMP1_TRANS")) {
+			if (!in_range_max(dict->value, UINT32_MAX, dict->key))
+				return -1;
+			log->thrm_mgmt_temp1_trans_count = htole32(dict->value);
+		} else if (!strcmp(dict->key, "THRM_TEMP2_TRANS")) {
+			if (!in_range_max(dict->value, UINT32_MAX, dict->key))
+				return -1;
+			log->thrm_mgmt_temp2_trans_count = htole32(dict->value);
+		} else if (!strcmp(dict->key, "TOTAL_THM_TEMP1")) {
+			if (!in_range_max(dict->value, UINT32_MAX, dict->key))
+				return -1;
+			log->total_time_thm_mgmt_temp1 = htole32(dict->value);
+		} else if (!strcmp(dict->key, "TOTAL_THM_TEMP2")) {
+			if (!in_range_max(dict->value, UINT32_MAX, dict->key))
+				return -1;
+			log->total_time_thm_mgmt_temp2 = htole32(dict->value);
+		}
+		dict++;
+	}
+	return 0;
 }
 
 /* set_vpd_pcie_field - Set the appropriate field with VPD information collected

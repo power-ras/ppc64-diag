@@ -43,6 +43,8 @@ static void set_notify(struct notify *notify, struct dictionary *dict, int num_e
 static long double uint128_to_long_double(uint8_t *data);
 
 int main(int argc, char *argv[]) {
+	bool dump_opt = false;
+	char *dump_path = NULL;
 	int opt, rc = 0, num_elements;
 
 	struct dictionary dict[MAX_DICT_ELEMENTS];
@@ -52,12 +54,17 @@ int main(int argc, char *argv[]) {
 	struct dirent *dirent;
 
 	static struct option long_options[] = {
+		{"dump", required_argument, NULL, 'd'},
 		{"help", no_argument, NULL, 'h'},
 		{0, 0, 0, 0}
 	};
 
-	while ((opt = getopt_long(argc, argv, "h", long_options, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "d:h", long_options, NULL)) != -1) {
 		switch (opt) {
+		case 'd':
+			dump_opt = true;
+			dump_path = optarg;
+			break;
 		case 'h':
 			print_usage(argv[0]);
 			return 0;
@@ -69,6 +76,14 @@ int main(int argc, char *argv[]) {
 			print_usage(argv[0]);
 			return -1;
 		}
+	}
+
+	if (dump_opt) {
+		if (optind + 1 != argc) {
+			fprintf(stderr, "Specify one NVMe device to dump the SMART data into specified file\n");
+			return -1;
+		}
+		return dump_smart_data(argv[optind], dump_path);
 	}
 
 	if ((num_elements = read_file_dict(CONFIG_FILE, dict, MAX_DICT_ELEMENTS)) >= 0)
@@ -138,6 +153,49 @@ static int check_open_serv_event(char *location) {
 	}
 	servicelog_event_free(event);
 	servicelog_close(slog);
+	return 0;
+}
+
+/* dump_smart_data - Dump SMART data of NVMe device into a file
+ * @device_name - Name of the device to retrive SMART data from, expected format is nvme[0-9]+
+ * @dump_path - Null terminated pathname of file which SMART data will be dumped into
+ *
+ * Extract SMART data from specified NVMe device and write the contents of it into a file using a
+ * key=value format for each of the fields in the SMART data.
+ *
+ * Return - Return 0 on success, negative number on failure
+ */
+extern int dump_smart_data(char *device_name, char *dump_path) {
+	char dev_path[PATH_MAX];
+	int fd, rc;
+	FILE *fp;
+	struct nvme_smart_log_page smart_log = { 0 };
+
+	/* Read SMART data from device */
+	snprintf(dev_path,sizeof(dev_path), "/dev/%s", device_name);
+	fd = open_nvme(dev_path);
+	if (fd < 0)
+		return -1;
+	if ((rc = get_smart_log_page(fd, 0xffffffff, &smart_log)) != 0) {
+		fprintf(stderr, "SMART log data could not be retrieved for device %s, ioctl failed: 0x%x\n",
+				device_name, rc);
+		close(fd);
+		return -1;
+	}
+	close(fd);
+
+	/* Dump it into a file */
+	if (strlen(dump_path) > PATH_MAX) {
+		fprintf(stderr, "Path specified is longer than expected maximum: %d\n", PATH_MAX);
+		return -1;
+	}
+	fp = fopen(dump_path, "wx");
+	if (fp == NULL) {
+		fprintf(stderr, "%s open failed: %s\n", dump_path, strerror(errno));
+		return -1;
+	}
+	write_smart_file(fp, &smart_log);
+	fclose(fp);
 	return 0;
 }
 
@@ -570,8 +628,10 @@ extern int open_nvme(char *dev_path) {
 }
 
 static void print_usage(char *command) {
-	printf("Usage: %s [-h] [<nvme_devices>]\n"
-		"\t-h: print this help message\n"
+	printf("Usage: %s [-h] [-d <file>] [<nvme_devices>]\n"
+		"\t-h or --help: print this help message\n"
+		"\t-d or --dump: dump SMART data to the specified path and file name <file>\n"
+		"\t                  one <nvme_device> is expected with this option\n"
 		"\t<nvme_devices>: the NVMe devices on which to operate, for\n"
 		"\t                  example nvme0; if not specified, all detected\n"
 		"\t                  nvme devices will be diagnosed\n", command);
@@ -738,4 +798,67 @@ static long double uint128_to_long_double(uint8_t *data) {
 		value += data[15 - i];
 	}
 	return value;
+}
+
+extern void write_smart_file(FILE *fp, struct nvme_smart_log_page *log) {
+	fprintf(fp, "CRIT_WARN = %u # Length %ld byte\n",
+			log->critical_warning, sizeof(log->critical_warning));
+	fprintf(fp, "COMP_TEMP = %u # Length %ld byte\n",
+			le16toh(log->composite_temp), sizeof(log->composite_temp));
+	fprintf(fp, "AVAIL_SPARE = %u # Length %ld byte\n",
+			log->avail_spare, sizeof(log->avail_spare));
+	fprintf(fp, "AVAIL_SPARE_THRES = %u # Length %ld byte\n",
+			log->avail_spare_threshold, sizeof(log->avail_spare_threshold));
+	fprintf(fp, "PCT_USED = %u # Length %ld byte\n",
+			log->percentage_used, sizeof(log->percentage_used));
+	fprintf(fp, "END_GRP_CRIT_WARN = %u # Length %ld byte\n",
+			log->endurance_group_crit_warn_summary, sizeof(log->endurance_group_crit_warn_summary));
+	fprintf(fp, "UNITS_READ = %.0Lf # Length %ld byte\n",
+			uint128_to_long_double(log->data_units_read), sizeof(log->data_units_read));
+	fprintf(fp, "UNITS_WRITTEN = %.0Lf # Length %ld byte\n",
+			uint128_to_long_double(log->data_units_written), sizeof(log->data_units_written));
+	fprintf(fp, "HOST_READ_CMD = %.0Lf # Length %ld byte\n",
+			uint128_to_long_double(log->host_reads_cmd), sizeof(log->host_reads_cmd));
+	fprintf(fp, "HOST_WRITE_CMD = %.0Lf # Length %ld byte\n",
+			uint128_to_long_double(log->host_writes_cmd), sizeof(log->host_writes_cmd));
+	fprintf(fp, "CTRL_BUSY_TIME = %.0Lf # Length %ld byte\n",
+			uint128_to_long_double(log->ctrl_busy_time), sizeof(log->ctrl_busy_time));
+	fprintf(fp, "PWR_CYCLES = %.0Lf # Length %ld byte\n",
+			uint128_to_long_double(log->power_cycles), sizeof(log->power_cycles));
+	fprintf(fp, "PWR_ON_HOURS = %.0Lf # Length %ld byte\n",
+			uint128_to_long_double(log->power_on_hours), sizeof(log->power_on_hours));
+	fprintf(fp, "UNSAFE_SHUTDOWN = %.0Lf # Length %ld byte\n",
+			uint128_to_long_double(log->unsafe_shutdowns), sizeof(log->unsafe_shutdowns));
+	fprintf(fp, "MEDIA_ERR = %.0Lf # Length %ld byte\n",
+			uint128_to_long_double(log->media_data_integrity_err), sizeof(log->media_data_integrity_err));
+	fprintf(fp, "ERR_LOG = %.0Lf # Length %ld byte\n",
+			uint128_to_long_double(log->num_err_info_log_entries), sizeof(log->num_err_info_log_entries));
+	fprintf(fp, "WARN_TEMP_TIME = %u # Length %ld byte\n",
+			le32toh(log->warn_composite_temp_time), sizeof(log->warn_composite_temp_time));
+	fprintf(fp, "CRIT_TEMP_TIME = %u # Length %ld byte\n",
+			le32toh(log->crit_composite_temp_time), sizeof(log->crit_composite_temp_time));
+	fprintf(fp, "TEMP_SENSOR1 = %u # Length %ld byte\n",
+			le16toh(log->temp_sensor1), sizeof(log->temp_sensor1));
+	fprintf(fp, "TEMP_SENSOR2 = %u # Length %ld byte\n",
+			le16toh(log->temp_sensor2), sizeof(log->temp_sensor2));
+	fprintf(fp, "TEMP_SENSOR3 = %u # Length %ld byte\n",
+			le16toh(log->temp_sensor3), sizeof(log->temp_sensor3));
+	fprintf(fp, "TEMP_SENSOR4 = %u # Length %ld byte\n",
+			le16toh(log->temp_sensor4), sizeof(log->temp_sensor4));
+	fprintf(fp, "TEMP_SENSOR5 = %u # Length %ld byte\n",
+			le16toh(log->temp_sensor5), sizeof(log->temp_sensor5));
+	fprintf(fp, "TEMP_SENSOR6 = %u # Length %ld byte\n",
+			le16toh(log->temp_sensor6), sizeof(log->temp_sensor6));
+	fprintf(fp, "TEMP_SENSOR7 = %u # Length %ld byte\n",
+			le16toh(log->temp_sensor7), sizeof(log->temp_sensor7));
+	fprintf(fp, "TEMP_SENSOR8 = %u # Length %ld byte\n",
+			le16toh(log->temp_sensor8), sizeof(log->temp_sensor8));
+	fprintf(fp, "THRM_TEMP1_TRANS = %u # Length %ld byte\n",
+			le32toh(log->thrm_mgmt_temp1_trans_count), sizeof(log->thrm_mgmt_temp1_trans_count));
+	fprintf(fp, "THRM_TEMP2_TRANS = %u # Length %ld byte\n",
+			le32toh(log->thrm_mgmt_temp2_trans_count), sizeof(log->thrm_mgmt_temp2_trans_count));
+	fprintf(fp, "TOTAL_THM_TEMP1 = %u # Length %ld byte\n",
+			le32toh(log->total_time_thm_mgmt_temp1), sizeof(log->total_time_thm_mgmt_temp1));
+	fprintf(fp, "TOTAL_THM_TEMP2 = %u # Length %ld byte\n",
+			le32toh(log->total_time_thm_mgmt_temp2), sizeof(log->total_time_thm_mgmt_temp2));
 }

@@ -135,6 +135,7 @@ struct nvme_smart_log_page {
 	uint8_t reserved232[280];
 } __attribute__((packed));
 
+extern int dump_smart_data(char *device_name, char *dump_path);
 extern int get_ibm_vpd_log_page(int fd, struct nvme_ibm_vpd *vpd);
 extern int get_ibm_vpd_pcie(char *controller_name, struct nvme_ibm_vpd *vpd);
 extern int get_smart_log_page(int fd, uint32_t nsid, struct nvme_smart_log_page *log);
@@ -142,5 +143,6 @@ extern int location_code_nvme(char *location, char *controller_name);
 extern int open_nvme(char *dev_path);
 extern int read_file_dict(char *file_name, struct dictionary *dict, int max_params);
 extern void set_vpd_pcie_field(const char *keyword, const char *vpd_data, struct nvme_ibm_vpd *vpd);
+extern void write_smart_file(FILE *fp, struct nvme_smart_log_page *log);
 
 #endif /* _DIAG_NVME_H */

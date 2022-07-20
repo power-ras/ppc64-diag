@@ -26,6 +26,7 @@
 #include <sys/utsname.h>
 #include "diag_nvme.h"
 
+#define ITEM_DATA_LENGTH	255
 #define MIN_HOURS_ON		720
 
 struct notify {
@@ -34,13 +35,38 @@ struct notify {
 	bool write_rate;
 };
 
+struct section {
+	struct header_section {
+		uint8_t tag;
+		uint8_t reserved;
+		uint16_t length;
+	} header;
+	unsigned char *data;
+} __attribute__((packed));
+
+struct item {
+	struct header_item {
+		char keyword[2];
+		uint8_t reserved;
+		uint8_t length;
+	} header;
+	char data[ITEM_DATA_LENGTH];
+} __attribute__((packed));
+
+static int append_item(struct section *section, struct item *item);
+static int append_section(unsigned char **raw_data, uint32_t *raw_data_len, struct section *section);
 static int check_open_serv_event(char *location);
 static int diagnose_nvme(char *device_name, struct notify *notify, char *file_path);
+static void fill_item_ld(struct item *item, char *keyword, long double data);
+static void fill_item_string(struct item *item, char *keyword, char *data, size_t size);
+static int fill_raw_data(unsigned char **raw_data, uint32_t *raw_data_len, struct nvme_smart_log_page *log, struct nvme_ibm_vpd *vpd);
 static bool in_range_max (long double value, long double max, char *key);
 static bool is_positive (long double value, char *key);
 static int log_event(uint64_t *event_id, struct nvme_ibm_vpd *vpd, char *controller_name, uint8_t severity, char *description, unsigned char *raw_data, uint32_t raw_data_len);
 static void long_double_to_uint128(long double value, uint8_t *data);
 static void print_usage(char *command);
+static int raw_data_smart(unsigned char **raw_data, uint32_t *raw_data_len, struct nvme_smart_log_page *log);
+static int raw_data_vpd(unsigned char **raw_data, uint32_t *raw_data_len, struct nvme_ibm_vpd *vpd);
 static int regex_controller(char *controller_name, char *device_name);
 static void set_notify(struct notify *notify, struct dictionary *dict, int num_elements);
 static long double uint128_to_long_double(uint8_t *data);
@@ -132,6 +158,97 @@ int main(int argc, char *argv[]) {
 	}
 
 	return rc;
+}
+
+/* append_item - Append an item to a section
+ * @section - Address of section struct to be filled, user is expected to free memory
+ *		allocated for section->data to avoid memory leak
+ * @item - Address of item struct to be appended to section
+ *
+ * User is expected to free memory allocated for section->data
+ *
+ * Append a new item to the existent section
+ *
+ * Return - Return 0 on success, -1 if section is full, -2 for other errors
+ */
+static int append_item(struct section *section, struct item *item) {
+	unsigned char *old_data;
+	uint16_t length;
+
+	if(!section || !item) {
+		fprintf(stderr, "section or item parameter in %s is NULL, aborting", __func__);
+		return -2;
+	}
+
+	length = le16toh(section->header.length) + sizeof(item->header) + item->header.length;
+	if (length < section->header.length) {
+		fprintf(stdout, "Warn: Section 0x%.2x can't store additional items, ignoring item: keyword %.*s, data %.*s\n",
+				section->header.tag, (int) sizeof(item->header.keyword), item->header.keyword,
+				item->header.length, item->data);
+		return -1;
+	}
+	old_data = section->data;
+	if (!(section->data = malloc(length)))
+		goto err_out;
+	memcpy(section->data, old_data, le16toh(section->header.length));
+	memcpy((section->data + le16toh(section->header.length)), item,
+			(sizeof(item->header) + item->header.length));
+	section->header.length = htole16(length);
+	free(old_data);
+	return 0;
+
+err_out:
+	fprintf(stderr, "Memory allocation failed in %s for section 0x%.2x, keyword %.*s, data %.*s\n",
+			__func__, section->header.tag, (int) sizeof(item->header.keyword),
+			item->header.keyword, item->header.length, item->data);
+	section->data = old_data;
+	return -2;
+}
+
+/* append_section - Append a section to raw_data
+ * @raw_data - Address of pointer to the binary data to be filled, user is expected to free memory
+ *		allocated for raw_data to avoid memory leak
+ * @raw_data_len - Address of variable to set with length (in bytes) of raw_data that was filled
+ * @section - Address of section struct to be appended to raw_data
+ *
+ * User is expected to free memory allocated for raw_data
+ *
+ * Append a new section to the existent raw_data
+ *
+ * Return - Return 0 on success, -1 if raw_data is full, -2 for other errors
+ */
+static int append_section(unsigned char **raw_data, uint32_t *raw_data_len, struct section *section) {
+	unsigned char *old_raw_data;
+	uint32_t length;
+
+	if(!section) {
+		fprintf(stderr, "section parameter in %s is NULL, aborting", __func__);
+		return -2;
+	}
+
+	length = *raw_data_len + sizeof(section->header) + le16toh(section->header.length);
+	if (length < *raw_data_len) {
+		fprintf(stdout, "Warn: raw_data can't store additional section, ignoring section 0x%.2x\n",
+				section->header.tag);
+		return -1;
+	}
+	old_raw_data = *raw_data;
+	if (!(*raw_data = malloc(length)))
+		goto err_out;
+	memcpy(*raw_data, old_raw_data, *raw_data_len);
+	memcpy((*raw_data + *raw_data_len), section, sizeof(section->header));
+	memcpy((*raw_data + *raw_data_len + sizeof(section->header)), section->data,
+			le16toh(section->header.length));
+	*raw_data_len = length;
+	free(old_raw_data);
+
+	return 0;
+
+err_out:
+	fprintf(stderr, "Memory allocation failed in %s for section 0x%.2x\n", __func__,
+			section->header.tag);
+	*raw_data = old_raw_data;
+	return -2;
 }
 
 /* check_open_serv_event - Check existent serviceable event in open state for device
@@ -236,6 +353,8 @@ static int diagnose_nvme(char *device_name, struct notify *notify, char *file_pa
 	char endurance_s[sizeof(vpd.endurance) + 1], capacity_s[sizeof(vpd.capacity)+1];
         uint64_t event_id;
 	uint8_t severity;
+	uint32_t raw_data_len = 0;
+	unsigned char *raw_data = NULL;
 
 	tmp_rc = regex_controller(controller_name, device_name);
 	if (tmp_rc != 0)
@@ -274,7 +393,11 @@ static int diagnose_nvme(char *device_name, struct notify *notify, char *file_pa
 		fprintf(stderr, "Smart Log retrieve failed: %d\n", tmp_rc);
 		severity = SL_SEV_ERROR;
 		snprintf(description, sizeof(description), "SMART log data could not be retrieved for device. Device is assumed to be in a bad state.");
-		rc += log_event(&event_id, &vpd, controller_name, severity, description, NULL, 0);
+		if(!raw_data && fill_raw_data(&raw_data, &raw_data_len, NULL, &vpd) != 0) {
+			free(raw_data);
+			return -1;
+		}
+		rc += log_event(&event_id, &vpd, controller_name, severity, description, raw_data, raw_data_len);
 		close(fd);
 		return rc;
 	}
@@ -296,7 +419,11 @@ static int diagnose_nvme(char *device_name, struct notify *notify, char *file_pa
 				"\t0x%.2x - Persistent Memory Region", smart_log.critical_warning,
 				CRIT_WARN_SPARE, CRIT_WARN_TEMP, CRIT_WARN_DEGRADED, CRIT_WARN_RO,
 				CRIT_WARN_VOLATILE_MEM, CRIT_WARN_PMR_RO);
-		rc += log_event(&event_id, &vpd, controller_name, severity, description, NULL, 0);
+		if (!raw_data && fill_raw_data(&raw_data, &raw_data_len, &smart_log, &vpd) != 0) {
+			free(raw_data);
+			return -1;
+		}
+		rc += log_event(&event_id, &vpd, controller_name, severity, description, raw_data, raw_data_len);
 	}
 
 	/* Create a warning event in case average rate of writing exceeds device endurance for a day
@@ -320,11 +447,147 @@ static int diagnose_nvme(char *device_name, struct notify *notify, char *file_pa
 					"Current device DWPD average: %.3Lf\n"
 					"Device advertised DWPD endurance: %.3lf\n",
 					avg_dwpd, endurance);
-			rc += log_event(&event_id, &vpd, controller_name, severity, description, NULL, 0);
+			if (!raw_data && fill_raw_data(&raw_data, &raw_data_len, &smart_log, &vpd) != 0) {
+				free(raw_data);
+				return -1;
+			}
+			rc += log_event(&event_id, &vpd, controller_name, severity, description, raw_data, raw_data_len);
 		}
 	}
 
+	free(raw_data);
 	return rc;
+}
+
+/* fill_item_ld - Fill item with long double data
+ * @item - Address of item struct to be filled
+ * @keyword - Address of keyword string to fill in item struct
+ * @data - long double value to fill in item struct
+ *
+ * Fill item struct with a keyword string and a long double data converted into ASCII.
+ */
+static void fill_item_ld(struct item *item, char *keyword, long double data) {
+	int length;
+
+	if(!item || !keyword)
+		return;
+
+	memset(item->header.keyword, '\0', sizeof(item->header.keyword));
+	memset(item->data, '\0', sizeof(item->data));
+
+	strncpy(item->header.keyword, keyword, sizeof(item->header.keyword));
+	length = snprintf(item->data, sizeof(item->data), "%0.Lf", data);
+	item->header.length = (length > ITEM_DATA_LENGTH) ? ITEM_DATA_LENGTH : length;
+}
+
+/* fill_item_string - Fill item with string data
+ * @item - Address of item struct to be filled
+ * @keyword - Address of keyword string to fill in item struct
+ * @data - Address of data string to fill in item struct
+ * @data_len - Length of data string
+ *
+ * Fill item struct with a keyword string and the data string.
+ */
+static void fill_item_string(struct item *item, char *keyword, char *data, size_t data_len) {
+
+	if(!item || !keyword || !data)
+		return;
+
+	memset(item->header.keyword, '\0', sizeof(item->header.keyword));
+	memset(item->data, '\0', sizeof(item->data));
+
+	strncpy(item->header.keyword, keyword, sizeof(item->header.keyword));
+	if (data_len > ITEM_DATA_LENGTH)
+		data_len = ITEM_DATA_LENGTH;
+	item->header.length = snprintf(item->data, sizeof(item->data), "%.*s", (int) data_len, data);
+}
+
+/* fill_raw_data - Fill the raw_data field of a servicelog event
+ * @raw_data - Address of pointer to the binary data to be filled, user is expected to free memory
+ * 	 	allocated for raw_data to avoid memory leak
+ * @raw_data_len - Address of variable to set with length (in bytes) of raw_data that was filled
+ * @log - Address of vpd struct containing SMART data to fill raw_data
+ * @vpd - Address of vpd struct containing IBM VPD data to fill raw_data
+ * @controller_name - Name of the device to log event against, expected format is nvme[0-9]+
+ *
+ * User is expected to free memory allocated for raw_data
+ *
+ * Fill the raw_data field with any extra data such as VPD and SMART to be logged in the servicelog
+ * database. The data itself is formatted as follows so it provides an extensible way to add more
+ * data in the future if needed:
+ *
+ * The raw_data format is made of sections, each section contains a one-byte tag which identifies
+ * what is the data contained in this section, an additional one-byte reserved and two-byte length
+ * which represents the length value (in bytes) of all the data fields contained in this section,
+ * followed by the data items, so a section has the following format:
+ * +------------+----------------------------------------------+
+ * |   Offset   |                Field meaning                 |
+ * +------------+----------------------------------------------+
+ * |   Byte 0   |               Identifier Tag                 |
+ * |            |                                              |
+ * |   Byte 1   |                  Reserved                    |
+ * |            |                                              |
+ * |   Byte 2   | Length (in bytes) of data - bits[7:0] (LSB)  |
+ * |            |                                              |
+ * |   Byte 3   | Length (in bytes) of data - bits[15:8] (MSB) |
+ * |            |                                              |
+ * | Byte 4 - N |                 Data items                   |
+ * +------------+----------------------------------------------+
+ *
+ * The current tags in use are the following:
+ * +---------+------------+
+ * | Tag 01h | SMART data |
+ * +---------+------------+
+ * | Tag 02h |  VPD data  |
+ * +---------+------------+
+ * | Tag FFh |  End Tag   |
+ * +---------+------------+
+ * For the end tag (FFh) no additional data items are present along with the header, so it is a
+ * section with the other header bytes set to 0.
+ *
+ * Each data item consists of a four-byte header followed by some amount of data, The format of
+ * this header is as follows: a keyword is a two-character (ASCII) mnemonic that uniquely
+ * identifies the information in the field, one additional reserved byte and the last byte of the
+ * header is binary and represents the length value (in bytes) of the data that follows. The
+ * keyword data is provided as ASCII characters. The following is an example:
+ *          |      +0       |      +1       |      +2       |      +3       |
+ *          |               |               |               |               |
+ *          |7|6|5|4|3|2|1|0|7|6|5|4|3|2|1|0|7|6|5|4|3|2|1|0|7|6|5|4|3|2|1|0|
+ *          +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *          |            Keyword            |   Reserved    |   Length (N)  |
+ * Byte 0 ->|                               |               |               |
+ *          +-------------------------------+---------------+---------------+
+ *          |               Data (byte 4 -> N+3, example here N=4)          |
+ * Byte 4 ->|                                                               |
+ *          +---------------------------------------------------------------+
+ *
+ * Return - Return 0 on success, -1 on error
+ */
+static int fill_raw_data(unsigned char **raw_data, uint32_t *raw_data_len, struct nvme_smart_log_page *log, struct nvme_ibm_vpd *vpd) {
+	struct section section = { 0 };
+
+	if (!raw_data || !raw_data_len) {
+		fprintf(stderr, "raw_data or raw_data_len parameter for %s is NULL, aborting\n", __func__);
+		return -1;
+	}
+
+	if (log)
+		if(raw_data_smart(raw_data, raw_data_len, log))
+			goto err_out;
+	if (vpd)
+		if(raw_data_vpd(raw_data, raw_data_len, vpd))
+			goto err_out;
+
+	/* Append end tag section */
+	section.header.tag = 0xFF;
+	if(append_section(raw_data, raw_data_len, &section))
+		goto err_out;
+
+	return 0;
+
+err_out:
+	fprintf(stderr, "raw_data was not filled properly, aborting\n");
+	return -1;
 }
 
 /* get_ibm_vpd_log_page - Get IBM VPD data from NVMe device log page
@@ -704,6 +967,168 @@ static void print_usage(char *command) {
 		"\t<nvme_devices>: the NVMe devices on which to operate, for\n"
 		"\t                  example nvme0; if not specified, all detected\n"
 		"\t                  nvme devices will be diagnosed\n", command);
+}
+
+/* raw_data_smart - Fill the raw_data field with SMART information
+ * @raw_data - Address of pointer to the binary data to be filled, user is expected to free memory
+ *              allocated for raw_data to avoid memory leak
+ * @raw_data_len - Address of variable to set with length (in bytes) of raw_data that was filled
+ * @vpd - Address of vpd struct containing IBM VPD data to fill raw_data
+ *
+ * User is expected to free memory allocated for raw_data
+ *
+ * Fill the raw_data field with SMART section (tag 0x01). Data format to be followed is described
+ * in fill_raw_data function description.
+ *
+ * Return - Return 0 on success, -1 on error
+ */
+static int raw_data_smart(unsigned char **raw_data, uint32_t *raw_data_len, struct nvme_smart_log_page *log) {
+	int rc = -1;
+	struct section section = { 0 };
+	struct item item = { 0 };
+
+	section.header.tag = 0x01;
+
+	fill_item_ld(&item, "CW", log->critical_warning);
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "T0", le16toh(log->composite_temp));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "AS", log->avail_spare);
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "ST", log->avail_spare_threshold);
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "PU", log->percentage_used);
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "EG", log->endurance_group_crit_warn_summary);
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "DR", uint128_to_long_double(log->data_units_read));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "DW", uint128_to_long_double(log->data_units_written));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "HR", uint128_to_long_double(log->host_reads_cmd));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "HW", uint128_to_long_double(log->host_writes_cmd));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "BT", uint128_to_long_double(log->ctrl_busy_time));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "PC", uint128_to_long_double(log->power_cycles));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "PH", uint128_to_long_double(log->power_on_hours));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "US", uint128_to_long_double(log->unsafe_shutdowns));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "DI", uint128_to_long_double(log->media_data_integrity_err));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "EI", uint128_to_long_double(log->num_err_info_log_entries));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "TW", le32toh(log->warn_composite_temp_time));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "TC", le32toh(log->crit_composite_temp_time));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "T1", le16toh(log->temp_sensor1));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "T2", le16toh(log->temp_sensor2));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "T3", le16toh(log->temp_sensor3));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "T4", le16toh(log->temp_sensor3));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "T5", le16toh(log->temp_sensor5));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "T6", le16toh(log->temp_sensor6));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "T7", le16toh(log->temp_sensor7));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "T8", le16toh(log->temp_sensor8));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "M1", le32toh(log->thrm_mgmt_temp1_trans_count));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "M2", le32toh(log->thrm_mgmt_temp2_trans_count));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "M3", le32toh(log->total_time_thm_mgmt_temp1));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_ld(&item, "M4", le32toh(log->total_time_thm_mgmt_temp2));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+
+	if(append_section(raw_data, raw_data_len, &section) < -1)
+		goto err_out;
+	rc = 0;
+
+err_out:
+	free(section.data);
+	return rc;
+}
+
+/* raw_data_vpd - Fill the raw_data field with VPD information
+ * @raw_data - Address of pointer to the binary data to be filled, user is expected to free memory
+ *              allocated for raw_data to avoid memory leak
+ * @raw_data_len - Address of variable to set with length (in bytes) of raw_data that was filled
+ * @vpd - Address of vpd struct containing IBM VPD data to fill raw_data
+ *
+ * User is expected to free memory allocated for raw_data
+ *
+ * Fill the raw_data field with VPD section (tag 0x02). Data format to be followed is described in
+ * fill_raw_data function description.
+ *
+ * Return - Return 0 on success, -1 on error
+ */
+static int raw_data_vpd(unsigned char **raw_data, uint32_t *raw_data_len, struct nvme_ibm_vpd *vpd) {
+	int rc = -1;
+	struct section section = { 0 };
+	struct item item = { 0 };
+
+	section.header.tag = 0x02;
+
+	fill_item_string(&item, "Z1", vpd->endurance, sizeof(vpd->endurance));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_string(&item, "Z2", vpd->capacity, sizeof(vpd->capacity));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_string(&item, "Z3", vpd->warranty, sizeof(vpd->warranty));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+	fill_item_string(&item, "RM", vpd->firmware_level, sizeof(vpd->firmware_level));
+	if(append_item(&section, &item) < -1)
+		goto err_out;
+
+	if(append_section(raw_data, raw_data_len, &section) < -1)
+		goto err_out;
+	rc = 0;
+
+err_out:
+	free(section.data);
+	return rc;
 }
 
 /* read_file_dict - Read a file and parse the key=value settings

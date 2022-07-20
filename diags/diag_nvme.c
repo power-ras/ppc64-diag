@@ -25,11 +25,14 @@
 #include <sys/utsname.h>
 #include "diag_nvme.h"
 
+#define MIN_HOURS_ON		720
+
 static int check_open_serv_event(char *location);
 static int diagnose_nvme(char *device_name);
 static int log_event(uint64_t *event_id, struct nvme_ibm_vpd *vpd, char *controller_name, uint8_t severity, char *description, unsigned char *raw_data, uint32_t raw_data_len);
 static void print_usage(char *command);
 static int regex_controller(char *controller_name, char *device_name);
+static long double uint128_to_long_double(uint8_t *data);
 
 int main(int argc, char *argv[]) {
 	int opt, rc = 0;
@@ -132,9 +135,13 @@ static int check_open_serv_event(char *location) {
  */
 static int diagnose_nvme(char *device_name) {
 	char dev_path[PATH_MAX], controller_name[NAME_MAX] = { '\0' }, description[DESCR_LENGTH];
+	double endurance;
 	int fd, rc = 0, tmp_rc, time = 0, interval = 5;
+	long double power_on_hours, data_units_written, avg_dwpd;
+	long int capacity;
 	struct nvme_smart_log_page smart_log = { 0 };
 	struct nvme_ibm_vpd vpd = { 0 };
+	char endurance_s[sizeof(vpd.endurance) + 1], capacity_s[sizeof(vpd.capacity)+1];
         uint64_t event_id;
 	uint8_t severity;
 
@@ -190,6 +197,31 @@ static int diagnose_nvme(char *device_name) {
 				CRIT_WARN_SPARE, CRIT_WARN_TEMP, CRIT_WARN_DEGRADED, CRIT_WARN_RO,
 				CRIT_WARN_VOLATILE_MEM, CRIT_WARN_PMR_RO);
 		rc += log_event(&event_id, &vpd, controller_name, severity, description, NULL, 0);
+	}
+
+	/* Create a warning event in case average rate of writing exceeds device endurance for a day
+	 * This is an estimate since data units written from SMART data doesn't account for metadata
+	 * Initial usage of a device might be intense on the beggining, so only do the calculation
+	 * if device has been powered on for a certain amount of time
+	 */
+	power_on_hours = uint128_to_long_double(smart_log.power_on_hours);
+	data_units_written = uint128_to_long_double(smart_log.data_units_written);
+
+	/* Fields in the VPD log might have not been null terminated so add an extra character for it */
+	snprintf(endurance_s, sizeof(endurance_s), "%s", vpd.endurance);
+	snprintf(capacity_s, sizeof(capacity_s), "%s", vpd.capacity);
+	endurance = atof(endurance_s);
+	capacity = atol(capacity_s);
+	if (power_on_hours >= MIN_HOURS_ON && endurance && capacity) {
+		avg_dwpd = data_units_written * (1000 * 512 * 24 / (power_on_hours * 1000000000 * capacity));
+		if (avg_dwpd > endurance) {
+			severity = SL_SEV_WARNING;
+			snprintf(description, sizeof(description), "Drive Writes Per Day (DWPD) average are exceeding the device endurance.\n"
+					"Current device DWPD average: %.3Lf\n"
+					"Device advertised DWPD endurance: %.3lf\n",
+					avg_dwpd, endurance);
+			rc += log_event(&event_id, &vpd, controller_name, severity, description, NULL, 0);
+		}
 	}
 
 	return rc;
@@ -617,4 +649,15 @@ extern void set_vpd_pcie_field(const char *keyword, const char *vpd_data, struct
 		strncpy(vpd->manufacture_sn, vpd_data, sizeof(vpd->manufacture_sn));
 	else if (!strcmp(keyword, "RM"))
 		strncpy(vpd->firmware_level, vpd_data, sizeof(vpd->firmware_level));
+}
+
+static long double uint128_to_long_double(uint8_t *data) {
+	int i;
+	long double value = 0;
+
+	for (i = 0; i < 16; i++) {
+		value *= 256;
+		value += data[15 - i];
+	}
+	return value;
 }

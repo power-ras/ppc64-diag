@@ -17,6 +17,7 @@
  * USA.
  */
 
+#include <dirent.h>
 #include <getopt.h>
 #include <regex.h>
 #include <servicelog-1/servicelog.h>
@@ -32,6 +33,9 @@ static int regex_controller(char *controller_name, char *device_name);
 
 int main(int argc, char *argv[]) {
 	int opt, rc = 0;
+
+	DIR *dir;
+	struct dirent *dirent;
 
 	static struct option long_options[] = {
 		{"help", no_argument, NULL, 'h'},
@@ -53,6 +57,25 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	/* No devices have been specified, look for all NVMe devices in sysfs */
+	if (optind == argc) {
+		dir = opendir(NVME_SYS_PATH);
+		if (!dir) {
+			fprintf(stderr, "%s open failed: %s\n", NVME_SYS_PATH, strerror(errno));
+			fprintf(stdout, "No NVMe devices detected in system\n");
+		}
+		else {
+			while ((dirent = readdir(dir)) != NULL) {
+				if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
+					continue;
+				rc += diagnose_nvme(dirent->d_name);
+				fprintf(stdout, "\n");
+			}
+			closedir(dir);
+		}
+	}
+
+	/* Only go through the devices specified */
 	while (optind < argc) {
 		rc += diagnose_nvme(argv[optind]);
 		fprintf(stdout, "\n");
@@ -477,10 +500,11 @@ extern int open_nvme(char *dev_path) {
 }
 
 static void print_usage(char *command) {
-	printf("Usage: %s [-h] <nvme_devices>\n"
+	printf("Usage: %s [-h] [<nvme_devices>]\n"
 		"\t-h: print this help message\n"
 		"\t<nvme_devices>: the NVMe devices on which to operate, for\n"
-		"\t                  example nvme0\n", command);
+		"\t                  example nvme0; if not specified, all detected\n"
+		"\t                  nvme devices will be diagnosed\n", command);
 }
 
 /* regex_controller - Extract controller name from device name

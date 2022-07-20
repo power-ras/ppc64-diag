@@ -168,8 +168,29 @@ static int diagnose_nvme(char *device_name) {
 		severity = SL_SEV_ERROR;
 		snprintf(description, sizeof(description), "SMART log data could not be retrieved for device. Device is assumed to be in a bad state.");
 		rc += log_event(&event_id, &vpd, controller_name, severity, description, NULL, 0);
+		close(fd);
+		return rc;
 	}
 	close(fd);
+
+	/* Check if any critical warning bits are set and if so report an event */
+	if (smart_log.critical_warning & CRIT_WARN_TEMP)
+		severity = SL_SEV_WARNING;
+	if (smart_log.critical_warning & ~CRIT_WARN_TEMP)
+		severity = SL_SEV_ERROR;
+	if (smart_log.critical_warning != 0) {
+		snprintf(description, sizeof(description), "SMART data has critical warning bits set: 0x%x\n"
+				"The following is the meaning of each bit:\n"
+				"\t0x%.2x - Available spare capacity\n"
+				"\t0x%.2x - Temperature\n"
+				"\t0x%.2x - NVM subsystem reliability\n"
+				"\t0x%.2x - Media read-only\n"
+				"\t0x%.2x - Volatile memory backup\n"
+				"\t0x%.2x - Persistent Memory Region", smart_log.critical_warning,
+				CRIT_WARN_SPARE, CRIT_WARN_TEMP, CRIT_WARN_DEGRADED, CRIT_WARN_RO,
+				CRIT_WARN_VOLATILE_MEM, CRIT_WARN_PMR_RO);
+		rc += log_event(&event_id, &vpd, controller_name, severity, description, NULL, 0);
+	}
 
 	return rc;
 }

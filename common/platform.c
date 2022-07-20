@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "platform.h"
 
@@ -61,4 +62,65 @@ get_platform(void)
 
 	fclose(fp);
 	return rc;
+}
+
+int
+get_processor(void)
+{
+	int rc;
+
+	switch(get_pvr_ver()) {
+	case PVR_POWER4:
+	case PVR_POWER4p:
+		rc = POWER4;
+		break;
+	case PVR_POWER5:
+	case PVR_POWER5p:
+		rc = POWER5;
+		break;
+	case PVR_POWER6:
+		rc = POWER6;
+		break;
+	case PVR_POWER7:
+	case PVR_POWER7p:
+		rc = POWER7;
+		break;
+	case PVR_POWER8E:
+	case PVR_POWER8NVL:
+	case PVR_POWER8:
+		rc = POWER8;
+		break;
+	case PVR_POWER9:
+		rc = POWER9;
+		break;
+	case PVR_POWER10:
+		rc = POWER10;
+		break;
+	default:
+		rc = PROCESSOR_UNKNOWN;
+		break;
+	}
+
+	return rc;
+}
+
+uint16_t
+get_pvr_ver(void)
+{
+	uint16_t pvr_ver = 0xFFFF;
+	FILE *fp;
+	char line[LENGTH], *p;
+
+	if((fp = fopen(PLATFORM_FILE, "r")) == NULL)
+		return pvr_ver;
+
+	while (fgets(line, LENGTH, fp)) {
+		if ((p = strstr(line, "(pvr")) != NULL) {
+			if (sscanf(p, "(pvr%" SCNx16, &pvr_ver) == 1)
+				break;
+		}
+	}
+
+	fclose(fp);
+	return pvr_ver;
 }

@@ -1,0 +1,98 @@
+.\"
+.\" Copyright (C) 2022 IBM Corporation
+.\"
+.TH "DIAG_NVME" "8" "June 2022" "Linux" "PowerLinux Diagnostic Tools"
+.hy
+.SH NAME
+.PP
+diag_nvme \- diagnose NVMe devices
+.SH SYNOPSIS
+.PP
+\f[B]diag_nvme\f[] [<\f[B]nvme\f[]\f[I]n\f[] \&...>]
+.PD 0
+.P
+.PD
+\f[B]diag_nvme\f[] [\-d <\f[I]file\f[]>] [\-f <\f[I]file\f[]>]
+<\f[B]nvme\f[]\f[I]n\f[]>
+.PD 0
+.P
+.PD
+\f[B]diag_nvme\f[] --help
+.SH DESCRIPTION
+.PP
+The \f[B]diag_nvme\f[] command retrieves the SMART data from the NVMe
+device(s) specified and report failures detected through events created
+in the servicelog database.
+If no device is specified, all NVMe devices detected in the system will
+go through the diagnostics procedure.
+.PP
+The user can control which events will be reported through the
+configuration file \f[I]/etc/ppc64\-diag/diag_nvme.config\f[]
+.SH OPTIONS
+.TP
+.B \f[B]\-d\f[], \f[B]--dump\f[] \f[I]file\f[]
+Dump SMART data to the specified path and file name \f[I]file\f[].
+The SMART data is extracted from an NVMe device, so specifying one is
+mandatory if this option is selected.
+File created is in a simple key=value format.
+.RS
+.RE
+.TP
+.B \f[B]\-f\f[], \f[B]--file\f[] \f[I]file\f[]
+This option usage is for testing only.
+Use SMART data from the specified path and file name \f[I]file\f[]
+instead of device, one NVMe is mandatory if this option is selected.
+The expected format of the file is a simple key=value that is the same
+one provided with the \-d / --dump option.
+If \f[I]file\f[] is missing from the filesystem it will be treated as a
+failure to retrieve SMART data and an event will be reported.
+.RS
+.RE
+.TP
+.B \f[B]\-h\f[], \f[B]--help\f[]
+Print a help message and exit
+.RS
+.RE
+.SH EXAMPLES
+.TP
+.B \f[B]diag_nvme\f[]
+Run diagnostics in all NVMe devices detected in the system.
+.RS
+.RE
+.TP
+.B \f[B]diag_nvme nvme0 nvme1\f[]
+Run diagnostics only in nvme0 and nvme1 devices.
+.RS
+.RE
+.TP
+.B \f[B]diag_nvme \-d smart.txt nvme0\f[]
+Dump SMART data from nvme0 into file smart.txt.
+.RS
+.RE
+.TP
+.B \f[B]diag_nvme \-f smart.txt nvme0\f[]
+Read SMART data from file smart.txt and use it as health information for
+diagnostics of device nvme0.
+.RS
+.RE
+.SH REPORTING BUGS
+.PP
+Patches and issues may be submitted at
+https://github.com/power\-ras/ppc64\-diag/
+.SH FILES
+.TP
+.B \f[I]/etc/ppc64\-diag/diag_nvme.config\f[]
+Configuration file to select which events to report to the servicelog
+database.
+.RS
+.RE
+.TP
+.B \f[I]/etc/cron.daily/run_diag_nvme\f[]
+Script to run diag_nvme in the system on a daily basis.
+.RS
+.RE
+.SH SEE ALSO
+.PP
+\f[B]servicelog\f[](8)
+.SH AUTHORS
+Murilo Fossa Vicentini

@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <sys/utsname.h>
 #include "diag_nvme.h"
+#include "platform.h"
 
 #define ITEM_DATA_LENGTH	255
 #define MIN_HOURS_ON		720
@@ -81,6 +82,11 @@ int main(int argc, char *argv[]) {
 
 	DIR *dir;
 	struct dirent *dirent;
+
+	if (get_platform() != PLATFORM_PSERIES_LPAR || get_processor() < POWER10) {
+		fprintf(stdout, "%s is only supported in PowerVM LPARs and at least Power10 processors\n", argv[0]);
+		return 0;
+	}
 
 	static struct option long_options[] = {
 		{"dump", required_argument, NULL, 'd'},

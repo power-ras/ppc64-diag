@@ -21,21 +21,32 @@
 #include <getopt.h>
 #include <regex.h>
 #include <servicelog-1/servicelog.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <sys/utsname.h>
 #include "diag_nvme.h"
 
 #define MIN_HOURS_ON		720
 
+struct notify {
+	bool smart_missing;
+	uint8_t crit_warn;
+	bool write_rate;
+};
+
 static int check_open_serv_event(char *location);
-static int diagnose_nvme(char *device_name);
+static int diagnose_nvme(char *device_name, struct notify *notify);
 static int log_event(uint64_t *event_id, struct nvme_ibm_vpd *vpd, char *controller_name, uint8_t severity, char *description, unsigned char *raw_data, uint32_t raw_data_len);
 static void print_usage(char *command);
 static int regex_controller(char *controller_name, char *device_name);
+static void set_notify(struct notify *notify, struct dictionary *dict, int num_elements);
 static long double uint128_to_long_double(uint8_t *data);
 
 int main(int argc, char *argv[]) {
-	int opt, rc = 0;
+	int opt, rc = 0, num_elements;
+
+	struct dictionary dict[MAX_DICT_ELEMENTS];
+	struct notify notify = { .smart_missing = true, .crit_warn = 0xFF, .write_rate = true };
 
 	DIR *dir;
 	struct dirent *dirent;
@@ -60,6 +71,11 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	if ((num_elements = read_file_dict(CONFIG_FILE, dict, MAX_DICT_ELEMENTS)) >= 0)
+		set_notify(&notify, dict, num_elements);
+	else
+		return -1;
+
 	/* No devices have been specified, look for all NVMe devices in sysfs */
 	if (optind == argc) {
 		dir = opendir(NVME_SYS_PATH);
@@ -71,7 +87,7 @@ int main(int argc, char *argv[]) {
 			while ((dirent = readdir(dir)) != NULL) {
 				if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
 					continue;
-				rc += diagnose_nvme(dirent->d_name);
+				rc += diagnose_nvme(dirent->d_name, &notify);
 				fprintf(stdout, "\n");
 			}
 			closedir(dir);
@@ -80,7 +96,7 @@ int main(int argc, char *argv[]) {
 
 	/* Only go through the devices specified */
 	while (optind < argc) {
-		rc += diagnose_nvme(argv[optind]);
+		rc += diagnose_nvme(argv[optind], &notify);
 		fprintf(stdout, "\n");
 		optind++;
 	}
@@ -127,13 +143,14 @@ static int check_open_serv_event(char *location) {
 
 /* diagnose_nvme - Diagnose NVMe device health status
  * @device_name - Name of the device to be diagnosed, expected format is nvme[0-9]+
+ * @notify - Struct containing which events are to be notified based on diag_nvme.config parsing
  *
  * Diagnose will check SMART data retrieved and identify any failures that need to be reported in
  * the servicelog database.
  *
  * Return - Return 0 on success, negative number on failure
  */
-static int diagnose_nvme(char *device_name) {
+static int diagnose_nvme(char *device_name, struct notify *notify) {
 	char dev_path[PATH_MAX], controller_name[NAME_MAX] = { '\0' }, description[DESCR_LENGTH];
 	double endurance;
 	int fd, rc = 0, tmp_rc, time = 0, interval = 5;
@@ -170,7 +187,7 @@ static int diagnose_nvme(char *device_name) {
 		fprintf(stdout, "Warn: %s PCIe VPD failed: 0x%x, proceed without device VPD data\n", controller_name, tmp_rc);
 
 	/* If SMART data can't be retrieved assume device is in a bad state and report an event */
-	if ((tmp_rc = get_smart_log_page(fd, 0xffffffff, &smart_log)) != 0) {
+	if ((tmp_rc = get_smart_log_page(fd, 0xffffffff, &smart_log)) != 0 && notify->smart_missing) {
 		fprintf(stderr, "Smart Log ioctl failed: 0x%x\n", tmp_rc);
 		severity = SL_SEV_ERROR;
 		snprintf(description, sizeof(description), "SMART log data could not be retrieved for device. Device is assumed to be in a bad state.");
@@ -181,11 +198,11 @@ static int diagnose_nvme(char *device_name) {
 	close(fd);
 
 	/* Check if any critical warning bits are set and if so report an event */
-	if (smart_log.critical_warning & CRIT_WARN_TEMP)
+	if (smart_log.critical_warning & CRIT_WARN_TEMP & notify->crit_warn)
 		severity = SL_SEV_WARNING;
-	if (smart_log.critical_warning & ~CRIT_WARN_TEMP)
+	if (smart_log.critical_warning & ~CRIT_WARN_TEMP & notify->crit_warn)
 		severity = SL_SEV_ERROR;
-	if (smart_log.critical_warning != 0) {
+	if (smart_log.critical_warning & notify->crit_warn) {
 		snprintf(description, sizeof(description), "SMART data has critical warning bits set: 0x%x\n"
 				"The following is the meaning of each bit:\n"
 				"\t0x%.2x - Available spare capacity\n"
@@ -212,7 +229,7 @@ static int diagnose_nvme(char *device_name) {
 	snprintf(capacity_s, sizeof(capacity_s), "%s", vpd.capacity);
 	endurance = atof(endurance_s);
 	capacity = atol(capacity_s);
-	if (power_on_hours >= MIN_HOURS_ON && endurance && capacity) {
+	if (power_on_hours >= MIN_HOURS_ON && endurance && capacity && notify->write_rate) {
 		avg_dwpd = data_units_written * (1000 * 512 * 24 / (power_on_hours * 1000000000 * capacity));
 		if (avg_dwpd > endurance) {
 			severity = SL_SEV_WARNING;
@@ -560,6 +577,45 @@ static void print_usage(char *command) {
 		"\t                  nvme devices will be diagnosed\n", command);
 }
 
+/* read_file_dict - Read a file and parse the key=value settings
+ * @file_name - File to be parsed, expected format of lines in it is a string key and number value
+ * @dict - Pointer to the array of dictionary structs to be filled when parsing the file
+ * @max_elements - Length of the dict array
+ *
+ * This function reads a file and extracts the key=value elements found in it and fill the dict
+ * array.
+ *
+ * Return - Return number of elements filled in the array, -1 on error
+ */
+extern int read_file_dict(char *file_name, struct dictionary *dict, int max_elements) {
+	FILE *fp;
+	int line, num_elements = 0;
+	char *line_string = NULL;
+	size_t length = 0;
+
+	fp = fopen(file_name, "r");
+	if (fp == NULL) {
+		fprintf(stderr, "%s open failed: %s\n", file_name, strerror(errno));
+		return -1;
+	}
+	for (line = 1; getline(&line_string, &length, fp) != -1 &&
+			num_elements < max_elements; line++) {
+		if (sscanf(line_string, " %[\n\r#/]", dict->key))
+			continue;
+		/* Width in sscanf should be (KEY_LENGTH - 1) when attempting to read dictionary key */
+		if (sscanf(line_string, " %127[^= ] = %Lf", dict->key, &dict->value) < 2) {
+			fprintf(stderr, "File: %s error at line %d: %s\n", file_name, line, line_string);
+			free(line_string);
+			fclose(fp);
+			return -1;
+		}
+		dict++, num_elements++;
+	}
+	free(line_string);
+	fclose(fp);
+	return num_elements;
+}
+
 /* regex_controller - Extract controller name from device name
  * @device_name - Name of the NVMe device submitted by user or extracted from sysfs
  * @controller_name - Address to store the NVMe controller string extracted from regex, format is
@@ -593,6 +649,28 @@ static int regex_controller(char *controller_name, char *device_name) {
 	strncpy(controller_name, device_name + match[0].rm_so, match[0].rm_eo - match[0].rm_so);
 	regfree(&regex);
 	return rc;
+}
+
+static void set_notify(struct notify *notify, struct dictionary *dict, int num_elements) {
+	for (int counter = 1; counter <= num_elements; counter++) {
+		if (!strcmp(dict->key, "SMART_LOG_MISSING"))
+			notify->smart_missing = dict->value;
+		else if (!strcmp(dict->key, "WRITE_RATE"))
+			notify->write_rate = dict->value;
+		else if (!strcmp(dict->key, "AVAILABLE_SPARE_CAPACITY") && dict->value == 0)
+			notify->crit_warn &= ~(CRIT_WARN_SPARE);
+		else if (!strcmp(dict->key, "TEMPERATURE_THRESHOLD") && dict->value == 0)
+			notify->crit_warn &= ~(CRIT_WARN_TEMP);
+		else if (!strcmp(dict->key, "NVM_SUBSYSTEM_RELIABILITY") && dict->value == 0)
+			notify->crit_warn &= ~(CRIT_WARN_DEGRADED);
+		else if (!strcmp(dict->key, "MEDIA_READ_ONLY") && dict->value == 0)
+			notify->crit_warn &= ~(CRIT_WARN_RO);
+		else if (!strcmp(dict->key, "VOLATILE_MEMORY_BACKUP") && dict->value == 0)
+			notify->crit_warn &= ~(CRIT_WARN_VOLATILE_MEM);
+		else if (!strcmp(dict->key, "PERSISTENT_MEMORY_REGION") && dict->value == 0)
+			notify->crit_warn &= ~(CRIT_WARN_PMR_RO);
+		dict++;
+	}
 }
 
 /* set_vpd_pcie_field - Set the appropriate field with VPD information collected

@@ -31,14 +31,23 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#define CONFIG_FILE			"/etc/ppc64-diag/diag_nvme.config"
 #define DESCR_LENGTH			1024
 #define DEVICE_TREE_PATH		"/sys/firmware/devicetree/base"
+#define KEY_LENGTH			128
 #define LOCATION_LENGTH			80
 #define MAX_TIME			127
+#define MAX_DICT_ELEMENTS		64
 #define NVME_DEV_PATH			"/dev/nvme"
 #define NVME_SYS_PATH			"/sys/class/nvme"
 #define OPCODE_ADMIN_GET_LOG_PAGE	0x02
 #define VPD_NOT_READY			0x00F3
+
+/* Struct to parse key=value settings in a file */
+struct dictionary {
+	char key[KEY_LENGTH];
+	long double value;
+};
 
 /* Struct representing IBM VPD information retrieved from Log Page 0xF1.
  * This struct is also reutilized for PCIe VPD information in case Log Page 0xF1 is not supported.
@@ -131,6 +140,7 @@ extern int get_ibm_vpd_pcie(char *controller_name, struct nvme_ibm_vpd *vpd);
 extern int get_smart_log_page(int fd, uint32_t nsid, struct nvme_smart_log_page *log);
 extern int location_code_nvme(char *location, char *controller_name);
 extern int open_nvme(char *dev_path);
+extern int read_file_dict(char *file_name, struct dictionary *dict, int max_params);
 extern void set_vpd_pcie_field(const char *keyword, const char *vpd_data, struct nvme_ibm_vpd *vpd);
 
 #endif /* _DIAG_NVME_H */

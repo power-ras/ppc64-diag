@@ -17,6 +17,7 @@
  * USA.
  */
 
+#include <ctype.h>
 #include <dirent.h>
 #include <getopt.h>
 #include <regex.h>
@@ -70,6 +71,7 @@ static int raw_data_smart(unsigned char **raw_data, uint32_t *raw_data_len, stru
 static int raw_data_vpd(unsigned char **raw_data, uint32_t *raw_data_len, struct nvme_ibm_vpd *vpd);
 static int regex_controller(char *controller_name, char *device_name);
 static void set_notify(struct notify *notify, struct dictionary *dict, int num_elements);
+static void trim_trail_space(char *string);
 static long double uint128_to_long_double(uint8_t *data);
 
 int main(int argc, char *argv[]) {
@@ -843,7 +845,10 @@ static int log_event(uint64_t *event_id, struct nvme_ibm_vpd *vpd, char *control
 	if (!(os->device = strndup(controller_name, NAME_MAX)))
 		goto err_out;
 
-	/* Fill sl_callout struct */
+	/* Fill sl_callout struct
+	 * Callout data fields can't have white spaces or it will mess the parsing in
+	 * servevent_parse.pl which split the input through spaces
+	 */
         if (!(entry->callouts = calloc(1, sizeof(struct sl_callout))))
                 goto err_out;
 
@@ -852,12 +857,16 @@ static int log_event(uint64_t *event_id, struct nvme_ibm_vpd *vpd, char *control
 	entry->callouts->priority = 'M';
 	if (!(entry->callouts->location = strndup(location, sizeof(location))))
 		goto err_out;
+	trim_trail_space(entry->callouts->location);
 	if (!(entry->callouts->fru = strndup(vpd->fru_pn, sizeof(vpd->fru_pn))))
 		goto err_out;
+	trim_trail_space(entry->callouts->fru);
 	if (!(entry->callouts->ccin = strndup(vpd->ccin, sizeof(vpd->ccin))))
 		goto err_out;
+	trim_trail_space(entry->callouts->ccin);
 	if (!(entry->callouts->serial = strndup(vpd->manufacture_sn, sizeof(vpd->manufacture_sn))))
 		goto err_out;
+	trim_trail_space(entry->callouts->serial);
 
 	/* Fill sl_event struct */
 	time(&entry->time_event);
@@ -1415,6 +1424,28 @@ extern void set_vpd_pcie_field(const char *keyword, const char *vpd_data, struct
 		strncpy(vpd->manufacture_sn, vpd_data, sizeof(vpd->manufacture_sn));
 	else if (!strcmp(keyword, "RM"))
 		strncpy(vpd->firmware_level, vpd_data, sizeof(vpd->firmware_level));
+}
+
+/* trim_trail_space - Trim trailing white spaces from string
+ * @string - Null terminated string to remove white spaces from
+ *
+ * This function will alter the passed string by removing any trailing white spaces and null
+ * terminating it at that point.
+ */
+static void trim_trail_space(char *string) {
+	char *end;
+	size_t length;
+
+	if (string == NULL)
+		return;
+
+	if ((length = strlen(string)) == 0)
+		return;
+
+	end = string + length - 1;
+	while (end >= string && isspace(*end))
+		end--;
+	*(end + 1) = '\0';
 }
 
 static long double uint128_to_long_double(uint8_t *data) {

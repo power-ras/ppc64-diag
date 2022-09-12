@@ -106,7 +106,7 @@ $partition_name = (split(/\./, $host_name))[0];
 
 # Retrieve partition ID from /proc/device-tree/ibm,partition-no
 if (-e "/proc/device-tree/ibm,partition-no") {
-	$partition_no = `od -An -td /proc/device-tree/ibm,partition-no | sed "s/\\s//g" 2>/dev/null`;
+	$partition_no = `od -An -td --endian=big /proc/device-tree/ibm,partition-no | sed "s/\\s//g" 2>/dev/null`;
 	chomp $partition_no;
 	if (length($partition_no) == 0) {
 		$partition_no = "000".$partition_no

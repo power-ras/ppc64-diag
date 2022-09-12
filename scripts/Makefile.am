@@ -4,7 +4,8 @@ PPC64_DIAG_SCRIPT = scripts/ppc64_diag_setup \
 		     scripts/ppc64_diag_migrate \
 		     scripts/servevent_parse.pl
 
-CONFIG_FILE = scripts/ppc64-diag.config
+CONFIG_FILE = scripts/ppc64-diag.config \
+	       scripts/diag_nvme.config
 
 INIT_FILES = scripts/rtas_errd scripts/opal_errd
 
@@ -26,6 +27,7 @@ uninstall-hook-scripts:
 	rm -f $(DESTDIR)/etc/ppc64-diag/ppc64_diag_migrate
 	rm -f $(DESTDIR)/etc/ppc64-diag/servevent_parse.pl
 	rm -f $(DESTDIR)/etc/ppc64-diag/ppc64-diag.config
+	rm -f $(DESTDIR)/etc/ppc64-diag/diag_nvme.config
 	rm -f $(DESTDIR)/usr/libexec/ppc64-diag/rtas_errd
 	rm -f $(DESTDIR)/usr/libexec/ppc64-diag/opal_errd
 	rm -f $(DESTDIR)/usr/lib/systemd/system/rtas_errd.service

@@ -12,7 +12,10 @@ diag_encl_h_files = diags/diag_encl.h \
 encl_led_h_files = diags/encl_led.h \
 		   $(diag_common_h_files)
 
-sbin_PROGRAMS += diags/diag_encl diags/encl_led
+diag_nvme_h_files = diags/diag_nvme.h \
+		    common/platform.h
+
+sbin_PROGRAMS += diags/diag_encl diags/encl_led diags/diag_nvme
 
 diags_diag_encl_SOURCES = diags/diag_encl.c \
 			  diags/7031_D24_T24.c \
@@ -36,9 +39,15 @@ diags_encl_led_SOURCES = diags/encl_led.c \
 			 common/utils.c \
 			 $(encl_led_h_files)
 
-dist_man_MANS += diags/man/diag_encl.8 diags/man/encl_led.8
+diags_diag_nvme_SOURCES = diags/diag_nvme.c \
+			  common/platform.c \
+			  $(diag_nvme_h_files)
+diags_diag_nvme_LDADD = -lservicelog -lm
+diags_diag_nvme_CFLAGS = $(AM_CFLAGS) -Wno-stringop-truncation
 
-DIAG_CRONTAB_SCRIPT = diags/run_diag_encl
+dist_man_MANS += diags/man/diag_encl.8 diags/man/encl_led.8 diags/man/diag_nvme.8
+
+DIAG_CRONTAB_SCRIPT = diags/run_diag_encl diags/run_diag_nvme
 
 install-exec-hook-diag:
 	install -d --mode=755 $(DESTDIR)/var/log/ppc64-diag/diag_disk
@@ -49,6 +58,7 @@ INSTALL_EXEC_HOOKS += install-exec-hook-diag
 
 uninstall-hook-diags:
 	rm -f $(DESTDIR)/etc/cron.daily/run_diag_encl
+	rm -f $(DESTDIR)/etc/cron.daily/run_diag_nvme
 
 UNINSTALL_HOOKS += uninstall-hook-diags
 

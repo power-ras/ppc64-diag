@@ -1,4 +1,4 @@
-FROM fedora:33
+FROM fedora:37
 
 
 RUN dnf -y install gcc git xz make g++ libtool perl which flex bison rpm-build

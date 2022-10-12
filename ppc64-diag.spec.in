@@ -124,6 +124,11 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Wed Oct 12 2022 - Mahesh Salgaonkar <mahesh@linux.ibm.com> - 2.7.9
+- Add NVMe diagnostics support (Murilo).
+- Update travis build to use fedora37 and Ubuntu22.10
+- Few minor bugs fixes.
+
 * Thu Mar 3  2022 - Mahesh Salgaonkar <mahesh@linux.ibm.com> - 2.7.8
 - Update build dependency to use libvpd >= v2.2.9
 - Fix extract_opal_dump error message on unsupported platform

@@ -31,6 +31,8 @@
 #include <sys/stat.h>
 #include <syslog.h>
 #include <sys/types.h>
+#include <libgen.h>
+#include "platform.c"
 
 #include "libopalevents.h"
 #include "opal-event-data.h"
@@ -445,6 +447,14 @@ int main(int argc, char *argv[])
 	char *elog_path = NULL;
 	int opt_display_file = 0;
 	int opt_display_all = 0;
+	int platform = 0;
+
+	platform = get_platform();
+	if (platform != PLATFORM_POWERNV) {
+		fprintf(stderr, "%s is not supported on the %s platform\n",
+				basename(argv[0]), __power_platform_name(platform));
+		exit(0);
+	}
 
 	while ((opt = getopt(argc, argv, "ad:lshf:p:e:")) != -1) {
 		switch (opt) {

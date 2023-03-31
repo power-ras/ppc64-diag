@@ -33,6 +33,8 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <sys/types.h>
+#include <libgen.h>
+#include "platform.c"
 
 #include "opal-dump-parse.h"
 
@@ -461,6 +463,14 @@ out:
 int main(int argc, char *argv[])
 {
 	int opt = 0;
+	int platform = 0;
+
+	platform = get_platform();
+	if (platform != PLATFORM_POWERNV) {
+		fprintf(stderr, "%s is not supported on the %s platform\n",
+				basename(argv[0]), __power_platform_name(platform));
+		exit(0);
+	}
 
 	while ((opt = getopt(argc, argv, "hl:s:o:")) != -1) {
 		switch (opt) {

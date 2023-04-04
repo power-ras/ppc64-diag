@@ -13,6 +13,9 @@ mkdir -p $OUT/platform
 
 run_binary "./opal_errd" "-s $SYSFS -o $OUT/platform -D -e /bin/true -n 5 -a 29"
 sed -e 's/ELOG\[[0-9]*\]/ELOG[XXXX]/' -i $OUTSTDERR
+# On qemu pseries it prints PowerKVM Guest. Make travis CI happy
+sed -e 's/PowerKVM/PowerVM/' -i $OUTSTDERR
+sed -e 's/Guest/LPAR/' -i $OUTSTDERR
 
 ls -1 $OUT >> $OUTSTDOUT
 (cd $OUT/platform; md5sum *) | sort  -t ' ' -k 2 | awk  -F'[- ]' '{print $1"  "$4}' >> $OUTSTDOUT

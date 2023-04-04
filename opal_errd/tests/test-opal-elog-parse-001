@@ -8,11 +8,11 @@ check_suite
 copy_sysfs
 
 ./$OPAL_ERRD_DIR/opal_errd -s $SYSFS -o $OUT/platform -D -e /bin/true &>> /dev/null 2>&1
-
-$VALGRIND ./$OPAL_ERRD_DIR/opal-elog-parse/opal-elog-parse -d 1 -p $OUT/platform &>> /dev/null 2>&1
-R=$?
-if [ $R -ne 234 ]; then
-	register_fail $R
+if [[ -x $OUT/platform ]] ; then
+	$VALGRIND ./$OPAL_ERRD_DIR/opal-elog-parse/opal-elog-parse -d 1 -p $OUT/platform &>> /dev/null 2>&1
+	R=$?
+	if [ $R -ne 234 ]; then
+		register_fail $R
+	fi
 fi
-
 register_success

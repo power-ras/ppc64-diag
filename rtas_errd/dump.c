@@ -30,8 +30,10 @@
 #include <fcntl.h>
 #include <librtas.h>
 #include <librtasevent.h>
+#include <syslog.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <sys/statvfs.h>
 #include "utils.h"
 #include "rtas_errd.h"
 
@@ -284,7 +286,9 @@ void
 check_platform_dump(struct event *event)
 {
 	struct rtas_dump_scn *dump_scn;
+	struct statvfs vfs;
 	uint64_t dump_tag;
+	uint64_t dump_size;
 	char	filename[DUMP_MAX_FNAME_LEN + 20], *pos;
 	char	*pathname = NULL;
 	FILE	*f;
@@ -306,11 +310,34 @@ check_platform_dump(struct event *event)
 		return;
 	}
 
-	/* Retrieve the dump */
+	/* Retrieve the dump tag */
 	dump_tag = dump_scn->id;
 	dump_tag |= ((uint64_t)dump_scn->v6hdr.subtype << 32);
 	dbg("Dump ID: 0x%016LX", dump_tag);
 
+	if (statvfs(d_cfg.platform_dump_path, &vfs) == -1) {
+		log_msg(event, "statvfs() failed on %s: %s",
+				d_cfg.platform_dump_path, strerror(errno));
+		return;
+	}
+
+	/* Retrieve the size of the platform dump */
+	dump_size = dump_scn->size_hi;
+	dump_size <<= 32;
+	dump_size |= dump_scn->size_lo;
+
+	/* Check if there is sufficient space in the file system to store the dump */
+	if (vfs.f_bavail * vfs.f_frsize < dump_size) {
+		syslog(LOG_ERR, "Insufficient space in %s to store platform dump for dump ID: "
+				"0x%016lX (required: %lu bytes, available: %lu bytes)",
+				d_cfg.platform_dump_path, dump_tag, dump_size,
+				(vfs.f_bavail * vfs.f_frsize));
+		syslog(LOG_ERR, "After clearing space, run 'extract_platdump "
+				"0x%016lX'.\n", dump_tag);
+		return;
+	}
+
+	/* Retrieve the dump */
 	snprintf(tmp_sys_arg, 60, "0x%016LX", (long long unsigned int)dump_tag);
 	system_args[0] = EXTRACT_PLATDUMP_CMD;
 	system_args[1] = tmp_sys_arg;

@@ -290,12 +290,6 @@ extract_platform_dump(uint64_t dump_tag)
 		}
 	}
 
-	/*
-	 * Before writing the new dump out, we need to see if any older
-	 * dumps need to be removed first
-	 */
-	remove_old_dumpfiles(filename, prefix_size);
-
 	/* Copy the dump off to the filesystem */
 	pathname[0] = '\0';
 	strcpy(pathname, d_cfg.platform_dump_path);

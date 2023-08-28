@@ -24,3 +24,10 @@ script:
       --tmpfs /tmp/
       --rm -t $RUN_ON_CONTAINER
       bash -c "./ppc64-diag-ci/build-${RUN_ON_CONTAINER}.sh";
+
+notifications:
+  slack: 
+    on_failure: always
+    on_success: always
+    rooms:
+      - secure: "kjiysvfyVNaN9/NrGQu5CVxDnTC04pepsw0e//ClYPTj/C439KL+mcNjOhqK620pOCIC4f+HcDSQbXWyVb8WLBqszLvwt000qdzUPOSJPIXXD1cjnoGGKPaWIzCipIpGQ0vIXxBAJ34bC8VxxI4hls0hG61S+yjMOnVQrG8jlwEFrPQmkDckt/ydvB3YC5YN6kOnzwwzXaKLtWRsQbxmnmxjX6ydQrExofS3OojCmLA+nyYH5+HcquSZcrjfMJPJ5X/cfiqxeBdfVNOBWfNPPoj5tRlME9SP8CE8N265IJjomGLumFi5UEIjUCwF5U+kDk8zIjmQxA5wNHUuQnpajfQemZx6rIi7cNDTns4HItBGLJXbtbsuxxuQhVCndg5F5FKLaGpUWBvCnMjJf5/eoDhDGlLR/m3/d70X00gWJndC2tMoSinVB4SFoAoCecmt0P5WrgOwycwg8L9F7Bvtcpldgy7LgJi88xrnqykc4jAnYRT0nu8T9foy9s6jfDzWcF03P/cw60ueKAr61ljFfDmlYorFHuuqaxKL99EEwY2i6y9VqgjwHu3j7LRMMmng2nz94EQYUpXPHQThHTymonxKiHTBTj+tuT7sDcosqgNdQezMHxd8FjDWQghOMqejAiIGpRXAohoqAEu0lbwkf4bt0AGjrUGyCgCXDLa0kqk="

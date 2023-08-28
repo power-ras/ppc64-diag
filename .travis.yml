@@ -1,8 +1,7 @@
 language: c
 
-os: linux-ppc64le
-group: ibm-cloud
-dist: bionic
+arch: ppc64le
+group: power-focal
 
 sudo: required
 

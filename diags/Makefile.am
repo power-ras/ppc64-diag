@@ -13,7 +13,8 @@ encl_led_h_files = diags/encl_led.h \
 		   $(diag_common_h_files)
 
 diag_nvme_h_files = diags/diag_nvme.h \
-		    common/platform.h
+		    common/platform.h \
+		    common/utils.h
 
 sbin_PROGRAMS += diags/diag_encl diags/encl_led diags/diag_nvme
 
@@ -41,6 +42,7 @@ diags_encl_led_SOURCES = diags/encl_led.c \
 
 diags_diag_nvme_SOURCES = diags/diag_nvme.c \
 			  common/platform.c \
+			  common/utils.c    \
 			  $(diag_nvme_h_files)
 diags_diag_nvme_LDADD = -lservicelog -lm
 diags_diag_nvme_CFLAGS = $(AM_CFLAGS) -Wno-stringop-truncation

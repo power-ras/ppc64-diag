@@ -24,8 +24,33 @@
 #include <fcntl.h>
 #include <string.h>
 #include <assert.h>
+#include <ctype.h>
 
 #include "utils.h"
+
+/* trim_trail_space - Trim trailing white spaces from string
+ * @string - Null terminated string to remove white spaces from
+ *
+ * This function will alter the passed string by removing any trailing white spaces and null
+ * terminating it at that point.
+ */
+void trim_trail_space(char *string)
+{
+	char *end;
+	size_t length;
+
+	if (string == NULL)
+		return;
+
+	length = strlen(string);
+	if (length == 0)
+		return;
+
+	end = string + length - 1;
+	while (end >= string && isspace(*end))
+		end--;
+	*(end + 1) = '\0';
+}
 
 static int process_child(char *argv[], int pipefd[])
 {

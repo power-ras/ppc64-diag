@@ -27,6 +27,7 @@
 #include <sys/utsname.h>
 #include "diag_nvme.h"
 #include "platform.h"
+#include "utils.h"
 
 #define ITEM_DATA_LENGTH	255
 #define MIN_HOURS_ON		720
@@ -71,7 +72,6 @@ static int raw_data_smart(unsigned char **raw_data, uint32_t *raw_data_len, stru
 static int raw_data_vpd(unsigned char **raw_data, uint32_t *raw_data_len, struct nvme_ibm_vpd *vpd);
 static int regex_controller(char *controller_name, char *device_name);
 static void set_notify(struct notify *notify, struct dictionary *dict, int num_elements);
-static void trim_trail_space(char *string);
 static long double uint128_to_long_double(uint8_t *data);
 
 int main(int argc, char *argv[]) {
@@ -1424,28 +1424,6 @@ extern void set_vpd_pcie_field(const char *keyword, const char *vpd_data, struct
 		strncpy(vpd->manufacture_sn, vpd_data, sizeof(vpd->manufacture_sn));
 	else if (!strcmp(keyword, "RM"))
 		strncpy(vpd->firmware_level, vpd_data, sizeof(vpd->firmware_level));
-}
-
-/* trim_trail_space - Trim trailing white spaces from string
- * @string - Null terminated string to remove white spaces from
- *
- * This function will alter the passed string by removing any trailing white spaces and null
- * terminating it at that point.
- */
-static void trim_trail_space(char *string) {
-	char *end;
-	size_t length;
-
-	if (string == NULL)
-		return;
-
-	if ((length = strlen(string)) == 0)
-		return;
-
-	end = string + length - 1;
-	while (end >= string && isspace(*end))
-		end--;
-	*(end + 1) = '\0';
 }
 
 static long double uint128_to_long_double(uint8_t *data) {

@@ -18,6 +18,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+void trim_trail_space(char *string);
 FILE	*spopen(char **, pid_t *);
 int	spclose(FILE *, pid_t);
 

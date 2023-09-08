@@ -37,6 +37,8 @@
 #include "lp_util.h"
 #include "utils.h"
 
+static int rtas_event;
+
 /* FRU callout priority as defined in PAPR+
  *
  * Note: Order of the priority is important!
@@ -173,8 +175,10 @@ service_event_supported(struct sl_event *event)
 			return 0;
 		}
 		break;
-	case SL_TYPE_BMC:
 	case SL_TYPE_RTAS:
+		rtas_event = 1;
+		break;
+	case SL_TYPE_BMC:
 	case SL_TYPE_BASIC:
 	default:
 		return 0;
@@ -446,14 +450,20 @@ parse_service_event(int event_id)
 	attn_loc = &list[0];
 
 	if (operating_mode == LED_MODE_LIGHT_PATH) {
-		if (event->callouts)
+		if (event->callouts) {
 			/* Run over FRU callout priority in order and
 			 * enable fault indicator
 			 */
-			for (i = 0; FRU_CALLOUT_PRIORITY[i]; i++)
+			if (!rtas_event) {
+				for (i = 0; FRU_CALLOUT_PRIORITY[i]; i++)
+					rc = event_fru_callout(event->callouts, list,
+							FRU_CALLOUT_PRIORITY[i],
+							&attn_on);
+			} else {
 				rc = event_fru_callout(event->callouts, list,
-						       FRU_CALLOUT_PRIORITY[i],
-						       &attn_on);
+						'H', &attn_on);
+			}
+		}
 		else {
 			/* No callout list, enable check log indicator */
 			indicator_log_write("Empty callout list");

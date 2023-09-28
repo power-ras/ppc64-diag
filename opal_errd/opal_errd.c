@@ -49,6 +49,8 @@
 #include <time.h>
 #include <libudev.h>
 #include <sys/wait.h>
+#include <libgen.h>
+#include "platform.c"
 
 #include "opal-elog-parse/opal-elog.h"
 #include "opal-elog-parse/opal-event-data.h"
@@ -872,6 +874,8 @@ int main(int argc, char *argv[])
 
 	int log_options;
 
+	int platform=0;
+
 	struct udev *udev = NULL;
 	struct udev_monitor *udev_mon = NULL;
 	struct udev_device *udev_dev = NULL;
@@ -948,6 +952,17 @@ int main(int argc, char *argv[])
 			exit(EXIT_FAILURE);
 		}
 	}
+	
+	/* platform initialization */
+
+        if (opt_daemon) {
+            platform = get_platform();
+            if (platform != PLATFORM_POWERNV) {
+               fprintf(stderr, "%s is not supported on the %s platform\n",
+                       basename(argv[0]), __power_platform_name(platform));
+               exit(0);
+            }
+         }
 
 	/* syslog initialization */
 	setlogmask(LOG_UPTO(LOG_NOTICE));

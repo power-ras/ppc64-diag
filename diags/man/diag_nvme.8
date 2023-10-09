@@ -30,6 +30,12 @@ The user can control which events will be reported through the
 configuration file \f[I]/etc/ppc64\-diag/diag_nvme.config\f[]
 .SH OPTIONS
 .TP
+.B \f[B]nvme\f[]\f[I]n\f[]
+The NVMe devices on which to operate, for example nvme0; if not
+specified, all detected nvme devices will be diagnosed.
+.RS
+.RE
+.TP
 .B \f[B]\-d\f[], \f[B]--dump\f[] \f[I]file\f[]
 Dump SMART data to the specified path and file name \f[I]file\f[].
 The SMART data is extracted from an NVMe device, so specifying one is

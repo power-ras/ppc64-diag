@@ -166,9 +166,9 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (rc == 0)
-		fprintf(stdout, "Command completed successfully\n");
+		fprintf(stdout, "NVMe diag command completed successfully\n");
 	else
-		fprintf(stderr, "Command failed, exiting with rc %d\n", rc);
+		fprintf(stderr, "NVMe diag command failed with rc %d\n", rc);
 
 	return rc;
 }
@@ -724,8 +724,11 @@ extern int get_smart_file(char *file_path, struct nvme_smart_log_page *log) {
 	int num_elements = 0;
 	struct dictionary dict[MAX_DICT_ELEMENTS];
 
-	if ((num_elements = read_file_dict(file_path, dict, MAX_DICT_ELEMENTS)) < 0)
+	if ((num_elements = read_file_dict(file_path, dict, MAX_DICT_ELEMENTS)) < 0) {
+		fprintf(stderr, "read_file_dict failed: %s, rc % d\n",
+				file_path, num_elements);
 		return num_elements;
+	}
 	return set_smart_log_field(log, dict, num_elements);
 }
 

@@ -43,6 +43,7 @@
 #define SCANLOG_DUMP_FILE	"/proc/ppc64/scan-log-dump"
 #define SCANLOG_DUMP_EXISTS	"/proc/device-tree/chosen/ibm,scan-log-data"
 #define SYSID_FILE		"/proc/device-tree/system-id"
+#define SYSID_VENDOR_FILE	"/proc/device-tree/ibm,vendor-system-id"
 #define SCANLOG_MODULE		"scanlog"
 #define MODPROBE_PROGRAM	"/sbin/modprobe"
 
@@ -62,21 +63,26 @@ get_machine_serial()
 {
 	FILE *fp;
 	char buf[20] = {0,}, *ret = NULL;
+	char *filename = SYSID_VENDOR_FILE;
 
 	/*
 	 * Odds of SYSID_FILE, open failing is almost none.
 	 * But, better to catch the odds.
 	 */
-	fp = fopen(SYSID_FILE, "r");
+	fp = fopen(filename, "r");
 	if (!fp) {
-		log_msg(NULL, "%s: Failed to open %s, %s",
-				__func__, SYSID_FILE, strerror(errno));
-		return ret;
+		filename = SYSID_FILE;
+		fp = fopen(filename, "r");
+		if (!fp) {
+			log_msg(NULL, "%s: Failed to open %s, %s", __func__,
+					filename, strerror(errno));
+			return ret;
+		}
 	}
 
 	if (fgets(buf, sizeof(buf), fp) == NULL) {
 		log_msg(NULL, "%s: Reading file %s failed, %s",
-				__func__, SYSID_FILE, strerror(errno));
+				__func__, filename, strerror(errno));
 	} else {
 		ret = strdup(buf + 4);
 		if (!ret) {

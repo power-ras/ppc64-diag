@@ -122,11 +122,18 @@ else {
 	$partition_no = "000";
 }
 
-# Retrieve CEC MTMS from /proc/device-tree/model and /proc/device-tree/system-id
-$cec_machinetype = `cat /proc/device-tree/model | cut -c5- 2>/dev/null`;
+# Retrieve CEC MTMS from /proc/device-tree/*model and /proc/device-tree/*system-id
+$cec_machinetype = -e '/proc/device-tree/ibm,vendor-model' ?
+`cat /proc/device-tree/ibm,vendor-model | cut -c5- 2>/dev/null` :
+`cat /proc/device-tree/model | cut -c5- 2>/dev/null`;
+
 chomp $cec_machinetype;
 chop $cec_machinetype;
-$cec_machineserial = `cat /proc/device-tree/system-id | cut -c7- 2>/dev/null`;
+
+$cec_machineserial = -e '/proc/device-tree/ibm,vendor-system-id' ?
+`cat /proc/device-tree/ibm,vendor-system-id | cut -c5- 2>/dev/null` :
+`cat /proc/device-tree/system-id | cut -c5- 2>/dev/null` :
+
 chomp $cec_machineserial;
 chop $cec_machineserial;
 

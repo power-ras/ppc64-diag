@@ -43,7 +43,9 @@
 #define SYSFS_SG_PATH			"/sys/class/scsi_generic"
 #define DEVICE_TREE			"/proc/device-tree/"
 #define DEVICE_TREE_SYSTEM_ID		DEVICE_TREE"system-id"
+#define DEVICE_TREE_VENDOR_SYSTEM_ID	DEVICE_TREE"ibm,vendor-system-id"
 #define DEVICE_TREE_MODEL		DEVICE_TREE"model"
+#define DEVICE_TREE_VENDOR_MODEL	DEVICE_TREE"ibm,vendor-model"
 
 #define BUFFER_LENGTH			16
 #define SERIAL_NUM_LEN			8
@@ -248,9 +250,18 @@ static int get_system_vpd(char *machine_serial,
 	char model[BUFFER_LENGTH] = {0};
 	char *temp;
 
-	device_fd = open(DEVICE_TREE_SYSTEM_ID, O_RDONLY);
-	if (device_fd < 0)
-		return -1;
+	/*
+	 * Always use ibm,vendor-system-id device-tree property
+	 * to get machine serial number. If it does not exist,
+	 * then fallback to system-id property to get machine
+	 * serial number.
+	 */
+	device_fd = open(DEVICE_TREE_VENDOR_SYSTEM_ID, O_RDONLY);
+	if (device_fd < 0) {
+		device_fd = open(DEVICE_TREE_SYSTEM_ID, O_RDONLY);
+		if (device_fd < 0)
+			return -1;
+	}
 
 	rc = read(device_fd, serial, BUFFER_LENGTH);
 	close(device_fd);
@@ -266,9 +277,17 @@ static int get_system_vpd(char *machine_serial,
 	memcpy(machine_serial, serial + start_index, SERIAL_NUM_LEN);
 	machine_serial[SERIAL_NUM_LEN - 1] = '\0';
 
-	device_fd = open(DEVICE_TREE_MODEL, O_RDONLY);
-	if (device_fd < 0)
-		return -1;
+	/*
+	 * Always use ibm,vendor-model device-tree property
+	 * to get model info. If it does not exist, then
+	 * fallback to model property to get model info.
+	 */
+	device_fd = open(DEVICE_TREE_VENDOR_MODEL, O_RDONLY);
+	if (device_fd < 0) {
+		device_fd = open(DEVICE_TREE_MODEL, O_RDONLY);
+		if (device_fd < 0)
+			return -1;
+	}
 
 	rc = read(device_fd, model, BUFFER_LENGTH);
 	close(device_fd);

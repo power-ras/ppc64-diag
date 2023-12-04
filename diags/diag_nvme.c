@@ -165,6 +165,11 @@ int main(int argc, char *argv[]) {
 		optind++;
 	}
 
+	if (rc == 0)
+		fprintf(stdout, "NVMe diag command completed successfully\n");
+	else
+		fprintf(stderr, "NVMe diag command failed with rc %d\n", rc);
+
 	return rc;
 }
 
@@ -310,6 +315,7 @@ extern int dump_smart_data(char *device_name, char *dump_path) {
 	int fd, rc;
 	FILE *fp;
 	struct nvme_smart_log_page smart_log = { 0 };
+	char ans;
 
 	/* Read SMART data from device */
 	snprintf(dev_path,sizeof(dev_path), "/dev/%s", device_name);
@@ -331,8 +337,16 @@ extern int dump_smart_data(char *device_name, char *dump_path) {
 	}
 	fp = fopen(dump_path, "wx");
 	if (fp == NULL) {
-		fprintf(stderr, "%s open failed: %s\n", dump_path, strerror(errno));
-		return -1;
+		if (errno == EEXIST) {
+			fprintf(stdout, "File %s exists. Overwrite (y/n)? ", dump_path);
+			rc = scanf("%c", &ans);
+			if (ans == 'y' || ans == 'Y')
+				fp = fopen(dump_path, "w");
+		}
+		if (fp == NULL) {
+			fprintf(stderr, "%s open failed: %s\n", dump_path, strerror(errno));
+			return -1;
+		}
 	}
 	write_smart_file(fp, &smart_log);
 	fclose(fp);
@@ -710,8 +724,11 @@ extern int get_smart_file(char *file_path, struct nvme_smart_log_page *log) {
 	int num_elements = 0;
 	struct dictionary dict[MAX_DICT_ELEMENTS];
 
-	if ((num_elements = read_file_dict(file_path, dict, MAX_DICT_ELEMENTS)) < 0)
+	if ((num_elements = read_file_dict(file_path, dict, MAX_DICT_ELEMENTS)) < 0) {
+		fprintf(stderr, "read_file_dict failed: %s, rc % d\n",
+				file_path, num_elements);
 		return num_elements;
+	}
 	return set_smart_log_field(log, dict, num_elements);
 }
 
@@ -972,13 +989,8 @@ extern int open_nvme(char *dev_path) {
 }
 
 static void print_usage(char *command) {
-	printf("Usage: %s [-h] [-d <file>] [-f <file>] [<nvme_devices>]\n"
+	printf("Usage: %s [-h] [<nvme_devices>]\n"
 		"\t-h or --help: print this help message\n"
-		"\t-d or --dump: dump SMART data to the specified path and file name <file>\n"
-		"\t                  one <nvme_device> is expected with this option\n"
-		"\t-f or --file: use SMART data from the specified path and file name <file>\n"
-		"\t                  instead of device, one <nvme_device> is expected with\n"
-		"\t                  this option\n"
 		"\t<nvme_devices>: the NVMe devices on which to operate, for\n"
 		"\t                  example nvme0; if not specified, all detected\n"
 		"\t                  nvme devices will be diagnosed\n", command);

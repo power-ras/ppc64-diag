@@ -991,7 +991,7 @@ extern int open_nvme(char *dev_path) {
 static void print_usage(char *command) {
 	printf("Usage: %s [-h] [<nvme_devices>]\n"
 		"\t-h or --help: print this help message\n"
-		"\t<nvme_devices>: the NVMe devices on which to operate, for\n"
+		"\t<nvmen ...>: the NVMe devices on which to operate, for\n"
 		"\t                  example nvme0; if not specified, all detected\n"
 		"\t                  nvme devices will be diagnosed\n", command);
 }

@@ -375,8 +375,39 @@ static int diagnose_nvme(char *device_name, struct notify *notify, char *file_pa
 	char endurance_s[sizeof(vpd.endurance) + 1], capacity_s[sizeof(vpd.capacity)+1];
         uint64_t event_id;
 	uint8_t severity;
+	FILE *fp;
+	char tr_file_path[PATH_MAX];
 	uint32_t raw_data_len = 0;
 	unsigned char *raw_data = NULL;
+
+	/*
+	 * Skip diag test if NVMe is connected over fabric
+	 */
+	snprintf(tr_file_path, sizeof(tr_file_path),
+			NVME_SYS_PATH"/%s/%s", device_name, "transport");
+	fp = fopen(tr_file_path, "r");
+	if (fp) {
+		char buf[12];
+		int n = fread(buf, 1, sizeof(buf), fp);
+
+		if (n) {
+			/*
+			 * If NVMe transport is anything but pcie then skip the diag test
+			 */
+			if (strncmp(buf, "pcie", 4) != 0) {
+				fprintf(stdout, "Skipping diagnostics for nvmf : %s\n",
+						device_name);
+				fclose(fp);
+				return 0;
+			}
+		}
+		fclose(fp);
+	} else {
+		fprintf(stderr, "Skipping diagnostics for %s:\n"
+				"Unable to find the nvme transport type\n",
+				device_name);
+		return -1;
+	}
 
 	tmp_rc = regex_controller(controller_name, device_name);
 	if (tmp_rc != 0)

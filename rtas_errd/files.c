@@ -284,10 +284,27 @@ init_files(void)
 		proc_error_log_fd = open(proc_error_log2, O_RDONLY);
 
 	if (proc_error_log_fd < 0) {
-		log_msg(NULL, "Could not open error log file at either %s or "
-			"%s, %s\nThe rtas_errd daemon cannot continue and will "
-			"exit", proc_error_log1, proc_error_log2,
-			strerror(errno));
+
+		if (strlen(proc_error_log1) <= 2048) {
+			log_msg(NULL, "Could not open error log file at either %s or "
+					"%s, %s\nThe rtas_errd daemon cannot continue and will "
+					"exit", proc_error_log1, proc_error_log2,
+					strerror(errno));
+		} else {
+			/* If the filename is too long, truncate it */
+			char truncated_filename[2048];
+
+			strncpy(truncated_filename, proc_error_log1,
+					sizeof(truncated_filename) - 1);
+			truncated_filename[sizeof(truncated_filename) - 1] = '\0';
+
+			log_msg(NULL, "Truncating the filename since it is too long "
+					"(%d characters)", strlen(proc_error_log1));
+			log_msg(NULL, "Could not open error log file at either %s or "
+					"%s, %s\nThe rtas_errd daemon cannot continue and will "
+					"exit", truncated_filename, proc_error_log2,
+					strerror(errno));
+		}
 		return -1;
 	}
 

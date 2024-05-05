@@ -30,6 +30,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <librtas.h>
+#include <limits.h>
 
 #include "rtas_errd.h"
 #include "platform.h"
@@ -474,6 +475,12 @@ main(int argc, char *argv[])
 
 				f_flag++;
 				proc_error_log1 = optarg;
+				if (strlen(proc_error_log1) > PATH_MAX) {
+					fprintf(stderr, "The specified file path %s exceeds"
+							" the maximum supported file length of 4096 characters.\n",
+							proc_error_log1);
+					goto error_out;
+				}
 				proc_error_log2 = NULL;
 				break;
 

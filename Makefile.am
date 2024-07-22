@@ -2,12 +2,12 @@ ACLOCAL_AMFLAGS = -I m4
 
 AM_CFLAGS = -I $(top_srcdir)/common/ -I $(top_srcdir)/ela/ \
 	    -I $(top_srcdir)/diags -I $(top_srcdir)/lpd/ \
-	    -I /usr/include/ncurses/ -Wall -g -DDEBUG \
+	    -Wall -g -DDEBUG \
 	    -DDEST_DIR='"${exec_prefix}"' -DVERSION='"@VERSION@"'
 
 AM_CXXFLAGS = -I $(top_srcdir)/common/ -I $(top_srcdir)/ela/ \
 	      -I $(top_srcdir)/diags -I $(top_srcdir)/lpd/ \
-	      -I /usr/include/ncurses/ -Wall -g -DDEBUG \
+	      -Wall -g -DDEBUG \
 	      -DDEST_DIR='"${exec_prefix}"' -DVERSION='"@VERSION@"'
 
 AM_LDFLAGS =

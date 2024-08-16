@@ -75,8 +75,7 @@ static struct {
  */
 static void
 print_usage(const char *name) {
-	printf("Usage: %s [-h] [-V] [-s [-c][-l]] [-v] [-f <path.pg2>]"
-							" [<scsi_enclosure>]\n"
+	printf("Usage: %s [-h] [-V] [-s [-c][-l]] [-v] [-f <path.pg2>] [<sgn ...>]\n"
 		"\n\t-h: print this help message\n"
 		"\t-s: generate serviceable events for any failures and\n"
 		"\t      write events to the servicelog\n"
@@ -87,7 +86,7 @@ print_usage(const char *name) {
 		"\t-V: print the version of the command and exit\n"
 		"\t-f: for testing, read SES data from path.pg2 and VPD\n"
 		"\t      from path.vpd\n"
-		"\t<scsi_enclosure>: the sg device on which to operate, such\n"
+		"\t<sgn ...>: the scsi device on which to operate, such\n"
 		"\t                    as sg7; if not specified, all such\n"
 		"\t                    devices will be diagnosed\n", name);
 }

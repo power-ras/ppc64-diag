@@ -77,8 +77,10 @@ static void dump_get_file_name(char *buf, int bsize, char *dfile,
 	if (bsize >= DUMP_HDR_PREFIX_OFFSET + sizeof(uint16_t))
 		*prefix_size = be16toh(*(uint16_t *)(buf + DUMP_HDR_PREFIX_OFFSET));
 
-	if (bsize >= DUMP_HDR_FNAME_OFFSET + DUMP_MAX_FNAME_LEN)
-		strncpy(dfile, buf + DUMP_HDR_FNAME_OFFSET, dfile_size);
+	if (bsize >= DUMP_HDR_FNAME_OFFSET + DUMP_MAX_FNAME_LEN) {
+		strncpy(dfile, buf + DUMP_HDR_FNAME_OFFSET, dfile_size - 1);
+		dfile[dfile_size - 1] = '\0';
+	}
 	else
 		strncpy(dfile, "platform.dumpid.PARTIAL", dfile_size);
 

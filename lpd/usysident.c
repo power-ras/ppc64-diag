@@ -429,7 +429,7 @@ retry:
 				 * next elements in the list (which may match the device name);
 				 * for this we need to retry, re-starting on the next element.
 				 */
-				if (dvalue && current->devname &&
+				if (dvalue && current->devname[0] != '\0' &&
 				    strncmp(dvalue, current->devname, DEV_LENGTH)) {
 					list_start = current->next;
 					goto retry;

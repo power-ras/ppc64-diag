@@ -124,6 +124,15 @@ if [ "$2" = "2" ]; then
 fi
 
 %changelog
+* Fri Sep 13 2024 - Mahesh Salgaonkar <mahesh@linux.ibm.com> - 2.7.10
+- Add support for multiple platform dumps
+- Add support for light path diagnostics for rtas events
+- Enable correct display of model and system-id for IPS Power systems
+- Fix call home feature for nvmf devices
+- Fix crash in rtas_errd due to invalid -f option values
+- Fix build warnings with GCC-15
+- Update travis build to use v3 supported tags
+
 * Wed Oct 12 2022 - Mahesh Salgaonkar <mahesh@linux.ibm.com> - 2.7.9
 - Add NVMe diagnostics support (Murilo).
 - Update travis build to use fedora37 and Ubuntu22.10

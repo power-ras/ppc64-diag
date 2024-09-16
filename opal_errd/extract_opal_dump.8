@@ -1,0 +1,25 @@
+.TH extract_opal_dump "8" "June 2016" "ppc64-diag" "System Administration Utilities"
+.SH NAME
+extract_opal_dump \- Extract opal dump
+.SH SYNOPSIS
+.B extract_opal_dump
+[\fI\,OPTION\/\fR]...
+.SH DESCRIPTION
+.PP
+\fB\-A\fR
+Don't acknowledge dump
+.TP
+\fB\-s\fR \fI\,dir\fR
+sysfs directory (default \fI\,/sys\/\fP)
+.TP
+\fB\-o\fR \fI\,dir\fR
+directory to save dumps (default \fI\,/var/log/dump\/\fP)
+.TP
+\fB\-m\fR \fI\,max\fR
+maximum number of dumps of a specific type to be saved
+.TP
+\fB\-w\fR
+wait for a dump
+.TP
+\fB\-h\fR
+help (this message)

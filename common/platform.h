@@ -36,6 +36,7 @@
 #define PVR_POWER8	0x004D
 #define PVR_POWER9	0x004E
 #define PVR_POWER10	0x0080
+#define PVR_POWER11	0x0082
 
 enum {
 	PLATFORM_UNKNOWN = 0,
@@ -56,6 +57,7 @@ enum {
 	POWER8,
 	POWER9,
 	POWER10,
+	POWER11,
 };
 
 extern const char *__platform_name[];

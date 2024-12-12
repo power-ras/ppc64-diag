@@ -9,7 +9,7 @@ services: docker
 
 env:
     matrix:
-    - RUN_ON_CONTAINER=fedora-37
+    - RUN_ON_CONTAINER=fedora-41
     - RUN_ON_CONTAINER=ubuntu-24.04
 
 install:

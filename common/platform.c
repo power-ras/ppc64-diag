@@ -96,6 +96,9 @@ get_processor(void)
 	case PVR_POWER10:
 		rc = POWER10;
 		break;
+	case PVR_POWER11:
+		rc = POWER11;
+		break;
 	default:
 		rc = PROCESSOR_UNKNOWN;
 		break;

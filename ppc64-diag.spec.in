@@ -74,7 +74,6 @@ mkdir -p $RPM_BUILD_ROOT/var/log/ppc64_diag/diag_disk
 %doc /usr/share/man/man8/*
 /usr/sbin/*
 %dir /etc/%{name}
-%dir /etc/%{name}/ses_pages
 %dir /var/log/ppc64-diag
 %dir /var/log/ppc64-diag/diag_disk
 %dir /var/log/dump

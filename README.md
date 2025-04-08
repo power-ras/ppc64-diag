@@ -89,7 +89,7 @@ make install
 ### Building rpms
 To build a tarball to feed to rpmbuild, do
 
-`make tarball
+`make dist-gzip
 
 As an example, we use a command similar to the following:
 

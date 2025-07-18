@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
+#include <stdbool.h>
 
-typedef enum { false, true } bool;
 static int cur_year = 0;	// year - 1900
 static time_t end_of_cur_year;	// January 1 00:00:00 of next year
 

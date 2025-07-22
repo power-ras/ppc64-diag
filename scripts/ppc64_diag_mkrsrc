@@ -132,7 +132,7 @@ chop $cec_machinetype;
 
 $cec_machineserial = -e '/proc/device-tree/ibm,vendor-system-id' ?
 `cat /proc/device-tree/ibm,vendor-system-id | cut -c5- 2>/dev/null` :
-`cat /proc/device-tree/system-id | cut -c5- 2>/dev/null` :
+`cat /proc/device-tree/system-id | cut -c5- 2>/dev/null` ;
 
 chomp $cec_machineserial;
 chop $cec_machineserial;

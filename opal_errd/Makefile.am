@@ -78,7 +78,8 @@ opal_errd_opal_elog_parse_opal_elog_parse_SOURCES = \
 		opal_errd/opal-elog-parse/print-esel-header.c \
 		$(opal_elog_parse_h_files)
 
-dist_man_MANS += opal_errd/man/opal-elog-parse.8 opal_errd/man/opal_errd.8
+dist_man_MANS += opal_errd/man/opal-elog-parse.8 opal_errd/man/opal_errd.8 \
+								 opal_errd/man/extract_opal_dump.8
 
 EXTRA_DIST += opal_errd/run_tests \
 	      opal_errd/test-extract_opal_dump \

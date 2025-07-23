@@ -54,7 +54,7 @@ ela_add_regex_SOURCES = ela/add_regex.cpp \
 			$(BUILT_SOURCE) \
 			$(ela_h_files)
 
-dist_man_MANS += ela/man/explain_syslog.8
+dist_man_MANS += ela/man/explain_syslog.8 ela/man/add_regex.8
 
 clean-local-ela:
 	rm -f $(BUILT_SOURCE)

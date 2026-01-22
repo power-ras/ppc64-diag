@@ -184,7 +184,7 @@ int parse_fru_scn(struct opal_fru_scn *fru_scn, const char *buf, int buflen)
 	fru_scn->priority = bufsrc->priority;
 	fru_scn->loc_code_len = bufsrc->loc_code_len;
 	if (bufsrc->loc_code_len % 4) {
-		fprintf(stderr, "%s: invalide location code length, must be multiple "
+		fprintf(stderr, "%s: invalid location code length, must be multiple "
 		        "of 4, got: %u", __func__, bufsrc->loc_code_len);
 		return -EINVAL;
 	}

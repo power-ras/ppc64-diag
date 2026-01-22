@@ -499,7 +499,7 @@ report_menugoal(struct event *event, struct rtas_priv_hdr_scn *privhdr,
 	snprintf(menu_num_str, 20, "#%d", menu_num);
 	event->sl_entry->refcode = malloc(strlen(menu_num_str)+1);
 	if (event->sl_entry->refcode == NULL) {
-		log_msg(event, "Memory allocaion failed.\n");
+		log_msg(event, "Memory allocation failed.\n");
 		return;
 	}
 	strcpy(event->sl_entry->refcode, menu_num_str);
@@ -507,7 +507,7 @@ report_menugoal(struct event *event, struct rtas_priv_hdr_scn *privhdr,
 	event->sl_entry->description = malloc(strlen(msg)+1);
 	if (event->sl_entry->description == NULL) {
 		free(event->sl_entry->refcode);
-		log_msg(event, "Memory allocaion failed.\n");
+		log_msg(event, "Memory allocation failed.\n");
 		return;
 	}
 	strcpy(event->sl_entry->description, msg);

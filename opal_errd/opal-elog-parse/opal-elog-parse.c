@@ -43,7 +43,7 @@ char *opt_platform_dir = DEFAULT_opt_platform_dir;
 
 void print_usage(char *command)
 {
-	printf("%s - Parse OPAL plaform error logs\n\n", command);
+	printf("%s - Parse OPAL platform error logs\n\n", command);
 	printf("Usage: %s { -d  <logid> | -e <logid> | -a | -l | -s | -h }"
 			" [ -p dir | -f file]\n\n"
 			"\t-a       - Display all error log entry details\n"

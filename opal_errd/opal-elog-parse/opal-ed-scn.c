@@ -20,8 +20,10 @@ int parse_ed_scn(struct opal_ed_scn **r_ed,
 	    check_buflen(hdr->length, sizeof(struct opal_ed_scn), __func__) < 0)
 		return -EINVAL;
 	*r_ed = malloc(hdr->length);
-	if (!*r_ed)
+	if (!*r_ed) {
+		fprintf(stderr, "%s: failed to allocate memory for ED section\n", __func__);
 		return -ENOMEM;
+	}
 	ed = *r_ed;
 
 	ed->v6hdr = *hdr;

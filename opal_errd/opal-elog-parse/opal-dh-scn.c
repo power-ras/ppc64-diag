@@ -20,8 +20,10 @@ int parse_dh_scn(struct opal_dh_scn **r_dh,
 		return -EINVAL;
 
 	*r_dh = malloc(sizeof(struct opal_dh_scn));
-	if(!*r_dh)
+	if (!*r_dh) {
+		fprintf(stderr, "%s: failed to allocate memory for DH section\n", __func__);
 		return -ENOMEM;
+	}
 	dh = *r_dh;
 
 	dh->v6hdr = *hdr;

@@ -31,8 +31,10 @@ int parse_priv_hdr_scn(struct opal_priv_hdr_scn **r_privhdr,
 	}
 
 	*r_privhdr = malloc(sizeof(struct opal_priv_hdr_scn));
-	if (!*r_privhdr)
+	if (!*r_privhdr) {
+		fprintf(stderr, "%s: failed to allocate memory for PH section\n", __func__);
 		return -ENOMEM;
+	}
 	privhdr = *r_privhdr;
 
 	privhdr->v6hdr = *hdr;

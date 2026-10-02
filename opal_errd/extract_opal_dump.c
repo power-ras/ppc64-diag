@@ -114,6 +114,8 @@ static void ack_dump(const char* dump_dir_path)
 		syslog(LOG_ERR, "Failed to acknowledge platform dump: %s"
 		       " (%d:%s)\n",
 		       ack_file, errno, strerror(errno));
+	} else {
+		syslog(LOG_DEBUG, "Acknowledged platform dump: %s\n", dump_dir_path);
 	}
 
 	close(fd);
@@ -129,7 +131,7 @@ static void check_dup_dump_file(char *dumpname)
 
 	rc = snprintf(dump_path, PATH_MAX, "%s/%s", opt_output_dir, dumpname);
 	if (rc >= PATH_MAX) {
-		syslog(LOG_NOTICE, "Path to dump file (%s) is too big",
+		syslog(LOG_ERR, "Path to dump file (%s) is too big\n",
 		       dumpname);
 		return;
 	}
@@ -137,11 +139,14 @@ static void check_dup_dump_file(char *dumpname)
 	if (access(dump_path, R_OK) == -1)
 		return;
 
+	syslog(LOG_WARNING, "Duplicate dump file found: %s, removing\n", dump_path);
 	if (unlink(dump_path) < 0)
-		syslog(LOG_NOTICE, "Could not delete file \"%s\" "
+		syslog(LOG_ERR, "Could not delete duplicate dump file \"%s\" "
 		       "(%s) to make room for incoming platform dump."
 		       " The new dump will be saved anyways.\n",
 		       dump_path, strerror(errno));
+	else
+		syslog(LOG_INFO, "Removed duplicate dump file: %s\n", dump_path);
 }
 
 static int timesort(const struct dirent **file1, const struct dirent **file2)
@@ -168,12 +173,18 @@ static int timesort(const struct dirent **file1, const struct dirent **file2)
 	}
 
 	rc = stat(dump_path1, &sbuf1);
-	if (rc < 0)
+	if (rc < 0) {
+		syslog(LOG_WARNING, "stat(%s) failed (%d:%s)\n",
+		       dump_path1, errno, strerror(errno));
 		return rc;
+	}
 
 	rc = stat(dump_path2, &sbuf2);
-	if (rc < 0)
+	if (rc < 0) {
+		syslog(LOG_WARNING, "stat(%s) failed (%d:%s)\n",
+		       dump_path2, errno, strerror(errno));
 		return rc;
+	}
 
 	return (sbuf2.st_mtime - sbuf1.st_mtime);
 }
@@ -200,8 +211,11 @@ static void remove_dump_files(char *dumpname)
 	check_dup_dump_file(dumpname);
 
 	n = scandir(opt_output_dir, &namelist, NULL, timesort);
-	if (n < 0)
+	if (n < 0) {
+		syslog(LOG_ERR, "Failed to scan output directory %s (%d:%s)\n",
+		       opt_output_dir, errno, strerror(errno));
 		return;
+	}
 
 	for (i = 0; i < n; i++) {
 		dirent = namelist[i];
@@ -228,8 +242,10 @@ static void remove_dump_files(char *dumpname)
 		if (count < opt_max_dump)
 			continue;
 
+		syslog(LOG_INFO, "Removing old dump file (count=%d >= max=%d): %s\n",
+		       count, opt_max_dump, dump_path);
 		if (unlink(dump_path) < 0)
-			syslog(LOG_NOTICE, "Could not delete file \"%s\" "
+			syslog(LOG_ERR, "Could not delete dump file \"%s\" "
 			"(%s) to make room for incoming platform dump."
 			" The new dump will be saved anyways.\n",
 			dump_path, strerror(errno));
@@ -262,8 +278,14 @@ static int process_dump(const char* dump_dir_path, const char *output_dir)
 		return -1;
 	}
 
-	if (stat(dump_path,&sbuf) == -1)
+	if (stat(dump_path, &sbuf) == -1) {
+		syslog(LOG_WARNING, "stat(%s) failed (%d:%s), skipping dump\n",
+		       dump_path, errno, strerror(errno));
 		return -1;
+	}
+
+	syslog(LOG_DEBUG, "Processing dump file: %s (size=%lld)\n",
+	       dump_path, (long long)sbuf.st_size);
 
 	bufsz = sbuf.st_size;
 	buf = malloc(bufsz);
@@ -374,8 +396,13 @@ static int find_and_process_dumps(const char *opal_dump_dir,
 	int i;
 
 	n = scandir(opal_dump_dir, &namelist, NULL, alphasort);
-	if (n < 0)
+	if (n < 0) {
+		syslog(LOG_ERR, "Failed to scan dump directory %s (%d:%s)\n",
+		       opal_dump_dir, errno, strerror(errno));
 		return -1;
+	}
+	syslog(LOG_DEBUG, "Scanning dump directory %s: %d entries found\n",
+	       opal_dump_dir, n);
 
 	for (i = 0; i < n; i++) {
 		dirent = namelist[i];
@@ -402,7 +429,8 @@ static int find_and_process_dumps(const char *opal_dump_dir,
 			/* Fall back to stat() */
 			rc = stat(dump_path, &sbuf);
 			if (rc == -1) {
-				/* skip on stat error */
+				syslog(LOG_WARNING, "stat(%s) failed (%d:%s), skipping\n",
+				       dump_path, errno, strerror(errno));
 				free(namelist[i]);
 				continue;
 			}
@@ -413,6 +441,7 @@ static int find_and_process_dumps(const char *opal_dump_dir,
 		}
 
 		if (is_dir) {
+			syslog(LOG_DEBUG, "Processing dump directory: %s\n", dump_path);
 			rc = process_dump(dump_path, output_dir);
 			if (rc != 0 && retval == 0)
 				retval = -1;
@@ -445,7 +474,7 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
-	setlogmask(LOG_UPTO(LOG_NOTICE));
+	setlogmask(LOG_UPTO(LOG_DEBUG));
 	openlog("OPAL_DUMP", LOG_CONS | LOG_PID | LOG_NDELAY | LOG_PERROR,
 		LOG_LOCAL1);
 
@@ -486,16 +515,22 @@ int main(int argc, char *argv[])
 	snprintf(sysfs_path, sizeof(sysfs_path), "%s/%s",
 		 opt_sysfs, DEFAULT_DUMP_PATH);
 
+	syslog(LOG_INFO, "Starting extract_opal_dump: sysfs=%s output=%s max_dumps=%d\n",
+	       sysfs_path, opt_output_dir, opt_max_dump);
+
 	rc = access(sysfs_path, R_OK);
 	if (rc != 0) {
 		syslog(LOG_ERR, "Error accessing sysfs: %s (%d: %s)\n",
 		       sysfs_path, errno, strerror(errno));
 		goto err_out;
 	}
+	syslog(LOG_DEBUG, "Dump sysfs path accessible: %s\n", sysfs_path);
 
 	rc = access(opt_output_dir, W_OK);
 	if (rc != 0) {
 		if (errno == ENOENT) {
+			syslog(LOG_INFO, "Output directory %s does not exist, creating\n",
+			       opt_output_dir);
 			rc = mkdir(opt_output_dir,
 				   S_IRGRP | S_IRUSR | S_IWGRP | S_IWUSR | S_IXUSR);
 			if (rc != 0) {
@@ -504,18 +539,26 @@ int main(int argc, char *argv[])
 						errno, strerror(errno));
 				goto err_out;
 			}
+			syslog(LOG_INFO, "Created output directory: %s\n", opt_output_dir);
 		} else {
 			syslog(LOG_ERR, "Error accessing output dir: %s (%d: %s)\n",
 					opt_output_dir, errno, strerror(errno));
 			goto err_out;
 		}
+	} else {
+		syslog(LOG_DEBUG, "Output directory accessible: %s\n", opt_output_dir);
 	}
 
 start:
+	syslog(LOG_DEBUG, "Scanning for platform dumps in %s\n", sysfs_path);
 	rc = find_and_process_dumps(sysfs_path, opt_output_dir);
 	if (rc == 0 && opt_wait) {
+		syslog(LOG_INFO, "No dumps found, waiting for new dump events on %s\n",
+		       sysfs_path);
 		fd = open(sysfs_path, O_RDONLY|O_DIRECTORY);
 		if (fd < 0) {
+			syslog(LOG_ERR, "Failed to open dump directory for waiting: %s (%d:%s)\n",
+			       sysfs_path, errno, strerror(errno));
 			rc = -1;
 			goto err_out;
 		}
@@ -524,9 +567,13 @@ start:
 		rc = select(fd+1, NULL, NULL, &exceptfds, NULL);
 		close(fd);
 
-		if (rc == -1)
+		if (rc == -1) {
+			syslog(LOG_ERR, "select() failed while waiting for dump (%d:%s)\n",
+			       errno, strerror(errno));
 			goto err_out;
+		}
 
+		syslog(LOG_DEBUG, "Woke up from select(), re-scanning for dumps\n");
 		goto start;
 	}
 

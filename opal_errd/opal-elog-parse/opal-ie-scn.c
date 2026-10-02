@@ -21,8 +21,10 @@ int parse_ie_scn(struct opal_ie_scn **r_ie,
 	}
 
 	*r_ie = malloc(sizeof(struct opal_ie_scn));
-	if (!*r_ie)
+	if (!*r_ie) {
+		fprintf(stderr, "%s: failed to allocate memory for IE section\n", __func__);
 		return -ENOMEM;
+	}
 	ie = *r_ie;
 
 	ie->v6hdr = *hdr;

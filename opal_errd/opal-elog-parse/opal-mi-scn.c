@@ -19,8 +19,10 @@ int parse_mi_scn(struct opal_mi_scn **r_mi,
 	}
 
 	*r_mi = malloc(sizeof(struct opal_mi_scn));
-	if (!*r_mi)
+	if (!*r_mi) {
+		fprintf(stderr, "%s: failed to allocate memory for MI section\n", __func__);
 		return -ENOMEM;
+	}
 	mi = *r_mi;
 
 	mi->v6hdr = *hdr;

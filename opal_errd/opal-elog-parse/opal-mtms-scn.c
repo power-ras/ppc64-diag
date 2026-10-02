@@ -25,8 +25,10 @@ int parse_mtms_scn(struct opal_mtms_scn **r_mtms, const struct opal_v6_hdr *hdr,
 	}
 
 	*r_mtms = malloc(sizeof(struct opal_mtms_scn));
-	if(!*r_mtms)
+	if (!*r_mtms) {
+		fprintf(stderr, "%s: failed to allocate memory for MT section\n", __func__);
 		return -ENOMEM;
+	}
 	mtms = *r_mtms;
 
 	mtms->v6hdr = *hdr;

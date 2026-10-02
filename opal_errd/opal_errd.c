@@ -126,21 +126,31 @@ static char *find_opal_errd_dir(void)
 	ssize_t r;
 	char *errd_path;
 	char *path_end;
-	if (lstat("/proc/self/exe", &sb) == -1)
+	if (lstat("/proc/self/exe", &sb) == -1) {
+		syslog(LOG_WARNING, "lstat(/proc/self/exe) failed (%d:%s)\n",
+		       errno, strerror(errno));
 		return NULL;
+	}
 
 	errd_path = malloc(sb.st_size + 1);
-	if (!errd_path)
+	if (!errd_path) {
+		syslog(LOG_ERR, "Failed to allocate memory for executable path\n");
 		return NULL;
+	}
 
-	r = readlink ("/proc/self/exe", errd_path, sb.st_size);
-	if (r <= 0 || r > sb.st_size)
+	r = readlink("/proc/self/exe", errd_path, sb.st_size);
+	if (r <= 0 || r > sb.st_size) {
+		syslog(LOG_WARNING, "readlink(/proc/self/exe) failed (%d:%s)\n",
+		       errno, strerror(errno));
 		goto out;
+	}
 
 	/* Just interested in the path, trim fname  */
-	path_end = strrchr (errd_path, '/');
-	if (path_end == NULL)
+	path_end = strrchr(errd_path, '/');
+	if (path_end == NULL) {
+		syslog(LOG_WARNING, "Could not determine directory from executable path\n");
 		goto out;
+	}
 
 	/* + 1 to ensure the trailing / stays in */
 	*(path_end + 1) = '\0';
@@ -159,20 +169,29 @@ static int find_extract_opal_dump_cmd(char **r_dump_path)
 	*r_dump_path = NULL;
 	/* Check default location */
 	if (access(DEFAULT_EXTRACT_DUMP_CMD, X_OK) == 0) {
-		/* Exists */
+		syslog(LOG_DEBUG, "Found extract_opal_dump at default location: %s\n",
+		       DEFAULT_EXTRACT_DUMP_CMD);
 		*r_dump_path = strdup(DEFAULT_EXTRACT_DUMP_CMD);
-		if (*r_dump_path == NULL)
+		if (*r_dump_path == NULL) {
+			syslog(LOG_ERR, "Failed to allocate memory for dump command path\n");
 			return -1;
+		}
 		return 0;
 	}
 
+	syslog(LOG_DEBUG, "extract_opal_dump not found at default location %s,"
+	       " searching executable directory\n", DEFAULT_EXTRACT_DUMP_CMD);
+
 	errd_path = find_opal_errd_dir();
-	if (!errd_path)
+	if (!errd_path) {
+		syslog(LOG_WARNING, "Could not determine opal_errd executable directory\n");
 		return -1;
+	}
 
 	/* Look in where ever errd was executed from */
 	dump_path = malloc(strlen(errd_path) + strlen(DEFAULT_EXTRACT_DUMP_FNAME) + 1);
 	if (!dump_path) {
+		syslog(LOG_ERR, "Failed to allocate memory for dump command path\n");
 		free(errd_path);
 		return -1;
 	}
@@ -181,10 +200,12 @@ static int find_extract_opal_dump_cmd(char **r_dump_path)
 	strcat(dump_path, DEFAULT_EXTRACT_DUMP_FNAME);
 	free(errd_path);
 	if (access(dump_path, X_OK) == 0) {
+		syslog(LOG_DEBUG, "Found extract_opal_dump at: %s\n", dump_path);
 		*r_dump_path = dump_path;
 		return 0;
 	}
 
+	syslog(LOG_WARNING, "extract_opal_dump not found at %s\n", dump_path);
 	free(dump_path);
 	return -1;
 }
@@ -256,20 +277,33 @@ static int get_elog_type_from_file_data(char *path)
 	size_t bufsz, readsz;
 	off_t seek_loc;
 
-	if (stat(path, &sbuf) == -1)
+	if (stat(path, &sbuf) == -1) {
+		syslog(LOG_WARNING, "stat(%s) failed (%d:%s)\n",
+		       path, errno, strerror(errno));
 		return elog_type;
+	}
 
 	bufsz = sbuf.st_size;
-	if (bufsz > OPAL_ERROR_LOG_MAX)
+	if (bufsz > OPAL_ERROR_LOG_MAX) {
+		syslog(LOG_WARNING, "Elog file %s size (%zu) exceeds maximum,"
+		       " skipping type detection\n", path, bufsz);
 		return elog_type;
+	}
 
 	fd = open(path, O_RDONLY);
-	if (fd < 0)
+	if (fd < 0) {
+		syslog(LOG_ERR, "Failed to open elog file %s (%d:%s)\n",
+		       path, errno, strerror(errno));
 		return elog_type;
+	}
 
 	readsz = read(fd, &eselhdr, sizeof(eselhdr));
-	if (readsz < sizeof(eselhdr))
+	if (readsz < sizeof(eselhdr)) {
+		syslog(LOG_WARNING, "Short read on elog file %s"
+		       " (expected %zu, got %zu)\n",
+		       path, sizeof(eselhdr), readsz);
 		goto out;
+	}
 
 	seek_loc = ELOG_ACTION_OFFSET;
 	if(is_esel_header(buf))
@@ -312,8 +346,13 @@ static void rename_old_logs(const char *output_dir)
 	int rc;
 
 	n = scandir(output_dir, &namelist, is_suffixless_elog_filename, alphasort);
-	if (n < 0)
+	if (n < 0) {
+		syslog(LOG_WARNING, "Failed to scan directory for old logs: %s (%d:%s)\n",
+		       output_dir, errno, strerror(errno));
 		return;
+	}
+	syslog(LOG_DEBUG, "Found %d old-format elog file(s) to rename in %s\n",
+	       n, output_dir);
 
 	for (i = 0; i < n; i++) {
 		dirent = namelist[i];
@@ -333,6 +372,8 @@ static void rename_old_logs(const char *output_dir)
 
 		elog_type = get_elog_type_from_file_data(oldname);
 		if (elog_type == OPAL_ELOG_INVALID) {
+			syslog(LOG_WARNING, "Could not determine elog type for %s,"
+			       " skipping rename\n", oldname);
 			free(namelist[i]);
 			continue; /* Delete the file here ? */
 		}
@@ -389,16 +430,21 @@ static void rotate_logs(const char *elog_dir, int max_logs, int elog_type)
 
 	/* Retrieve file list */
 	if (chdir(elog_dir) < 0) {
-		syslog(LOG_NOTICE, "chdir failed\n");
+		syslog(LOG_ERR, "chdir(%s) failed (%d:%s)\n",
+		       elog_dir, errno, strerror(errno));
 		return;
 	}
 
 	nfiles = scandir(elog_dir, &filelist, filter, alphasort);
 	if (nfiles < 0) {
-		syslog(LOG_NOTICE, "Error scanning the log directory %s\n",
-					elog_dir);
+		syslog(LOG_ERR, "Error scanning the log directory %s (%d:%s)\n",
+		       elog_dir, errno, strerror(errno));
 		return;
 	}
+
+	syslog(LOG_DEBUG, "Rotating %s logs: %d files found, max_logs=%d\n",
+	       (elog_type == OPAL_ELOG_SERVICEABLE) ? "serviceable" : "informational",
+	       nfiles, max_logs);
 
 	for (i = 0; i < nfiles; i++) {
 		if (!trim){
@@ -411,10 +457,12 @@ static void rotate_logs(const char *elog_dir, int max_logs, int elog_type)
 			trim = 0;
 
 		if (trim) {
+			syslog(LOG_INFO, "Rotating out old elog: %s\n",
+			       filelist[i]->d_name);
 			ret = remove(filelist[i]->d_name);
-			if(ret)
-				syslog(LOG_NOTICE, "Error removing %s\n",
-				       filelist[i]->d_name);
+			if (ret)
+				syslog(LOG_ERR, "Error removing %s (%d:%s)\n",
+				       filelist[i]->d_name, errno, strerror(errno));
 		}
 		free(filelist[i]);
 	}
@@ -707,8 +755,13 @@ static int find_and_read_elog_events(const char *elog_dir, const char *output_pa
 	int i;
 
 	n = scandir(elog_dir, &namelist, NULL, alphasort);
-	if (n < 0)
+	if (n < 0) {
+		syslog(LOG_ERR, "Failed to scan elog directory %s (%d:%s)\n",
+		       elog_dir, errno, strerror(errno));
 		return -1;
+	}
+	syslog(LOG_DEBUG, "Scanning elog directory %s: %d entries found\n",
+	       elog_dir, n);
 
 	for (i = 0; i < n; i++) {
 		dirent = namelist[i];
@@ -735,7 +788,8 @@ static int find_and_read_elog_events(const char *elog_dir, const char *output_pa
 			/* Fall back to stat() */
 			rc = stat(elog_path, &sbuf);
 			if (rc == -1) {
-				/* skip on stat error */
+				syslog(LOG_WARNING, "stat(%s) failed (%d:%s), skipping\n",
+				       elog_path, errno, strerror(errno));
 				free(namelist[i]);
 				continue;
 			}
@@ -746,6 +800,7 @@ static int find_and_read_elog_events(const char *elog_dir, const char *output_pa
 		}
 
 		if (is_dir) {
+			syslog(LOG_DEBUG, "Processing elog directory: %s\n", elog_path);
 			rc = process_elog(elog_path, output_path);
 			if (rc != 0 && retval == 0)
 				retval = -1;
@@ -950,11 +1005,14 @@ int main(int argc, char *argv[])
 	}
 
 	/* syslog initialization */
-	setlogmask(LOG_UPTO(LOG_NOTICE));
+	setlogmask(LOG_UPTO(LOG_DEBUG));
 	log_options = LOG_CONS | LOG_PID | LOG_NDELAY;
 	if (!opt_daemon)
 		log_options |= LOG_PERROR;
 	openlog("ELOG", log_options, LOG_LOCAL1);
+
+	syslog(LOG_INFO, "Starting opal_errd: sysfs=%s output=%s max_elogs=%d\n",
+	       opt_sysfs, opt_output_dir, opt_max_logs);
 
 	/*
 	 * By default 20% of the log counts are reserved for serviceable
@@ -965,19 +1023,29 @@ int main(int argc, char *argv[])
 		max_serviceable_logs = 0.2 * opt_max_logs;
 		max_info_logs = 0.8 * opt_max_logs;
 	}
+	syslog(LOG_DEBUG, "Log retention: max_info=%d max_serviceable=%d\n",
+	       max_info_logs, max_serviceable_logs);
 
 	/* Do we have a valid extract_opal_dump?
 	 * Confirm that what the user entered is valid
 	 * If not, try to locate a valid extract_opal_dump binary
 	 */
 	extract_opal_dump_cmd = validate_extract_opal_dump(opt_extract_opal_dump_cmd);
+	if (extract_opal_dump_cmd)
+		syslog(LOG_INFO, "Using extract_opal_dump command: %s\n",
+		       extract_opal_dump_cmd);
 
 	/* Validate dump sysfs path */
 	snprintf(dump_path, sizeof(dump_path),
 		 "%s/%s", opt_sysfs, DEFAULT_DUMP_PATH);
 	if (access(dump_path, R_OK)) {
+		syslog(LOG_WARNING, "Dump sysfs path not accessible: %s (%d: %s),"
+		       " platform dump extraction disabled\n",
+		       dump_path, errno, strerror(errno));
 		free(extract_opal_dump_cmd);
 		extract_opal_dump_cmd = NULL;
+	} else {
+		syslog(LOG_DEBUG, "Dump sysfs path: %s\n", dump_path);
 	}
 
 	/* Use PATH_MAX but admit that it may be insufficient */
@@ -1040,15 +1108,18 @@ int main(int argc, char *argv[])
 	rc = opal_init_udev(&udev, &udev_mon, &(fds[UDEV_FD].fd));
 	if (rc != 0)
 		goto exit;
+	syslog(LOG_DEBUG, "udev monitor initialised (fd=%d)\n", fds[UDEV_FD].fd);
 
 	/* Convert the opal_errd process to a daemon. */
 	if (opt_daemon) {
+		syslog(LOG_DEBUG, "Daemonizing opal_errd\n");
 		rc = daemon(0, 0);
 		if (rc) {
-			syslog(LOG_NOTICE, "Cannot daemonize opal_errd, "
+			syslog(LOG_ERR, "Cannot daemonize opal_errd, "
 			       "opal_errd cannot continue.\n");
 			goto exit;
 		}
+		syslog(LOG_INFO, "opal_errd running as daemon\n");
 
 		siga.sa_handler = SIG_IGN;
 		sigemptyset(&siga.sa_mask);
@@ -1070,6 +1141,7 @@ int main(int argc, char *argv[])
 
 	fds[INOTIFY_FD].events = POLLIN;
 	fds[UDEV_FD].events = POLLIN;
+	syslog(LOG_INFO, "Watching elog path: %s\n", elog_path);
 	/* Read error/event log until we get termination signal */
 	while (!terminate) {
 		rotate_srvc_logs = rotate_info_logs = false;
@@ -1095,7 +1167,14 @@ int main(int argc, char *argv[])
 			 * event, we'll just scan the directory anyway
 			 */
 			rc = poll(fds, sizeof(fds)/sizeof(struct pollfd), POLL_TIMEOUT);
+			if (rc == -1) {
+				syslog(LOG_ERR, "poll() failed (%d:%s)\n",
+				       errno, strerror(errno));
+				goto exit;
+			}
 			if (rc > 0 && fds[INOTIFY_FD].revents) {
+				syslog(LOG_DEBUG, "inotify event received on %s\n",
+				       sysfs_path);
 				if (read(fds[INOTIFY_FD].fd, inotifybuf, sizeof(inotifybuf)) == -1) {
 					syslog(LOG_WARNING, "Can not read platform log directory:"
 					       " (%d:%s)\n", errno, strerror(errno));
@@ -1109,6 +1188,10 @@ int main(int argc, char *argv[])
 				if (devpath && strrchr(devpath, '/')) {
 					strncpy(elog_str_name, strrchr(devpath, '/'), ELOG_STR_SIZE);
 					elog_str_name[sizeof(elog_str_name) - 1] = '\0';
+					syslog(LOG_DEBUG, "udev event for elog: %s\n",
+					       elog_str_name);
+				} else {
+					syslog(LOG_DEBUG, "udev event received (no devpath)\n");
 				}
 				udev_device_unref(udev_dev);
 				/* The id of the elog should be in elog_str_name

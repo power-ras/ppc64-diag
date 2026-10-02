@@ -21,8 +21,10 @@ int parse_eh_scn(struct opal_eh_scn **r_eh,
 	}
 
 	eh = malloc(hdr->length);
-	if (!eh)
+	if (!eh) {
+		fprintf(stderr, "%s: failed to allocate memory for EH section\n", __func__);
 		return -ENOMEM;
+	}
 
 	if (buflen < sizeof(struct opal_eh_scn)) {
 		fprintf(stderr, "%s: corrupted input buffer, expected length >= %lu, "

@@ -151,8 +151,11 @@ add_callout(struct event *event, char pri, int type, char *proc, char *loc,
 		callout = callout->next;
 	}
 
-	if (!callout)
+	if (!callout) {
+		log_msg(event, "%s: calloc failed for callout, %s",
+			__func__, strerror(errno));
 		return;
+	}
 
 	callout->priority = pri;
 	callout->type = type;

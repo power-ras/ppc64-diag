@@ -73,7 +73,8 @@ static void open_prrn_log(void)
 			   S_IRUSR | S_IWUSR);
 	if (prrn_log_fd == -1) {
 		prrn_log_fd = 0;
-		dbg("Could not open PRRN log file");
+		log_msg(NULL, "Could not open PRRN log file %s, %s",
+			prrn_filename, strerror(errno));
 		return;
 	}
 }
@@ -317,13 +318,14 @@ static int do_update(char *cmd, int len)
 
 	fd = open(OFDTPATH, O_WRONLY);
 	if (fd < 0) {
-		dbg("Failed to open %s: %s", OFDTPATH, strerror(errno));
+		log_msg(NULL, "Failed to open %s: %s", OFDTPATH, strerror(errno));
 		rc = errno;
 		return rc;
 	}
 
 	if ((rc = write(fd, cmd, len)) != len)
-		dbg("Error writing to ofdt file! rc %d errno %d", rc, errno);
+		log_msg(NULL, "Error writing to %s! rc %d errno %d",
+			OFDTPATH, rc, errno);
 
 	close(fd);
 
@@ -450,6 +452,9 @@ static int update_properties(uint32_t phandle)
 				if (longcmd) {
 					newcmd = malloc(cmdlen + vd);
 					if (!newcmd) {
+						log_msg(NULL, "%s: malloc failed "
+							"for newcmd, %s", __func__,
+							strerror(errno));
 						free(longcmd);
 						return -1;
 					}
@@ -459,8 +464,12 @@ static int update_properties(uint32_t phandle)
 					longcmd = newcmd;
 				} else {
 					longcmd = malloc(vd+128);
-					if (!longcmd)
+					if (!longcmd) {
+						log_msg(NULL, "%s: malloc failed "
+							"for longcmd, %s", __func__,
+							strerror(errno));
 						return -1;
+					}
 
 					/* Build the command with a length
 					 * of six zeros
@@ -633,7 +642,8 @@ void handle_prrn_event(struct event *re)
 	pid = fork();
 	if (pid == -1) {
 		unlink(prrn_filename);
-		dbg("Could not exec drmgr PRRN handler.\n");
+		log_msg(NULL, "fork failed for drmgr PRRN handler, %s",
+			strerror(errno));
 		return;
 	}
 

@@ -186,6 +186,8 @@ check_scanlog_dump(void)
 	if ((temp = get_machine_serial()) != 0) {
 		if (asprintf(&scanlog_file, "%sscanoutlog.%s",
 			d_cfg.scanlog_dump_path, temp) < 0) {
+			log_msg(NULL, "%s: asprintf failed for scanlog_file, %s",
+				__func__, strerror(errno));
 			free(temp);
 			goto scanlog_out;
 		}
@@ -193,16 +195,22 @@ check_scanlog_dump(void)
 	}
 	else {
 		if (asprintf(&scanlog_file, "%sscanoutlog.NOSERIAL",
-			     d_cfg.scanlog_dump_path) < 0)
+			     d_cfg.scanlog_dump_path) < 0) {
+			log_msg(NULL, "%s: asprintf failed for scanlog_file "
+				"(NOSERIAL), %s", __func__, strerror(errno));
 			goto scanlog_out;
+		}
 	}
 
 	if (!access(scanlog_file, F_OK)) {
 		/* A scanlog dump already exists on the filesystem;
-		 * rename it with a .bak extension. 
+		 * rename it with a .bak extension.
 		 */
-		if (asprintf(&scanlog_file_bak, "%s.bak", scanlog_file) < 0)
+		if (asprintf(&scanlog_file_bak, "%s.bak", scanlog_file) < 0) {
+			log_msg(NULL, "%s: asprintf failed for "
+				"scanlog_file_bak, %s", __func__, strerror(errno));
 			goto scanlog_out;
+		}
 		rc = rename(scanlog_file, scanlog_file_bak);
 		if (rc) {
 			log_msg(NULL, "Could not rename %s, an existing "
@@ -359,7 +367,8 @@ check_platform_dump(struct event *event)
 		return;
 	}
 	if (!fgets(filename, DUMP_MAX_FNAME_LEN + 20, f)) {
-		dbg("Failed to collect filename info");
+		log_msg(event, "Failed to collect filename from %s",
+			EXTRACT_PLATDUMP_CMD);
 		spclose(f, cpid);
 		setup_sigchld_handler();
 		return;
@@ -369,7 +378,8 @@ check_platform_dump(struct event *event)
 	setup_sigchld_handler();
 
 	if (rc) {
-		dbg("%s failed to extract the dump", EXTRACT_PLATDUMP_CMD);
+		log_msg(event, "%s failed to extract the dump (rc=%d)",
+			EXTRACT_PLATDUMP_CMD, rc);
 		return;
 	}
 
@@ -389,7 +399,8 @@ check_platform_dump(struct event *event)
 
 	if (asprintf(&pathname, "%s/%s",
 		 d_cfg.platform_dump_path, filename) < 0) {
-		dbg("%s: Failed to allocate memory", __func__);
+		log_msg(event, "%s: asprintf failed for pathname, %s",
+			__func__, strerror(errno));
 		return;
 	}
 	platform_log_write("Platform Dump Notification\n");

@@ -268,9 +268,14 @@ init_files(void)
 	/* First, open the rtas_errd log file */
 	rtas_errd_log_fd = open(rtas_errd_log, O_RDWR | O_CREAT | O_APPEND,
 				S_IRUSR | S_IWUSR | S_IRGRP /*0640*/);
-	if (rtas_errd_log_fd == -1 && debug)
-		fprintf(stderr, "Could not open rtas_errd log file \"%s\".\n",
-			rtas_errd_log);
+	if (rtas_errd_log_fd == -1) {
+		fprintf(stderr, "Could not open rtas_errd log file \"%s\": %s\n",
+			rtas_errd_log, strerror(errno));
+	} else {
+		log_msg(NULL, "rtas_errd started, log file: %s, "
+			"proc_error_log: %s, platform_log: %s",
+			rtas_errd_log, proc_error_log1, platform_log);
+	}
 
 
 	/* Next, open the /proc file */
@@ -614,7 +619,8 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 
 	rc = write(rtas_errd_log_fd, buf, len);
 	if (rc == -1)
-		dbg("rtas_errd: write to rtas_errd log failed");
+		dbg("rtas_errd: write to rtas_errd log failed (%s)",
+		    strerror(errno));
 
 	/* After each write check to see if we need to to do log rotation */
 	rc = fstat(rtas_errd_log_fd, &sbuf);
@@ -686,7 +692,10 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 					O_RDWR | O_CREAT | O_TRUNC,
 					S_IRUSR | S_IWUSR | S_IRGRP);
 		if (rtas_errd_log_fd == -1)
-			dbg("Could not re-open %s", rtas_errd_log);
+			dbg("Could not re-open %s: %s", rtas_errd_log,
+			    strerror(errno));
+		else
+			dbg("Log rotated, re-opened %s", rtas_errd_log);
 
 		free(rtas_errd_log_c);
 	}
@@ -848,13 +857,19 @@ print_rtas_event(struct event *event)
 			  event->seq_num);
 
 	dbg("Writing RTAS event %d to %s", event->seq_num, platform_log);
-	lseek(platform_log_fd, 0, SEEK_END);
+	if (lseek(platform_log_fd, 0, SEEK_END) == -1)
+		log_msg(NULL, "lseek to end of %s failed: %s",
+			platform_log, strerror(errno));
+
 	rc = write(platform_log_fd, out_buf, offset);
 	if (rc != offset) {
-		log_msg(NULL, "Writing RTAS event %d to %s failed."
-			"expected to write %d, only wrote %d. %s",
+		log_msg(NULL, "Writing RTAS event %d to %s failed, "
+			"expected to write %d, only wrote %d: %s",
 			event->seq_num, platform_log, offset, rc,
 			strerror(errno));
+	} else {
+		dbg("Wrote RTAS event %d (%d bytes) to %s",
+		    event->seq_num, offset, platform_log);
 	}
 
 	free(out_buf);

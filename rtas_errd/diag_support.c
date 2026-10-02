@@ -81,10 +81,10 @@ lsvpd_init(FILE **fp, pid_t *cpid)
 
 	*fp = spopen(system_args, cpid);
 	if (!*fp) {
-		perror("popen");
-		dbg("lsvpd_init failed popen (%s)", CMD_LSVPD);
-                return -1;
-        }
+		log_msg(NULL, "lsvpd_init: spopen(%s) failed, %s",
+			CMD_LSVPD, strerror(errno));
+		return -1;
+	}
 
 	dbg("end lsvpd_init");
 
@@ -312,7 +312,8 @@ get_dt_status(char *dev)
 	/* results of the find command */
 	fp1 = fopen(tmp_file, "r");
 	if (fp1 == NULL) {
-		fprintf(stderr, "open failed on %s\n", tmp_file);
+		log_msg(NULL, "%s: open failed on %s, %s",
+			__func__, tmp_file, strerror(errno));
 		return NULL;
 	}
 
@@ -322,7 +323,8 @@ get_dt_status(char *dev)
 		/* read the status in case this is the one */
 		fp2 = fopen(loc_file, "r");
 		if (fp2 == NULL) {
-			fprintf(stderr, "open failed on %s\n", loc_file);
+			log_msg(NULL, "%s: open failed on %s, %s",
+				__func__, loc_file, strerror(errno));
 			goto out;
 		}
 
@@ -330,7 +332,8 @@ get_dt_status(char *dev)
 			dbg("target_status = \"%s\", loc_file = \"%s\"",
 			    target_status, loc_file);
 		} else {
-			fprintf(stderr, "read failed on %s\n", loc_file);
+			log_msg(NULL, "%s: read failed on %s, %s",
+				__func__, loc_file, strerror(errno));
 			goto out;
 		}
 
@@ -351,7 +354,8 @@ get_dt_status(char *dev)
 
 		fp2 = fopen(loc_file, "r");
 		if (fp2 == NULL) {
-			fprintf(stderr, "open failed on %s\n", loc_file);
+			log_msg(NULL, "%s: open failed on %s, %s",
+				__func__, loc_file, strerror(errno));
 			goto out;
 		}
 
@@ -365,7 +369,8 @@ get_dt_status(char *dev)
 					return target_status;
 			}
 		} else {
-			fprintf(stderr, "read failed on %s\n", loc_file);
+			log_msg(NULL, "%s: read failed on %s, %s",
+				__func__, loc_file, strerror(errno));
 			goto out;
 		}
 
@@ -373,7 +378,7 @@ get_dt_status(char *dev)
 		fp2 = NULL;
 	}
 
-	fprintf(stderr, "error: status NOT FOUND\n");
+	log_msg(NULL, "%s: status not found for device %s", __func__, dev);
 
 out:
 	if (fp2)

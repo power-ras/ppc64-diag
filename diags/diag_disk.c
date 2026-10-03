@@ -123,8 +123,10 @@ static int get_page_34_data(int device_fd)
 	/* Second (MSB) and third byte contains data length field */
 	buff_len = (first_4_bytes[2] << 8) + first_4_bytes[3] + 4;
 	buff = (uint8_t *)calloc(1, buff_len);
-	if (!buff)
+	if (!buff) {
+		fprintf(stderr, "Out of memory allocating SMART buffer\n");
 		return -1;
+	}
 
 	rc = do_ses_cmd(device_fd, LOG_SENSE, SMART_DATA_PAGE, 0x01,
 			cdb_size[(LOG_SENSE >> 5) & 0x7], SG_DXFER_FROM_DEV,
@@ -164,27 +166,39 @@ static int open_output_xml_file(const char *xml_filename)
 	rc = access(DISK_OUTPUT_PATH, W_OK);
 	if (rc) {
 		/* Return if it fails with error code other than ENOENT */
-		if (errno != ENOENT)
+		if (errno != ENOENT) {
+			fprintf(stderr, "Cannot access %s: %s\n",
+				DISK_OUTPUT_PATH, strerror(errno));
 			return -1;
+		}
 
 		/* Check for the existence of parent directory */
 		rc = access(DIAG_OUTPUT_PATH, W_OK);
 		if (rc) {
-			if (errno != ENOENT)
+			if (errno != ENOENT) {
+				fprintf(stderr, "Cannot access %s: %s\n",
+					DIAG_OUTPUT_PATH, strerror(errno));
 				return -1;
+			}
 
 			rc = mkdir(DIAG_OUTPUT_PATH,
 				S_IRGRP | S_IRUSR | S_IWGRP | S_IWUSR | S_IXUSR);
-			if (rc)
+			if (rc) {
+				fprintf(stderr, "mkdir %s failed: %s\n",
+					DIAG_OUTPUT_PATH, strerror(errno));
 				return -1;
+			}
 
 			dir_sync(DIAG_OUTPUT_PATH);
 		}
 
 		rc = mkdir(DISK_OUTPUT_PATH,
 			   S_IRGRP | S_IRUSR | S_IWGRP | S_IWUSR | S_IXUSR);
-		if (rc)
+		if (rc) {
+			fprintf(stderr, "mkdir %s failed: %s\n",
+				DISK_OUTPUT_PATH, strerror(errno));
 			return -1;
+		}
 
 		dir_sync(DISK_OUTPUT_PATH);
 	}
@@ -199,8 +213,11 @@ static int open_output_xml_file(const char *xml_filename)
 	}
 
 	result_file = fopen(filename, "w");
-	if (!result_file)
+	if (!result_file) {
+		fprintf(stderr, "Failed to open output file %s: %s\n",
+			filename, strerror(errno));
 		return -1;
+	}
 
 	return 0;
 }
@@ -259,14 +276,21 @@ static int get_system_vpd(char *machine_serial,
 	device_fd = open(DEVICE_TREE_VENDOR_SYSTEM_ID, O_RDONLY);
 	if (device_fd < 0) {
 		device_fd = open(DEVICE_TREE_SYSTEM_ID, O_RDONLY);
-		if (device_fd < 0)
+		if (device_fd < 0) {
+			fprintf(stderr,
+				"Failed to open system-id from device tree: %s\n",
+				strerror(errno));
 			return -1;
+		}
 	}
 
 	rc = read(device_fd, serial, BUFFER_LENGTH);
 	close(device_fd);
-	if (rc <= 0)
+	if (rc <= 0) {
+		fprintf(stderr, "Failed to read system serial number: %s\n",
+			strerror(errno));
 		return -1;
+	}
 
 	/*
 	 * We are interested in last 5 bytes of serial number not complete
@@ -285,14 +309,21 @@ static int get_system_vpd(char *machine_serial,
 	device_fd = open(DEVICE_TREE_VENDOR_MODEL, O_RDONLY);
 	if (device_fd < 0) {
 		device_fd = open(DEVICE_TREE_MODEL, O_RDONLY);
-		if (device_fd < 0)
+		if (device_fd < 0) {
+			fprintf(stderr,
+				"Failed to open model from device tree: %s\n",
+				strerror(errno));
 			return -1;
+		}
 	}
 
 	rc = read(device_fd, model, BUFFER_LENGTH);
 	close(device_fd);
-	if (rc <= 0)
+	if (rc <= 0) {
+		fprintf(stderr, "Failed to read system model: %s\n",
+			strerror(errno));
 		return -1;
+	}
 
 	temp = model;
 	/* Discard manufacturer name (valid on PowerVM) */
@@ -372,8 +403,11 @@ static int sysfs_sg_disk_scan(const char *dir_name, char *disk_name)
 	struct dirent *namelist;
 
 	d = opendir(dir_name);
-	if (!d)
+	if (!d) {
+		fprintf(stderr, "Failed to open %s: %s\n",
+			dir_name, strerror(errno));
 		return -errno;
+	}
 
 	/* scan and get disk data */
 	while ((namelist = readdir(d)) != NULL) {

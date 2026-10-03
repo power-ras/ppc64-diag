@@ -105,7 +105,7 @@ open_sg_device(const char *encl)
 	snprintf(dev_sg, PATH_MAX, "/dev/%s", encl);
 	fd = open(dev_sg, O_RDWR);
 	if (fd < 0)
-		perror(dev_sg);
+		fprintf(stderr, "%s: open failed: %s\n", dev_sg, strerror(errno));
 	return fd;
 }
 
@@ -137,12 +137,12 @@ read_page2_from_file(const char *path, bool display_error_msg,
 	f = fopen(path, "r");
 	if (!f) {
 		if (display_error_msg || errno != ENOENT)
-			perror(path);
+			fprintf(stderr, "%s: open failed: %s\n", path, strerror(errno));
 		return -1;
 	}
 	if (fread(pg, size, 1, f) != 1) {
 		if (display_error_msg)
-			perror(path);
+			fprintf(stderr, "%s: read failed: %s\n", path, strerror(errno));
 		fclose(f);
 		return -2;
 	}
@@ -293,6 +293,12 @@ do_ses_cmd(int fd, uint8_t cmd, uint8_t page_nr, uint8_t flags,
 		if (rc == 0 || hdr.host_status == 1)
 			break;
 	}
+
+	if (rc != 0)
+		fprintf(stderr,
+			"SG_IO ioctl failed for cmd 0x%02x: rc=%d "
+			"host_status=%d driver_status=%d\n",
+			cmd, rc, hdr.host_status, hdr.driver_status);
 
 	return rc;
 }

@@ -108,6 +108,9 @@ parse_rtas_workarea(struct loc_code *loc, const char *buf)
 		buf += sizeof(uint32_t);
 		/* Corrupted work area */
 		if (curr->length > LOCATION_LENGTH) {
+			log_msg("Corrupted RTAS work area: location code "
+				"length %u exceeds maximum %d",
+				curr->length, LOCATION_LENGTH);
 			free_indicator_list(loc);
 			return NULL;
 		}
@@ -197,8 +200,10 @@ get_rtas_indices(int indicator, struct loc_code **loc)
 	struct	loc_code *list = NULL;
 
 	rtas_token = get_rtas_token(indicator);
-	if (rtas_token == -1)
+	if (rtas_token == -1) {
+		log_msg("Unsupported RTAS indicator type %d", indicator);
 		return -3; /* Indicator type not supported */
+	}
 
 	do {
 		rc = rtas_get_indices(0, rtas_token, workarea, BUF_SIZE,
@@ -233,6 +238,7 @@ get_rtas_indices(int indicator, struct loc_code **loc)
 			free_indicator_list(list);
 			break;
 		case -4:	/* list changed; start over */
+			dbg("RTAS indicator list changed, restarting enumeration");
 			free_indicator_list(list);
 			list = NULL;
 			index = 1;

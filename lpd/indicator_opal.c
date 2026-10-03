@@ -144,8 +144,10 @@ opal_get_indices(int indicator, struct loc_code **loc)
 	struct dirent *dirent;
 
 	indicator_desc = get_indicator_desc(indicator);
-	if (!indicator_desc)
+	if (!indicator_desc) {
+		log_msg("%s: Unknown indicator type %d", __func__, indicator);
 		return rc;
+	}
 
 	nleds = scandir(OPAL_LED_SYSFS_PATH, &dirlist, NULL, alphasort);
 	if (nleds == -1) {
@@ -185,8 +187,10 @@ open_led_brightness_file(struct loc_code *loc, int mode)
 	int rc = -1;
 
 	indicator_desc = get_indicator_desc(loc->index);
-	if (!indicator_desc)
+	if (!indicator_desc) {
+		log_msg("%s: Unknown indicator type %d", __func__, loc->index);
 		return rc;
+	}
 
 	len = snprintf(filename, PATH_MAX, "%s/%s:%s/%s",
 		       OPAL_LED_SYSFS_PATH, loc->code,
@@ -389,6 +393,8 @@ opal_get_indicator_mode(void)
 
 	rc = stat(OPAL_LED_MODE_PROPERTY, &sbuf);
 	if (rc) {
+		dbg("%s: LED mode property absent, defaulting to Light Path",
+		    __func__);
 		operating_mode = LED_MODE_LIGHT_PATH;
 		return 0;
 	}

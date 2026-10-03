@@ -230,8 +230,10 @@ log_msg(const char *fmt, ...)
 	/* reformat the new message */
 	len = reformat_msg(buf, LP_ERROR_LOG_MAX);
 	rc = write(lp_error_log_fd, buf, len);
-	if (rc == -1)
-		dbg("Write to log file \"%s\" failed", lp_error_log_file);
+	if (rc == -1) {
+		fprintf(stderr, "%s: Write to log file \"%s\" failed: %s\n",
+			program_name, lp_error_log_file, strerror(errno));
+	}
 }
 
 /**
@@ -302,7 +304,8 @@ rotate_log_file(char *lp_log_file)
 
 	rc = stat(lp_log_file, &sbuf);
 	if (rc == -1) {
-		dbg("Cannot stat log file to rotate logs");
+		log_msg("Cannot stat log file \"%s\" for rotation: %s",
+			lp_log_file, strerror(errno));
 		return;
 	}
 
@@ -368,8 +371,8 @@ init_files(void)
 				       S_IRUSR | S_IWUSR | S_IRGRP);
 
 		if (lp_error_log_fd == -1)
-			dbg("Could not open log file \"%s\"",
-			    lp_error_log_file);
+			fprintf(stderr, "%s: Could not open log file \"%s\": %s\n",
+				program_name, lp_error_log_file, strerror(errno));
 	}
 
 	/* open event log file */
@@ -378,6 +381,9 @@ init_files(void)
 			       O_RDWR | O_CREAT | O_APPEND,
 			       S_IRUSR | S_IWUSR | S_IRGRP);
 	if (lp_event_log_fd == -1) {
+		fprintf(stderr, "%s: Could not open indicator event log file"
+			" \"%s\": %s\n",
+			program_name, lp_event_log_file, strerror(errno));
 		log_msg("Could not open indicator event log file \"%s\"",
 			lp_event_log_file);
 		return -1;

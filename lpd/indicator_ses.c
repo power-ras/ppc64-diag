@@ -90,8 +90,11 @@ read_ses_vpd(void)
 
 		/* read sg name */
 		if (asprintf(&path, "%s/%s/device/scsi_generic", SCSI_SES_PATH,
-			     v1->dev) < 0)
+			     v1->dev) < 0) {
+			log_msg("Out of memory building SES device path for %s",
+				v1->dev);
 			return NULL;
+		}
 
 		dir = opendir(path);
 		if (!dir) {
@@ -436,8 +439,10 @@ get_ses_indicator(int indicator, struct loc_code *loc, int *state)
 		return -1;
 	}
 
-	if (!fru_found)
+	if (!fru_found) {
+		log_msg("FRU not found in encl_led output for %s", loc->code);
 		return -1;
+	}
 	return 0;
 }
 
@@ -461,8 +466,11 @@ set_ses_indicator(int indicator, struct loc_code *loc, int new_value)
 	if (!fru_loc) /* Enclosure location code */
 		fru_loc = "-";
 
-	if (loc->dev[0] == '\0')
+	if (loc->dev[0] == '\0') {
+		log_msg("Empty device name for SES indicator at location %s",
+			loc->code);
 		return -1;
+	}
 
 	if (access(SCSI_INDICATOR_CMD, X_OK) != 0) {
 		log_msg("The command \"%s\" is not executable.\n",

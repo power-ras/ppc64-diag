@@ -23,6 +23,7 @@ AC_PROG_LEX
 AC_PROG_AWK
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
+PKG_PROG_PKG_CONFIG
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -59,7 +60,15 @@ AC_HEADER_DIRENT
 AC_CHECK_HEADERS([stdlib.h string.h unistd.h limits.h arpa/inet.h fcntl.h malloc.h \
 		  stddef.h sys/ioctl.h syslog.h sys/time.h])
 
+# Check for ncurses
+PKG_CHECK_MODULES([CURSES], [menu ncurses], [],
+	[PKG_CHECK_MODULES([CURSES], [menuw ncursesw], [],
+		[AC_MSG_ERROR([ncurses libraries are required for building ppc64-diag])])])
+save_CPPFLAGS=$CPPFLAGS
+CPPFLAGS="$CPPFLAGS $CURSES_CFLAGS"
 AC_CHECK_HEADER([curses.h],,[AC_MSG_ERROR([ncurses header files are required for building ppc64-diag])])
+AC_CHECK_HEADER([menu.h],,[AC_MSG_ERROR([ncurses menu.h is required for building ppc64-diag])])
+CPPFLAGS=$save_CPPFLAGS
 AC_CHECK_HEADER([libudev.h],,[AC_MSG_ERROR([libudev header files are required for building ppc64-diag])])
 
 

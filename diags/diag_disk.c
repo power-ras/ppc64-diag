@@ -328,7 +328,7 @@ static int get_disk_vpd(int device_fd)
 			&pagec4, sizeof(pagec4));
 	if (!rc) {
 		strncpy(serial_num, (char *)pagec4.serial_num,
-				sizeof(serial_num - 1));
+				sizeof(serial_num) - 1);
 		strncpy(master_drive_part_num,
 				(char *)pagec4.master_drive_part_num,
 				sizeof(master_drive_part_num) - 1);

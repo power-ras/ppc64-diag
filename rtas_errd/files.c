@@ -579,7 +579,7 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 		dbg("rtas_errd log file is not available");
 
 		vsnprintf(buf, sizeof(buf), fmt, ap);
-		_dbg(buf);
+		_dbg("%s", buf);
 
 		return;
 	}
@@ -616,7 +616,7 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 	if ((size_t)len + 1 < sizeof(buf))
 		len += sprintf(buf + len, ".");
 
-	_dbg(buf);
+	_dbg("%s", buf);
 
 	/* reformat the new message */
 	len = reformat_msg(buf);

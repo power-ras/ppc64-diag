@@ -44,6 +44,14 @@
 #define OPCODE_ADMIN_GET_LOG_PAGE	0x02
 #define VPD_NOT_READY			0x00F3
 
+/* IBM MI VPD Constants */
+#define MI_VPD_SIZE			256
+#define MI_VPD_OPCODE_READ		0x1e
+#define MI_VPD_CDW10			0x00000804
+#define MI_VPD_CDW11_READ		0x00000005
+#define MI_VPD_CDW12			0x00000000
+#define MI_VPD_CDW13			0x00000100
+
 /* Struct to parse key=value settings in a file */
 struct dictionary {
 	char key[KEY_LENGTH];
@@ -80,15 +88,24 @@ struct nvme_ibm_vpd {
 	char number_io_queues[4];
 	char flash_type[2];
 	char manufacture_sn[20];
-	char firmware_level[8];
-	uint8_t async_firmware_commit;
-	uint8_t query_lba_map_status;
-	uint8_t query_storage_usage;
-	uint8_t async_format_nvm;
-	uint16_t endurance_value;
-	uint16_t sanitize_cmd_timeout;
-	uint8_t dsm_io_hints_supported;
-	uint8_t reserved[816];
+	union {
+		struct {
+			char firmware_level[8];
+			uint8_t async_firmware_commit;
+			uint8_t query_lba_map_status;
+			uint8_t query_storage_usage;
+			uint8_t async_format_nvm;
+			uint16_t endurance_value;
+			uint16_t sanitize_cmd_timeout;
+			uint8_t dsm_io_hints_supported;
+			uint8_t reserved[816];
+		} __attribute__((packed)) ibm;
+		struct {
+			uint8_t reserved1[21];
+			char loc_and_type[2];
+			uint8_t reserved2[38];
+		} __attribute__((packed)) ibm_mi;
+	};
 } __attribute__((packed));
 
 /* Struct representing the SMART / health information log page as defined in NVMe base specification */
@@ -138,6 +155,7 @@ struct nvme_smart_log_page {
 
 extern int dump_smart_data(char *device_name, char *dump_path);
 extern int get_ibm_vpd_log_page(int fd, struct nvme_ibm_vpd *vpd);
+extern int get_ibm_mi_vpd(int fd, struct nvme_ibm_vpd *vpd);
 extern int get_ibm_vpd_pcie(char *controller_name, struct nvme_ibm_vpd *vpd);
 extern int get_smart_file(char *file_path, struct nvme_smart_log_page *log);
 extern int get_smart_log_page(int fd, uint32_t nsid, struct nvme_smart_log_page *log);

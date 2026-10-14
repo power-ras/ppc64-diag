@@ -598,8 +598,7 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 
 	/* Add the sequence number */
 	if (event)
-		len += sprintf(buf, "(Sequence #%d) ",
-			       event->seq_num);
+		len += sprintf(buf + len, "(Sequence #%d) ", event->seq_num);
 
 	/* Add the actual message */
 	n = vsnprintf(buf + len, sizeof(buf) - len, fmt, ap);

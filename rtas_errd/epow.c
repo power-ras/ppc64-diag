@@ -116,12 +116,24 @@ log_epow(struct event *event, char *fmt, ...)
 {
 	va_list ap;
 	char	buf[1024];
+	int	len;
 
 	va_start(ap, fmt);
-	vsprintf(buf, fmt, ap);
+	len = vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 
-	log_msg(event, buf);
+	if (len < 0) {
+		log_msg(event, "log_epow: failed to format message "
+			"(format: \"%s\")", fmt);
+		return;
+	}
+
+	log_msg(event, "%s", buf);
+	if ((size_t)len >= sizeof(buf))
+		log_msg(event, "log_epow: message truncated "
+			"(%d bytes needed, %zu available)",
+			len, sizeof(buf));
+
 	snprintf(event->addl_text, ADDL_TEXT_MAX, "%s", buf);
 }
 

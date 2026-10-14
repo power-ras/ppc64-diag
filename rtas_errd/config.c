@@ -439,7 +439,7 @@ config_restart_policy(char *start, char *end, int *line_no, int update_param)
 		system_arg[1] = "-p";
 		system_arg[2] = "common";
 		system_arg[3] = "--update-config";
-		sprintf(tmp_sys_arg, "ibm,os-restart-policy=%d",
+		snprintf(tmp_sys_arg, sizeof(tmp_sys_arg), "ibm,os-restart-policy=%d",
 			d_cfg.restart_policy);
 		system_arg[4] = tmp_sys_arg;
 

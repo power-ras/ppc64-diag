@@ -570,7 +570,7 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 {
 	struct stat sbuf;
 	char	buf[RTAS_ERROR_LOG_MAX];
-	int	len = 0, rc;
+	int	len = 0, rc, n;
 	char	*dir_name;
         char	*rtas_errd_log_c; /* Both rtas_errd_log/rtas_errd_log0 are
 				     global, so make a copy. */
@@ -578,7 +578,7 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 	if (rtas_errd_log_fd == -1) {
 		dbg("rtas_errd log file is not available");
 
-		vsprintf(buf, fmt, ap);
+		vsnprintf(buf, sizeof(buf), fmt, ap);
 		_dbg(buf);
 
 		return;
@@ -602,10 +602,17 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 			       event->seq_num);
 
 	/* Add the actual message */
-	len += vsprintf(buf + len, fmt, ap);
+	n = vsnprintf(buf + len, sizeof(buf) - len, fmt, ap);
+	if (n > 0)
+		len += n;
+
+	/* vsnprintf returns the would-be length; clamp after truncation */
+	if ((size_t)len >= sizeof(buf))
+		len = sizeof(buf) - 1;
 
 	/* Add ending punctuation */
-	len += sprintf(buf + len, ".");
+	if ((size_t)len + 1 < sizeof(buf))
+		len += sprintf(buf + len, ".");
 
 	_dbg(buf);
 

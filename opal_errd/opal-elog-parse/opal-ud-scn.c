@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <stddef.h>
 
 #include "opal-ud-scn.h"
 #include "print_helpers.h"
@@ -11,22 +12,30 @@ int parse_ud_scn(struct opal_ud_scn **r_ud,
                  const char *buf, int buflen)
 {
 	struct opal_ud_scn *ud;
-	struct opal_ud_scn *bufud = (struct opal_ud_scn *)buf;
+	const struct opal_ud_scn *bufud = (const struct opal_ud_scn *)buf;
+	size_t len = hdr->length;   /* widen once, after reading */
 
-	if (buflen < sizeof(struct opal_ud_scn)) {
-		fprintf(stderr, "%s: corrupted, expected length >= %lu, got %u\n",
-		        __func__, sizeof(struct opal_ud_scn), buflen);
+	if (buflen < 0 || (size_t)buflen < sizeof(*ud)) {
+		fprintf(stderr, "%s: corrupted, expected buflen >= %zu, got %d\n",
+		        __func__, sizeof(*ud), buflen);
 		return -EINVAL;
 	}
 
-	*r_ud = malloc(hdr->length);
-	if (!*r_ud)
+	/* hdr->length is untrusted: bound it on both sides before using it */
+	if (len < sizeof(*ud) || len > (size_t)buflen) {
+		fprintf(stderr, "%s: bad section length %zu (buflen %d, min %zu)\n",
+		        __func__, len, buflen, sizeof(*ud));
+		return -EINVAL;
+	}
+
+	ud = malloc(len);
+	if (!ud)
 		return -ENOMEM;
-	ud = *r_ud;
 
 	ud->v6hdr = *hdr;
-	memcpy(ud->data, bufud->data, hdr->length - sizeof(struct opal_v6_hdr));
+	memcpy(ud->data, bufud->data, len - offsetof(struct opal_ud_scn, data));
 
+	*r_ud = ud;   /* only publish on success */
 	return 0;
 }
 

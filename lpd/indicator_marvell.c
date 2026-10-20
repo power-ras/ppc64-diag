@@ -276,6 +276,11 @@ check_pci_id(char *path, char *pci_id)
 	return !!strncmp(pci_id, pci_id_buf, MV_PCI_ID_BUF_LEN);
 }
 
+/* longest suffix appended to the PCI device dir:
+ * "/subsystem_vendor" or "/subsystem_device"
+ */
+#define PCI_ID_SUFFIX_MAX	18	/* strlen("/subsystem_vendor") + 1 */
+
 /**
  * mv_indicator_list - Build Marvell HDD LED (indicator) list for the given disk vpd
  *
@@ -339,7 +344,8 @@ mv_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 	 * so skip the leading '../' (3 chars)
 	 */
 	len = snprintf(path, PATH_MAX, "%s/%s", "/sys", &symlink[3]);
-	if (len < 0) {
+	/* reserve room for the longest suffix, "/subsystem_device" + '\0' (18 bytes) */
+	if (len < 0 || len >= PATH_MAX - PCI_ID_SUFFIX_MAX) {
 		log_msg("Unable to format absolute pathname of '%s'", symlink);
 		return -1;
 	}

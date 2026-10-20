@@ -296,7 +296,7 @@ static int process_dump(const char* dump_dir_path, const char *output_dir)
 			   DUMP_MAX_FNAME_LEN, &prefix_size);
 
 	snprintf(dump_path, sizeof(dump_path), "%s/%s.tmp", output_dir, outfname);
-	snprintf(final_dump_path, sizeof(dump_path), "%s/%s", output_dir, outfname);
+	snprintf(final_dump_path, sizeof(final_dump_path), "%s/%s", output_dir, outfname);
 
 	remove_dump_files(outfname);
 

@@ -291,7 +291,8 @@ mv_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 {
 	struct	loc_code *list_curr, *list_new;
 	char	*block_path, path[PATH_MAX], symlink[PATH_MAX];
-	char	*ata_device, *host;
+	char	*ata_device, *host, *end;
+	unsigned long ata_index;
 	ssize_t	len;
 
 	/* check for an 'sdX' device name */
@@ -398,7 +399,16 @@ mv_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 		return -1;
 	}
 
-	list_new->index = (uint32_t)atoi(&ata_device[3]); /* use for ATA index */
+	/* use for ATA index; ata_device is "ataN" at this point */
+	errno = 0;
+	ata_index = strtoul(&ata_device[3], &end, 10);
+	if (errno != 0 || end == &ata_device[3] || *end != '\0' ||
+	    ata_index >= 32) {
+		log_msg("'%s':'%d' - Invalid ATA index in '%s'",
+			__func__, __LINE__, ata_device);
+		return -1;
+	}
+	list_new->index = (uint32_t)ata_index;
 
 	dbg("Marvell HDD LED:");
 	dbg("- location code: '%s'", list_new->code);

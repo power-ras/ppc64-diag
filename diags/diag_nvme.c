@@ -703,7 +703,8 @@ extern int get_ibm_vpd_pcie(char *controller_name, struct nvme_ibm_vpd *vpd) {
 			memset(vpd_data, '\0', sizeof(vpd_data));
 			if (read(fd, vpd_data, length) < length)
 				goto read_error;
-			strncpy(vpd->description, (char *)vpd_data, sizeof(vpd->description));
+			strncpy(vpd->description, (char *)vpd_data, sizeof(vpd->description) - 1);
+			vpd->description[sizeof(vpd->description) - 1] = '\0';
 			break;
 
 		/* VPD-R */

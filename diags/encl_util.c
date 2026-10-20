@@ -305,18 +305,38 @@ get_diagnostic_page(int fd, uint8_t cmd, uint8_t page_nr, void *buf,
 								buf, buf_len);
 }
 
-/* Read a line and strip the newline. */
+/* Read a line and strip the newline.
+ * Lines longer than the buffer are truncated (with a warning) and the
+ * rest is discarded. Returns NULL only on EOF or error.
+ */
 char *
 fgets_nonl(char *buf, int size, FILE *s)
 {
 	char *nl;
+	int c;
 
 	if (!fgets(buf, size, s))
 		return NULL;
+
 	nl = strchr(buf, '\n');
-	if (nl == NULL)
-		return NULL;
-	*nl = '\0';
+	if (nl) {
+		*nl = '\0';
+		return buf;
+	}
+
+	/*
+	 * No newline in the buffer. If the next character is the newline
+	 * or EOF, the line fit exactly (or is an unterminated last line)
+	 * and nothing is lost. Otherwise the line is truncated.
+	 */
+	c = getc(s);
+	if (c != EOF && c != '\n') {
+		fprintf(stderr, "%s: line truncated to %d characters\n",
+			__func__, size - 1);
+		while ((c = getc(s)) != EOF && c != '\n')
+			;
+	}
+
 	return buf;
 }
 

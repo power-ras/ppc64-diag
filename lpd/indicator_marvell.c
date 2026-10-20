@@ -371,7 +371,7 @@ mv_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 	list_new = calloc(1, sizeof(struct loc_code));
 	if (!list_new) {
 		log_msg("Out of memory");
-		return 1;
+		return -1;
 	}
 
 	if (*list) {

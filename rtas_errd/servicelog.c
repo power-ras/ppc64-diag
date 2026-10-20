@@ -138,72 +138,49 @@ void
 add_callout(struct event *event, char pri, int type, char *proc, char *loc,
 	    char *pn, char *sn, char *ccin)
 {
-	struct sl_callout *callout = event->sl_entry->callouts;
+	struct sl_callout *callout, *tail;
 
-	if (!callout) {
-		event->sl_entry->callouts = calloc(1, sizeof(*callout));
-		callout = event->sl_entry->callouts;
-	}
-	else {
-		while (callout->next)
-			callout = callout->next;
-		callout->next = calloc(1, sizeof(*callout));
-		callout = callout->next;
-	}
-
+	callout = calloc(1, sizeof(*callout));
 	if (!callout)
-		return;
+		goto mem_fail;
 
 	callout->priority = pri;
 	callout->type = type;
-	if (proc) {
-		callout->procedure = malloc(strlen(proc) + 1);
-		if (callout->procedure == NULL)
-			goto mem_fail;
-		strncpy(callout->procedure, proc, strlen(proc) + 1);
-	}
-	if (loc) {
-		callout->location = malloc(strlen(loc) + 1);
-		if (callout->location == NULL)
-			goto mem_fail;
-		strncpy(callout->location, loc, strlen(loc) + 1);
-	}
-	if (pn) {
-		callout->fru = malloc(strlen(pn) + 1);
-		if (callout->fru == NULL)
-			goto mem_fail;
-		strncpy(callout->fru, pn, strlen(pn) + 1);
-	}
-	if (sn) {
-		callout->serial = malloc(strlen(sn) + 1);
-		if (callout->serial == NULL)
-			goto mem_fail;
-		strncpy(callout->serial, sn, strlen(sn) + 1);
-	}
-	if (ccin) {
-		callout->ccin = malloc(strlen(ccin) + 1);
-		if (callout->ccin == NULL)
-			goto mem_fail;
-		strncpy(callout->ccin, ccin, strlen(ccin) + 1);
+
+	if (proc && !(callout->procedure = strdup(proc)))
+		goto mem_fail;
+	if (loc && !(callout->location = strdup(loc)))
+		goto mem_fail;
+	if (pn && !(callout->fru = strdup(pn)))
+		goto mem_fail;
+	if (sn && !(callout->serial = strdup(sn)))
+		goto mem_fail;
+	if (ccin && !(callout->ccin = strdup(ccin)))
+		goto mem_fail;
+
+	/* fully built; now link it into the list */
+	if (!event->sl_entry->callouts) {
+		event->sl_entry->callouts = callout;
+	} else {
+		tail = event->sl_entry->callouts;
+		while (tail->next)
+			tail = tail->next;
+		tail->next = callout;
 	}
 
 	return;
 
 mem_fail:
-	if (callout->ccin)
+	if (callout) {
 		free(callout->ccin);
-	if (callout->serial)
 		free(callout->serial);
-	if (callout->fru)
 		free(callout->fru);
-	if (callout->location)
 		free(callout->location);
-	if (callout->procedure)
 		free(callout->procedure);
-	free(callout);
+		free(callout);
+	}
 
-	log_msg(event, "Memory allocation failed");
-	return;
+	log_msg(event, "%s: memory allocation failed for callout", __func__);
 }
 
 /**

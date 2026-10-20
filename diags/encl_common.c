@@ -694,6 +694,8 @@ create_esm_callout(struct sl_callout **callouts, char *location,
 	int result = -1;
 	struct vpd_page element_vpdp;
 
+	memset(&element_vpdp, 0, sizeof(element_vpdp));
+
 	if (fd >= 0)
 		result = get_diagnostic_page(fd, INQUIRY, 1,
 					     &element_vpdp, sizeof(element_vpdp));

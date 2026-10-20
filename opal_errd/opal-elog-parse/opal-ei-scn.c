@@ -36,7 +36,7 @@ int parse_ei_scn(struct opal_ei_scn **r_ei,
 		 __func__) < 0 ||
 		 check_buflen(buflen, sizeof(struct opal_ei_scn) +
 		 (ei->read_count * sizeof(struct opal_ei_env_scn)),
-		 __func__)) {
+		 __func__) < 0) {
 		free(ei);
 		return -EINVAL;
 	}

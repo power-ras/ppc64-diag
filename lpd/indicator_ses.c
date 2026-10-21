@@ -137,10 +137,10 @@ read_ses_vpd(void)
  *      then relatvie FRU location code would be P1-D1.
  *
  */
-static char *
+static const char *
 get_relative_fru_location(const char *loccode)
 {
-	char *fru_loc;
+	const char *fru_loc;
 
 	fru_loc = strchr(loccode, '-');
 	if (!fru_loc)
@@ -201,8 +201,8 @@ get_ses_fru_location(char *buf)
 static int
 get_ses_fru_identify_state(const char *buf)
 {
-	char	*fault;
-	char	*ident;
+	const char *fault;
+	const char *ident;
 
 	fault = strchr(buf, 'o');
 	if (!fault)
@@ -224,7 +224,7 @@ get_ses_fru_identify_state(const char *buf)
 static int
 get_ses_fru_fault_state(const char *buf)
 {
-	char	*fault;
+	const char *fault;
 
 	fault = strchr(buf, 'o');
 	if (!fault)
@@ -394,7 +394,7 @@ get_ses_indicator(int indicator, struct loc_code *loc, int *state)
 {
 	int	fru_found = 0;
 	char	buf[128];
-	char	*fru_loc;
+	const char *fru_loc;
 	char	*fru;
 	char	*args[] = {SCSI_INDICATOR_CMD,
 		           "-l",
@@ -453,7 +453,7 @@ get_ses_indicator(int indicator, struct loc_code *loc, int *state)
 int
 set_ses_indicator(int indicator, struct loc_code *loc, int new_value)
 {
-	char	*fru_loc;
+	const char *fru_loc;
 	pid_t	fork_pid;
 	int	status;
 
@@ -482,7 +482,7 @@ set_ses_indicator(int indicator, struct loc_code *loc, int new_value)
 		args[1] = indicator == LED_TYPE_IDENT ? "-i" : "-f";
 		args[2] = new_value == LED_STATE_ON ? "on" : "off";
 		args[3] = loc->dev;
-		args[4] = fru_loc;
+		args[4] = (char *) fru_loc;
 		args[5] = NULL;
 
 		execv(SCSI_INDICATOR_CMD, args);

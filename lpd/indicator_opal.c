@@ -81,7 +81,7 @@ close_sysfs_led_dir(DIR *dir)
 static struct loc_code *
 opal_parse_loc_code(int indicator, struct loc_code *loc, const char *dirname)
 {
-	char *colon;
+	const char *colon;
 	int loc_len;
 	struct loc_code *curr = loc;
 

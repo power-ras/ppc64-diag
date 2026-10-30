@@ -221,11 +221,11 @@ log_msg(const char *fmt, ...)
 
 	if (lp_error_log_fd == -1) {
 		dbg("Log file \"%s\" is not available", lp_error_log_file);
-		_dbg(buf);
+		_dbg("%s", buf);
 		return;
 	}
 
-	_dbg(buf);
+	_dbg("%s", buf);
 
 	/* reformat the new message */
 	len = reformat_msg(buf, LP_ERROR_LOG_MAX);

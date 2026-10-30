@@ -570,7 +570,7 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 {
 	struct stat sbuf;
 	char	buf[RTAS_ERROR_LOG_MAX];
-	int	len = 0, rc;
+	int	len = 0, rc, n;
 	char	*dir_name;
         char	*rtas_errd_log_c; /* Both rtas_errd_log/rtas_errd_log0 are
 				     global, so make a copy. */
@@ -578,8 +578,8 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 	if (rtas_errd_log_fd == -1) {
 		dbg("rtas_errd log file is not available");
 
-		vsprintf(buf, fmt, ap);
-		_dbg(buf);
+		vsnprintf(buf, sizeof(buf), fmt, ap);
+		_dbg("%s", buf);
 
 		return;
 	}
@@ -587,27 +587,36 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 #ifndef DEBUG
 	{
 		time_t	cal;
+		char	ts[32];	/* ctime_r needs at least 26 bytes */
+
 		/* In order to make testing easier we don't print the date
 		 * to the log file for debug versions of rtas_errd.  This helps
 		 * avoid lots of ugly date munging when comparing files.
 		 */
 		cal = time(NULL);
-		len = sprintf(buf, "%s ", ctime(&cal));
+		if (ctime_r(&cal, ts))
+			len = snprintf(buf, sizeof(buf), "%s ", ctime(&cal));
 	}
 #endif
 
 	/* Add the sequence number */
 	if (event)
-		len += sprintf(buf, "(Sequence #%d) ",
-			       event->seq_num);
+		len += sprintf(buf + len, "(Sequence #%d) ", event->seq_num);
 
 	/* Add the actual message */
-	len += vsprintf(buf + len, fmt, ap);
+	n = vsnprintf(buf + len, sizeof(buf) - len, fmt, ap);
+	if (n > 0)
+		len += n;
+
+	/* vsnprintf returns the would-be length; clamp after truncation */
+	if ((size_t)len >= sizeof(buf))
+		len = sizeof(buf) - 1;
 
 	/* Add ending punctuation */
-	len += sprintf(buf + len, ".");
+	if ((size_t)len + 1 < sizeof(buf))
+		len += sprintf(buf + len, ".");
 
-	_dbg(buf);
+	_dbg("%s", buf);
 
 	/* reformat the new message */
 	len = reformat_msg(buf);

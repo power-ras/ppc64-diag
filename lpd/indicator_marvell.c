@@ -276,6 +276,11 @@ check_pci_id(char *path, char *pci_id)
 	return !!strncmp(pci_id, pci_id_buf, MV_PCI_ID_BUF_LEN);
 }
 
+/* longest suffix appended to the PCI device dir:
+ * "/subsystem_vendor" or "/subsystem_device"
+ */
+#define PCI_ID_SUFFIX_MAX	18	/* strlen("/subsystem_vendor") + 1 */
+
 /**
  * mv_indicator_list - Build Marvell HDD LED (indicator) list for the given disk vpd
  *
@@ -291,7 +296,8 @@ mv_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 {
 	struct	loc_code *list_curr, *list_new;
 	char	*block_path, path[PATH_MAX], symlink[PATH_MAX];
-	char	*ata_device, *host;
+	char	*ata_device, *host, *end;
+	unsigned long ata_index;
 	ssize_t	len;
 
 	/* check for an 'sdX' device name */
@@ -338,7 +344,8 @@ mv_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 	 * so skip the leading '../' (3 chars)
 	 */
 	len = snprintf(path, PATH_MAX, "%s/%s", "/sys", &symlink[3]);
-	if (len < 0) {
+	/* reserve room for the longest suffix, "/subsystem_device" + '\0' (18 bytes) */
+	if (len < 0 || len >= PATH_MAX - PCI_ID_SUFFIX_MAX) {
 		log_msg("Unable to format absolute pathname of '%s'", symlink);
 		return -1;
 	}
@@ -371,7 +378,7 @@ mv_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 	list_new = calloc(1, sizeof(struct loc_code));
 	if (!list_new) {
 		log_msg("Out of memory");
-		return 1;
+		return -1;
 	}
 
 	if (*list) {
@@ -398,7 +405,16 @@ mv_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 		return -1;
 	}
 
-	list_new->index = (uint32_t)atoi(&ata_device[3]); /* use for ATA index */
+	/* use for ATA index; ata_device is "ataN" at this point */
+	errno = 0;
+	ata_index = strtoul(&ata_device[3], &end, 10);
+	if (errno != 0 || end == &ata_device[3] || *end != '\0' ||
+	    ata_index >= 32) {
+		log_msg("'%s':'%d' - Invalid ATA index in '%s'",
+			__func__, __LINE__, ata_device);
+		return -1;
+	}
+	list_new->index = (uint32_t)ata_index;
 
 	dbg("Marvell HDD LED:");
 	dbg("- location code: '%s'", list_new->code);

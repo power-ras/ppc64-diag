@@ -16,7 +16,7 @@ lpd_common_files = lpd/files.c \
 		   common/platform.c
 
 lpd_common_lib = -lrtas -lrtasevent -lservicelog
-lp_diag_lib = -lncurses -lmenu $(lpd_common_lib)
+lp_diag_lib = $(CURSES_LIBS) $(lpd_common_lib)
 
 sbin_PROGRAMS += lpd/lp_diag lpd/usysident
 
@@ -25,6 +25,7 @@ lpd_lp_diag_SOURCES = lpd/lp_diag.c \
 		      $(lpd_common_files) \
 		      $(lpd_h_files)
 lpd_lp_diag_LDADD = $(lp_diag_lib)
+lpd_lp_diag_CPPFLAGS = $(CURSES_CFLAGS)
 
 lpd_usysident_SOURCES = lpd/usysident.c \
 			$(lpd_common_files)\

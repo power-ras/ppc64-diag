@@ -62,14 +62,14 @@ static int check_open_serv_event(char *location);
 static int diagnose_nvme(char *device_name, struct notify *notify, char *file_path);
 static void fill_item_ld(struct item *item, char *keyword, long double data);
 static void fill_item_string(struct item *item, char *keyword, char *data, size_t size);
-static int fill_raw_data(unsigned char **raw_data, uint32_t *raw_data_len, struct nvme_smart_log_page *log, struct nvme_ibm_vpd *vpd);
+static int fill_raw_data(unsigned char **raw_data, uint32_t *raw_data_len, struct nvme_smart_log_page *log, struct nvme_ibm_vpd *vpd, bool vpd_mi);
 static bool in_range_max (long double value, long double max, char *key);
 static bool is_positive (long double value, char *key);
 static int log_event(uint64_t *event_id, struct nvme_ibm_vpd *vpd, char *controller_name, uint8_t severity, char *description, unsigned char *raw_data, uint32_t raw_data_len);
 static void long_double_to_uint128(long double value, uint8_t *data);
 static void print_usage(char *command);
 static int raw_data_smart(unsigned char **raw_data, uint32_t *raw_data_len, struct nvme_smart_log_page *log);
-static int raw_data_vpd(unsigned char **raw_data, uint32_t *raw_data_len, struct nvme_ibm_vpd *vpd);
+static int raw_data_vpd(unsigned char **raw_data, uint32_t *raw_data_len, struct nvme_ibm_vpd *vpd, bool vpd_mi);
 static int regex_controller(char *controller_name, char *device_name);
 static void set_notify(struct notify *notify, struct dictionary *dict, int num_elements);
 static long double uint128_to_long_double(uint8_t *data);
@@ -379,6 +379,7 @@ static int diagnose_nvme(char *device_name, struct notify *notify, char *file_pa
 	char tr_file_path[PATH_MAX];
 	uint32_t raw_data_len = 0;
 	unsigned char *raw_data = NULL;
+	bool vpd_mi = false;
 
 	/*
 	 * Skip diag test if NVMe is connected over fabric
@@ -424,9 +425,18 @@ static int diagnose_nvme(char *device_name, struct notify *notify, char *file_pa
 	       time += interval;
 	}
 
+	if (tmp_rc != 0) {
+		fprintf(stdout, "Warn: %s VPD log page ioctl failed: 0x%x, fallback to MI VPD\n", controller_name, tmp_rc);
+		tmp_rc = get_ibm_mi_vpd(fd, &vpd);
+		if (tmp_rc == 0) {
+			fprintf(stdout, "IBM MI VPD data retrieved successfully\n");
+			vpd_mi = true;
+		}
+	}
+
 	/* If VPD log page fails to be collected fallback to PCIe VPD */
 	if (tmp_rc != 0) {
-		fprintf(stdout, "Warn: %s VPD log page ioctl failed: 0x%x, fallback to PCIe VPD\n", controller_name, tmp_rc);
+		fprintf(stdout, "Warn: %s VPD log page ioctl/MI VPD failed: 0x%x, fallback to PCIe VPD\n", controller_name, tmp_rc);
 		tmp_rc = get_ibm_vpd_pcie(controller_name, &vpd);
         }
 
@@ -446,7 +456,7 @@ static int diagnose_nvme(char *device_name, struct notify *notify, char *file_pa
 		fprintf(stderr, "Smart Log retrieve failed: %d\n", tmp_rc);
 		severity = SL_SEV_ERROR;
 		snprintf(description, sizeof(description), "SMART log data could not be retrieved for device. Device is assumed to be in a bad state.");
-		if(!raw_data && fill_raw_data(&raw_data, &raw_data_len, NULL, &vpd) != 0) {
+		if (!raw_data && fill_raw_data(&raw_data, &raw_data_len, NULL, &vpd, vpd_mi) != 0) {
 			free(raw_data);
 			return -1;
 		}
@@ -472,7 +482,7 @@ static int diagnose_nvme(char *device_name, struct notify *notify, char *file_pa
 				"\t0x%.2x - Persistent Memory Region", smart_log.critical_warning,
 				CRIT_WARN_SPARE, CRIT_WARN_TEMP, CRIT_WARN_DEGRADED, CRIT_WARN_RO,
 				CRIT_WARN_VOLATILE_MEM, CRIT_WARN_PMR_RO);
-		if (!raw_data && fill_raw_data(&raw_data, &raw_data_len, &smart_log, &vpd) != 0) {
+		if (!raw_data && fill_raw_data(&raw_data, &raw_data_len, &smart_log, &vpd, vpd_mi) != 0) {
 			free(raw_data);
 			return -1;
 		}
@@ -500,7 +510,7 @@ static int diagnose_nvme(char *device_name, struct notify *notify, char *file_pa
 					"Current device DWPD average: %.3Lf\n"
 					"Device advertised DWPD endurance: %.3lf\n",
 					avg_dwpd, endurance);
-			if (!raw_data && fill_raw_data(&raw_data, &raw_data_len, &smart_log, &vpd) != 0) {
+			if (!raw_data && fill_raw_data(&raw_data, &raw_data_len, &smart_log, &vpd, vpd_mi) != 0) {
 				free(raw_data);
 				return -1;
 			}
@@ -616,7 +626,7 @@ static void fill_item_string(struct item *item, char *keyword, char *data, size_
  *
  * Return - Return 0 on success, -1 on error
  */
-static int fill_raw_data(unsigned char **raw_data, uint32_t *raw_data_len, struct nvme_smart_log_page *log, struct nvme_ibm_vpd *vpd) {
+static int fill_raw_data(unsigned char **raw_data, uint32_t *raw_data_len, struct nvme_smart_log_page *log, struct nvme_ibm_vpd *vpd, bool vpd_mi) {
 	struct section section = { 0 };
 
 	if (!raw_data || !raw_data_len) {
@@ -628,7 +638,7 @@ static int fill_raw_data(unsigned char **raw_data, uint32_t *raw_data_len, struc
 		if(raw_data_smart(raw_data, raw_data_len, log))
 			goto err_out;
 	if (vpd)
-		if(raw_data_vpd(raw_data, raw_data_len, vpd))
+		if(raw_data_vpd(raw_data, raw_data_len, vpd, vpd_mi))
 			goto err_out;
 
 	/* Append end tag section */
@@ -641,6 +651,30 @@ static int fill_raw_data(unsigned char **raw_data, uint32_t *raw_data_len, struc
 err_out:
 	fprintf(stderr, "raw_data was not filled properly, aborting\n");
 	return -1;
+}
+
+/* get_ibm_mi_vpd - Get IBM MI VPD data from NVMe device
+ * @fd - File descriptor index of NVMe device
+ * @mi_vpd - Address of nvme_ibm_vpd struct to store the MI VPD data
+ *
+ * Do an ioctl to retrieve MI VPD data using vendor-specific admin command.
+ * This uses the IBM Management Interface (MI) VPD specification with
+ * opcode 0x1e (read) and specific CDW parameters.
+ *
+ * Return - ioctl return code is returned, 0 on success
+ */
+extern int get_ibm_mi_vpd(int fd, struct nvme_ibm_vpd *mi_vpd) {
+	struct nvme_admin_cmd admin_cmd = {
+		.opcode = MI_VPD_OPCODE_READ,
+		.addr = (uint64_t)(uintptr_t)mi_vpd,
+		.data_len = MI_VPD_SIZE,
+		.cdw10 = MI_VPD_CDW10,
+		.cdw11 = MI_VPD_CDW11_READ,
+		.cdw12 = MI_VPD_CDW12,
+		.cdw13 = MI_VPD_CDW13,
+	};
+
+	return ioctl(fd, NVME_IOCTL_ADMIN_CMD, &admin_cmd);
 }
 
 /* get_ibm_vpd_log_page - Get IBM VPD data from NVMe device log page
@@ -1160,7 +1194,7 @@ err_out:
  *
  * Return - Return 0 on success, -1 on error
  */
-static int raw_data_vpd(unsigned char **raw_data, uint32_t *raw_data_len, struct nvme_ibm_vpd *vpd) {
+static int raw_data_vpd(unsigned char **raw_data, uint32_t *raw_data_len, struct nvme_ibm_vpd *vpd, bool vpd_mi) {
 	int rc = -1;
 	struct section section = { 0 };
 	struct item item = { 0 };
@@ -1176,9 +1210,11 @@ static int raw_data_vpd(unsigned char **raw_data, uint32_t *raw_data_len, struct
 	fill_item_string(&item, "Z3", vpd->warranty, sizeof(vpd->warranty));
 	if(append_item(&section, &item) < -1)
 		goto err_out;
-	fill_item_string(&item, "RM", vpd->firmware_level, sizeof(vpd->firmware_level));
-	if(append_item(&section, &item) < -1)
-		goto err_out;
+	if (!vpd_mi) {
+		fill_item_string(&item, "RM", vpd->ibm.firmware_level, sizeof(vpd->ibm.firmware_level));
+		if (append_item(&section, &item) < -1)
+			goto err_out;
+	}
 
 	if(append_section(raw_data, raw_data_len, &section) < -1)
 		goto err_out;
@@ -1466,7 +1502,7 @@ extern void set_vpd_pcie_field(const char *keyword, const char *vpd_data, struct
 	else if (!strcmp(keyword, "MN"))
 		strncpy(vpd->manufacture_sn, vpd_data, sizeof(vpd->manufacture_sn));
 	else if (!strcmp(keyword, "RM"))
-		strncpy(vpd->firmware_level, vpd_data, sizeof(vpd->firmware_level));
+		strncpy(vpd->ibm.firmware_level, vpd_data, sizeof(vpd->ibm.firmware_level));
 }
 
 static long double uint128_to_long_double(uint8_t *data) {

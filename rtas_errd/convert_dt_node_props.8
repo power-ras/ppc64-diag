@@ -1,0 +1,16 @@
+.TH convert_dt_node_props "8" "June 2016" "ppc64-diag" "System Administration Utilities"
+.SH NAME
+convert_dt_node_props \- conversion tool
+.SH SYNOPSIS
+.B convert_dt_node_props
+\fB\-\-context\fR \fI\,<x>\fR \fB\-\-from \fI\,<y>\fR \fB\-\-to \fI\,<z>\fR \fI\,<value>\/\fR
+.SH DESCRIPTION
+.HP
+\fB\-c\fR, \fB\-\-context\fR: currently, \fI\,<x>\fR must be cpu
+.HP
+\fB\-f\fR, \fB\-\-from\fR and \fB\-t\fR, \fB\-\-to\fR: allowed values for \fI\,<y>\fR and \fI\,<z>\fR: interrupt\-server, drc\-index, drc\-name
+.IP
+if \fI\,<value>\fR is a drc\-index or interrupt\-server, it can be
+specified in decimal, hex (with a leading 0x), or octal
+(with a leading 0); if it is a drc\-name, it should be
+specified as a string in double quotes

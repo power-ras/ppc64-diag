@@ -703,7 +703,8 @@ extern int get_ibm_vpd_pcie(char *controller_name, struct nvme_ibm_vpd *vpd) {
 			memset(vpd_data, '\0', sizeof(vpd_data));
 			if (read(fd, vpd_data, length) < length)
 				goto read_error;
-			strncpy(vpd->description, (char *)vpd_data, sizeof(vpd->description));
+			strncpy(vpd->description, (char *)vpd_data, sizeof(vpd->description) - 1);
+			vpd->description[sizeof(vpd->description) - 1] = '\0';
 			break;
 
 		/* VPD-R */
@@ -1413,6 +1414,15 @@ extern int set_smart_log_field(struct nvme_smart_log_page *log, struct dictionar
 	return 0;
 }
 
+static void copy_vpd_field(char *dst, size_t dst_size, const char *src)
+{
+	strncpy(dst, src, dst_size - 1);
+	dst[dst_size - 1] = '\0';
+}
+
+#define SET_VPD_FIELD(field) \
+	copy_vpd_field((field), sizeof(field), vpd_data)
+
 /* set_vpd_pcie_field - Set the appropriate field with VPD information collected
  * @keyword - Address of keyword string extracted from PCIe VPD for a device
  * @vpd_data - Address of vpd data string extracted from PCIe VPD for a device
@@ -1424,49 +1434,49 @@ extern int set_smart_log_field(struct nvme_smart_log_page *log, struct dictionar
  */
 extern void set_vpd_pcie_field(const char *keyword, const char *vpd_data, struct nvme_ibm_vpd *vpd) {
 	if (!strcmp(keyword, "PN"))
-		strncpy(vpd->master_pn, vpd_data, sizeof(vpd->master_pn));
+		SET_VPD_FIELD(vpd->master_pn);
 	else if (!strcmp(keyword, "EC"))
-		strncpy(vpd->ec_level, vpd_data, sizeof(vpd->ec_level));
+		SET_VPD_FIELD(vpd->ec_level);
 	else if (!strcmp(keyword, "FN"))
-		strncpy(vpd->fru_pn, vpd_data, sizeof(vpd->fru_pn));
+		SET_VPD_FIELD(vpd->fru_pn);
 	else if (!strcmp(keyword, "AN"))
-		strncpy(vpd->final_asm_pn, vpd_data, sizeof(vpd->final_asm_pn));
+		SET_VPD_FIELD(vpd->final_asm_pn);
 	else if (!strcmp(keyword, "FC"))
-		strncpy(vpd->feature_code, vpd_data, sizeof(vpd->feature_code));
+		SET_VPD_FIELD(vpd->feature_code);
 	else if (!strcmp(keyword, "CC"))
-		strncpy(vpd->ccin, vpd_data, sizeof(vpd->ccin));
+		SET_VPD_FIELD(vpd->ccin);
 	else if (!strcmp(keyword, "SN"))
-		strncpy(vpd->sn_11s, vpd_data, sizeof(vpd->sn_11s));
+		SET_VPD_FIELD(vpd->sn_11s);
 	else if (!strcmp(keyword, "Z0"))
-		strncpy(vpd->pcie_ssid, vpd_data, sizeof(vpd->pcie_ssid));
+		SET_VPD_FIELD(vpd->pcie_ssid);
 	else if (!strcmp(keyword, "Z1"))
-		strncpy(vpd->endurance, vpd_data, sizeof(vpd->endurance));
+		SET_VPD_FIELD(vpd->endurance);
 	else if (!strcmp(keyword, "Z2"))
-		strncpy(vpd->capacity, vpd_data, sizeof(vpd->capacity));
+		SET_VPD_FIELD(vpd->capacity);
 	else if (!strcmp(keyword, "Z3"))
-		strncpy(vpd->warranty, vpd_data, sizeof(vpd->warranty));
+		SET_VPD_FIELD(vpd->warranty);
 	else if (!strcmp(keyword, "Z4"))
-		strncpy(vpd->encryption, vpd_data, sizeof(vpd->encryption));
+		SET_VPD_FIELD(vpd->encryption);
 	else if (!strcmp(keyword, "Z5"))
-		strncpy(vpd->rctt, vpd_data, sizeof(vpd->rctt));
+		SET_VPD_FIELD(vpd->rctt);
 	else if (!strcmp(keyword, "Z6"))
-		strncpy(vpd->load_id, vpd_data, sizeof(vpd->load_id));
+		SET_VPD_FIELD(vpd->load_id);
 	else if (!strcmp(keyword, "Z7"))
-		strncpy(vpd->mfg_location, vpd_data, sizeof(vpd->mfg_location));
+		SET_VPD_FIELD(vpd->mfg_location);
 	else if (!strcmp(keyword, "Z8"))
-		strncpy(vpd->ffc_led, vpd_data, sizeof(vpd->ffc_led));
+		SET_VPD_FIELD(vpd->ffc_led);
 	else if (!strcmp(keyword, "Z9"))
-		strncpy(vpd->system_io_cmd_timeout, vpd_data, sizeof(vpd->system_io_cmd_timeout));
+		SET_VPD_FIELD(vpd->system_io_cmd_timeout);
 	else if (!strcmp(keyword, "ZA"))
-		strncpy(vpd->format_cmd_timeout, vpd_data, sizeof(vpd->format_cmd_timeout));
+		SET_VPD_FIELD(vpd->format_cmd_timeout);
 	else if (!strcmp(keyword, "ZB"))
-		strncpy(vpd->number_io_queues, vpd_data, sizeof(vpd->number_io_queues));
+		SET_VPD_FIELD(vpd->number_io_queues);
 	else if (!strcmp(keyword, "ZC"))
-		strncpy(vpd->flash_type, vpd_data, sizeof(vpd->flash_type));
+		SET_VPD_FIELD(vpd->flash_type);
 	else if (!strcmp(keyword, "MN"))
-		strncpy(vpd->manufacture_sn, vpd_data, sizeof(vpd->manufacture_sn));
+		SET_VPD_FIELD(vpd->manufacture_sn);
 	else if (!strcmp(keyword, "RM"))
-		strncpy(vpd->firmware_level, vpd_data, sizeof(vpd->firmware_level));
+		SET_VPD_FIELD(vpd->firmware_level);
 }
 
 static long double uint128_to_long_double(uint8_t *data) {

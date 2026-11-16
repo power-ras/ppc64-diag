@@ -31,8 +31,10 @@ int parse_src_scn(struct opal_src_scn **r_src,
 	}
 
 	*r_src = malloc(sizeof(struct opal_src_scn));
-	if(!*r_src)
+	if (!*r_src) {
+		fprintf(stderr, "%s: failed to allocate memory for SRC section\n", __func__);
 		return -ENOMEM;
+	}
 	src = *r_src;
 
 	src->v6hdr = *hdr;

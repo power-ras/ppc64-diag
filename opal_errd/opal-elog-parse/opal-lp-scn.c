@@ -23,7 +23,7 @@ int parse_lp_scn(struct opal_lp_scn **r_lp,
 
 	*r_lp = malloc(hdr->length);
 	if (!*r_lp) {
-		fprintf(stderr, "%s: out of memory\n", __func__);
+		fprintf(stderr, "%s: failed to allocate memory for LP section\n", __func__);
 		return -ENOMEM;
 	}
 

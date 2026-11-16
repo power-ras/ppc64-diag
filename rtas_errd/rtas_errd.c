@@ -301,6 +301,7 @@ read_rtas_events()
 		d_cfg.flags |= RE_CFG_RECFG_SAFE;
 
 		if (d_cfg.flags & RE_CFG_RECEIVED_SIGHUP) {
+			dbg("SIGHUP received, re-reading configuration");
 			diag_cfg(1, &cfg_log);
 			d_cfg.flags &= ~RE_CFG_RECEIVED_SIGHUP;
 		}
@@ -568,6 +569,10 @@ main(int argc, char *argv[])
 	if (rc)
 		goto error_out;
 
+	log_msg(NULL, "rtas_errd starting: platform_dump_path=%s "
+		"scanlog_dump_path=%s",
+		d_cfg.platform_dump_path, d_cfg.scanlog_dump_path);
+
 	/* Open the servicelog database */
 	rc = servicelog_open(&slog, 0);
 	if (rc) {
@@ -575,6 +580,8 @@ main(int argc, char *argv[])
 			"will only be written to /var/log/platform.\n%s\n",
 			strerror(rc));
 		slog = NULL;
+	} else {
+		log_msg(NULL, "servicelog database opened successfully");
 	}
 
 	/* update RTAS events from syslog */

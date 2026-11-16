@@ -107,8 +107,10 @@ char *get_elog_filename_int(uint32_t eid)
 	int i;
 	int nfiles = scandir(opt_platform_dir, &filelist, file_filter, alphasort);
 
-	if (nfiles < 1)
+	if (nfiles < 1) {
+		fprintf(stderr, "No elog files found in %s\n", opt_platform_dir);
 		return NULL;
+	}
 
 	for (i = 0; i < nfiles; i++) {
 		if (ret_str) {
@@ -426,12 +428,25 @@ int delete_elog(const char *eid)
 {
 	int error = -1;
 	char *f_name = get_elog_filename_str(eid);
-	if (f_name) {
-		error = chdir(opt_platform_dir);
-		if (!error)
-			error = remove(f_name);
-		free(f_name);
+	if (!f_name) {
+		fprintf(stderr, "Could not find elog file for id %s in %s\n",
+			eid, opt_platform_dir);
+		return -1;
 	}
+
+	error = chdir(opt_platform_dir);
+	if (error) {
+		fprintf(stderr, "Failed to change to platform log directory: %s\n",
+			opt_platform_dir);
+	} else {
+		error = remove(f_name);
+		if (error)
+			fprintf(stderr, "Failed to remove elog file %s: %s\n",
+				f_name, strerror(errno));
+		else
+			fprintf(stderr, "Removed elog file: %s\n", f_name);
+	}
+	free(f_name);
 	return error;
 }
 

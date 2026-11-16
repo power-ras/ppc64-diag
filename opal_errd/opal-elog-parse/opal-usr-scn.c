@@ -27,8 +27,10 @@ int parse_usr_hdr_scn(struct opal_usr_hdr_scn **r_usrhdr,
 	}
 
 	*r_usrhdr = malloc(sizeof(struct opal_usr_hdr_scn));
-	if(!*r_usrhdr)
+	if (!*r_usrhdr) {
+		fprintf(stderr, "%s: failed to allocate memory for UH section\n", __func__);
 		return -ENOMEM;
+	}
 	usrhdr = *r_usrhdr;
 
 	usrhdr->v6hdr = *hdr;

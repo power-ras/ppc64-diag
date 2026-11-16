@@ -18,8 +18,10 @@ int parse_ei_scn(struct opal_ei_scn **r_ei,
 		return -EINVAL;
 
 	*r_ei = malloc(hdr->length);
-	if (!*r_ei)
+	if (!*r_ei) {
+		fprintf(stderr, "%s: failed to allocate memory for EI section\n", __func__);
 		return -ENOMEM;
+	}
 
 	ei = *r_ei;
 

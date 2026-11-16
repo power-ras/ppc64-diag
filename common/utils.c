@@ -187,11 +187,17 @@ int spclose(FILE *stream, pid_t cpid)
 	} while (pid == -1 && errno == EINTR);
 
 	/* Couldn't obtain child status */
-	if (status == -1)
-		errno = SIGCHLD;
+	if (status == -1) {
+		fprintf(stderr, "%s: waitpid(%d) could not obtain child "
+			"status\n", __func__, (int)cpid);
+		errno = ECHILD;
+	}
 
-	if (pid != cpid)
+	if (pid != cpid) {
+		fprintf(stderr, "%s: waitpid returned pid %d, expected %d\n",
+			__func__, (int)pid, (int)cpid);
 		return -1;
+	}
 
 	return 0;
 }

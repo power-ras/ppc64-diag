@@ -153,8 +153,10 @@ make_prev_path(const char *encl_loc)
 
 	free(cmd_opts.prev_path);
 	cmd_opts.prev_path = malloc(path_len);
-	if (!cmd_opts.prev_path)
+	if (!cmd_opts.prev_path) {
+		fprintf(stderr, "Out of memory allocating prev path\n");
 		return;
+	}
 
 	memset(cmd_opts.prev_path, 0, path_len);
 	if (strlen(DIAG_ENCL_PREV_PAGES_DIR) < path_len)
@@ -292,6 +294,8 @@ main(int argc, char *argv[])
 	struct dev_vpd *diagnosed = NULL;
 
 	platform = get_platform();
+	if (platform == PLATFORM_UNKNOWN)
+		fprintf(stderr, "WARNING: running on unknown platform\n");
 	memset(&cmd_opts, 0, sizeof(cmd_opts));
 
 	for (;;) {
@@ -411,8 +415,11 @@ main(int argc, char *argv[])
 			}
 
 			sdir = opendir(path);
-			if (!sdir)
+			if (!sdir) {
+				fprintf(stderr, "Failed to open %s: %s\n",
+					path, strerror(errno));
 				continue;
+			}
 
 			while ((sdirent = readdir(sdir)) != NULL) {
 				if (!strcmp(sdirent->d_name, ".") ||

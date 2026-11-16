@@ -189,8 +189,11 @@ static int write_log(char path[], int flag,
 	char dump_suffix[DUMP_FILE_SUFFIX_SIZE + 1];
 
 	sz = strlen(path);
-	if (sz >= PATH_MAX)
+	if (sz >= PATH_MAX) {
+		fprintf(stderr, "Output path \"%s\" exceeds maximum length\n",
+			path);
 		return rc;
+	}
 
 	dump_path[PATH_MAX - 1] = '\0';
 	strncpy(dump_path, path, PATH_MAX - 1);
@@ -200,8 +203,11 @@ static int write_log(char path[], int flag,
 			&data[offsetof(dump_file_hdr, fname) + DUMP_FILE_PREFIX_SIZE],
 			DUMP_FILE_SUFFIX_SIZE);
 		dump_suffix[DUMP_FILE_SUFFIX_SIZE] = '\0';
-		if ((sz + strlen(dump_suffix)) >= PATH_MAX)
+		if ((sz + strlen(dump_suffix)) >= PATH_MAX) {
+			fprintf(stderr, "Output path with suffix exceeds "
+				"maximum length\n");
 			return rc;
+		}
 		strncat(dump_path, dump_suffix,
 				PATH_MAX - (strlen(dump_path)));
 	}
@@ -392,8 +398,10 @@ static int parse_dump(void)
 		return E_FILE;
 	}
 
-	if (dump_sbuf.st_size == 0)
+	if (dump_sbuf.st_size == 0) {
+		fprintf(stderr, "Dump file \"%s\" is empty\n", dump_file);
 		return E_FILE;
+	}
 
 	if ((dump_fd = open(dump_file, O_RDONLY)) < 0) {
 		fprintf(stderr, "Could not open the dump file "

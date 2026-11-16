@@ -19,8 +19,10 @@ int parse_lr_scn(struct opal_lr_scn **r_lr,
 	}
 
 	*r_lr = malloc(sizeof(struct opal_lr_scn));
-	if (!*r_lr)
+	if (!*r_lr) {
+		fprintf(stderr, "%s: failed to allocate memory for LR section\n", __func__);
 		return -ENOMEM;
+	}
 	lr = *r_lr;
 
 	lr->v6hdr = *hdr;

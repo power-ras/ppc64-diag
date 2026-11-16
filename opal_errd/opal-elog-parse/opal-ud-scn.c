@@ -20,8 +20,10 @@ int parse_ud_scn(struct opal_ud_scn **r_ud,
 	}
 
 	*r_ud = malloc(hdr->length);
-	if (!*r_ud)
+	if (!*r_ud) {
+		fprintf(stderr, "%s: failed to allocate memory for UD section\n", __func__);
 		return -ENOMEM;
+	}
 	ud = *r_ud;
 
 	ud->v6hdr = *hdr;

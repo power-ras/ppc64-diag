@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <inttypes.h>
 
 #include "platform.h"
@@ -43,8 +44,11 @@ get_platform(void)
 	FILE *fp;
 	char line[LENGTH];
 
-	if((fp = fopen(PLATFORM_FILE, "r")) == NULL)
+	if ((fp = fopen(PLATFORM_FILE, "r")) == NULL) {
+		fprintf(stderr, "platform: failed to open %s: %s\n",
+			PLATFORM_FILE, strerror(errno));
 		return rc;
+	}
 
 	while (fgets(line, LENGTH, fp)) {
 		if (strstr(line, "PowerNV")) {
@@ -114,8 +118,11 @@ get_pvr_ver(void)
 	FILE *fp;
 	char line[LENGTH], *p;
 
-	if((fp = fopen(PLATFORM_FILE, "r")) == NULL)
+	if ((fp = fopen(PLATFORM_FILE, "r")) == NULL) {
+		fprintf(stderr, "platform: failed to open %s: %s\n",
+			PLATFORM_FILE, strerror(errno));
 		return pvr_ver;
+	}
 
 	while (fgets(line, LENGTH, fp)) {
 		if ((p = strstr(line, "(pvr")) != NULL) {
@@ -125,5 +132,10 @@ get_pvr_ver(void)
 	}
 
 	fclose(fp);
+
+	if (pvr_ver == 0xFFFF)
+		fprintf(stderr, "platform: failed to parse PVR from %s\n",
+			PLATFORM_FILE);
+
 	return pvr_ver;
 }

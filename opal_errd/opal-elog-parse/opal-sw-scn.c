@@ -67,11 +67,15 @@ int parse_sw_scn(struct opal_sw_scn **r_sw,
 	int rc = 0;
 
 	*r_sw = malloc(hdr->length);
-	if(!*r_sw)
+	if (!*r_sw) {
+		fprintf(stderr, "%s: failed to allocate memory for SW section\n", __func__);
 		return -ENOMEM;
+	}
 	sw = *r_sw;
 
 	if (buflen < sizeof(struct opal_v6_hdr)) {
+		fprintf(stderr, "%s: buffer too short for v6 header, expected %lu got %u\n",
+		        __func__, sizeof(struct opal_v6_hdr), buflen);
 		free(sw);
 		return -EINVAL;
 	}

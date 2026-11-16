@@ -423,11 +423,13 @@ parse_service_event(int event_id)
 
 	/* get servicelog event */
 	rc = get_service_event(event_id, &event);
-	if (rc)
+	if (rc) {
+		log_msg("Failed to retrieve service event %d", event_id);
 		return rc;
+	}
 
 	if (!event) {
-		log_msg("Unable to read service event");
+		log_msg("Unable to read service event %d", event_id);
 		return -1;
 	}
 
@@ -525,8 +527,10 @@ parse_repair_event(int repair_id)
 
 	/* get servicelog repair events */
 	rc = get_repair_event(repair_id, &repair_events);
-	if (rc)
+	if (rc) {
+		log_msg("Failed to retrieve repair event %d", repair_id);
 		return rc;
+	}
 
 	/* get_repair_event returns success, even if particular
 	 * repair event didn't close any serviceable event(s).
@@ -538,8 +542,10 @@ parse_repair_event(int repair_id)
 	}
 
 	rc = get_all_open_service_event(&open_events);
-	if (rc)
+	if (rc) {
+		log_msg("Failed to retrieve open service events");
 		goto repair_out;
+	}
 
 	indicator_log_write("---- Repair event begin ----");
 
@@ -1244,31 +1250,37 @@ main(int argc, char *argv[])
 	}
 
 	if (geteuid() != 0) {
-		dbg("%s: Requires superuser privileges.", argv[0]);
+		fprintf(stderr, "%s: Requires superuser privileges\n", argv[0]);
 		exit(1);
 	}
 
 	if (optind < argc) {
-		dbg("Unrecognized argument : %s", argv[optind]);
+		fprintf(stderr, "%s: Unrecognized argument: %s\n",
+			argv[0], argv[optind]);
 		print_usage(argv[0]);
 		exit(1);
 	}
 
 	if (event_flag && repair_flag) {
-		dbg("The -e and -r options cannot be used together\n");
+		fprintf(stderr, "%s: The -e and -r options cannot be used "
+			"together\n", argv[0]);
 		print_usage(argv[0]);
 		exit(1);
 	}
 
 	/* initialize */
 	rc = init_files();
-	if (rc)
+	if (rc) {
+		fprintf(stderr, "%s: Failed to initialize log files\n", argv[0]);
 		goto cleanup;
+	}
 
 	/* Light Path operating mode */
 	rc = get_indicator_mode();
-	if (rc)
+	if (rc) {
+		log_msg("Unable to determine indicator operating mode");
 		goto cleanup;
+	}
 
 	if (argc < 2) {
 		log_msg("Starting LPD UI");

@@ -49,6 +49,9 @@ int parse_opal_event_log(char *buf, int buflen, struct opal_event_log_scn **r_lo
 	while (buflen) {
 		rc = parse_section_header(&hdr, buf, buflen);
 		if (rc < 0) {
+			fprintf(stderr, "%s: failed to parse section header"
+			        " at offset %lu (rc=%d)\n",
+			        __func__, (unsigned long)(buf - start), rc);
 			break;
 		}
 
@@ -101,8 +104,8 @@ int parse_opal_event_log(char *buf, int buflen, struct opal_event_log_scn **r_lo
 				log = create_opal_event_log(ph->scn_count);
 				if (!log) {
 					free(ph);
-					fprintf(stderr, "ERROR %s: Could not allocate internal log buffer\n",
-							__func__);
+					fprintf(stderr, "ERROR %s: Could not allocate internal log buffer"
+					        " for %u sections\n", __func__, ph->scn_count);
 					return -ENOMEM;
 				}
 				add_opal_event_log_scn(log, "PH", ph, log_pos++);

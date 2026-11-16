@@ -15,8 +15,10 @@ int parse_ch_scn(struct opal_ch_scn **r_ch,
 	struct opal_ch_scn *bufch = (struct opal_ch_scn*)buf;
 
 	*r_ch = malloc(hdr->length);
-	if (!*r_ch)
+	if (!*r_ch) {
+		fprintf(stderr, "%s: failed to allocate memory for CH section\n", __func__);
 		return -ENOMEM;
+	}
 	ch = *r_ch;
 
 	if (buflen < sizeof(struct opal_ch_scn)) {

@@ -21,8 +21,10 @@ int parse_ep_scn(struct opal_ep_scn **r_ep,
 	}
 
 	*r_ep = malloc(sizeof(struct opal_ep_scn));
-	if(!*r_ep)
+	if (!*r_ep) {
+		fprintf(stderr, "%s: failed to allocate memory for EP section\n", __func__);
 		return -ENOMEM;
+	}
 	ep = *r_ep;
 
 	ep->v6hdr = *hdr;

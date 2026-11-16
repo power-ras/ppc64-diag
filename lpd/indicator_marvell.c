@@ -167,10 +167,12 @@ mv_munmap_bar5(void *bar5, int fd)
 {
 	/* munmap() and close PCI BAR5 */
 	if (munmap(bar5, mv_pci_bar5_length))
-		log_msg("Unable to munmap file");
+		log_msg("Unable to munmap PCI BAR5 file (%d: %s)",
+			errno, strerror(errno));
 
 	if (close(fd))
-		log_msg("Unable to close file");
+		log_msg("Unable to close PCI BAR5 file (%d: %s)",
+			errno, strerror(errno));
 }
 
 /**
@@ -345,7 +347,8 @@ mv_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 	len = snprintf(path, PATH_MAX, "%s/%s", "/sys", &symlink[3]);
 	/* reserve room for the longest suffix, "/subsystem_device" + '\0' (18 bytes) */
 	if (len < 0 || len >= PATH_MAX - PCI_ID_SUFFIX_MAX) {
-		log_msg("Unable to format absolute pathname of '%s'", symlink);
+		log_msg("Unable to format absolute pathname of '%s': %s",
+			symlink, strerror(errno));
 		return -1;
 	}
 
@@ -400,7 +403,8 @@ mv_indicator_list(struct loc_code **list, struct dev_vpd *vpd)
 	/* PCI BAR5 */
 	len = snprintf(list_new->dev, DEV_LENGTH, "%s/resource5", path);
 	if (len < 0 || len >= DEV_LENGTH) {
-		log_msg("'%s':'%d' - Unable to format '%s'", __func__, __LINE__, path);
+		log_msg("%s:%d: Unable to format PCI BAR5 path for '%s': %s",
+			__func__, __LINE__, path, strerror(errno));
 		return -1;
 	}
 

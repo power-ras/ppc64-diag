@@ -286,7 +286,19 @@ static int get_mdst_table_offset(char *data, int hwdata_start,
 		return E_OPAL_TABLE;
 	}
 
-	*mdst_start = toc_start + (toc_size * toc_cnt) + be32toh(toc->offset);
+	uint64_t mdst_offset = (uint64_t)toc_start +
+			       ((uint64_t)toc_size * toc_cnt) +
+			       be32toh(toc->offset);
+
+	if (mdst_offset > INT_MAX) {
+		fprintf(stderr,
+			"Error: MDST table offset exceeds INT_MAX "
+			"(toc_start: %d, toc_size: %u, toc_cnt: %u)\n",
+			toc_start, toc_size, toc_cnt);
+		return E_OPAL_TABLE;
+	}
+
+	*mdst_start = (int)mdst_offset;
 	*mdst_cnt = be32toh(toc->size) / sizeof(mdst_table);
 
 	return E_SUCCESS;

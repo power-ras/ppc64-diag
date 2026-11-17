@@ -674,7 +674,8 @@ extern int get_ibm_vpd_pcie(char *controller_name, struct nvme_ibm_vpd *vpd) {
 	int fd;
 	char sysfs_vpd_path[PATH_MAX], keyword[3] = { '\0' };
 	uint8_t vpd_data[256], length_data[2], length_keyword, tag;
-	uint16_t length, length_parsed;
+	uint16_t length;
+	uint32_t length_parsed;
 
 	snprintf(sysfs_vpd_path,sizeof(sysfs_vpd_path), "%s/%s/device/vpd", NVME_SYS_PATH, controller_name);
 	fd = open(sysfs_vpd_path, O_RDONLY);

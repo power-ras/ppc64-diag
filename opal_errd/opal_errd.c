@@ -618,8 +618,21 @@ static int process_elog(const char *elog_path, const char *output)
 	do {
 		readsz = read(in_fd, buf+sz, bufsz-sz);
 		if (readsz == -1) {
+			/* Retry read() if it was interrupted by a signal. */
+			if (errno == EINTR)
+				continue;
+
 			syslog(LOG_ERR, "Failed to read elog: %s (%d:%s)\n",
 			       elog_raw_path, errno, strerror(errno));
+			goto err;
+		}
+
+		/* Unexpected EOF would cause an infinite loop because sz would
+		 * never reach bufsz.
+		 */
+		if (readsz == 0) {
+			syslog(LOG_ERR, "Unexpected EOF while reading elog: %s\n",
+			       elog_raw_path);
 			goto err;
 		}
 

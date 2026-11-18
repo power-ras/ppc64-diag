@@ -587,12 +587,15 @@ _log_msg(struct event *event, const char *fmt, va_list ap)
 #ifndef DEBUG
 	{
 		time_t	cal;
+		char	ts[32];	/* ctime_r needs at least 26 bytes */
+
 		/* In order to make testing easier we don't print the date
 		 * to the log file for debug versions of rtas_errd.  This helps
 		 * avoid lots of ugly date munging when comparing files.
 		 */
 		cal = time(NULL);
-		len = sprintf(buf, "%s ", ctime(&cal));
+		if (ctime_r(&cal, ts))
+			len = snprintf(buf, sizeof(buf), "%s ", ctime(&cal));
 	}
 #endif
 

@@ -137,6 +137,12 @@ read_char_name(int fd, char *propname, int buf_size) {
 	int offset = 0;
 	uint8_t ch;
 
+	/* Zero the buffer so it is always NUL-terminated,
+	 * even on EOF or read error
+	 */
+	if (propname && buf_size > 0)
+		memset(propname, 0, buf_size);
+
 	/* Copy the property string at the current location to the buffer */
 	while ((read(fd, &ch, 1)) == 1) {
 		if (propname) {

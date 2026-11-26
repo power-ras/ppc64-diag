@@ -474,6 +474,13 @@ search_drcname_to_drcindex(struct drc_info_search_config *sr, char *drc_name,
 		if (strcmp(drc_type, sr->drc_type))
 			continue;
 
+		/* Need room for "%d" plus the NUL terminator */
+		if (strlen(drc_name_base) + sizeof("%d") > sizeof(drc_name_base)) {
+			fprintf(stderr, "Warning: skipping drc name base %s, too long\n",
+				drc_name_base);
+			continue;
+		}
+
 		strcat(drc_name_base, "%d");
 		rc = sscanf(drc_name, drc_name_base, &read_idx);
 		if (rc)

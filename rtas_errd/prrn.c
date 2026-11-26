@@ -458,9 +458,27 @@ static int update_properties(uint32_t phandle)
 					free(longcmd);
 					longcmd = newcmd;
 				} else {
-					longcmd = malloc(vd+128);
-					if (!longcmd)
+					int hdr;
+					size_t sz;
+
+					/* Size the buffer from the real header length (pname is
+					 * independent of vd), plus the value and some slack.
+					 */
+					hdr = snprintf(NULL, 0, "update_property %u %s 000000 ",
+						       phandle, pname);
+					if (hdr < 0) {
+						dbg("Error computing update_property command length, rc %d errno %d",
+						    hdr, errno);
 						return -1;
+					}
+
+					sz = (size_t)hdr + vd + 128;
+					longcmd = malloc(sz);
+					if (!longcmd) {
+						dbg("Failed to allocate %zu bytes for update_property command, "
+						    "errno %d", sz, errno);
+						return -1;
+					}
 
 					/* Build the command with a length
 					 * of six zeros

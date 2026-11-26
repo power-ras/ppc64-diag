@@ -778,6 +778,14 @@ print_rtas_event(struct event *event)
 	int	len, buf_size, offset;
 	int	i, rc, nlines;
 
+	if (event->length < 0 || event->length > (int)sizeof(event->event_buf)) {
+		log_msg(NULL, "RTAS event %d has an invalid length (%d, max %d). "
+			"The event will not be copied to %s",
+			event->seq_num, event->length,
+			(int)sizeof(event->event_buf), platform_log);
+		return -1;
+	}
+
 	/* Determine the length of the log */
 	len = event->length;
 

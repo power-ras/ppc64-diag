@@ -137,6 +137,12 @@ read_char_name(int fd, char *propname, int buf_size) {
 	int offset = 0;
 	uint8_t ch;
 
+	/* Zero the buffer so it is always NUL-terminated,
+	 * even on EOF or read error
+	 */
+	if (propname && buf_size > 0)
+		memset(propname, 0, buf_size);
+
 	/* Copy the property string at the current location to the buffer */
 	while ((read(fd, &ch, 1)) == 1) {
 		if (propname) {
@@ -467,6 +473,13 @@ search_drcname_to_drcindex(struct drc_info_search_config *sr, char *drc_name,
 		/* Drc-type sought match current entry? */
 		if (strcmp(drc_type, sr->drc_type))
 			continue;
+
+		/* Need room for "%d" plus the NUL terminator */
+		if (strlen(drc_name_base) + sizeof("%d") > sizeof(drc_name_base)) {
+			fprintf(stderr, "Warning: skipping drc name base %s, too long\n",
+				drc_name_base);
+			continue;
+		}
 
 		strcat(drc_name_base, "%d");
 		rc = sscanf(drc_name, drc_name_base, &read_idx);
